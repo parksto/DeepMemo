@@ -602,4 +602,4 @@ const app = {
 ---
 
 **Document technique V0.7**
-Dernière mise à jour : 15 Décembre 2024
+Dernière mise à jour : 15 Décembre 2025

@@ -2,7 +2,7 @@
 
 > **Ton second cerveau, organisé et connecté**
 
-DeepMemo est un système de gestion de connaissances personnelles basé sur des nœuds récursifs interconnectés.
+DeepMemo est un système de gestion de connaissances personnelles basé sur des nœuds récursifs, interconnectés et actifs.
 
 ## 🚀 Démarrage rapide
 
@@ -70,7 +70,7 @@ DeepMemo/
 
 ## 📝 Notes de version
 
-**V0.7** (Décembre 2024)
+**V0.7** (Décembre 2025)
 - ✅ Restructuration en multifile (HTML + CSS + JS séparés)
 - ✅ Structure de projet propre et évolutive
 - ✅ Fix bug de sélection dans les modales

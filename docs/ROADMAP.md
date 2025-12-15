@@ -1,6 +1,6 @@
 # 🗺️ DeepMemo - Roadmap
 
-## 📍 État actuel : V0.7 (Décembre 2024)
+## 📍 État actuel : V0.7 (Décembre 2025)
 
 ### ✅ Fonctionnalités implémentées
 
@@ -247,6 +247,6 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 15 Décembre 2024
+**Dernière mise à jour** : 15 Décembre 2025
 **Version actuelle** : V0.7
 **Prochaine milestone** : V0.8 (Features avancées)
