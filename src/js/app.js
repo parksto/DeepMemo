@@ -11,8 +11,12 @@
       symlinkModalExpandedNodes: new Set(), // État expand/collapse pour la modal symlink
       actionModalExpandedNodes: new Set(), // État expand/collapse pour la modal actions
       showAllTags: false, // Afficher tous les tags du cloud
+      viewMode: 'edit', // 'edit' ou 'view' (markdown rendered)
 
       init() {
+        // Charger le mode de vue depuis localStorage
+        const savedViewMode = localStorage.getItem('deepmemo_viewMode');
+        if (savedViewMode) this.viewMode = savedViewMode;
         this.loadData();
         // Initialiser les backlinks pour les données existantes
         if (this.data.rootNodes.length > 0) {
@@ -542,6 +546,7 @@
         this.updateRightPanel();
         this.updateDeleteButton();
         this.renderTags();
+        this.updateViewMode(); // Mettre à jour le mode view/edit
         this.render();
       },
 
@@ -2274,6 +2279,42 @@
         wrapper.appendChild(input);
         wrapper.appendChild(autocompleteDiv);
         container.appendChild(wrapper);
+      },
+
+      // Toggle entre mode édition et affichage markdown
+      toggleViewMode() {
+        this.viewMode = this.viewMode === 'edit' ? 'view' : 'edit';
+        localStorage.setItem('deepmemo_viewMode', this.viewMode);
+        this.updateViewMode();
+      },
+
+      // Mettre à jour l'affichage selon le mode
+      updateViewMode() {
+        const toggleBtn = document.getElementById('toggleViewMode');
+        const contentEditor = document.getElementById('nodeContent');
+        const contentPreview = document.getElementById('contentPreview');
+
+        if (this.viewMode === 'view') {
+          // Mode affichage : afficher le rendu markdown
+          toggleBtn.textContent = '✏️ Éditer';
+          contentEditor.style.display = 'none';
+          contentPreview.style.display = 'block';
+
+          if (this.currentNodeId) {
+            const node = this.data.nodes[this.currentNodeId];
+            if (node && node.content) {
+              const renderedContent = marked.parse(node.content);
+              contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
+            } else {
+              contentPreview.innerHTML = '<div class="markdown-content"><em>Aucun contenu</em></div>';
+            }
+          }
+        } else {
+          // Mode édition : afficher le textarea
+          toggleBtn.textContent = '👁️ Afficher';
+          contentEditor.style.display = 'block';
+          contentPreview.style.display = 'none';
+        }
       }
     };
 

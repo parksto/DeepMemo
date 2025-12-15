@@ -7,6 +7,7 @@
   <meta name="description" content="DeepMemo - Ton second cerveau, organisé et connecté">
   <title>DeepMemo V0.7</title>
   <link rel="stylesheet" href="src/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <button class="sidebar-toggle-external" onclick="app.toggleSidebar()">☰</button>
@@ -80,6 +81,7 @@
         </div>
 
         <div class="content-actions">
+          <button class="btn btn-secondary btn-small" id="toggleViewMode" onclick="app.toggleViewMode()">👁️ Afficher</button>
           <button class="btn btn-secondary btn-small" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" onclick="app.openActionModal()">⚙️ Actions...</button>
           <button class="btn btn-secondary btn-small" onclick="app.deleteCurrentNode()">🗑️ Supprimer</button>
