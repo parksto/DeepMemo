@@ -17,6 +17,23 @@
         // Charger le mode de vue depuis localStorage
         const savedViewMode = localStorage.getItem('deepmemo_viewMode');
         if (savedViewMode) this.viewMode = savedViewMode;
+
+        // Charger l'état du right panel depuis localStorage
+        const savedRightPanelState = localStorage.getItem('deepmemo_rightPanelVisible');
+        if (savedRightPanelState !== null) {
+          this.rightPanelVisible = savedRightPanelState === 'true';
+          // Appliquer l'état initial
+          const panel = document.querySelector('.right-panel');
+          const externalBtn = document.querySelector('.right-panel-toggle-external');
+          if (!this.rightPanelVisible) {
+            panel.classList.add('hidden');
+            externalBtn.style.display = 'flex';
+          } else {
+            panel.classList.remove('hidden');
+            externalBtn.style.display = 'none';
+          }
+        }
+
         this.loadData();
         // Initialiser les backlinks pour les données existantes
         if (this.data.rootNodes.length > 0) {
@@ -25,7 +42,13 @@
         this.render();
         this.updateNodeCounter();
         this.setupKeyboardShortcuts();
-        if (this.data.rootNodes.length === 0) this.createExampleNodes();
+        if (this.data.rootNodes.length === 0) {
+          this.createExampleNodes();
+        }
+        // Sélectionner le premier nœud racine automatiquement
+        if (this.data.rootNodes.length > 0) {
+          this.selectNode(this.data.rootNodes[0]);
+        }
       },
 
       createExampleNodes() {
@@ -178,11 +201,34 @@
           const node = this.data.nodes[nodeId];
           const element = document.querySelector(`[data-node-id="${nodeId}"]`);
           const parent = element?.closest('.tree-node');
-          if (node.children.length > 0 && parent?.classList.contains('expanded')) {
+
+          // Trouver les symlinks dans ce nœud
+          const symlinksInThisNode = [];
+          Object.values(this.data.nodes).forEach(n => {
+            if (n.symlinkedIn && n.symlinkedIn.includes(nodeId)) {
+              symlinksInThisNode.push(n.id);
+            }
+          });
+
+          const hasChildren = node.children.length > 0 || symlinksInThisNode.length > 0;
+
+          if (hasChildren && parent?.classList.contains('expanded')) {
+            // Traverser les enfants directs
             node.children.forEach(childId => traverse(childId));
+            // Traverser les symlinks
+            symlinksInThisNode.forEach(symlinkId => traverse(symlinkId));
           }
         };
+
         this.data.rootNodes.forEach(nodeId => traverse(nodeId));
+
+        // Ajouter les symlinks à la racine
+        Object.values(this.data.nodes).forEach(node => {
+          if (node.symlinkedIn && node.symlinkedIn.includes(null)) {
+            traverse(node.id);
+          }
+        });
+
         return visible;
       },
 
@@ -456,15 +502,18 @@
         this.rightPanelVisible = !this.rightPanelVisible;
         const panel = document.querySelector('.right-panel');
         const externalBtn = document.querySelector('.right-panel-toggle-external');
-        
+
         panel.classList.toggle('hidden');
-        
+
         // Afficher/cacher le bouton externe
         if (this.rightPanelVisible) {
           externalBtn.style.display = 'none';
         } else {
           externalBtn.style.display = 'flex';
         }
+
+        // Sauvegarder l'état dans localStorage
+        localStorage.setItem('deepmemo_rightPanelVisible', this.rightPanelVisible);
       },
 
       createRootNode() {
@@ -524,40 +573,77 @@
         document.getElementById('nodeTitle').value = node.title;
         const contentEditor = document.getElementById('nodeContent');
         contentEditor.value = node.content;
-        
+
         // Auto-resize du textarea
         this.autoResizeTextarea(contentEditor);
-        
-        document.getElementById('nodeMeta').textContent = 
+
+        document.getElementById('nodeMeta').textContent =
           `Créé: ${new Date(node.created).toLocaleDateString()}`;
 
         // Afficher le preview avec liens cliquables si le contenu contient des liens
         const preview = document.getElementById('contentPreview');
         if (node.content && node.content.includes('[[')) {
           preview.style.display = 'block';
-          preview.innerHTML = '<strong>🔎 Aperçu avec liens :</strong><br><br>' + 
+          preview.innerHTML = '<strong>🔎 Aperçu avec liens :</strong><br><br>' +
             this.renderContentWithLinks(node.content).replace(/\n/g, '<br>');
         } else {
           preview.style.display = 'none';
         }
 
+        // Déplier l'arborescence pour afficher le nœud sélectionné
+        this.expandPathToNode(id);
+
         this.updateBreadcrumb();
         this.updateChildren();
         this.updateRightPanel();
         this.updateDeleteButton();
+        this.updateActionsButton();
         this.renderTags();
         this.updateViewMode(); // Mettre à jour le mode view/edit
         this.render();
       },
 
-      // Auto-resize du textarea selon son contenu
+      // Auto-resize du textarea selon son contenu et l'espace disponible
       autoResizeTextarea(textarea) {
         if (!textarea) return;
+
+        const childrenSection = document.getElementById('childrenSection');
+        const hasChildren = childrenSection && childrenSection.style.display !== 'none';
+
+        // Gérer la classe CSS selon la présence d'enfants
+        if (hasChildren) {
+          textarea.classList.remove('expanded');
+        } else {
+          textarea.classList.add('expanded');
+        }
+
+        // Calculer la hauteur du textarea
         textarea.style.height = 'auto';
         const scrollHeight = textarea.scrollHeight;
-        const maxHeight = 400; // Max-height défini en CSS
-        const minHeight = 100; // Min-height défini en CSS
-        textarea.style.height = Math.min(Math.max(scrollHeight, minHeight), maxHeight) + 'px';
+        const minHeight = 100;
+
+        let maxHeight;
+        if (hasChildren) {
+          // Si on a des enfants, limiter la hauteur pour laisser de la place
+          maxHeight = 400;
+        } else {
+          // Si pas d'enfants, calculer l'espace disponible dans la fenêtre
+          const editorContainer = document.getElementById('editorContainer');
+          const contentHeader = document.querySelector('.content-header');
+          const contentActions = document.querySelector('.content-actions');
+          const breadcrumb = document.getElementById('breadcrumb');
+
+          if (editorContainer && contentHeader && contentActions && breadcrumb) {
+            const windowHeight = window.innerHeight;
+            const usedHeight = breadcrumb.offsetHeight + contentHeader.offsetHeight + contentActions.offsetHeight + 100; // marges + padding
+            const availableHeight = windowHeight - usedHeight;
+            maxHeight = Math.floor(Math.max(400, availableHeight));
+          } else {
+            maxHeight = 400;
+          }
+        }
+
+        textarea.style.height = Math.floor(Math.min(Math.max(scrollHeight, minHeight), maxHeight)) + 'px';
       },
 
       updateBreadcrumb() {
@@ -894,6 +980,29 @@
         // Un vrai système de contexte viendrait ici
         deleteBtn.textContent = '🗑️ Supprimer';
         deleteBtn.onclick = () => this.deleteCurrentNode();
+      },
+
+      // Mettre à jour le bouton Actions selon le contexte (désactiver sur nœud racine)
+      updateActionsButton() {
+        const node = this.data.nodes[this.currentNodeId];
+        if (!node) return;
+
+        // Trouver le bouton Actions dans le HTML
+        const actionsButtons = document.querySelectorAll('.content-actions button');
+        actionsButtons.forEach(btn => {
+          if (btn.textContent.includes('Actions')) {
+            // Désactiver si c'est un nœud racine (parent === null)
+            if (node.parent === null) {
+              btn.disabled = true;
+              btn.style.opacity = '0.5';
+              btn.style.cursor = 'not-allowed';
+            } else {
+              btn.disabled = false;
+              btn.style.opacity = '1';
+              btn.style.cursor = 'pointer';
+            }
+          }
+        });
       },
 
       // Supprimer uniquement un lien symbolique
@@ -2314,6 +2423,8 @@
           toggleBtn.textContent = '👁️ Afficher';
           contentEditor.style.display = 'block';
           contentPreview.style.display = 'none';
+          // Adapter la taille du textarea au contenu
+          this.autoResizeTextarea(contentEditor);
         }
       }
     };

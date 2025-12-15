@@ -13,11 +13,11 @@ DeepMemo/
 ├── reference/
 │   └── deepmemo-reference.html  # Version V0.6 single-file (référence)
 ├── docs/
-│   ├── README.md          # Concept et features
-│   ├── ROADMAP.md         # État actuel et prochaines étapes
-│   ├── ARCHITECTURE.md    # Détails techniques
-│   ├── START.md           # Ce fichier
-│   └── VISION.md          # Vision long-terme
+│   ├── README.md                  # Concept et features
+│   ├── ROADMAP.md                 # État actuel et prochaines étapes
+│   ├── ARCHITECTURE.md            # Détails techniques
+│   ├── Guide de développement.md  # Ce fichier
+│   └── VISION.md                  # Vision long-terme
 └── .gitignore
 ```
 

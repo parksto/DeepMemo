@@ -627,7 +627,7 @@ body {
   width: 100%;
   height: auto; /* Auto-height pour s'adapter au contenu */
   min-height: 100px; /* Minimum 100px */
-  max-height: 400px; /* Maximum 400px */
+  max-height: 400px; /* Maximum 400px par défaut */
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -639,6 +639,10 @@ body {
   resize: vertical;
   outline: none;
   overflow-y: auto; /* Scroll si dépasse max-height */
+}
+
+.content-editor.expanded {
+  max-height: none; /* Pas de limite quand pas d'enfants */
 }
 
 .content-editor:focus {

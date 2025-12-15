@@ -29,11 +29,11 @@ DeepMemo/
 ├── reference/
 │   └── deepmemo-reference.html  # Version single-file (référence)
 ├── docs/
-│   ├── README.md           # Présentation du concept
-│   ├── ROADMAP.md          # État et prochaines étapes
-│   ├── ARCHITECTURE.md     # Détails techniques
-│   ├── START.md            # Guide de démarrage
-│   └── VISION.md           # Vision long-terme
+│   ├── README.md                  # Présentation du concept
+│   ├── ROADMAP.md                 # État et prochaines étapes
+│   ├── ARCHITECTURE.md            # Détails techniques
+│   ├── Guide de développement.md  # Guide de démarrage
+│   └── VISION.md                  # Vision long-terme
 └── .gitignore
 ```
 
