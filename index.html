@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="description" content="DeepMemo - Ton second cerveau, organisé et connecté">
+  <title>DeepMemo V0.7</title>
+  <link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+  <button class="sidebar-toggle-external" onclick="app.toggleSidebar()">☰</button>
+  <button class="right-panel-toggle-external" onclick="app.toggleRightPanel()">ℹ️</button>
+
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <button class="sidebar-toggle" onclick="app.toggleSidebar()">✕</button>
+        <h1>🌟 DeepMemo</h1>
+        <div class="tagline">Ton second cerveau</div>
+        <div class="node-counter" id="nodeCounter">0 nœuds</div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn" onclick="app.createRootNode()">➕ Nouveau nœud</button>
+        <div class="import-zone">
+          <input type="file" id="importFile" accept=".json" onchange="app.importData(event)">
+          <label for="importFile" class="btn-import">📂 Importer JSON</label>
+        </div>
+        <div class="shortcuts-hint">
+          <kbd>Alt+N</kbd> Nouveau • <kbd>Ctrl+K</kbd> Recherche<br>
+          <kbd>Alt+E</kbd> Éditeur • <kbd>↑↓←→</kbd> Arbre
+        </div>
+      </div>
+
+      <div class="tree-container" id="treeContainer"></div>
+    </div>
+
+    <div class="main-content">
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state-icon">🧩</div>
+        <h2>Bienvenue dans DeepMemo</h2>
+        <p>Crée ton premier nœud pour commencer</p>
+      </div>
+
+      <div id="editorContainer" style="display: none; flex: 1; display: flex; flex-direction: column;">
+        <div class="breadcrumb" id="breadcrumb"></div>
+
+        <div class="content-header">
+          <input type="text" class="content-title-input" id="nodeTitle"
+                 placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
+          <div class="content-meta"><span id="nodeMeta"></span></div>
+
+          <div class="tags-container" id="tagsContainer">
+            <!-- Tags générés dynamiquement -->
+            <div style="position: relative;">
+              <input type="text" class="tag-input" id="tagInput"
+                     placeholder="+ tag"
+                     onkeydown="app.handleTagInput(event)"
+                     oninput="app.handleTagAutocomplete(event)"
+                     onfocus="app.showTagAutocomplete()"
+                     onblur="app.hideTagAutocomplete()">
+              <div class="tag-autocomplete" id="tagAutocomplete" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-body">
+          <textarea class="content-editor" id="nodeContent"
+                    placeholder="Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)"
+                    onchange="app.saveCurrentNode()"
+                    oninput="app.autoResizeTextarea(event.target)"></textarea>
+
+          <div class="content-preview" id="contentPreview" style="display: none;"></div>
+
+          <div class="children-section" id="childrenSection" style="display: none;">
+            <div class="children-header">📂 Nœuds enfants (<span id="childrenCount">0</span>)</div>
+            <div class="children-grid" id="childrenGrid"></div>
+          </div>
+        </div>
+
+        <div class="content-actions">
+          <button class="btn btn-secondary btn-small" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
+          <button class="btn btn-secondary btn-small" onclick="app.openActionModal()">⚙️ Actions...</button>
+          <button class="btn btn-secondary btn-small" onclick="app.deleteCurrentNode()">🗑️ Supprimer</button>
+          <button class="btn btn-secondary btn-small" onclick="app.exportData()">💾 Exporter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-panel" id="rightPanel">
+      <div class="panel-header">
+        <button class="right-panel-toggle" onclick="app.toggleRightPanel()">✕</button>
+        <div class="panel-title">Informations</div>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="toast-icon" id="toastIcon">✅</div>
+    <div class="toast-message" id="toastMessage">Message</div>
+  </div>
+
+  <div class="search-modal" id="searchModal">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <div class="search-icon">🔍</div>
+        <input type="text" class="search-input" id="searchInput"
+               placeholder="Rechercher dans tous les nœuds..." autocomplete="off">
+        <span class="search-hint">Esc</span>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div class="search-empty">
+          <div class="search-empty-icon">💭</div>
+          <div>Tape pour rechercher dans tes nœuds</div>
+        </div>
+      </div>
+      <div class="search-footer">
+        <div class="search-footer-item"><kbd>↑</kbd><kbd>↓</kbd> Naviguer</div>
+        <div class="search-footer-item"><kbd>Entrée</kbd> Ouvrir</div>
+        <div class="search-footer-item"><kbd>Esc</kbd> Fermer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Symlink -->
+  <div class="modal-overlay" id="symlinkModal">
+    <div class="modal">
+      <h2>🔗 Créer un lien symbolique</h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+          Choisis où afficher ce nœud comme lien symbolique :
+        </p>
+        <div class="node-selector" id="nodeSelector"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" onclick="app.closeSymlinkModal()">Annuler</button>
+        <button class="btn btn-small" onclick="app.confirmSymlink()">🔗 Créer le lien</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Actions (Déplacer/Lien/Dupliquer) -->
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal">
+      <h2>⚙️ Actions sur le nœud</h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+          Que veux-tu faire avec ce nœud ?
+        </p>
+
+        <!-- Choix de l'action -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+          <button class="btn btn-secondary btn-small" id="actionMove" onclick="app.selectAction('move')" style="flex: 1; border-radius: 8px;">
+            ↗️ Déplacer
+          </button>
+          <button class="btn btn-secondary btn-small" id="actionLink" onclick="app.selectAction('link')" style="flex: 1; border-radius: 8px;">
+            🔗 Lien
+          </button>
+          <button class="btn btn-secondary btn-small" id="actionDuplicate" onclick="app.selectAction('duplicate')" style="flex: 1; border-radius: 8px;">
+            📋 Dupliquer
+          </button>
+        </div>
+
+        <div id="actionDescription" style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; min-height: 40px;">
+          Sélectionne une action ci-dessus
+        </div>
+
+        <div class="node-selector" id="actionNodeSelector"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" onclick="app.closeActionModal()">Annuler</button>
+        <button class="btn btn-small" id="confirmActionBtn" onclick="app.confirmAction()" disabled>✓ Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/js/app.js"></script>
+</body>
+</html>
