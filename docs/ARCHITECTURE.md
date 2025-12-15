@@ -2,7 +2,12 @@
 
 ## 📐 Vue d'ensemble
 
-DeepMemo est actuellement une application **single-page** (SPA) en vanilla JavaScript, HTML et CSS, utilisant LocalStorage pour la persistence.
+DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML et CSS, utilisant LocalStorage pour la persistence.
+
+**Architecture V0.7** : Multifile
+- `index.html` : Structure HTML
+- `src/css/style.css` : Styles (~1180 lignes)
+- `src/js/app.js` : Logique (~2270 lignes)
 
 ---
 
@@ -596,5 +601,5 @@ const app = {
 
 ---
 
-**Document technique V0.6**  
-Dernière mise à jour : Décembre 2024
+**Document technique V0.7**
+Dernière mise à jour : 15 Décembre 2024

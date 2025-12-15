@@ -54,10 +54,13 @@ Chaque nœud possède :
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
-## 🏗️ Architecture actuelle (V0.6)
+## 🏗️ Architecture actuelle (V0.7)
 
 ### Format
-- Single-file HTML (~3600 lignes)
+- **Multifile** : HTML + CSS + JS séparés
+- `index.html` : Structure HTML minimale
+- `src/css/style.css` : Tous les styles (~1180 lignes)
+- `src/js/app.js` : Toute la logique (~2270 lignes)
 - Vanilla JavaScript (pas de framework)
 - CSS Variables pour le theming
 - LocalStorage pour la persistence
@@ -91,23 +94,14 @@ Chaque nœud possède :
 - **Panel droit** : Métadonnées, liens, backlinks, tags cloud
 - **Dark theme** par défaut
 
-## 🚀 Prochaines étapes (V0.7)
-
-### Restructuration multifile
-```
-deepMemo/
-  ├── index.html
-  ├── css/
-  │   └── style.css
-  └── js/
-      └── app.js
-```
+## 🚀 Prochaines étapes (V0.8)
 
 ### Features à implémenter
-- [ ] Fix sélection de nœud dans les modales
 - [ ] Persistent tree state (améliorer)
 - [ ] Vue liste nested (enfants = contenu principal)
-- [ ] Export/Import amélioré
+- [ ] Export/Import amélioré (Markdown, Notion, Obsidian)
+- [ ] Markdown rendering
+- [ ] Thèmes personnalisables
 - [ ] Permissions multi-user (chmod-style)
 - [ ] Types de nœuds actifs (avec scripts)
 
@@ -145,4 +139,4 @@ Projet personnel - Pas de licence définie pour le moment.
 
 ---
 
-**DeepMemo V0.6** - Décembre 2024
+**DeepMemo V0.7** - 15 Décembre 2024

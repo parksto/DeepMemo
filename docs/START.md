@@ -1,188 +1,260 @@
-# 🚀 Démarrer avec Claude Code
+# 🚀 Guide de développement DeepMemo
 
-## 📁 Contenu de ce dossier
+## 📁 Structure du projet
 
 ```
-v0.7-multifile/
-  ├── README.md              (Vue d'ensemble du projet)
-  ├── ROADMAP.md             (État actuel + prochaines étapes)
-  ├── ARCHITECTURE.md        (Détails techniques)
-  ├── deepmemo-v0.6.html     (Version actuelle qui fonctionne)
-  └── START.md               (Ce fichier)
-```
-
-## 🎯 Objectif de cette session
-
-**Transformer DeepMemo V0.6 (single-file) en V0.7 (multifile)**
-
-Structure cible :
-```
-v0.7-multifile/
-  ├── index.html
-  ├── css/
-  │   └── style.css
-  ├── js/
-  │   └── app.js
-  └── deepmemo-v0.6.html (référence)
+DeepMemo/
+├── index.html              # Point d'entrée HTML
+├── src/
+│   ├── css/
+│   │   └── style.css      # Tous les styles (~1180 lignes)
+│   └── js/
+│       └── app.js         # Toute la logique (~2270 lignes)
+├── reference/
+│   └── deepmemo-reference.html  # Version V0.6 single-file (référence)
+├── docs/
+│   ├── README.md          # Concept et features
+│   ├── ROADMAP.md         # État actuel et prochaines étapes
+│   ├── ARCHITECTURE.md    # Détails techniques
+│   ├── START.md           # Ce fichier
+│   └── VISION.md          # Vision long-terme
+└── .gitignore
 ```
 
 ---
 
-## 🐛 Bug prioritaire à corriger
+## 🛠️ Configuration de l'environnement
 
-**Sélection de nœud dans les modales ne fonctionne pas**
-- Les flèches ▶/▼ fonctionnent (expand/collapse)
-- Mais cliquer sur un nœud pour le sélectionner ne marche pas
-- L'event ne passe pas correctement à `selectSymlinkTarget()` et `selectActionDestination()`
+### Prérequis
+- **Navigateur moderne** (Chrome, Firefox, Edge, Safari)
+- **Serveur HTTP local** (Python, Node.js, ou autre)
+- **Git** (pour le versioning)
 
-Voir `ROADMAP.md` section "Bugs connus" pour détails.
+### Lancer l'application
+
+#### Depuis WSL Ubuntu
+```bash
+cd DeepMemo
+python3 -m http.server 8000
+```
+
+#### Depuis Node.js
+```bash
+cd DeepMemo
+npx http-server -p 8000
+```
+
+Puis ouvrir : **http://localhost:8000**
 
 ---
 
-## 📝 Instructions pour Claude Code
+## 📚 Lire la documentation
 
-### 1. Lire la documentation
-Commence par lire dans l'ordre :
-1. `README.md` - Comprendre le concept
-2. `ROADMAP.md` - Savoir où on en est
-3. `ARCHITECTURE.md` - Détails techniques
+Ordre recommandé pour bien comprendre le projet :
 
-### 2. Analyser le code actuel
-- Ouvre `deepmemo-v0.6.html`
-- C'est un fichier de ~3600 lignes
-- Structure : `<style>` + `<body>` + `<script>`
-
-### 3. Plan de restructuration
-
-#### Étape 1 : Extraire le CSS
-- Créer `css/style.css`
-- Copier tout le contenu de `<style>...</style>`
-- Lier dans `index.html` : `<link rel="stylesheet" href="css/style.css">`
-
-#### Étape 2 : Extraire le JavaScript
-- Créer `js/app.js`
-- Copier tout le contenu de `<script>...</script>`
-- Ajuster si besoin (pas de wrapping dans IIFE nécessaire)
-- Lier dans `index.html` : `<script src="js/app.js" defer></script>`
-
-#### Étape 3 : Créer index.html minimal
-- Garder uniquement la structure HTML
-- Liens vers CSS et JS externes
-- Tester que tout fonctionne
-
-#### Étape 4 : Corriger le bug de sélection
-Une fois la restructuration faite, fixer la sélection dans les modales.
+1. **[README.md](README.md)** - Concept général et features
+2. **[ROADMAP.md](ROADMAP.md)** - État actuel et bugs connus
+3. **[ARCHITECTURE.md](ARCHITECTURE.md)** - Détails techniques
+4. **[VISION.md](VISION.md)** - Vision long-terme
 
 ---
 
 ## 🧪 Tester l'application
 
-### Lancer un serveur local
-```bash
-cd v0.7-multifile
-python3 -m http.server 8000
+### Fonctionnalités à tester
+
+#### Gestion des nœuds
+- [ ] Créer un nœud racine (`Alt+N`)
+- [ ] Créer un nœud enfant
+- [ ] Éditer le titre et le contenu
+- [ ] Supprimer un nœud
+- [ ] Auto-sélection du titre lors de la création
+
+#### Navigation
+- [ ] Breadcrumbs cliquables
+- [ ] Navigation clavier dans l'arbre (`↑↓←→`)
+- [ ] Expand/collapse des branches
+- [ ] Persistence de l'état expand/collapse
+
+#### Liens
+- [ ] Créer un wiki-link `[[Nom du nœud]]`
+- [ ] Cliquer sur un lien dans le preview
+- [ ] Vérifier les backlinks dans le panel droit
+- [ ] Créer un lien symbolique via la modal Actions
+
+#### Tags
+- [ ] Ajouter des tags
+- [ ] Auto-complétion des tags
+- [ ] Tag cloud dans le panel droit
+- [ ] Recherche par tag
+
+#### Recherche
+- [ ] Ouvrir la recherche (`Ctrl+K`)
+- [ ] Rechercher dans titres
+- [ ] Rechercher dans contenus
+- [ ] Rechercher dans tags
+- [ ] Navigation clavier dans les résultats
+
+#### Drag & Drop
+- [ ] Déplacer un nœud (drag simple)
+- [ ] Dupliquer un nœud (`Ctrl + drag`)
+- [ ] Créer un lien symbolique (`Ctrl+Alt + drag`)
+- [ ] Réorganiser l'ordre (zones before/after)
+- [ ] Indicateurs visuels de position
+
+#### Modales
+- [ ] Modal Actions : sélectionner une action
+- [ ] Modal Actions : sélectionner une destination ✅ **BUG CORRIGÉ en V0.7**
+- [ ] Modal Actions : confirmer l'action
+- [ ] Expand/collapse dans les modales
+
+#### Export/Import
+- [ ] Exporter en JSON
+- [ ] Importer un JSON
+- [ ] Vérifier l'intégrité des données
+
+---
+
+## 🐛 Debugging
+
+### Console navigateur
+Ouvre les DevTools (`F12`) pour :
+- Voir les erreurs JavaScript
+- Inspecter le LocalStorage
+- Debugger le code
+
+### LocalStorage
+```javascript
+// Dans la console :
+localStorage.getItem('deepmemo_data')        // Voir les données
+localStorage.getItem('deepmemo_expanded')    // Voir l'état des nœuds dépliés
+localStorage.clear()                          // Reset complet
 ```
 
-Puis ouvrir : http://localhost:8000
+### Fichiers à vérifier en cas de bug
+1. `src/js/app.js` - Toute la logique
+2. `index.html` - Structure HTML et événements onclick
+3. `src/css/style.css` - Styles et z-index
 
-### Points à tester
-- [ ] Création de nœuds
-- [ ] Navigation dans l'arborescence
-- [ ] Expand/collapse
-- [ ] Drag & drop
-- [ ] Recherche (Ctrl+K)
-- [ ] Tags
-- [ ] Modales (surtout la sélection de nœud !)
-- [ ] Export/Import
+---
+
+## 📝 Conventions de code
+
+### Style JavaScript
+- **Indentation** : 2 espaces
+- **Quotes** : Simple quotes `'...'`
+- **Noms de variables** : `camelCase`
+- **Commentaires** : Français ou anglais
+
+### Style CSS
+- **Noms de classes** : `kebab-case`
+- **Variables CSS** : `--nom-variable`
+- **Ordre** : Utiliser les variables CSS autant que possible
+
+### Structure app
+```javascript
+const app = {
+  // État
+  data: { nodes: {}, rootNodes: [] },
+  currentNodeId: null,
+
+  // Méthodes lifecycle
+  init() { ... },
+  render() { ... },
+
+  // Méthodes métier
+  createNode() { ... },
+  deleteNode() { ... },
+
+  // Méthodes persistence
+  saveData() { ... },
+  loadData() { ... }
+};
+```
+
+---
+
+## 🎯 Contribuer
+
+### Workflow Git
+```bash
+# Créer une branche pour ta feature
+git checkout -b feature/ma-feature
+
+# Développer et tester
+
+# Commit
+git add .
+git commit -m "✨ Add: ma feature"
+
+# Push
+git push origin feature/ma-feature
+```
+
+### Types de commits
+- `✨ Add:` Nouvelle feature
+- `🐛 Fix:` Correction de bug
+- `📝 Docs:` Documentation
+- `♻️ Refactor:` Refactoring
+- `🎨 Style:` CSS/UI
+- `⚡ Perf:` Performance
+
+---
+
+## 🔧 Technologies utilisées
+
+### Frontend
+- **HTML5**
+- **CSS3** (Variables, Flexbox, Grid)
+- **JavaScript ES6+** (Classes, Arrow functions, Template literals)
+
+### APIs natives
+- **LocalStorage API** - Persistence
+- **Drag & Drop API** - Interactions
+- **FileReader API** - Import/Export
+
+### Pas de dépendances
+- Pas de framework (React, Vue, etc.)
+- Pas de bibliothèque (jQuery, Lodash, etc.)
+- Tout est vanilla JavaScript
 
 ---
 
 ## 💡 Conseils
 
 ### Approche progressive
-1. **D'abord restructurer** (3 fichiers)
-2. **Tester que tout marche** pareil
-3. **Puis corriger les bugs**
-4. **Enfin optimiser**
+1. Lire la doc
+2. Tester l'app manuellement
+3. Comprendre le code existant
+4. Faire des petites modifications
+5. Tester à chaque étape
 
-### Validation continue
-Après chaque étape, lance le serveur et teste !
+### Garder la simplicité
+- Privilégier les solutions simples
+- Éviter la sur-ingénierie
+- Tester fréquemment
 
-### Garder deepmemo-v0.6.html
-C'est la référence qui marche. Si problème, on peut toujours comparer.
-
----
-
-## 📚 Contexte utile
-
-### Technologies utilisées
-- Vanilla JavaScript (ES6+)
-- CSS3 (Variables, Flexbox, Grid)
-- LocalStorage API
-- HTML5 Drag & Drop API
-
-### Pas de dépendances
-- Pas de framework (React, Vue, etc.)
-- Pas de bibliothèque (jQuery, Lodash, etc.)
-- Tout est natif
-
-### Philosophie
-- Keep it simple
-- Keyboard-first
-- Performance > Fancy UI
-- User data sovereignty
+### Performance
+- Utiliser la délégation d'événements
+- Éviter les re-renders complets
+- Optimiser les recherches
 
 ---
 
-## 🎨 Style de code actuel
+## 📚 Ressources
 
-### Conventions
-- Indentation : 2 espaces
-- Quotes : Simple quotes pour strings
-- Noms de variables : camelCase
-- Noms de classes CSS : kebab-case
-- Commentaires : français OK, anglais OK
+### Documentation externe
+- [MDN Web Docs](https://developer.mozilla.org/)
+- [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- [Drag & Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
 
-### Structure app
-```javascript
-const app = {
-  data: {},
-  currentNodeId: null,
-  
-  init() { ... },
-  render() { ... },
-  saveData() { ... },
-  // ... méthodes
-};
-
-window.addEventListener('DOMContentLoaded', () => app.init());
-```
+### Projet
+- **Repo GitHub** : `git@github.com:parksto/DeepMemo.git`
+- **Version actuelle** : V0.7
+- **Statut** : Développement actif
 
 ---
 
-## ❓ Questions fréquentes
+**Bonne contribution ! 🚀**
 
-**Q : Pourquoi pas de framework ?**  
-A : Contrôle total, légèreté, pas de breaking changes à gérer.
-
-**Q : Pourquoi LocalStorage et pas une vraie DB ?**  
-A : MVP d'abord. Migration vers IndexedDB/Backend prévue en V1.0.
-
-**Q : Le code est sale par endroits, c'est normal ?**  
-A : Oui, c'est du prototype rapide. On va le nettoyer progressivement.
-
----
-
-## 🎯 Critères de succès pour cette session
-
-- [ ] Structure multifile créée (index.html + css/ + js/)
-- [ ] Application fonctionne identiquement
-- [ ] Bug de sélection dans modales corrigé
-- [ ] Code plus propre et maintainable
-- [ ] Documentation à jour
-
----
-
-**Bonne chance ! 🚀**
-
-*Fabien sera là pour valider et tester.*
+*N'hésite pas à poser des questions ou proposer des améliorations.*
