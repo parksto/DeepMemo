@@ -1,6 +1,6 @@
 # 🗺️ DeepMemo - Roadmap
 
-## 📍 État actuel : V0.6 (Décembre 2024)
+## 📍 État actuel : V0.7 (Décembre 2024)
 
 ### ✅ Fonctionnalités implémentées
 
@@ -72,10 +72,10 @@
 
 ---
 
-## 🐛 Bugs connus (à corriger en V0.7)
+## 🐛 Bugs connus
 
-### Priorité haute
-- [ ] **Sélection dans les modales** : On ne peut pas sélectionner le nœud destination dans les modales d'action/symlink (l'event ne passe pas correctement)
+### Corrigés en V0.7
+- [x] **Sélection dans les modales** ✅ : Impossible de sélectionner le nœud destination dans les modales d'action/symlink → **CORRIGÉ** (utilisation de `data-node-id` avec `querySelector`)
 
 ### Priorité moyenne
 - [ ] Parfois les bordures des boutons ont un effet relief (navigateur par défaut)
@@ -87,36 +87,35 @@
 
 ---
 
-## 🎯 V0.7 - Restructuration Multifile (Prochaine étape)
+## ✅ V0.7 - Restructuration Multifile (TERMINÉE)
 
-### Objectifs principaux
+### Objectifs atteints
 
-#### 1. Structure du projet
+#### 1. Structure du projet ✅
 ```
-deepMemo/
+DeepMemo/
   ├── index.html          (Structure HTML minimale)
-  ├── css/
-  │   └── style.css       (Tous les styles)
-  ├── js/
-  │   └── app.js          (Toute la logique)
-  └── data/
-      └── (localStorage pour l'instant)
+  ├── src/
+  │   ├── css/
+  │   │   └── style.css   (Tous les styles)
+  │   └── js/
+  │       └── app.js      (Toute la logique)
+  ├── reference/
+  │   └── deepmemo-reference.html  (Version single-file)
+  ├── docs/
+  │   └── (documentation complète)
+  └── .gitignore
 ```
 
 #### 2. Corrections urgentes
-- [ ] Fix sélection de nœud dans les modales
+- [x] Fix sélection de nœud dans les modales ✅
 - [ ] Uniformiser les bordures des boutons
 - [ ] Améliorer la gestion des events
 
-#### 3. Améliorations de l'arborescence
-- [ ] Persistent expand/collapse state plus robuste
-- [ ] Animation smooth pour expand/collapse
-- [ ] Scroll automatique vers le nœud sélectionné
-
-#### 4. Qualité de code
-- [ ] Séparer les responsabilités (UI, Data, Events)
-- [ ] Ajouter des commentaires JSDoc
-- [ ] Optimiser les performances (rendering)
+#### 3. Infrastructure
+- [x] Repo GitHub créé et configuré ✅
+- [x] Documentation complète (README + docs) ✅
+- [x] Structure professionnelle évolutive ✅
 
 ---
 
@@ -230,11 +229,15 @@ deepMemo/
 - ✅ Drag & drop : intuitif et rapide
 - ✅ Single-file au début : pratique pour prototyper
 
-### Ce qui doit être amélioré
-- ⚠️ Single-file devient difficile à maintenir
+### Ce qui a été amélioré en V0.7
+- ✅ Single-file → Multifile : beaucoup plus maintenable
+- ✅ Structure de projet professionnelle
+- ✅ UX des modales corrigée
+
+### Ce qui doit encore être amélioré
 - ⚠️ Pas de tests automatisés
 - ⚠️ Performance avec beaucoup de nœuds (>1000) à tester
-- ⚠️ UX des modales perfectible
+- ⚠️ Qualité de code (JSDoc, séparation des responsabilités)
 
 ### Décisions techniques validées
 - ✅ Vanilla JS : pas de overhead, contrôle total
@@ -244,6 +247,6 @@ deepMemo/
 
 ---
 
-**Dernière mise à jour** : Décembre 2024  
-**Version actuelle** : V0.6  
-**Prochaine milestone** : V0.7 (Restructuration multifile)
+**Dernière mise à jour** : 15 Décembre 2024
+**Version actuelle** : V0.7
+**Prochaine milestone** : V0.8 (Features avancées)

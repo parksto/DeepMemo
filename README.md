@@ -10,7 +10,7 @@ DeepMemo est un système de gestion de connaissances personnelles basé sur des 
 
 ```bash
 # Depuis WSL Ubuntu ou tout terminal bash
-cd v0.7-multifile
+cd DeepMemo
 python3 -m http.server 8000
 ```
 
@@ -19,7 +19,7 @@ Puis ouvrir dans ton navigateur : **http://localhost:8000**
 ### Structure du projet
 
 ```
-v0.7-multifile/
+DeepMemo/
 ├── index.html              # Point d'entrée
 ├── src/
 │   ├── css/
@@ -71,8 +71,10 @@ v0.7-multifile/
 ## 📝 Notes de version
 
 **V0.7** (Décembre 2024)
-- Restructuration en multifile (HTML + CSS + JS séparés)
-- Structure de projet propre et évolutive
+- ✅ Restructuration en multifile (HTML + CSS + JS séparés)
+- ✅ Structure de projet propre et évolutive
+- ✅ Fix bug de sélection dans les modales
+- ✅ Repo GitHub créé
 
 **V0.6** (Version de référence)
 - Single-file HTML fonctionnel
