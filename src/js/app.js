@@ -42,6 +42,7 @@
         this.render();
         this.updateNodeCounter();
         this.setupKeyboardShortcuts();
+        this.setupSidebarResizer();
         if (this.data.rootNodes.length === 0) {
           this.createExampleNodes();
         }
@@ -143,6 +144,54 @@
         searchInput.addEventListener('keydown', (e) => this.handleSearchNavigation(e));
         searchModal.addEventListener('click', (e) => {
           if (e.target === searchModal) this.closeSearch();
+        });
+      },
+
+      setupSidebarResizer() {
+        const resizer = document.getElementById('sidebarResizer');
+        const sidebar = document.querySelector('.sidebar');
+        let isResizing = false;
+        let startX = 0;
+        let startWidth = 0;
+
+        // Charger la largeur sauvegardée
+        const savedWidth = localStorage.getItem('deepmemo_sidebarWidth');
+        if (savedWidth) {
+          sidebar.style.width = savedWidth + 'px';
+        }
+
+        resizer.addEventListener('mousedown', (e) => {
+          isResizing = true;
+          startX = e.clientX;
+          startWidth = sidebar.offsetWidth;
+          resizer.classList.add('resizing');
+          document.body.style.cursor = 'ew-resize';
+          document.body.style.userSelect = 'none';
+          e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+          if (!isResizing) return;
+
+          const delta = e.clientX - startX;
+          const newWidth = startWidth + delta;
+          const minWidth = 265;
+          const maxWidth = 600;
+
+          if (newWidth >= minWidth && newWidth <= maxWidth) {
+            sidebar.style.width = newWidth + 'px';
+          }
+        });
+
+        document.addEventListener('mouseup', () => {
+          if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            // Sauvegarder la largeur
+            localStorage.setItem('deepmemo_sidebarWidth', sidebar.offsetWidth);
+          }
         });
       },
 
