@@ -1,17 +1,24 @@
     const app = {
       data: { nodes: {}, rootNodes: [] },
       currentNodeId: null,
+      currentInstanceKey: null, // Instance key du nœud sélectionné (pour active state)
       sidebarVisible: true,
       rightPanelVisible: true,
       focusedTreeNodeId: null,
+      focusedInstanceKey: null, // Clé unique pour l'instance focusée (nodeId@parentId)
       searchVisible: false,
       searchResults: [],
       selectedSearchResultIndex: 0,
-      expandedNodes: new Set(), // Mémoriser les nœuds dépliés
+      expandedNodes: new Set(), // Mémoriser les nœuds dépliés (utilise instance keys)
       symlinkModalExpandedNodes: new Set(), // État expand/collapse pour la modal symlink
       actionModalExpandedNodes: new Set(), // État expand/collapse pour la modal actions
       showAllTags: false, // Afficher tous les tags du cloud
       viewMode: 'edit', // 'edit' ou 'view' (markdown rendered)
+
+      // Créer une clé unique pour une instance de nœud dans l'arbre
+      getInstanceKey(nodeId, parentContext) {
+        return parentContext === null ? `${nodeId}@root` : `${nodeId}@${parentContext}`;
+      },
 
       init() {
         // Charger le mode de vue depuis localStorage
@@ -199,56 +206,67 @@
         const visibleNodes = this.getVisibleTreeNodes();
         if (visibleNodes.length === 0) return;
 
-        if (!this.focusedTreeNodeId) {
+        if (!this.focusedInstanceKey) {
           if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
             e.preventDefault();
-            this.focusedTreeNodeId = visibleNodes[0];
+            this.focusedInstanceKey = visibleNodes[0];
             this.updateTreeFocus();
           }
           return;
         }
 
-        const currentIndex = visibleNodes.indexOf(this.focusedTreeNodeId);
+        const currentIndex = visibleNodes.indexOf(this.focusedInstanceKey);
         if (currentIndex === -1) return;
+
+        // Extraire le nodeId de l'instance key
+        const nodeId = this.focusedInstanceKey.split('@')[0];
 
         switch(e.key) {
           case 'ArrowDown':
             e.preventDefault();
             if (currentIndex < visibleNodes.length - 1) {
-              this.focusedTreeNodeId = visibleNodes[currentIndex + 1];
+              this.focusedInstanceKey = visibleNodes[currentIndex + 1];
               this.updateTreeFocus();
-              this.scrollTreeNodeIntoView(this.focusedTreeNodeId);
+              this.scrollTreeNodeIntoView(this.focusedInstanceKey);
             }
             break;
           case 'ArrowUp':
             e.preventDefault();
             if (currentIndex > 0) {
-              this.focusedTreeNodeId = visibleNodes[currentIndex - 1];
+              this.focusedInstanceKey = visibleNodes[currentIndex - 1];
               this.updateTreeFocus();
-              this.scrollTreeNodeIntoView(this.focusedTreeNodeId);
+              this.scrollTreeNodeIntoView(this.focusedInstanceKey);
             }
             break;
           case 'ArrowRight':
             e.preventDefault();
-            this.expandTreeNode(this.focusedTreeNodeId);
+            this.expandTreeNode(this.focusedInstanceKey);
             break;
           case 'ArrowLeft':
             e.preventDefault();
-            this.collapseTreeNode(this.focusedTreeNodeId);
+            this.collapseTreeNode(this.focusedInstanceKey);
             break;
           case 'Enter':
             e.preventDefault();
-            this.selectNode(this.focusedTreeNodeId);
+            this.currentInstanceKey = this.focusedInstanceKey; // Sync avec le highlight
+            this.selectNode(nodeId);
             break;
         }
       },
 
       getVisibleTreeNodes() {
         const visible = [];
-        const traverse = (nodeId) => {
-          visible.push(nodeId);
+        const traverse = (nodeId, parentContext, isRootLevel = false) => {
+          const instanceKey = this.getInstanceKey(nodeId, parentContext);
           const node = this.data.nodes[nodeId];
-          const element = document.querySelector(`[data-node-id="${nodeId}"]`);
+          const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
+
+          // Vérifier si ce nœud est réellement visible (rendu dans le DOM)
+          // Un nœud n'est visible que si son élément existe et n'est pas caché
+          if (!element) return;
+
+          visible.push(instanceKey);
+
           const parent = element?.closest('.tree-node');
 
           // Trouver les symlinks dans ce nœud
@@ -263,18 +281,18 @@
 
           if (hasChildren && parent?.classList.contains('expanded')) {
             // Traverser les enfants directs
-            node.children.forEach(childId => traverse(childId));
+            node.children.forEach(childId => traverse(childId, nodeId, false));
             // Traverser les symlinks
-            symlinksInThisNode.forEach(symlinkId => traverse(symlinkId));
+            symlinksInThisNode.forEach(symlinkId => traverse(symlinkId, nodeId, false));
           }
         };
 
-        this.data.rootNodes.forEach(nodeId => traverse(nodeId));
+        this.data.rootNodes.forEach(nodeId => traverse(nodeId, null, true));
 
         // Ajouter les symlinks à la racine
         Object.values(this.data.nodes).forEach(node => {
           if (node.symlinkedIn && node.symlinkedIn.includes(null)) {
-            traverse(node.id);
+            traverse(node.id, null, true);
           }
         });
 
@@ -283,14 +301,14 @@
 
       updateTreeFocus() {
         document.querySelectorAll('.tree-node-content').forEach(el => el.classList.remove('focused'));
-        if (this.focusedTreeNodeId) {
-          const element = document.querySelector(`[data-node-id="${this.focusedTreeNodeId}"]`);
+        if (this.focusedInstanceKey) {
+          const element = document.querySelector(`[data-instance-key="${this.focusedInstanceKey}"]`);
           if (element) element.classList.add('focused');
         }
       },
 
-      scrollTreeNodeIntoView(nodeId) {
-        const element = document.querySelector(`[data-node-id="${nodeId}"]`);
+      scrollTreeNodeIntoView(instanceKey) {
+        const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
         if (element) element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       },
 
@@ -319,25 +337,27 @@
         localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
       },
 
-      expandTreeNode(nodeId) {
-        const element = document.querySelector(`[data-node-id="${nodeId}"]`);
+      expandTreeNode(instanceKey) {
+        const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
         const parent = element?.closest('.tree-node');
         const toggle = element?.querySelector('.tree-node-toggle');
         if (parent && !parent.classList.contains('expanded') && toggle) {
           parent.classList.add('expanded');
           toggle.textContent = '▼';
-          this.expandedNodes.add(nodeId); // Sauvegarder l'état
+          this.expandedNodes.add(instanceKey); // Sauvegarder l'état avec instance key
+          localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
         }
       },
 
-      collapseTreeNode(nodeId) {
-        const element = document.querySelector(`[data-node-id="${nodeId}"]`);
+      collapseTreeNode(instanceKey) {
+        const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
         const parent = element?.closest('.tree-node');
         const toggle = element?.querySelector('.tree-node-toggle');
         if (parent && parent.classList.contains('expanded') && toggle) {
           parent.classList.remove('expanded');
           toggle.textContent = '▶';
-          this.expandedNodes.delete(nodeId); // Sauvegarder l'état
+          this.expandedNodes.delete(instanceKey); // Sauvegarder l'état avec instance key
+          localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
         }
       },
 
@@ -1077,8 +1097,20 @@
 
         const renderNode = (nodeId, parentContext = null) => {
           const node = this.data.nodes[nodeId];
-          const isActive = nodeId === this.currentNodeId;
-          const isSymlink = parentContext !== null && this.isSymlinkIn(nodeId, parentContext);
+
+          // Si parentContext est une instance key (contient @), extraire le vrai nodeId parent
+          let actualParentNodeId = parentContext;
+          if (parentContext && parentContext.includes('@')) {
+            actualParentNodeId = parentContext.split('@')[0];
+          }
+
+          const isSymlink = actualParentNodeId !== null && this.isSymlinkIn(nodeId, actualParentNodeId);
+
+          // Clé unique pour cette instance
+          const instanceKey = this.getInstanceKey(nodeId, parentContext);
+
+          // Active seulement si c'est la bonne instance
+          const isActive = instanceKey === this.currentInstanceKey;
 
           // Trouver les symlinks qui doivent apparaître dans ce nœud
           const symlinksInThisNode = [];
@@ -1091,14 +1123,15 @@
           const hasChildren = node.children.length > 0 || symlinksInThisNode.length > 0;
 
           const div = document.createElement('div');
-          // Utiliser l'état mémorisé au lieu de toujours expanded
-          const isExpanded = this.expandedNodes.has(nodeId);
+          // Utiliser l'état mémorisé avec la clé d'instance
+          const isExpanded = this.expandedNodes.has(instanceKey);
           div.className = 'tree-node' + (isExpanded ? ' expanded' : '');
           if (isSymlink) div.classList.add('symlink-node');
 
           const content = document.createElement('div');
           content.className = 'tree-node-content' + (isActive ? ' active' : '');
           content.setAttribute('data-node-id', nodeId);
+          content.setAttribute('data-instance-key', instanceKey);
           
           if (hasChildren) {
             const toggle = document.createElement('span');
@@ -1107,16 +1140,16 @@
             toggle.onclick = (e) => {
               e.stopPropagation();
               div.classList.toggle('expanded');
-              
-              // Sauvegarder l'état
+
+              // Sauvegarder l'état avec la clé d'instance
               if (div.classList.contains('expanded')) {
-                this.expandedNodes.add(nodeId);
+                this.expandedNodes.add(instanceKey);
                 toggle.textContent = '▼';
               } else {
-                this.expandedNodes.delete(nodeId);
+                this.expandedNodes.delete(instanceKey);
                 toggle.textContent = '▶';
               }
-              
+
               // Sauvegarder dans localStorage
               localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
             };
@@ -1144,7 +1177,11 @@
             content.appendChild(badge);
           }
 
-          content.onclick = () => this.selectNode(nodeId);
+          content.onclick = () => {
+            this.currentInstanceKey = instanceKey; // Mémoriser quelle instance est active avant selectNode
+            this.focusedInstanceKey = instanceKey; // Mettre à jour le focus clavier
+            this.selectNode(nodeId); // Ceci va appeler render() qui utilisera currentInstanceKey
+          };
 
           // Drag & Drop
           content.setAttribute('draggable', 'true');
@@ -1159,17 +1196,21 @@
           if (hasChildren) {
             const childrenDiv = document.createElement('div');
             childrenDiv.className = 'tree-node-children';
-            
+
+            // Pour les enfants d'un symlink, on utilise l'instanceKey comme parent
+            // pour avoir un contexte unique
+            const childParentContext = isSymlink ? instanceKey : nodeId;
+
             // Ajouter les enfants réels
             node.children.forEach(childId => {
-              childrenDiv.appendChild(renderNode(childId, nodeId));
+              childrenDiv.appendChild(renderNode(childId, childParentContext));
             });
-            
+
             // Ajouter les symlinks
             symlinksInThisNode.forEach(symlinkId => {
               childrenDiv.appendChild(renderNode(symlinkId, nodeId));
             });
-            
+
             div.appendChild(childrenDiv);
           }
 

@@ -77,9 +77,11 @@
 ### Corrigés en V0.7
 - [x] **Sélection dans les modales** ✅ : Impossible de sélectionner le nœud destination dans les modales d'action/symlink → **CORRIGÉ** (utilisation de `data-node-id` avec `querySelector`)
 
+### Priorité haute
+- [ ] **Liens symboliques et arborescence** : Quand un lien symbolique a plusieurs niveaux d'enfants dépliés, l'arborescence peut afficher les enfants à plusieurs endroits simultanément (sous l'original ET sous le symlink). En attendant une refonte complète du système de rendu, il est recommandé de garder l'arborescence ouverte à un seul endroit à la fois.
+
 ### Priorité moyenne
 - [ ] Parfois les bordures des boutons ont un effet relief (navigateur par défaut)
-- [ ] Le panel droit devrait se souvenir de son état ouvert/fermé
 
 ### Priorité basse
 - [ ] Pas de confirmation avant suppression massive

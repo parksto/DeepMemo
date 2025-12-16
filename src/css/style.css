@@ -523,8 +523,8 @@ body {
 .tag {
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 2px 5px 4px 5px;
+  border-radius: 9px;
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -629,8 +629,8 @@ body {
 .tag-cloud-item {
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  padding: 4px 8px;
-  border-radius: 8px;
+  padding: 2px 5px 4px 5px;
+  border-radius: 9px;
   border: 1px solid var(--border);
   cursor: pointer;
   transition: all 0.2s;
