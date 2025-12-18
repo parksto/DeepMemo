@@ -77,8 +77,11 @@
 ### Corrigés en V0.7
 - [x] **Sélection dans les modales** ✅ : Impossible de sélectionner le nœud destination dans les modales d'action/symlink → **CORRIGÉ** (utilisation de `data-node-id` avec `querySelector`)
 
+### Priorité CRITIQUE
+- [ ] **⚠️ Bug perte de données - Symlinks avec noms identiques** : Créer un lien symbolique depuis un nœud vers un autre nœud portant exactement le même nom peut causer la disparition totale du contenu. **WORKAROUND** : Éviter de créer des symlinks entre nœuds de même nom. **ROOT CAUSE** : Possible utilisation de `title` au lieu de `id` pour identifier les nœuds. **FIX PRÉVU** : V0.8 avec refonte complète du système symlinks.
+
 ### Priorité haute
-- [ ] **Liens symboliques et arborescence** : Quand un lien symbolique a plusieurs niveaux d'enfants dépliés, l'arborescence peut afficher les enfants à plusieurs endroits simultanément (sous l'original ET sous le symlink). En attendant une refonte complète du système de rendu, il est recommandé de garder l'arborescence ouverte à un seul endroit à la fois.
+- [ ] **Liens symboliques et arborescence** : Quand un lien symbolique a plusieurs niveaux d'enfants dépliés, l'arborescence peut afficher les enfants à plusieurs endroits simultanément (sous l'original ET sous le symlink). En attendant une refonte complète du système de rendu (V0.8), il est recommandé de garder l'arborescence ouverte à un seul endroit à la fois.
 
 ### Priorité moyenne
 - [ ] Parfois les bordures des boutons ont un effet relief (navigateur par défaut)
@@ -121,7 +124,102 @@ DeepMemo/
 
 ---
 
-## 🚀 V0.8 - Features avancées
+## 🚀 V0.8 - Refonte Symlinks & Navigation
+
+**Objectif principal** : Refactorisation complète du système de liens symboliques pour plus de robustesse et de flexibilité.
+
+### 🔗 Refonte des Liens Symboliques (PRIORITÉ #1)
+
+**Concept** : Traiter les symlinks comme des "raccourcis Windows" - des nœuds de type spécial qui pointent vers un nœud cible.
+
+#### Architecture nouvelle
+- [ ] **Type de nœud** : Ajouter propriété `type: "node" | "symlink"` à tous les nœuds
+- [ ] **Structure symlink** :
+  ```javascript
+  {
+    id: "symlink_xxx",
+    type: "symlink",
+    title: "Titre custom du raccourci",
+    targetId: "node_abc",  // Pointe vers le nœud réel
+    parent: "node_xyz",
+    children: [],          // Toujours vide
+    created: timestamp,
+    modified: timestamp
+  }
+  ```
+- [ ] **Migration automatique** : Convertir `symlinkedIn[]` vers vrais nœuds symlink
+- [ ] **Fonction `migrateSymlinks()`** : Exécuter au `loadData()` si ancien format détecté
+- [ ] **Renommage indépendant** : Le titre du symlink n'affecte pas le nœud cible
+- [ ] **Suppression propre** : Supprimer un symlink = supprimer un nœud normal
+- [ ] **Détection cycles** : Protection anti-boucle infinie lors de la création
+- [ ] **Symlinks cassés** : Affichage grisé + icône ⚠️ si `targetId` invalide
+
+#### Rendu et UI
+- [ ] Modifier `render()` pour switch sur `node.type`
+- [ ] Afficher icône 🔗 pour les symlinks
+- [ ] Au clic : ouvrir le contenu du `targetId`, pas du symlink
+- [ ] Badge visuel distinct des nœuds normaux
+- [ ] Supprimer code complexe `isSymlinkIn()`, `symlinksInThisNode`, etc.
+
+#### Avantages
+- ✅ Symlinks = enfants normaux dans `children[]`
+- ✅ Tri et ordre naturels
+- ✅ Métadonnées propres à chaque symlink
+- ✅ Code beaucoup plus simple
+- ✅ Pas de cycles possibles (symlinks n'ont pas d'enfants)
+
+### 🌳 Arborescence Intelligente
+
+- [ ] **Auto-collapse global** : Replier tout sauf le chemin actif
+- [ ] **Déplier jusqu'au nœud actuel** : `expandPathToNode()` amélioré
+- [ ] **Focus synchronisé** : Arborescence suit la navigation
+- [ ] **Navigation clavier fluide** : Sans "téléportation" du focus
+
+### 🔗 Navigation via Liens Internes
+
+- [ ] **Sélection intelligente** : Choisir nœud original OU symlink le plus proche
+- [ ] **Distance euclidienne** : Calculer le symlink le plus proche du focus actuel
+- [ ] **Fallback sur original** : Si pas de symlink, ouvrir le nœud réel
+
+### 🔗 Système d'URL Dynamique
+
+- [ ] **Hash routing** : `#node=abc123` pour pointer vers un nœud
+- [ ] **Persistence refresh** : Rester sur le nœud actif après F5
+- [ ] **Bookmarkabilité** : URLs partageables
+- [ ] **Scope isolation** : `#scope=projects&node=abc123`
+- [ ] **Symlinks hors scope** : Grisés + désactivés
+- [ ] **Mode read-only** : Pour nœuds accessibles mais non modifiables
+
+### ⌨️ Raccourcis & UX
+
+- [ ] **Toggle view/edit** : `Alt+V` ou `Ctrl+Shift+E`
+- [ ] **Keyboard tips** : Mise à jour + déplacement en bas du right panel
+- [ ] **Modal Actions** : Déplacer bouton Supprimer dedans
+- [ ] **Masquage conditionnel** : Cacher arborescence modale si pas nécessaire
+
+### 👁️ Améliorations UI
+
+- [ ] **Breadcrumb intelligent** : `.../parent/noeud_actuel` avec niveaux de taille
+- [ ] **Tags right panel** : Ne pas dupliquer avec center panel
+- [ ] **Import/Export** : Regrouper + harmoniser styles
+- [ ] **Titre contextuel** : Adapter selon profondeur (racine, niveau 1, niveau N)
+
+### 📄 Documentation & Tests
+
+- [ ] **Audit .md files** : Cohérence et mise à jour
+- [ ] **JSDoc complet** : Documenter toutes les fonctions
+- [ ] **Guide migration** : Expliquer passage V0.7 → V0.8
+- [ ] **Tests manuels** : Checklist validation des symlinks
+
+### 🐛 Bugs Critiques à Corriger
+
+- [ ] **Bug noms identiques** : Investigation + fix (utiliser IDs partout)
+- [ ] **Références circulaires** : Protection lors création symlinks
+- [ ] **Perte de données** : Audit complet avant release
+
+---
+
+## 🌟 V0.9 - Features Avancées
 
 ### Vue liste nested
 - [ ] Les enfants deviennent le contenu principal
