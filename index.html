@@ -48,8 +48,20 @@
         <div class="breadcrumb" id="breadcrumb"></div>
 
         <div class="content-header">
-          <input type="text" class="content-title-input" id="nodeTitle"
-                 placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="text" class="content-title-input" id="nodeTitle"
+                   placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
+            <a href="#" id="shareLink" title="Partager ce nœud (clic pour copier, clic droit pour copier le lien)"
+               style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
+               onmouseover="this.style.opacity='1'"
+               onmouseout="this.style.opacity='0.6'"
+               onclick="app.shareNode(event)">🔗</a>
+            <a href="#" id="shareBranchLink" title="Partager comme branche isolée (clic pour copier, clic droit pour copier le lien)"
+               style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
+               onmouseover="this.style.opacity='1'"
+               onmouseout="this.style.opacity='0.6'"
+               onclick="app.shareBranch(event)">🌳</a>
+          </div>
           <div class="content-meta"><span id="nodeMeta"></span></div>
 
           <div class="tags-container" id="tagsContainer">

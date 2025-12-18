@@ -14,10 +14,149 @@
       actionModalExpandedNodes: new Set(), // État expand/collapse pour la modal actions
       showAllTags: false, // Afficher tous les tags du cloud
       viewMode: 'edit', // 'edit' ou 'view' (markdown rendered)
+      branchMode: false, // Mode branche isolée activé ?
+      branchRootId: null, // ID du nœud racine de la branche isolée
+      isInitializing: true, // Flag pour éviter d'écraser l'URL pendant l'init
 
       // Créer une clé unique pour une instance de nœud dans l'arbre
       getInstanceKey(nodeId, parentContext) {
         return parentContext === null ? `${nodeId}@root` : `${nodeId}@${parentContext}`;
+      },
+
+      // ===== GESTION DES URL =====
+
+      // Parser l'URL pour extraire les paramètres
+      parseURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const branchId = urlParams.get('branch');
+
+        const hash = window.location.hash;
+        let nodeId = null;
+        let view = 'edit';
+
+        if (hash.startsWith('#/node/')) {
+          const parts = hash.substring(7).split('?');
+          nodeId = parts[0];
+
+          if (parts[1]) {
+            const hashParams = new URLSearchParams(parts[1]);
+            view = hashParams.get('view') || 'edit';
+          }
+        }
+
+        return { branchId, nodeId, view };
+      },
+
+      // Mettre à jour l'URL sans recharger la page
+      updateURL(nodeId, options = {}) {
+        // Ne pas mettre à jour l'URL pendant l'initialisation
+        if (this.isInitializing) return;
+
+        const { replaceHistory = true } = options;
+
+        // Construire le hash
+        let hash = `#/node/${nodeId}`;
+        if (this.viewMode !== 'edit') {
+          hash += `?view=${this.viewMode}`;
+        }
+
+        // Construire les query params
+        let search = '';
+        if (this.branchMode && this.branchRootId) {
+          search = `?branch=${this.branchRootId}`;
+        }
+
+        const newURL = `${window.location.pathname}${search}${hash}`;
+
+        if (replaceHistory) {
+          window.history.replaceState({}, '', newURL);
+        } else {
+          window.history.pushState({}, '', newURL);
+        }
+      },
+
+      // Activer le mode branche isolée
+      enableBranchMode(nodeId) {
+        const node = this.data.nodes[nodeId];
+        if (!node) return false;
+
+        this.branchMode = true;
+        this.branchRootId = nodeId;
+
+        // S'assurer que la branche est dépliée
+        const instanceKey = this.getInstanceKey(nodeId, null);
+        this.expandedNodes.add(instanceKey);
+        localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+
+        return true;
+      },
+
+      // Vérifier si un nœud est accessible en mode branche
+      isNodeInBranch(nodeId) {
+        if (!this.branchMode) return true;
+        if (nodeId === this.branchRootId) return true;
+
+        // Remonter les parents jusqu'à trouver branchRootId
+        let current = nodeId;
+        while (current) {
+          if (current === this.branchRootId) return true;
+          const node = this.data.nodes[current];
+          if (!node) return false;
+          current = node.parent;
+        }
+
+        return false;
+      },
+
+      // Écouter les changements d'URL (boutons précédent/suivant du navigateur)
+      setupURLListener() {
+        window.addEventListener('popstate', () => {
+          const { branchId, nodeId, view } = this.parseURL();
+
+          // Changer le mode branche si nécessaire
+          if (branchId && this.data.nodes[branchId]) {
+            if (!this.branchMode || this.branchRootId !== branchId) {
+              this.enableBranchMode(branchId);
+              this.render(); // Re-render l'arborescence
+            }
+          } else if (this.branchMode) {
+            // Désactiver le mode branche
+            this.branchMode = false;
+            this.branchRootId = null;
+            this.render();
+          }
+
+          // Changer le mode view si nécessaire
+          if (view && view !== this.viewMode) {
+            this.viewMode = view;
+            this.updateViewMode();
+          }
+
+          // Naviguer vers le nœud
+          if (nodeId && this.data.nodes[nodeId] && this.isNodeInBranch(nodeId)) {
+            this.selectNode(nodeId);
+          }
+        });
+
+        // Écouter aussi les changements de hash sans popstate
+        window.addEventListener('hashchange', (e) => {
+          // Éviter de traiter si c'est déjà géré par popstate
+          if (e.oldURL && e.newURL && e.oldURL !== e.newURL) {
+            const { nodeId, view } = this.parseURL();
+
+            if (view && view !== this.viewMode) {
+              this.viewMode = view;
+              this.updateViewMode();
+            }
+
+            if (nodeId && this.data.nodes[nodeId] && this.isNodeInBranch(nodeId)) {
+              // Ne pas appeler selectNode si on est déjà sur ce nœud
+              if (this.currentNodeId !== nodeId) {
+                this.selectNode(nodeId);
+              }
+            }
+          }
+        });
       },
 
       init() {
@@ -46,53 +185,100 @@
         if (this.data.rootNodes.length > 0) {
           this.updateBacklinks();
         }
+
+        // Créer les exemples si nécessaire
+        if (this.data.rootNodes.length === 0) {
+          this.createExampleNodes();
+        }
+
+        // Parser l'URL pour déterminer le nœud à afficher
+        const { branchId, nodeId, view } = this.parseURL();
+
+        // Activer le mode branche si demandé
+        if (branchId && this.data.nodes[branchId]) {
+          this.enableBranchMode(branchId);
+        }
+
+        // Appliquer le mode view depuis l'URL (priorité sur localStorage)
+        if (view) {
+          this.viewMode = view;
+        }
+
+        // Render initial
         this.render();
         this.updateNodeCounter();
         this.setupKeyboardShortcuts();
         this.setupSidebarResizer();
-        if (this.data.rootNodes.length === 0) {
-          this.createExampleNodes();
+        this.setupURLListener();
+
+        // Sélectionner le nœud cible
+        let targetNode = null;
+
+        // 1. Si un nodeId est dans l'URL, l'utiliser
+        if (nodeId && this.data.nodes[nodeId]) {
+          // Vérifier que le nœud est accessible en mode branche
+          if (this.isNodeInBranch(nodeId)) {
+            targetNode = nodeId;
+          }
         }
-        // Sélectionner le premier nœud racine automatiquement
-        if (this.data.rootNodes.length > 0) {
-          this.selectNode(this.data.rootNodes[0]);
+
+        // 2. Sinon, sélectionner le premier nœud disponible
+        if (!targetNode) {
+          const availableRoots = this.branchMode
+            ? [this.branchRootId]
+            : this.data.rootNodes;
+
+          if (availableRoots.length > 0) {
+            targetNode = availableRoots[0];
+          }
         }
+
+        // Sélectionner le nœud
+        if (targetNode) {
+          this.selectNode(targetNode);
+        }
+
+        // Fin de l'initialisation
+        this.isInitializing = false;
       },
 
       createExampleNodes() {
         const w = this.generateId(), n1 = this.generateId(), n2 = this.generateId();
-        this.data.nodes[w] = { 
-          id: w, 
-          title: '👋 Bienvenue', 
-          content: 'Bienvenue dans DeepMemo !\n\nUtilise Ctrl+K pour rechercher.\n\nTu peux créer des liens : [[📝 Notes]] et [[💡 Idées]]', 
-          children: [n1, n2], 
-          parent: null, 
-          created: Date.now(), 
-          modified: Date.now(), 
+        this.data.nodes[w] = {
+          id: w,
+          type: 'node',
+          title: '👋 Bienvenue',
+          content: 'Bienvenue dans DeepMemo !\n\nUtilise Ctrl+K pour rechercher.\n\nTu peux créer des liens : [[📝 Notes]] et [[💡 Idées]]',
+          children: [n1, n2],
+          parent: null,
+          created: Date.now(),
+          modified: Date.now(),
           links: ['📝 Notes', '💡 Idées'],
           backlinks: [],
           tags: ['bienvenue', 'guide']
         };
-        this.data.nodes[n1] = { 
-          id: n1, 
-          title: '📝 Notes', 
-          content: 'Tes notes ici...\n\nRetour vers [[👋 Bienvenue]]', 
-          children: [], 
-          parent: w, 
-          created: Date.now(), 
-          modified: Date.now(), 
+        this.data.nodes[n1] = {
+          id: n1,
+          type: 'node',
+          title: '📝 Notes',
+          content: 'Tes notes ici...\n\nRetour vers [[👋 Bienvenue]]',
+          children: [],
+          parent: w,
+          created: Date.now(),
+          modified: Date.now(),
           links: ['👋 Bienvenue'],
           backlinks: [w],
           tags: ['note', 'exemple']
         };
-        this.data.nodes[n2] = { 
-          id: n2, 
-          title: '💡 Idées', 
-          content: 'Tes idées ici...\n\nVoir aussi [[📝 Notes]]', 
-          children: [], 
-          parent: w, 
-          created: Date.now(), 
-          modified: Date.now(), 
+        this.data.nodes[n2] = {
+          id: n2,
+          type: 'node',
+          title: '💡 Idées',
+          content: 'Tes idées ici...\n\nVoir aussi [[📝 Notes]]',
+          children: [],
+          parent: w,
+          created: Date.now(),
+          modified: Date.now(),
           links: ['📝 Notes'],
           backlinks: [w],
           tags: ['idée', 'brainstorming']
@@ -244,7 +430,52 @@
             break;
           case 'ArrowLeft':
             e.preventDefault();
-            this.collapseTreeNode(this.focusedInstanceKey);
+            // Si le nœud est déjà replié ou n'a pas d'enfants, remonter au parent
+            const element = document.querySelector(`[data-instance-key="${this.focusedInstanceKey}"]`);
+            const treeNode = element?.closest('.tree-node');
+            const isExpanded = treeNode?.classList.contains('expanded');
+            const node = this.data.nodes[nodeId];
+            const displayNode = node?.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+            const hasChildren = displayNode && displayNode.children.length > 0;
+
+            if (isExpanded && hasChildren) {
+              // Si le nœud est ouvert et a des enfants, le replier
+              this.collapseTreeNode(this.focusedInstanceKey);
+            } else if (node?.parent !== undefined && node.parent !== null) {
+              // Sinon, remonter au parent
+              // L'instance key a le format: nodeId@parentContext
+              // Par exemple: "child@parent@root" ou "child@parent@grandparent@root"
+              const atIndex = this.focusedInstanceKey.indexOf('@');
+              if (atIndex === -1) {
+                // Pas de parent (nœud racine), ne rien faire
+                break;
+              }
+
+              const parentContext = this.focusedInstanceKey.substring(atIndex + 1);
+
+              if (parentContext === 'root') {
+                // Le parent est la racine (nœud de niveau 1), ne rien faire
+                break;
+              }
+
+              // Extraire le parent ID du contexte
+              // parentContext peut être "parent@root" ou "parent@grandparent@root"
+              const parentAtIndex = parentContext.indexOf('@');
+              let parentInstanceKey;
+
+              if (parentAtIndex === -1) {
+                // Cas impossible normalement, mais par sécurité
+                parentInstanceKey = this.getInstanceKey(node.parent, null);
+              } else {
+                const parentId = parentContext.substring(0, parentAtIndex);
+                const grandParentContext = parentContext.substring(parentAtIndex + 1);
+                parentInstanceKey = this.getInstanceKey(parentId, grandParentContext === 'root' ? null : grandParentContext);
+              }
+
+              this.focusedInstanceKey = parentInstanceKey;
+              this.updateTreeFocus();
+              this.scrollTreeNodeIntoView(this.focusedInstanceKey);
+            }
             break;
           case 'Enter':
             e.preventDefault();
@@ -262,48 +493,69 @@
           const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
 
           // Vérifier si ce nœud est réellement visible (rendu dans le DOM)
-          // Un nœud n'est visible que si son élément existe et n'est pas caché
           if (!element) return;
 
           visible.push(instanceKey);
 
           const parent = element?.closest('.tree-node');
 
-          // Trouver les symlinks dans ce nœud
-          const symlinksInThisNode = [];
-          Object.values(this.data.nodes).forEach(n => {
-            if (n.symlinkedIn && n.symlinkedIn.includes(nodeId)) {
-              symlinksInThisNode.push(n.id);
-            }
-          });
-
-          const hasChildren = node.children.length > 0 || symlinksInThisNode.length > 0;
+          // Pour les symlinks, afficher les enfants du nœud cible
+          const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+          const hasChildren = displayNode && displayNode.children.length > 0;
 
           if (hasChildren && parent?.classList.contains('expanded')) {
-            // Traverser les enfants directs
-            node.children.forEach(childId => traverse(childId, nodeId, false));
-            // Traverser les symlinks
-            symlinksInThisNode.forEach(symlinkId => traverse(symlinkId, nodeId, false));
+            // Traverser les enfants
+            displayNode.children.forEach(childId => traverse(childId, instanceKey, false));
           }
         };
 
+        // Parcourir tous les nœuds racines (y compris les symlinks à la racine)
         this.data.rootNodes.forEach(nodeId => traverse(nodeId, null, true));
-
-        // Ajouter les symlinks à la racine
-        Object.values(this.data.nodes).forEach(node => {
-          if (node.symlinkedIn && node.symlinkedIn.includes(null)) {
-            traverse(node.id, null, true);
-          }
-        });
 
         return visible;
       },
 
       updateTreeFocus() {
         document.querySelectorAll('.tree-node-content').forEach(el => el.classList.remove('focused'));
+
+        // Si focusedInstanceKey n'est pas défini mais qu'on a un currentNodeId,
+        // trouver la première instance visible du nœud
+        if (!this.focusedInstanceKey && this.currentNodeId) {
+          const elements = document.querySelectorAll(`[data-node-id="${this.currentNodeId}"]`);
+          if (elements.length > 0) {
+            const instanceKey = elements[0].getAttribute('data-instance-key');
+            if (instanceKey) {
+              this.focusedInstanceKey = instanceKey;
+            }
+          }
+        }
+
         if (this.focusedInstanceKey) {
           const element = document.querySelector(`[data-instance-key="${this.focusedInstanceKey}"]`);
           if (element) element.classList.add('focused');
+        }
+      },
+
+      updateTreeActive() {
+        document.querySelectorAll('.tree-node-content').forEach(el => el.classList.remove('active'));
+
+        // Si currentInstanceKey n'est pas défini mais qu'on a un currentNodeId,
+        // trouver la première instance visible du nœud
+        if (!this.currentInstanceKey && this.currentNodeId) {
+          const elements = document.querySelectorAll(`[data-node-id="${this.currentNodeId}"]`);
+          if (elements.length > 0) {
+            const instanceKey = elements[0].getAttribute('data-instance-key');
+            if (instanceKey) {
+              this.currentInstanceKey = instanceKey;
+            }
+          }
+        }
+
+        if (this.currentInstanceKey) {
+          const element = document.querySelector(`[data-instance-key="${this.currentInstanceKey}"]`);
+          if (element) {
+            element.classList.add('active');
+          }
         }
       },
 
@@ -316,7 +568,7 @@
       expandPathToNode(nodeId) {
         const path = [];
         let currentId = nodeId;
-        
+
         // Collecter tous les parents
         while (currentId) {
           const node = this.data.nodes[currentId];
@@ -327,12 +579,67 @@
             currentId = node.parent;
           } else break;
         }
-        
+
         // Déplier tous les nœuds du chemin
         path.forEach(id => {
           this.expandedNodes.add(id);
         });
-        
+
+        // Sauvegarder
+        localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+      },
+
+      // Auto-collapse : replier toute l'arborescence sauf le chemin vers le nœud actif
+      autoCollapseTree() {
+        if (!this.currentInstanceKey) return;
+
+        // Construire le chemin en utilisant currentInstanceKey
+        // Format: "nodeId@parent@grandparent@root"
+        const pathInstanceKeys = new Set();
+
+        // Parser currentInstanceKey pour extraire tous les nœuds du chemin
+        const parts = this.currentInstanceKey.split('@');
+
+        // Exemple: "child@parent@root" -> parts = ["child", "parent", "root"]
+        // On doit créer les instance keys:
+        // - "parent@root" (parent au niveau racine)
+        // - "child@parent@root" (le nœud actif)
+
+        // Construire les instance keys du chemin en partant de la racine
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const nodeId = parts[i];
+          if (nodeId === 'root') continue; // Ignorer 'root'
+
+          // Construire le contexte parent pour cette instance
+          // Si i = parts.length - 2, context = null (nœud de niveau 1)
+          // Sinon, context = tous les parts après i+1
+          let context = null;
+          if (i < parts.length - 2) {
+            // Il y a des parents au-dessus
+            context = parts.slice(i + 1).join('@');
+          }
+
+          const instanceKey = this.getInstanceKey(nodeId, context);
+          pathInstanceKeys.add(instanceKey);
+        }
+
+        // Récupérer le nœud actif et vérifier s'il a des enfants
+        const currentNodeId = parts[0];
+        const currentNode = this.data.nodes[currentNodeId];
+
+        // Si c'est un symlink, obtenir le nœud cible pour vérifier les enfants
+        const displayNode = currentNode && currentNode.type === 'symlink'
+          ? this.data.nodes[currentNode.targetId]
+          : currentNode;
+
+        // Ajouter le nœud actif lui-même s'il a des enfants
+        if (displayNode && displayNode.children && displayNode.children.length > 0) {
+          pathInstanceKeys.add(this.currentInstanceKey);
+        }
+
+        // Remplacer expandedNodes par seulement les nœuds du chemin
+        this.expandedNodes = pathInstanceKeys;
+
         // Sauvegarder
         localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
       },
@@ -588,15 +895,23 @@
       createRootNode() {
         const id = this.generateId();
         this.data.nodes[id] = {
-          id, title: 'Nouveau nœud', content: '', children: [], parent: null,
-          created: Date.now(), modified: Date.now(), links: [], tags: []
+          id,
+          type: 'node',
+          title: 'Nouveau nœud',
+          content: '',
+          children: [],
+          parent: null,
+          created: Date.now(),
+          modified: Date.now(),
+          links: [],
+          tags: []
         };
         this.data.rootNodes.push(id);
         this.saveData();
         this.render();
         this.selectNode(id);
         this.updateNodeCounter();
-        
+
         // Auto-select le titre pour saisie immédiate
         setTimeout(() => {
           const titleInput = document.getElementById('nodeTitle');
@@ -611,8 +926,16 @@
         if (!this.currentNodeId) return;
         const id = this.generateId();
         this.data.nodes[id] = {
-          id, title: 'Nouvel enfant', content: '', children: [], parent: this.currentNodeId,
-          created: Date.now(), modified: Date.now(), links: [], tags: []
+          id,
+          type: 'node',
+          title: 'Nouvel enfant',
+          content: '',
+          children: [],
+          parent: this.currentNodeId,
+          created: Date.now(),
+          modified: Date.now(),
+          links: [],
+          tags: []
         };
         this.data.nodes[this.currentNodeId].children.push(id);
         this.saveData();
@@ -620,7 +943,7 @@
         this.updateChildren(); // Rafraîchir la liste des enfants
         this.selectNode(id);
         this.updateNodeCounter();
-        
+
         // Auto-select le titre pour saisie immédiate
         setTimeout(() => {
           const titleInput = document.getElementById('nodeTitle');
@@ -632,29 +955,62 @@
       },
 
       selectNode(id) {
+        // Gérer les symlinks : afficher le contenu du nœud cible
+        const node = this.data.nodes[id];
+        if (!node) return;
+
+        // Mémoriser l'ID sélectionné (peut être un symlink)
         this.currentNodeId = id;
         this.focusedTreeNodeId = id;
-        const node = this.data.nodes[id];
+
+        // Note: currentInstanceKey et focusedInstanceKey peuvent déjà être définis
+        // par le onclick handler dans render(). Dans ce cas, on les garde tels quels.
+        // Si ils ne sont pas définis (appel direct à selectNode), on les définira
+        // après le render() dans updateTreeActive() et updateTreeFocus()
+
+        // Pour les symlinks, obtenir le nœud cible pour afficher son contenu
+        const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+        if (!displayNode) {
+          // Symlink cassé - permettre quand même la sélection pour pouvoir le supprimer
+          document.getElementById('emptyState').style.display = 'none';
+          document.getElementById('editorContainer').style.display = 'flex';
+
+          document.getElementById('nodeTitle').value = node.title + ' (CASSÉ)';
+          const contentEditor = document.getElementById('nodeContent');
+          contentEditor.value = '⚠️ Ce lien symbolique pointe vers un nœud qui n\'existe plus.\n\nVous pouvez supprimer ce lien cassé.';
+          contentEditor.disabled = true;
+
+          this.updateBreadcrumb();
+          this.updateRightPanel();
+          this.updateDeleteButton();
+          this.render();
+          this.showToast('Lien symbolique cassé', '⚠️');
+          return;
+        }
+
+        // Réactiver l'éditeur si il était désactivé
+        document.getElementById('nodeContent').disabled = false;
 
         document.getElementById('emptyState').style.display = 'none';
         document.getElementById('editorContainer').style.display = 'flex';
 
-        document.getElementById('nodeTitle').value = node.title;
+        // Afficher le titre et le contenu du nœud cible (ou du nœud normal)
+        document.getElementById('nodeTitle').value = displayNode.title;
         const contentEditor = document.getElementById('nodeContent');
-        contentEditor.value = node.content;
+        contentEditor.value = displayNode.content || '';
 
         // Auto-resize du textarea
         this.autoResizeTextarea(contentEditor);
 
         document.getElementById('nodeMeta').textContent =
-          `Créé: ${new Date(node.created).toLocaleDateString()}`;
+          `Créé: ${new Date(displayNode.created).toLocaleDateString()}`;
 
         // Afficher le preview avec liens cliquables si le contenu contient des liens
         const preview = document.getElementById('contentPreview');
-        if (node.content && node.content.includes('[[')) {
+        if (displayNode.content && displayNode.content.includes('[[')) {
           preview.style.display = 'block';
           preview.innerHTML = '<strong>🔎 Aperçu avec liens :</strong><br><br>' +
-            this.renderContentWithLinks(node.content).replace(/\n/g, '<br>');
+            this.renderContentWithLinks(displayNode.content).replace(/\n/g, '<br>');
         } else {
           preview.style.display = 'none';
         }
@@ -669,7 +1025,95 @@
         this.updateActionsButton();
         this.renderTags();
         this.updateViewMode(); // Mettre à jour le mode view/edit
+
+        // Auto-collapse : replier toute l'arborescence sauf le chemin actif
+        this.autoCollapseTree();
+
         this.render();
+        this.updateTreeFocus(); // Appliquer la classe focused (outline) après le render
+        this.updateTreeActive(); // Appliquer la classe active (fond bleu) après le render
+
+        // Mettre à jour l'URL
+        this.updateURL(id);
+
+        // Mettre à jour le lien de partage
+        this.updateShareLink();
+
+        // Auto-scroll pour garder le nœud actif visible
+        setTimeout(() => {
+          this.scrollTreeNodeIntoView(this.currentInstanceKey);
+        }, 50);
+      },
+
+      // Mettre à jour le lien de partage
+      updateShareLink() {
+        const shareLink = document.getElementById('shareLink');
+        if (!shareLink || !this.currentNodeId) return;
+
+        // Construire l'URL complète
+        const baseURL = window.location.origin + window.location.pathname;
+        let search = '';
+        if (this.branchMode && this.branchRootId) {
+          search = `?branch=${this.branchRootId}`;
+        }
+        let hash = `#/node/${this.currentNodeId}`;
+        if (this.viewMode !== 'edit') {
+          hash += `?view=${this.viewMode}`;
+        }
+
+        const fullURL = baseURL + search + hash;
+        shareLink.href = fullURL;
+
+        // Mettre à jour également le lien de branche
+        this.updateShareBranchLink();
+      },
+
+      // Mettre à jour le lien de partage de branche
+      updateShareBranchLink() {
+        const shareBranchLink = document.getElementById('shareBranchLink');
+        if (!shareBranchLink || !this.currentNodeId) return;
+
+        // Construire l'URL de branche isolée
+        const baseURL = window.location.origin + window.location.pathname;
+        let hash = `#/node/${this.currentNodeId}`;
+        if (this.viewMode !== 'edit') {
+          hash += `?view=${this.viewMode}`;
+        }
+
+        const fullURL = `${baseURL}?branch=${this.currentNodeId}${hash}`;
+        shareBranchLink.href = fullURL;
+      },
+
+      // Partager le nœud (copier l'URL dans le presse-papier)
+      shareNode(event) {
+        event.preventDefault();
+
+        const shareLink = document.getElementById('shareLink');
+        const url = shareLink.href;
+
+        // Copier dans le presse-papier
+        navigator.clipboard.writeText(url).then(() => {
+          this.showToast('Lien copié dans le presse-papier', '📋');
+        }).catch(() => {
+          // Fallback si clipboard API n'est pas disponible
+          this.showToast('Lien disponible via clic droit', '🔗');
+        });
+      },
+
+      // Partager la branche (copier l'URL de branche dans le presse-papier)
+      shareBranch(event) {
+        event.preventDefault();
+
+        const shareBranchLink = document.getElementById('shareBranchLink');
+        const url = shareBranchLink.href;
+
+        // Copier dans le presse-papier
+        navigator.clipboard.writeText(url).then(() => {
+          this.showToast('Lien de branche copié dans le presse-papier', '🌳');
+        }).catch(() => {
+          // Fallback si clipboard API n'est pas disponible
+          this.showToast('Lien disponible via clic droit', '🌳');
+        });
       },
 
       // Auto-resize du textarea selon son contenu et l'espace disponible
@@ -745,15 +1189,14 @@
         const section = document.getElementById('childrenSection');
         const grid = document.getElementById('childrenGrid');
 
-        // Trouver les symlinks qui pointent vers ce nœud
-        const symlinks = [];
-        Object.values(this.data.nodes).forEach(n => {
-          if (n.symlinkedIn && n.symlinkedIn.includes(this.currentNodeId)) {
-            symlinks.push(n.id);
-          }
-        });
+        // Pour les symlinks, afficher les enfants du nœud cible
+        const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+        if (!displayNode) {
+          section.style.display = 'none';
+          return;
+        }
 
-        const totalChildren = node.children.length + symlinks.length;
+        const totalChildren = displayNode.children.length;
 
         if (totalChildren === 0) {
           section.style.display = 'none';
@@ -764,17 +1207,43 @@
         document.getElementById('childrenCount').textContent = totalChildren;
 
         grid.innerHTML = '';
-        
-        // Afficher les enfants réels
-        node.children.forEach(childId => {
+
+        // Afficher tous les enfants (nœuds réguliers + symlinks)
+        displayNode.children.forEach(childId => {
           const child = this.data.nodes[childId];
-          const icon = child.children.length > 0 ? '📂' : '📄';
-          const preview = child.content.substring(0, 50) || 'Vide';
-          
+          if (!child) return;
+
+          const isSymlink = child.type === 'symlink';
+          const displayNode = isSymlink ? this.data.nodes[child.targetId] : child;
+
+          if (!displayNode) {
+            // Symlink cassé
+            const card = document.createElement('div');
+            card.className = 'child-card broken-symlink';
+            card.style.opacity = '0.5';
+            card.innerHTML = `
+              <div class="child-card-icon">⚠️</div>
+              <div class="child-card-title">${child.title} (cassé)</div>
+              <div class="child-card-preview">Lien symbolique cassé</div>
+            `;
+            grid.appendChild(card);
+            return;
+          }
+
+          const icon = isSymlink ? '🔗' : (displayNode.children.length > 0 ? '📂' : '📄');
+          const preview = displayNode.content?.substring(0, 50) || 'Vide';
+
           const card = document.createElement('div');
-          card.className = 'child-card';
-          card.onclick = () => this.selectNode(childId);
-          
+          card.className = isSymlink ? 'child-card symlink-card' : 'child-card';
+          if (isSymlink) {
+            card.style.border = '1px dashed var(--accent)';
+            card.style.opacity = '0.9';
+          }
+
+          // Pour les symlinks, cliquer ouvre le nœud cible
+          const targetId = isSymlink ? child.targetId : childId;
+          card.onclick = () => this.selectNode(targetId);
+
           // Drag & Drop
           card.setAttribute('draggable', 'true');
           card.addEventListener('dragstart', (e) => this.handleDragStart(e, childId));
@@ -782,42 +1251,16 @@
           card.addEventListener('dragover', (e) => this.handleDragOver(e));
           card.addEventListener('dragleave', (e) => this.handleDragLeave(e));
           card.addEventListener('drop', (e) => this.handleDrop(e, childId));
-          
-          card.innerHTML = `
-            <div class="child-card-icon">${icon}</div>
-            <div class="child-card-title">${child.title}</div>
-            <div class="child-card-preview">${preview}</div>
-          `;
-          
-          grid.appendChild(card);
-        });
 
-        // Afficher les symlinks
-        symlinks.forEach(symlinkId => {
-          const child = this.data.nodes[symlinkId];
-          const icon = '🔗'; // Icône spéciale pour les symlinks
-          const preview = child.content.substring(0, 50) || 'Vide';
-          
-          const card = document.createElement('div');
-          card.className = 'child-card symlink-card';
-          card.style.border = '1px dashed var(--accent)';
-          card.style.opacity = '0.9';
-          card.onclick = () => this.selectNode(symlinkId);
-          
-          // Drag & Drop
-          card.setAttribute('draggable', 'true');
-          card.addEventListener('dragstart', (e) => this.handleDragStart(e, symlinkId));
-          card.addEventListener('dragend', (e) => this.handleDragEnd(e));
-          card.addEventListener('dragover', (e) => this.handleDragOver(e));
-          card.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-          card.addEventListener('drop', (e) => this.handleDrop(e, symlinkId));
-          
+          const titleStyle = isSymlink ? 'font-style: italic;' : '';
+          const badge = isSymlink ? ' <span class="symlink-badge">lien</span>' : '';
+
           card.innerHTML = `
             <div class="child-card-icon">${icon}</div>
-            <div class="child-card-title" style="font-style: italic;">${child.title} <span class="symlink-badge">lien</span></div>
+            <div class="child-card-title" style="${titleStyle}">${child.title}${badge}</div>
             <div class="child-card-preview">${preview}</div>
           `;
-          
+
           grid.appendChild(card);
         });
       },
@@ -826,19 +1269,32 @@
         const node = this.data.nodes[this.currentNodeId];
         const panel = document.getElementById('panelBody');
 
+        // Pour les symlinks, afficher les infos du nœud cible
+        const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+        if (!displayNode) {
+          panel.innerHTML = '<div class="info-section"><h3>⚠️ Lien cassé</h3></div>';
+          return;
+        }
+
         let html = '<div class="info-section"><h3>Structure</h3>';
-        html += `<div class="info-item"><div class="info-label">Enfants</div>${node.children.length} nœud(s)</div>`;
-        
+        html += `<div class="info-item"><div class="info-label">Enfants</div>${displayNode.children.length} nœud(s)</div>`;
+
         if (node.parent) {
           const parentNode = this.data.nodes[node.parent];
           html += `<div class="info-item"><div class="info-label">Parent</div>${parentNode.title}</div>`;
         }
+
+        // Si c'est un symlink, montrer aussi le nœud cible
+        if (node.type === 'symlink') {
+          html += `<div class="info-item"><div class="info-label">🔗 Pointe vers</div>${displayNode.title}</div>`;
+        }
+
         html += '</div>';
 
         // Section Liens
         html += '<div class="info-section"><h3>🔗 Liens</h3>';
-        if (node.links && node.links.length > 0) {
-          node.links.forEach(linkTitle => {
+        if (displayNode.links && displayNode.links.length > 0) {
+          displayNode.links.forEach(linkTitle => {
             const targetNode = this.findNodeByTitle(linkTitle);
             if (targetNode) {
               html += `<div class="info-item link-item" onclick="app.selectNode('${targetNode.id}')" title="Cliquer pour ouvrir">
@@ -855,8 +1311,8 @@
 
         // Section Backlinks
         html += '<div class="info-section"><h3>⬅️ Mentionné dans</h3>';
-        if (node.backlinks && node.backlinks.length > 0) {
-          node.backlinks.forEach(backlinkId => {
+        if (displayNode.backlinks && displayNode.backlinks.length > 0) {
+          displayNode.backlinks.forEach(backlinkId => {
             const sourceNode = this.data.nodes[backlinkId];
             if (sourceNode) {
               html += `<div class="info-item link-item" onclick="app.selectNode('${backlinkId}')" title="Cliquer pour ouvrir">
@@ -869,27 +1325,25 @@
         }
         html += '</div>';
 
-        // Section Symlinks
+        // Section Symlinks - Trouver les symlinks qui pointent vers le nœud affiché
         html += '<div class="info-section"><h3>🔗 Liens symboliques</h3>';
-        if (node.symlinkedIn && node.symlinkedIn.length > 0) {
-          html += '<div class="info-label">Ce nœud apparait aussi dans :</div>';
-          node.symlinkedIn.forEach(parentId => {
-            if (parentId === null) {
-              html += `<div class="info-item" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <span>🏠 Racine</span>
-                <button class="btn btn-danger" style="padding: 2px 6px; font-size: 11px; width: auto; min-width: 24px;" onclick="event.stopPropagation(); app.removeSymlink(null)" title="Supprimer ce lien">✕</button>
-              </div>`;
-            } else {
-              const parentNode = this.data.nodes[parentId];
-              if (parentNode) {
-                html += `<div class="info-item" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                  <span class="link-item" onclick="app.selectNode('${parentId}')" style="flex: 1; cursor: pointer;" title="Cliquer pour ouvrir">
-                    📂 ${parentNode.title}
-                  </span>
-                  <button class="btn btn-danger" style="padding: 2px 6px; font-size: 11px; width: auto; min-width: 24px;" onclick="event.stopPropagation(); app.removeSymlink('${parentId}')" title="Supprimer ce lien">✕</button>
-                </div>`;
-              }
-            }
+        // Si on affiche un symlink, chercher les symlinks vers le nœud cible
+        const targetId = node.type === 'symlink' ? node.targetId : this.currentNodeId;
+        const symlinksToThisNode = Object.values(this.data.nodes).filter(n =>
+          n.type === 'symlink' && n.targetId === targetId
+        );
+
+        if (symlinksToThisNode.length > 0) {
+          html += '<div class="info-label">Ce nœud est référencé par :</div>';
+          symlinksToThisNode.forEach(symlink => {
+            const parentNode = symlink.parent === null ? null : this.data.nodes[symlink.parent];
+            const locationText = parentNode ? `📂 ${parentNode.title}` : '🏠 Racine';
+
+            html += `<div class="info-item" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <span class="link-item" onclick="app.selectNode('${symlink.id}')" style="flex: 1; cursor: pointer;" title="Cliquer pour ouvrir">
+                ${locationText} → ${symlink.title}
+              </span>
+            </div>`;
           });
         } else {
           html += '<div class="info-item" style="opacity: 0.5;">Aucun lien symbolique</div>';
@@ -898,10 +1352,10 @@
 
         // Section Tags
         html += '<div class="info-section"><h3>🏷️ Tags</h3>';
-        if (node.tags && node.tags.length > 0) {
-          node.tags.forEach(tag => {
+        if (displayNode.tags && displayNode.tags.length > 0) {
+          displayNode.tags.forEach(tag => {
             const escapedTag = this.escapeHtml(tag);
-            html += `<div class="info-item link-item" 
+            html += `<div class="info-item link-item"
                           onclick="app.openSearch('${escapedTag}')"
                           style="cursor: pointer;"
                           title="Cliquer pour rechercher ce tag">
@@ -974,8 +1428,9 @@
         html += '</div>';
 
         html += '<div class="info-section"><h3>Statistiques</h3>';
-        html += `<div class="info-item"><div class="info-label">Caractères</div>${node.content.length}</div>`;
-        html += `<div class="info-item"><div class="info-label">Mots</div>${node.content.split(/\s+/).filter(w => w).length}</div>`;
+        const content = displayNode.content || '';
+        html += `<div class="info-item"><div class="info-label">Caractères</div>${content.length}</div>`;
+        html += `<div class="info-item"><div class="info-label">Mots</div>${content.split(/\s+/).filter(w => w).length}</div>`;
         html += '</div>';
 
         panel.innerHTML = html;
@@ -984,16 +1439,34 @@
       saveCurrentNode() {
         if (!this.currentNodeId) return;
         const node = this.data.nodes[this.currentNodeId];
-        node.title = document.getElementById('nodeTitle').value;
-        node.content = document.getElementById('nodeContent').value;
-        node.modified = Date.now();
-        
-        // Parser les liens dans le contenu
-        node.links = this.parseLinks(node.content);
-        
+
+        if (node.type === 'symlink') {
+          // Pour un symlink : sauvegarder le titre sur le symlink lui-même
+          node.title = document.getElementById('nodeTitle').value;
+          node.modified = Date.now();
+
+          // Sauvegarder le contenu sur le nœud cible
+          const targetNode = this.data.nodes[node.targetId];
+          if (targetNode) {
+            targetNode.content = document.getElementById('nodeContent').value;
+            targetNode.modified = Date.now();
+
+            // Parser les liens dans le contenu
+            targetNode.links = this.parseLinks(targetNode.content);
+          }
+        } else {
+          // Pour un nœud normal : sauvegarder titre et contenu normalement
+          node.title = document.getElementById('nodeTitle').value;
+          node.content = document.getElementById('nodeContent').value;
+          node.modified = Date.now();
+
+          // Parser les liens dans le contenu
+          node.links = this.parseLinks(node.content);
+        }
+
         // Mettre à jour tous les backlinks
         this.updateBacklinks();
-        
+
         this.saveData();
         this.render();
         this.updateBreadcrumb();
@@ -1002,27 +1475,57 @@
       },
 
       deleteCurrentNode() {
-        if (!this.currentNodeId || !confirm('Supprimer ce nœud et tous ses enfants ?')) return;
-
-        const deleteRecursive = (id) => {
-          const node = this.data.nodes[id];
-          node.children.forEach(childId => deleteRecursive(childId));
-          delete this.data.nodes[id];
-        };
-
         const node = this.data.nodes[this.currentNodeId];
-        const wasChild = !!node.parent; // Mémoriser si c'était un enfant
-        const parentId = node.parent;
-        
-        if (node.parent) {
-          const parent = this.data.nodes[node.parent];
-          parent.children = parent.children.filter(id => id !== this.currentNodeId);
+        if (!node) return;
+
+        // Message différent pour les symlinks
+        const isSymlink = node.type === 'symlink';
+        const confirmMessage = isSymlink
+          ? 'Supprimer ce lien symbolique ?'
+          : 'Supprimer ce nœud et tous ses enfants ?';
+
+        if (!confirm(confirmMessage)) return;
+
+        // Si c'est un symlink, on supprime juste le symlink (pas le nœud cible)
+        if (isSymlink) {
+          // Retirer des enfants du parent
+          if (node.parent) {
+            const parent = this.data.nodes[node.parent];
+            parent.children = parent.children.filter(id => id !== this.currentNodeId);
+          } else {
+            this.data.rootNodes = this.data.rootNodes.filter(id => id !== this.currentNodeId);
+          }
+
+          // Supprimer juste le symlink
+          delete this.data.nodes[this.currentNodeId];
+
+          this.showToast('Lien symbolique supprimé', '🔗');
         } else {
-          this.data.rootNodes = this.data.rootNodes.filter(id => id !== this.currentNodeId);
+          // Suppression récursive normale pour les nœuds
+          const deleteRecursive = (id) => {
+            const n = this.data.nodes[id];
+            n.children.forEach(childId => deleteRecursive(childId));
+            delete this.data.nodes[id];
+          };
+
+          const wasChild = !!node.parent;
+          const parentId = node.parent;
+
+          if (node.parent) {
+            const parent = this.data.nodes[node.parent];
+            parent.children = parent.children.filter(id => id !== this.currentNodeId);
+          } else {
+            this.data.rootNodes = this.data.rootNodes.filter(id => id !== this.currentNodeId);
+          }
+
+          deleteRecursive(this.currentNodeId);
+
         }
 
-        deleteRecursive(this.currentNodeId);
-        
+        // Navigation après suppression
+        const wasChild = !!node.parent;
+        const parentId = node.parent;
+
         // Si on supprime un enfant, sélectionner le parent
         if (wasChild && parentId && this.data.nodes[parentId]) {
           this.selectNode(parentId);
@@ -1035,8 +1538,6 @@
         this.saveData();
         this.render();
         this.updateNodeCounter();
-
-        this.showToast('Nœud supprimé', '🗑️');
       },
 
       // Mettre à jour le bouton supprimer selon le contexte
@@ -1074,22 +1575,6 @@
         });
       },
 
-      // Supprimer uniquement un lien symbolique
-      removeSymlink(parentId) {
-        if (!this.currentNodeId) return;
-
-        const node = this.data.nodes[this.currentNodeId];
-        if (!node.symlinkedIn) return;
-
-        // Retirer le parent de la liste des symlinks
-        node.symlinkedIn = node.symlinkedIn.filter(id => id !== parentId);
-
-        this.saveData();
-        this.render();
-        this.updateChildren(); // Rafraîchir la liste des enfants
-        this.updateRightPanel();
-        this.showToast('Lien symbolique supprimé', '🔗');
-      },
 
       render() {
         const container = document.getElementById('treeContainer');
@@ -1097,14 +1582,75 @@
 
         const renderNode = (nodeId, parentContext = null) => {
           const node = this.data.nodes[nodeId];
+          if (!node) return null;
 
-          // Si parentContext est une instance key (contient @), extraire le vrai nodeId parent
-          let actualParentNodeId = parentContext;
-          if (parentContext && parentContext.includes('@')) {
-            actualParentNodeId = parentContext.split('@')[0];
+          // Déterminer le type de nœud
+          const isSymlink = node.type === 'symlink';
+
+          // DÉTECTION DE CYCLE : Si c'est un symlink, vérifier que le nœud cible
+          // n'est pas déjà dans la chaîne des parents (évite les boucles infinies)
+          if (isSymlink && node.targetId) {
+            // Construire la liste des IDs dans le parent context
+            const ancestorIds = parentContext ? parentContext.split('@').filter(id => id !== 'root') : [];
+            ancestorIds.push(nodeId); // Ajouter le symlink lui-même
+
+            // Si le targetId est déjà un ancêtre, c'est une référence circulaire
+            if (ancestorIds.includes(node.targetId)) {
+              // Afficher le symlink comme "circulaire" sans ses enfants
+              const instanceKey = this.getInstanceKey(nodeId, parentContext);
+              const isActive = instanceKey === this.currentInstanceKey;
+
+              const div = document.createElement('div');
+              div.className = 'tree-node';
+              const content = document.createElement('div');
+              content.className = 'tree-node-content circular-symlink' + (isActive ? ' active' : '');
+              content.setAttribute('data-node-id', nodeId);
+              content.setAttribute('data-instance-key', instanceKey);
+              content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">🔄</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (circulaire)</span>';
+
+              // Rendre cliquable
+              content.onclick = () => {
+                this.currentInstanceKey = instanceKey;
+                this.focusedInstanceKey = instanceKey;
+                this.selectNode(nodeId);
+              };
+
+              div.appendChild(content);
+              return div;
+            }
           }
 
-          const isSymlink = actualParentNodeId !== null && this.isSymlinkIn(nodeId, actualParentNodeId);
+          // SYMLINK EXTERNE : Si en mode branche, vérifier si le symlink pointe hors de la branche
+          let isExternalSymlink = false;
+          if (isSymlink && node.targetId && this.branchMode) {
+            isExternalSymlink = !this.isNodeInBranch(node.targetId);
+          }
+
+          // Pour les symlinks, obtenir le nœud cible pour afficher ses enfants
+          const displayNode = isSymlink ? this.data.nodes[node.targetId] : node;
+          if (!displayNode) {
+            // Symlink cassé : afficher quand même le symlink mais cliquable
+            const instanceKey = this.getInstanceKey(nodeId, parentContext);
+            const isActive = instanceKey === this.currentInstanceKey;
+
+            const div = document.createElement('div');
+            div.className = 'tree-node';
+            const content = document.createElement('div');
+            content.className = 'tree-node-content broken-symlink' + (isActive ? ' active' : '');
+            content.setAttribute('data-node-id', nodeId);
+            content.setAttribute('data-instance-key', instanceKey);
+            content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">⚠️</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (lien cassé)</span>';
+
+            // Rendre cliquable pour permettre la suppression
+            content.onclick = () => {
+              this.currentInstanceKey = instanceKey;
+              this.focusedInstanceKey = instanceKey;
+              this.selectNode(nodeId);
+            };
+
+            div.appendChild(content);
+            return div;
+          }
 
           // Clé unique pour cette instance
           const instanceKey = this.getInstanceKey(nodeId, parentContext);
@@ -1112,15 +1658,9 @@
           // Active seulement si c'est la bonne instance
           const isActive = instanceKey === this.currentInstanceKey;
 
-          // Trouver les symlinks qui doivent apparaître dans ce nœud
-          const symlinksInThisNode = [];
-          Object.values(this.data.nodes).forEach(n => {
-            if (n.symlinkedIn && n.symlinkedIn.includes(nodeId)) {
-              symlinksInThisNode.push(n.id);
-            }
-          });
-
-          const hasChildren = node.children.length > 0 || symlinksInThisNode.length > 0;
+          // Les symlinks n'ont jamais d'enfants directs (children[] est vide)
+          // Mais on peut afficher les enfants du nœud cible
+          const hasChildren = displayNode.children.length > 0;
 
           const div = document.createElement('div');
           // Utiliser l'état mémorisé avec la clé d'instance
@@ -1132,7 +1672,7 @@
           content.className = 'tree-node-content' + (isActive ? ' active' : '');
           content.setAttribute('data-node-id', nodeId);
           content.setAttribute('data-instance-key', instanceKey);
-          
+
           if (hasChildren) {
             const toggle = document.createElement('span');
             toggle.className = 'tree-node-toggle';
@@ -1162,25 +1702,43 @@
 
           const icon = document.createElement('span');
           icon.className = 'tree-node-icon';
-          icon.textContent = isSymlink ? '🔗' : '📄';
+          icon.textContent = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : '📄';
           content.appendChild(icon);
 
           const title = document.createElement('span');
           title.className = 'tree-node-title';
-          title.textContent = node.title;
+          title.textContent = node.title; // Titre du nœud lui-même (peut être différent de la cible si symlink)
+
+          // Griser les symlinks externes
+          if (isExternalSymlink) {
+            title.style.opacity = '0.4';
+            title.style.fontStyle = 'italic';
+          }
+
           content.appendChild(title);
 
           if (isSymlink) {
             const badge = document.createElement('span');
             badge.className = 'symlink-badge';
-            badge.textContent = 'lien';
+            badge.textContent = isExternalSymlink ? 'externe' : 'lien';
+            if (isExternalSymlink) {
+              badge.style.opacity = '0.5';
+            }
             content.appendChild(badge);
           }
 
           content.onclick = () => {
-            this.currentInstanceKey = instanceKey; // Mémoriser quelle instance est active avant selectNode
-            this.focusedInstanceKey = instanceKey; // Mettre à jour le focus clavier
-            this.selectNode(nodeId); // Ceci va appeler render() qui utilisera currentInstanceKey
+            // Ne pas permettre de cliquer sur les symlinks externes
+            if (isExternalSymlink) {
+              this.showToast('⚠️ Lien externe à la branche (non accessible)', '🚫');
+              return;
+            }
+
+            this.currentInstanceKey = instanceKey;
+            this.focusedInstanceKey = instanceKey;
+            // Toujours sélectionner le nodeId (qui est soit un node, soit un symlink)
+            // selectNode() va gérer le cas symlink en interne
+            this.selectNode(nodeId);
           };
 
           // Drag & Drop
@@ -1197,18 +1755,10 @@
             const childrenDiv = document.createElement('div');
             childrenDiv.className = 'tree-node-children';
 
-            // Pour les enfants d'un symlink, on utilise l'instanceKey comme parent
-            // pour avoir un contexte unique
-            const childParentContext = isSymlink ? instanceKey : nodeId;
-
-            // Ajouter les enfants réels
-            node.children.forEach(childId => {
-              childrenDiv.appendChild(renderNode(childId, childParentContext));
-            });
-
-            // Ajouter les symlinks
-            symlinksInThisNode.forEach(symlinkId => {
-              childrenDiv.appendChild(renderNode(symlinkId, nodeId));
+            // Afficher les enfants du nœud cible (pour symlinks) ou du nœud lui-même
+            displayNode.children.forEach(childId => {
+              const childElement = renderNode(childId, instanceKey);
+              if (childElement) childrenDiv.appendChild(childElement);
             });
 
             div.appendChild(childrenDiv);
@@ -1217,22 +1767,14 @@
           return div;
         };
 
-        // Trouver les symlinks à la racine
-        const symlinksAtRoot = [];
-        Object.values(this.data.nodes).forEach(node => {
-          if (node.symlinkedIn && node.symlinkedIn.includes(null)) {
-            symlinksAtRoot.push(node.id);
-          }
-        });
+        // Rendre les nœuds : en mode branche, seulement la branche isolée
+        const rootNodesToRender = this.branchMode
+          ? [this.branchRootId]
+          : this.data.rootNodes;
 
-        // Rendre les nœuds racines
-        this.data.rootNodes.forEach(nodeId => {
-          container.appendChild(renderNode(nodeId, null));
-        });
-
-        // Rendre les symlinks à la racine
-        symlinksAtRoot.forEach(nodeId => {
-          container.appendChild(renderNode(nodeId, null));
+        rootNodesToRender.forEach(nodeId => {
+          const element = renderNode(nodeId, null);
+          if (element) container.appendChild(element);
         });
       },
 
@@ -1257,12 +1799,75 @@
 
       loadData() {
         const stored = localStorage.getItem('deepmemo_data');
-        if (stored) this.data = JSON.parse(stored);
-        
+        if (stored) {
+          this.data = JSON.parse(stored);
+          // Migrer les anciens symlinks vers le nouveau format si nécessaire
+          this.migrateSymlinks();
+        }
+
         // Restaurer l'état des nœuds dépliés
         const expandedStored = localStorage.getItem('deepmemo_expanded');
         if (expandedStored) {
           this.expandedNodes = new Set(JSON.parse(expandedStored));
+        }
+      },
+
+      // Migration automatique des symlinks de l'ancien format vers le nouveau
+      migrateSymlinks() {
+        let migrated = false;
+
+        // Ajouter type: 'node' à tous les nœuds qui n'en ont pas
+        Object.values(this.data.nodes).forEach(node => {
+          if (!node.type) {
+            node.type = 'node';
+            migrated = true;
+          }
+        });
+
+        // Convertir les symlinks de l'ancien format (symlinkedIn[]) vers de vrais nœuds
+        Object.values(this.data.nodes).forEach(node => {
+          if (node.symlinkedIn && node.symlinkedIn.length > 0) {
+            node.symlinkedIn.forEach(parentId => {
+              // Créer un nouveau nœud symlink
+              const symlinkId = this.generateId();
+              const symlink = {
+                id: symlinkId,
+                type: 'symlink',
+                title: node.title, // Même titre par défaut
+                targetId: node.id,
+                parent: parentId,
+                children: [],
+                created: Date.now(),
+                modified: Date.now()
+              };
+
+              // Ajouter le symlink aux nodes
+              this.data.nodes[symlinkId] = symlink;
+
+              // Ajouter le symlink aux enfants du parent
+              if (parentId === null) {
+                if (!this.data.rootNodes.includes(symlinkId)) {
+                  this.data.rootNodes.push(symlinkId);
+                }
+              } else {
+                const parent = this.data.nodes[parentId];
+                if (parent && !parent.children.includes(symlinkId)) {
+                  parent.children.push(symlinkId);
+                }
+              }
+
+              migrated = true;
+            });
+
+            // Supprimer l'ancien champ symlinkedIn
+            delete node.symlinkedIn;
+          }
+        });
+
+        // Sauvegarder si migration effectuée
+        if (migrated) {
+          console.log('✅ Migration des symlinks effectuée');
+          this.saveData();
         }
       },
 
@@ -1539,6 +2144,65 @@
         return false;
       },
 
+      // Vérifier si créer un symlink de targetId dans parentId créerait un cycle
+      wouldCreateCycle(targetId, parentId) {
+        // Si on crée un symlink vers targetId dans parentId,
+        // cela créerait un cycle si targetId est un ancêtre de parentId
+        if (parentId === null) return false; // Racine, pas de cycle possible
+
+        // Vérifier si targetId est un ancêtre de parentId
+        let current = parentId;
+        while (current) {
+          if (current === targetId) return true; // Cycle détecté !
+          const node = this.data.nodes[current];
+          if (!node) return false;
+          current = node.parent;
+        }
+
+        return false;
+      },
+
+      // Vérifier si déplacer nodeId dans newParentId créerait un cycle via des symlinks
+      // Cette fonction vérifie récursivement tous les descendants de nodeId pour voir
+      // si l'un d'eux contient un symlink qui pointe vers un ancêtre de newParentId
+      wouldCreateCycleWithMove(nodeId, newParentId) {
+        if (newParentId === null) return false; // Racine, pas de cycle
+
+        // Collecter tous les ancêtres du nouveau parent (la chaîne où on veut déplacer)
+        const ancestorIds = [newParentId]; // Inclure le parent lui-même
+        let current = newParentId;
+        while (current) {
+          const node = this.data.nodes[current];
+          if (!node) break;
+          if (node.parent) ancestorIds.push(node.parent);
+          current = node.parent;
+        }
+
+        // Vérifier récursivement tous les descendants de nodeId
+        const checkDescendants = (currentId) => {
+          const node = this.data.nodes[currentId];
+          if (!node) return false;
+
+          // Si c'est un symlink, vérifier que son targetId n'est pas dans les ancêtres
+          if (node.type === 'symlink' && node.targetId) {
+            if (ancestorIds.includes(node.targetId)) {
+              return true; // Cycle détecté !
+            }
+          }
+
+          // Vérifier récursivement les enfants
+          if (node.children) {
+            for (const childId of node.children) {
+              if (checkDescendants(childId)) return true;
+            }
+          }
+
+          return false;
+        };
+
+        return checkDescendants(nodeId);
+      },
+
       // Sélectionner une destination
       selectActionDestination(targetId) {
         this.selectedDestination = targetId;
@@ -1558,15 +2222,19 @@
       confirmAction() {
         if (!this.selectedAction || this.selectedDestination === undefined) return;
 
+        // Si on est sur un symlink, utiliser le nœud cible pour les actions
+        const node = this.data.nodes[this.currentNodeId];
+        const targetNodeId = node && node.type === 'symlink' ? node.targetId : this.currentNodeId;
+
         switch(this.selectedAction) {
           case 'move':
-            this.moveNode(this.currentNodeId, this.selectedDestination);
+            this.moveNode(targetNodeId, this.selectedDestination);
             break;
           case 'link':
-            this.createSymlinkTo(this.currentNodeId, this.selectedDestination);
+            this.createSymlinkTo(targetNodeId, this.selectedDestination);
             break;
           case 'duplicate':
-            this.duplicateNode(this.currentNodeId, this.selectedDestination);
+            this.duplicateNode(targetNodeId, this.selectedDestination);
             break;
         }
 
@@ -1678,6 +2346,19 @@
         const node = this.data.nodes[nodeId];
         const oldParent = node.parent;
 
+        // PROTECTION : Ne pas déplacer dans ses propres descendants
+        if (newParentId !== null && this.isDescendantOf(newParentId, nodeId)) {
+          this.showToast('⚠️ Impossible : destination invalide', '🔄');
+          return;
+        }
+
+        // PROTECTION SYMLINKS : Vérifier qu'aucun descendant ne contient un symlink
+        // qui créerait une référence circulaire
+        if (this.wouldCreateCycleWithMove(nodeId, newParentId)) {
+          this.showToast('⚠️ Impossible : cela créerait une référence circulaire', '🔄');
+          return;
+        }
+
         // Retirer de l'ancien parent
         if (oldParent === null) {
           this.data.rootNodes = this.data.rootNodes.filter(id => id !== nodeId);
@@ -1701,20 +2382,67 @@
         this.showToast('Nœud déplacé', '↗️');
       },
 
-      // Créer un symlink (alias de la fonction existante)
+      // Créer un symlink (nouveau format : vrai nœud de type symlink)
       createSymlinkTo(nodeId, parentId) {
-        const node = this.data.nodes[nodeId];
-        if (!node.symlinkedIn) node.symlinkedIn = [];
+        const targetNode = this.data.nodes[nodeId];
+        if (!targetNode) return;
 
-        if (parentId === node.parent || node.symlinkedIn.includes(parentId)) {
+        // Vérifier que le symlink n'existe pas déjà
+        if (parentId === targetNode.parent) {
           this.showToast('Lien déjà existant', '⚠️');
           return;
         }
 
-        node.symlinkedIn.push(parentId);
+        // PROTECTION CYCLE 1 : Vérifier que le nœud cible n'est pas un ancêtre du parent
+        if (this.wouldCreateCycle(nodeId, parentId)) {
+          this.showToast('⚠️ Impossible : cela créerait une référence circulaire', '🔄');
+          return;
+        }
+
+        // PROTECTION CYCLE 2 : Vérifier que les descendants du nœud cible ne contiennent pas
+        // de symlink qui pointerait vers un ancêtre de parentId
+        if (this.wouldCreateCycleWithMove(nodeId, parentId)) {
+          this.showToast('⚠️ Impossible : cela créerait une référence circulaire', '🔄');
+          return;
+        }
+
+        // Vérifier s'il existe déjà un symlink vers ce nœud dans ce parent
+        const parent = parentId === null ? null : this.data.nodes[parentId];
+        const siblings = parentId === null ? this.data.rootNodes : (parent ? parent.children : []);
+
+        const existingSymlink = siblings.find(childId => {
+          const child = this.data.nodes[childId];
+          return child && child.type === 'symlink' && child.targetId === nodeId;
+        });
+
+        if (existingSymlink) {
+          this.showToast('Lien déjà existant', '⚠️');
+          return;
+        }
+
+        // Créer le nouveau nœud symlink
+        const symlinkId = this.generateId();
+        this.data.nodes[symlinkId] = {
+          id: symlinkId,
+          type: 'symlink',
+          title: targetNode.title, // Même titre que la cible par défaut
+          targetId: nodeId,
+          parent: parentId,
+          children: [],
+          created: Date.now(),
+          modified: Date.now()
+        };
+
+        // Ajouter le symlink aux enfants du parent
+        if (parentId === null) {
+          this.data.rootNodes.push(symlinkId);
+        } else {
+          parent.children.push(symlinkId);
+        }
+
         this.saveData();
         this.render();
-        this.updateChildren(); // Rafraîchir la liste des enfants
+        this.updateChildren();
         this.updateRightPanel();
         this.showToast('Lien symbolique créé', '🔗');
       },
@@ -1892,40 +2620,22 @@
         }
       },
 
-      // Confirmer la création du symlink
+      // Confirmer la création du symlink (nouveau format)
       confirmSymlink() {
         if (!this.currentNodeId) return;
 
+        // Si on est sur un symlink, utiliser le nœud cible
         const node = this.data.nodes[this.currentNodeId];
-        
-        // Initialiser le tableau symlinks si nécessaire
-        if (!node.symlinkedIn) node.symlinkedIn = [];
+        const targetNodeId = node && node.type === 'symlink' ? node.targetId : this.currentNodeId;
 
         const targetParent = this.selectedNodeForSymlink;
 
-        // Vérifier qu'on n'est pas déjà dans ce parent
-        if (targetParent === node.parent || node.symlinkedIn.includes(targetParent)) {
-          this.showToast('Lien déjà existant', '⚠️');
-          return;
-        }
+        // Utiliser la nouvelle fonction createSymlinkTo
+        this.createSymlinkTo(targetNodeId, targetParent);
 
-        // Ajouter le symlink
-        node.symlinkedIn.push(targetParent);
-
-        this.saveData();
-        this.render();
-        this.updateChildren(); // Rafraîchir la liste des enfants
-        this.updateRightPanel();
         this.closeSymlinkModal();
-        this.showToast('Lien symbolique créé', '🔗');
       },
 
-      // Vérifier si un nœud est un symlink dans un contexte donné
-      isSymlinkIn(nodeId, parentId) {
-        const node = this.data.nodes[nodeId];
-        if (!node.symlinkedIn) return false;
-        return node.symlinkedIn.includes(parentId);
-      },
 
       // ===== DRAG & DROP =====
 
@@ -2485,6 +3195,12 @@
         this.viewMode = this.viewMode === 'edit' ? 'view' : 'edit';
         localStorage.setItem('deepmemo_viewMode', this.viewMode);
         this.updateViewMode();
+
+        // Mettre à jour l'URL et le lien de partage
+        if (this.currentNodeId) {
+          this.updateURL(this.currentNodeId);
+          this.updateShareLink();
+        }
       },
 
       // Mettre à jour l'affichage selon le mode
