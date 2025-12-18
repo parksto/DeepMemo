@@ -13,7 +13,7 @@
       symlinkModalExpandedNodes: new Set(), // État expand/collapse pour la modal symlink
       actionModalExpandedNodes: new Set(), // État expand/collapse pour la modal actions
       showAllTags: false, // Afficher tous les tags du cloud
-      viewMode: 'edit', // 'edit' ou 'view' (markdown rendered)
+      viewMode: 'view', // 'view' (markdown rendered) ou 'edit'
       branchMode: false, // Mode branche isolée activé ?
       branchRootId: null, // ID du nœud racine de la branche isolée
       isInitializing: true, // Flag pour éviter d'écraser l'URL pendant l'init
@@ -32,7 +32,7 @@
 
         const hash = window.location.hash;
         let nodeId = null;
-        let view = 'edit';
+        let view = 'view';
 
         if (hash.startsWith('#/node/')) {
           const parts = hash.substring(7).split('?');
@@ -40,7 +40,7 @@
 
           if (parts[1]) {
             const hashParams = new URLSearchParams(parts[1]);
-            view = hashParams.get('view') || 'edit';
+            view = hashParams.get('view') || 'view';
           }
         }
 
@@ -56,8 +56,8 @@
 
         // Construire le hash
         let hash = `#/node/${nodeId}`;
-        if (this.viewMode !== 'edit') {
-          hash += `?view=${this.viewMode}`;
+        if (this.viewMode === 'edit') {
+          hash += `?view=edit`;
         }
 
         // Construire les query params
@@ -1057,8 +1057,8 @@
           search = `?branch=${this.branchRootId}`;
         }
         let hash = `#/node/${this.currentNodeId}`;
-        if (this.viewMode !== 'edit') {
-          hash += `?view=${this.viewMode}`;
+        if (this.viewMode === 'edit') {
+          hash += `?view=edit`;
         }
 
         const fullURL = baseURL + search + hash;
@@ -1076,8 +1076,8 @@
         // Construire l'URL de branche isolée
         const baseURL = window.location.origin + window.location.pathname;
         let hash = `#/node/${this.currentNodeId}`;
-        if (this.viewMode !== 'edit') {
-          hash += `?view=${this.viewMode}`;
+        if (this.viewMode === 'edit') {
+          hash += `?view=edit`;
         }
 
         const fullURL = `${baseURL}?branch=${this.currentNodeId}${hash}`;
