@@ -255,6 +255,6 @@
 
 ---
 
-**Maintenu par** : Fabien
-**Outil** : DeepMemo V0.8 + Claude Code
-**Prochaine revue** : Après implémentation des liens internes cliquables
+- **Maintenu par** : Fabien
+- **Outil** : DeepMemo + Claude Code + Sublime Text + Git
+- **Prochaine revue** : Après implémentation des liens internes cliquables (?)
