@@ -2,100 +2,76 @@
 
 > **Ton second cerveau, organisé et connecté**
 
-DeepMemo est un système de gestion de connaissances personnelles basé sur des nœuds récursifs, interconnectés et actifs.
+Système de gestion de connaissances basé sur des **nœuds récursifs**, où tout (notes, projets, contacts, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
+
+---
 
 ## 🚀 Démarrage rapide
 
-### Lancer l'application
-
 ```bash
-# Depuis WSL Ubuntu ou tout terminal bash
 cd DeepMemo
 python3 -m http.server 8000
+# Ouvrir http://localhost:8000
 ```
 
-Puis ouvrir dans ton navigateur : **http://localhost:8000**
+## ✨ Features V0.8
 
-### Structure du projet
-
-```
-DeepMemo/
-├── index.html              # Point d'entrée
-├── src/
-│   ├── css/
-│   │   └── style.css       # Styles
-│   └── js/
-│       └── app.js          # Logique
-├── reference/
-│   └── deepmemo-reference.html  # Version single-file (référence)
-├── docs/
-│   ├── README.md                  # Présentation du concept
-│   ├── ROADMAP.md                 # État et prochaines étapes
-│   ├── ARCHITECTURE.md            # Détails techniques
-│   ├── Guide de développement.md  # Guide de démarrage
-│   └── VISION.md                  # Vision long-terme
-└── .gitignore
-```
-
-## 📚 Documentation
-
-- **[Concept et features](docs/README.md)** - Comprendre DeepMemo
-- **[Roadmap](docs/ROADMAP.md)** - État actuel et bugs connus
-- **[Architecture](docs/ARCHITECTURE.md)** - Détails techniques
-- **[Vision](docs/VISION.md)** - Concepts avancés
-
-## ⌨️ Raccourcis clavier
-
-- `Alt+N` : Nouveau nœud
-- `Alt+E` : Focus éditeur
-- `Ctrl+K` : Recherche globale
-- `Escape` : Remonter au parent
-- `↑↓←→` : Navigation dans l'arbre
-
-## ✨ Features principales
-
-- 🌳 **Hiérarchie flexible** - Structure arborescente infinie
-- 🔗 **Liens intelligents** - Wiki-links `[[...]]` + backlinks automatiques
-- 🏷️ **Tags** - Auto-complétion + tag cloud
-- 🔍 **Recherche** - Temps réel, dans tout le contenu
-- 🎨 **Drag & Drop** - Déplacer, dupliquer, créer des liens symboliques
+- 🌳 **Hiérarchie infinie** - Nœuds récursifs sans limite
+- 🔗 **Liens symboliques** - Un nœud dans plusieurs endroits
+- 📎 **Wiki-links** - `[[Titre]]` crée des liens automatiques
+- 🏷️ **Tags intelligents** - Auto-complétion + tag cloud
+- 🔍 **Recherche temps réel** - Dans titres, contenus et tags
+- 🔗 **URLs bookmarkables** - Partage de nœuds ou branches
+- 🎨 **Drag & Drop** - Déplacer, dupliquer, lier
 - ⌨️ **Keyboard-first** - Navigation complète au clavier
 
-## 🔧 Technologies
+## ⌨️ Raccourcis essentiels
 
-- HTML5
-- CSS3 (Variables, Flexbox, Grid)
-- JavaScript ES6+ (Vanilla, pas de framework)
-- LocalStorage pour la persistence
+| Raccourci | Action |
+|-----------|--------|
+| `Alt+N` | Nouveau nœud |
+| `Alt+E` | Focus éditeur |
+| `Ctrl+K` | Recherche |
+| `Escape` | Remonter au parent |
+| `↑↓←→` | Navigation arbre |
 
-## 📝 Notes de version
+## 📚 Documentation complète
 
-**V0.8** (Décembre 2025)
-- ✅ Refonte complète des liens symboliques (type dédié, titres indépendants)
-- ✅ Système d'URL dynamiques (bookmarks, mode branche isolée, partage)
-- ✅ Auto-collapse intelligent de l'arborescence
-- ✅ Mode view par défaut avec toggle view/edit
-- ✅ Navigation navigateur (back/forward)
-- ✅ Détection de cycles et symlinks externes
+**→ [Documentation détaillée](docs/README.md)** - Concepts, architecture, features complètes
 
-**V0.7** (Décembre 2025)
-- ✅ Restructuration en multifile (HTML + CSS + JS séparés)
-- ✅ Structure de projet propre et évolutive
-- ✅ Fix bug de sélection dans les modales
-- ✅ Repo GitHub créé
+**Docs par thème** :
+- [ROADMAP.md](docs/ROADMAP.md) - État actuel V0.8 et prochaines étapes
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Structure technique détaillée
+- [Guide de développement.md](docs/Guide%20de%20développement.md) - Pour contribuer
+- [VISION.md](docs/VISION.md) - Vision long-terme (nœuds actifs, types)
+- [TODO.md](docs/TODO.md) - Backlog de développement
 
-**V0.6** (Version de référence)
-- Single-file HTML fonctionnel
-- Toutes les features de base implémentées
+## 📝 Changelog
 
-## 🐛 Bugs connus
+**V0.8** (Décembre 2025) - Symlinks & URLs dynamiques
+- Refonte complète des liens symboliques (type dédié, titres indépendants)
+- Système d'URL dynamiques (bookmarks, mode branche isolée)
+- Auto-collapse intelligent de l'arborescence
+- Détection de cycles et symlinks externes
 
-Voir [ROADMAP.md](docs/ROADMAP.md) pour la liste complète des bugs et features à venir.
+**V0.7** - Restructuration multifile
+**V0.6** - Version single-file de référence
+
+[→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
+
+## 🔧 Stack technique
+
+**100% Vanilla** - HTML5, CSS3, JavaScript ES6+ (sans framework)
+**Persistence** - LocalStorage (migration IndexedDB/Backend prévue)
+**Architecture** - Multifile (HTML + CSS + JS séparés)
 
 ## 🤝 Contribution
 
-Projet personnel en développement actif. Feedback bienvenu !
+Projet personnel en développement actif. Feedback et contributions bienvenues !
+
+**GitHub** : [parksto/DeepMemo](https://github.com/parksto/DeepMemo)
 
 ---
 
 **DeepMemo** - Développé par Fabien
+*Conception mentale depuis 4 ans, développement actif depuis 2024*

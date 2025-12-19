@@ -1,6 +1,6 @@
-# 🌟 DeepMemo
+# 📖 DeepMemo - Documentation Complète
 
-> **Ton second cerveau, organisé et connecté**
+> **Concepts, architecture et features détaillées**
 
 DeepMemo est un système de gestion de connaissances personnelles basé sur des nœuds récursifs, interconnectés et actifs. Tout (notes, projets, contacts, fichiers, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
 
