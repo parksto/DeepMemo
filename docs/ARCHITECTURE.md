@@ -37,6 +37,7 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
 ```javascript
 {
   id: String,              // "node_timestamp_random"
+  type: String,            // "node" (normal) ou "symlink" (lien symbolique)
   title: String,           // Titre du nœud
   content: String,         // Contenu (markdown supporté)
   children: Array<String>, // IDs des enfants directs
@@ -46,7 +47,9 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
   links: Array<String>,    // Titres des nœuds liés via [[...]]
   backlinks: Array<String>, // IDs des nœuds qui pointent ici
   tags: Array<String>,     // Tags du nœud
-  symlinkedIn: Array<String | null> // IDs des parents où ce nœud apparaît aussi
+
+  // Pour les symlinks uniquement :
+  targetId: String         // ID du nœud cible (si type === "symlink")
 }
 ```
 
@@ -101,10 +104,12 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
 }
 ```
 
-#### Nœud avec lien symbolique
+#### Nœud avec lien symbolique (V0.8)
 ```javascript
+// Nœud original
 {
   id: "node_1702234567894_mno345",
+  type: "node",
   title: "👤 Alice",
   content: "Contact : alice@example.com",
   children: [],
@@ -113,11 +118,19 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
   modified: 1702234567894,
   links: [],
   backlinks: ["node_1702234567891_def456"],
-  tags: ["contact", "équipe"],
-  symlinkedIn: [
-    "node_projet_x",  // Apparaît aussi dans le projet X
-    null              // Apparaît aussi à la racine
-  ]
+  tags: ["contact", "équipe"]
+}
+
+// Lien symbolique vers Alice dans un projet
+{
+  id: "symlink_1702234567895_pqr678",
+  type: "symlink",
+  title: "👤 Alice (Lead Dev)",  // Titre personnalisé
+  targetId: "node_1702234567894_mno345",  // Pointe vers le nœud original
+  parent: "node_projet_x",
+  children: [],  // Toujours vide pour les symlinks
+  created: 1702234567895,
+  modified: 1702234567895
 }
 ```
 
@@ -572,6 +585,277 @@ const app = {
 
 ---
 
+## 🔗 Système d'URL Dynamiques (V0.8)
+
+### Architecture
+
+DeepMemo utilise un système d'URL dynamiques pour permettre :
+- La **bookmarkabilité** des nœuds
+- La **persistence** après refresh
+- Le **partage** de nœuds ou branches
+- L'**isolation de branches** (mode scope)
+
+### Format des URLs
+
+```
+[origin]/[path]?branch=nodeId#/node/nodeId?view=mode
+```
+
+**Composants** :
+- **Query param `?branch=nodeId`** : Active le mode branche isolée
+- **Hash `#/node/nodeId`** : Identifie le nœud actif
+- **Hash param `?view=mode`** : Mode d'affichage (`view` par défaut, `edit` optionnel)
+
+**Exemples** :
+```
+# Nœud simple en mode lecture
+#/node/node_1702234567890_abc123
+
+# Nœud en mode édition
+#/node/node_1702234567890_abc123?view=edit
+
+# Branche isolée en mode lecture
+?branch=node_1702234567891_def456#/node/node_1702234567891_def456
+
+# Branche isolée en mode édition
+?branch=node_1702234567891_def456#/node/node_1702234567892_ghi789?view=edit
+```
+
+### Fonctions clés
+
+#### parseURL()
+```javascript
+parseURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const branchId = urlParams.get('branch');
+
+  const hash = window.location.hash;
+  let nodeId = null;
+  let view = 'view';  // Défaut = mode lecture
+
+  if (hash.startsWith('#/node/')) {
+    const parts = hash.substring(7).split('?');
+    nodeId = parts[0];
+
+    if (parts[1]) {
+      const hashParams = new URLSearchParams(parts[1]);
+      view = hashParams.get('view') || 'view';
+    }
+  }
+
+  return { branchId, nodeId, view };
+}
+```
+
+#### updateURL()
+```javascript
+updateURL(nodeId, options = {}) {
+  if (this.isInitializing) return;  // Ne pas écraser pendant l'init
+
+  const { replaceHistory = true } = options;
+
+  // Construire le hash
+  let hash = `#/node/${nodeId}`;
+  if (this.viewMode === 'edit') {
+    hash += `?view=edit`;  // Ajouté seulement en mode édition
+  }
+
+  // Construire les query params
+  let search = '';
+  if (this.branchMode && this.branchRootId) {
+    search = `?branch=${this.branchRootId}`;
+  }
+
+  const newURL = `${window.location.pathname}${search}${hash}`;
+
+  if (replaceHistory) {
+    window.history.replaceState({}, '', newURL);
+  } else {
+    window.history.pushState({}, '', newURL);
+  }
+}
+```
+
+#### setupURLListener()
+```javascript
+setupURLListener() {
+  // Écouter les changements d'URL (boutons back/forward)
+  window.addEventListener('popstate', () => {
+    const { branchId, nodeId, view } = this.parseURL();
+
+    // Activer/désactiver mode branche
+    if (branchId && this.data.nodes[branchId]) {
+      if (!this.branchMode || this.branchRootId !== branchId) {
+        this.enableBranchMode(branchId);
+        this.render();
+      }
+    } else if (this.branchMode) {
+      this.branchMode = false;
+      this.branchRootId = null;
+      this.render();
+    }
+
+    // Changer le mode view
+    if (view && view !== this.viewMode) {
+      this.viewMode = view;
+      this.updateViewMode();
+    }
+
+    // Naviguer vers le nœud
+    if (nodeId && this.data.nodes[nodeId] && this.isNodeInBranch(nodeId)) {
+      this.selectNode(nodeId);
+    }
+  });
+
+  // Écouter aussi les changements de hash
+  window.addEventListener('hashchange', (e) => {
+    if (e.oldURL && e.newURL && e.oldURL !== e.newURL) {
+      const { nodeId, view } = this.parseURL();
+
+      if (view && view !== this.viewMode) {
+        this.viewMode = view;
+        this.updateViewMode();
+      }
+
+      if (nodeId && this.data.nodes[nodeId] && this.isNodeInBranch(nodeId)) {
+        if (this.currentNodeId !== nodeId) {
+          this.selectNode(nodeId);
+        }
+      }
+    }
+  });
+}
+```
+
+### Mode Branche Isolée
+
+Le mode branche permet d'afficher uniquement un sous-arbre :
+
+```javascript
+enableBranchMode(nodeId) {
+  const node = this.data.nodes[nodeId];
+  if (!node) return false;
+
+  this.branchMode = true;
+  this.branchRootId = nodeId;
+
+  // S'assurer que la branche est dépliée
+  const instanceKey = this.getInstanceKey(nodeId, null);
+  this.expandedNodes.add(instanceKey);
+  localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+
+  return true;
+}
+
+isNodeInBranch(nodeId) {
+  if (!this.branchMode) return true;
+  if (nodeId === this.branchRootId) return true;
+
+  // Remonter les parents jusqu'à trouver branchRootId
+  let current = nodeId;
+  while (current) {
+    if (current === this.branchRootId) return true;
+    const node = this.data.nodes[current];
+    if (!node) return false;
+    current = node.parent;
+  }
+
+  return false;
+}
+```
+
+**Symlinks externes** : Les symlinks pointant hors de la branche sont :
+- Grisés (opacity 0.4)
+- Affichés en italique
+- Non-cliquables
+- Marqués avec l'icône 🔗🚫
+
+### Partage de Nœuds et Branches
+
+Deux icônes dans le header du panneau central :
+
+**Icône 🔗** (Partage de nœud) :
+```javascript
+updateShareLink() {
+  const shareLink = document.getElementById('shareLink');
+  if (!shareLink || !this.currentNodeId) return;
+
+  const baseURL = window.location.origin + window.location.pathname;
+  let search = '';
+  if (this.branchMode && this.branchRootId) {
+    search = `?branch=${this.branchRootId}`;
+  }
+  let hash = `#/node/${this.currentNodeId}`;
+  if (this.viewMode === 'edit') {
+    hash += `?view=edit`;
+  }
+
+  const fullURL = baseURL + search + hash;
+  shareLink.href = fullURL;
+}
+
+shareNode(event) {
+  event.preventDefault();
+  const shareLink = document.getElementById('shareLink');
+  const url = shareLink.href;
+
+  navigator.clipboard.writeText(url).then(() => {
+    this.showToast('Lien copié dans le presse-papier', '📋');
+  });
+}
+```
+
+**Icône 🌳** (Partage de branche) :
+```javascript
+updateShareBranchLink() {
+  const shareBranchLink = document.getElementById('shareBranchLink');
+  if (!shareBranchLink || !this.currentNodeId) return;
+
+  const baseURL = window.location.origin + window.location.pathname;
+  let hash = `#/node/${this.currentNodeId}`;
+  if (this.viewMode === 'edit') {
+    hash += `?view=edit`;
+  }
+
+  const fullURL = `${baseURL}?branch=${this.currentNodeId}${hash}`;
+  shareBranchLink.href = fullURL;
+}
+
+shareBranch(event) {
+  event.preventDefault();
+  const shareBranchLink = document.getElementById('shareBranchLink');
+  const url = shareBranchLink.href;
+
+  navigator.clipboard.writeText(url).then(() => {
+    this.showToast('Lien de branche copié dans le presse-papier', '🌳');
+  });
+}
+```
+
+### Instance Keys
+
+Pour gérer les symlinks et l'affichage multiple du même nœud :
+
+```javascript
+getInstanceKey(nodeId, parentContext) {
+  return parentContext === null
+    ? `${nodeId}@root`
+    : `${nodeId}@${parentContext}`;
+}
+```
+
+**Exemple** : Un nœud avec ID `abc` affiché dans `parent`, lui-même dans `grandparent` :
+```
+Instance key: "abc@parent@grandparent@root"
+```
+
+Cela permet de :
+- Distinguer chaque occurrence d'un nœud dans l'arbre
+- Gérer l'état expand/collapse de manière indépendante
+- Détecter les références circulaires
+
+---
+
 ## 🚀 Performance
 
 ### Optimisations actuelles
@@ -601,5 +885,5 @@ const app = {
 
 ---
 
-**Document technique V0.7**
-Dernière mise à jour : 15 Décembre 2025
+**Document technique V0.8**
+Dernière mise à jour : 19 Décembre 2025

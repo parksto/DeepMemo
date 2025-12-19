@@ -41,6 +41,20 @@ Chaque nœud possède :
 - Navigation clavier
 - Highlights des résultats
 
+### 🔗 URL Dynamiques (V0.8)
+- **URLs bookmarkables** : `#/node/nodeId`
+- **Persistence après refresh** : Rester sur le nœud actif
+- **Mode branche isolée** : `?branch=nodeId` pour afficher uniquement un sous-arbre
+- **Partage facile** : Icônes 🔗 (nœud) et 🌳 (branche)
+- **Navigation navigateur** : Support des boutons précédent/suivant
+
+### 📄 Affichage et Rendu (V0.7+)
+- **Markdown rendering** : Affichage formaté du contenu
+- **Mode view par défaut** : Lecture prioritaire sur édition
+- **Toggle view/edit** : Bouton [Afficher]/[Éditer]
+- **Sidebar redimensionnable** : Ajustable à la souris
+- **Auto-collapse** : Arborescence repliée sauf chemin actif
+
 ### 🎨 Drag & Drop
 - Déplacer des nœuds dans l'arborescence
 - Dupliquer (Ctrl + drag)
@@ -54,13 +68,13 @@ Chaque nœud possède :
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
-## 🏗️ Architecture actuelle (V0.7)
+## 🏗️ Architecture actuelle (V0.8)
 
 ### Format
 - **Multifile** : HTML + CSS + JS séparés
 - `index.html` : Structure HTML minimale
-- `src/css/style.css` : Tous les styles (~1180 lignes)
-- `src/js/app.js` : Toute la logique (~2270 lignes)
+- `src/css/style.css` : Tous les styles
+- `src/js/app.js` : Toute la logique
 - Vanilla JavaScript (pas de framework)
 - CSS Variables pour le theming
 - LocalStorage pour la persistence
@@ -71,6 +85,7 @@ Chaque nœud possède :
   nodes: {
     "node_xxx": {
       id: "node_xxx",
+      type: "node",  // "node" (normal) ou "symlink" (V0.8)
       title: "Titre",
       content: "Contenu markdown",
       children: ["node_yyy", "node_zzz"],
@@ -80,7 +95,7 @@ Chaque nœud possède :
       links: ["Titre du nœud lié"],
       backlinks: ["node_qui_pointe_ici"],
       tags: ["tag1", "tag2"],
-      symlinkedIn: ["node_parent_symlink"] // Où ce nœud apparait aussi
+      targetId: "node_target"  // Si type === "symlink" (V0.8)
     }
   },
   rootNodes: ["node_aaa", "node_bbb"]
@@ -94,13 +109,12 @@ Chaque nœud possède :
 - **Panel droit** : Métadonnées, liens, backlinks, tags cloud
 - **Dark theme** par défaut
 
-## 🚀 Prochaines étapes (V0.8)
+## 🚀 Prochaines étapes (V0.9)
 
 ### Features à implémenter
-- [ ] Persistent tree state (améliorer)
+- [ ] Navigation via liens `[[titre]]` cliquables
 - [ ] Vue liste nested (enfants = contenu principal)
 - [ ] Export/Import amélioré (Markdown, Notion, Obsidian)
-- [ ] Markdown rendering
 - [ ] Thèmes personnalisables
 - [ ] Permissions multi-user (chmod-style)
 - [ ] Types de nœuds actifs (avec scripts)
@@ -139,4 +153,4 @@ Projet personnel - Pas de licence définie pour le moment.
 
 ---
 
-**DeepMemo V0.7** - 15 Décembre 2025
+**DeepMemo V0.8** - 19 Décembre 2025

@@ -1,6 +1,6 @@
 # 🗺️ DeepMemo - Roadmap
 
-## 📍 État actuel : V0.7 (Décembre 2025)
+## 📍 État actuel : V0.8 (Décembre 2025)
 
 ### ✅ Fonctionnalités implémentées
 
@@ -70,6 +70,32 @@
 - [x] Import JSON
 - [x] Sauvegarde auto à chaque modification
 
+#### Rendu et Affichage (V0.7+)
+- [x] Markdown rendering avec mode view/edit toggle
+- [x] Mode view par défaut (lecture)
+- [x] Sidebar redimensionnable
+- [x] Scroll horizontal si contenu large
+- [x] Favicon personnalisé
+
+#### URL Dynamiques et Navigation (V0.8)
+- [x] Système d'URL dynamique avec hash routing
+- [x] URLs bookmarkables `#/node/nodeId`
+- [x] Persistence après refresh
+- [x] Mode branche isolée `?branch=nodeId`
+- [x] Symlinks externes grisés en mode branche
+- [x] Partage de nœud (icône 🔗)
+- [x] Partage de branche isolée (icône 🌳)
+- [x] Support navigation navigateur (back/forward)
+- [x] Auto-collapse arborescence (chemin actif uniquement)
+
+#### Liens Symboliques Refactorés (V0.8)
+- [x] Type de nœud `symlink` dédié
+- [x] Titres indépendants pour symlinks
+- [x] Détection de cycles (références circulaires)
+- [x] Prévention des boucles infinies
+- [x] Icône 🔄 pour symlinks circulaires
+- [x] Icône 🔗🚫 pour symlinks externes (hors branche)
+
 ---
 
 ## 🐛 Bugs connus
@@ -77,11 +103,10 @@
 ### Corrigés en V0.7
 - [x] **Sélection dans les modales** ✅ : Impossible de sélectionner le nœud destination dans les modales d'action/symlink → **CORRIGÉ** (utilisation de `data-node-id` avec `querySelector`)
 
-### Priorité CRITIQUE
-- [ ] **⚠️ Bug perte de données - Symlinks avec noms identiques** : Créer un lien symbolique depuis un nœud vers un autre nœud portant exactement le même nom peut causer la disparition totale du contenu. **WORKAROUND** : Éviter de créer des symlinks entre nœuds de même nom. **ROOT CAUSE** : Possible utilisation de `title` au lieu de `id` pour identifier les nœuds. **FIX PRÉVU** : V0.8 avec refonte complète du système symlinks.
-
-### Priorité haute
-- [ ] **Liens symboliques et arborescence** : Quand un lien symbolique a plusieurs niveaux d'enfants dépliés, l'arborescence peut afficher les enfants à plusieurs endroits simultanément (sous l'original ET sous le symlink). En attendant une refonte complète du système de rendu (V0.8), il est recommandé de garder l'arborescence ouverte à un seul endroit à la fois.
+### Corrigés en V0.8
+- [x] **Bug perte de données - Symlinks avec noms identiques** ✅ : **RÉSOLU** avec la refonte complète du système symlinks. Les symlinks sont maintenant des nœuds de type spécial avec leur propre `id`, ce qui élimine toute confusion basée sur les titres.
+- [x] **Références circulaires** ✅ : **RÉSOLU** avec détection automatique des cycles. Les symlinks qui créeraient une boucle infinie sont détectés et affichés avec l'icône 🔄 sans afficher leurs enfants.
+- [x] **Affichage multiple de symlinks** ✅ : **RÉSOLU** avec le système d'instance keys (`nodeId@parent@grandparent@root`) qui permet de distinguer chaque instance d'un nœud dans l'arbre.
 
 ### Priorité moyenne
 - [ ] Parfois les bordures des boutons ont un effet relief (navigateur par défaut)
@@ -124,17 +149,17 @@ DeepMemo/
 
 ---
 
-## 🚀 V0.8 - Refonte Symlinks & Navigation
+## 🚀 V0.8 - Refonte Symlinks & Navigation (EN COURS)
 
-**Objectif principal** : Refactorisation complète du système de liens symboliques pour plus de robustesse et de flexibilité.
+**Objectif principal** : Refactorisation complète du système de liens symboliques pour plus de robustesse et de flexibilité + système d'URL dynamiques.
 
-### 🔗 Refonte des Liens Symboliques (PRIORITÉ #1)
+### 🔗 Refonte des Liens Symboliques ✅ COMPLÉTÉ
 
 **Concept** : Traiter les symlinks comme des "raccourcis Windows" - des nœuds de type spécial qui pointent vers un nœud cible.
 
 #### Architecture nouvelle
-- [ ] **Type de nœud** : Ajouter propriété `type: "node" | "symlink"` à tous les nœuds
-- [ ] **Structure symlink** :
+- [x] **Type de nœud** : Ajouté propriété `type: "node" | "symlink"` à tous les nœuds
+- [x] **Structure symlink** :
   ```javascript
   {
     id: "symlink_xxx",
@@ -147,52 +172,56 @@ DeepMemo/
     modified: timestamp
   }
   ```
-- [ ] **Migration automatique** : Convertir `symlinkedIn[]` vers vrais nœuds symlink
-- [ ] **Fonction `migrateSymlinks()`** : Exécuter au `loadData()` si ancien format détecté
-- [ ] **Renommage indépendant** : Le titre du symlink n'affecte pas le nœud cible
-- [ ] **Suppression propre** : Supprimer un symlink = supprimer un nœud normal
-- [ ] **Détection cycles** : Protection anti-boucle infinie lors de la création
-- [ ] **Symlinks cassés** : Affichage grisé + icône ⚠️ si `targetId` invalide
+- [x] **Renommage indépendant** : Le titre du symlink n'affecte pas le nœud cible
+- [x] **Suppression propre** : Supprimer un symlink = supprimer un nœud normal
+- [x] **Détection cycles** : Protection anti-boucle infinie lors de la création via `wouldCreateCycleWithMove()`
+- [x] **Symlinks cassés** : Affichage avec message d'erreur et contenu désactivé
 
 #### Rendu et UI
-- [ ] Modifier `render()` pour switch sur `node.type`
-- [ ] Afficher icône 🔗 pour les symlinks
-- [ ] Au clic : ouvrir le contenu du `targetId`, pas du symlink
-- [ ] Badge visuel distinct des nœuds normaux
-- [ ] Supprimer code complexe `isSymlinkIn()`, `symlinksInThisNode`, etc.
+- [x] Modifier `render()` pour switch sur `node.type` avec pattern `displayNode`
+- [x] Afficher icône 🔗 pour les symlinks
+- [x] Au clic : ouvrir le contenu du `targetId`, pas du symlink
+- [x] Badge visuel distinct des nœuds normaux
+- [x] Code simplifié avec système d'instance keys
 
-#### Avantages
+#### Avantages obtenus
 - ✅ Symlinks = enfants normaux dans `children[]`
 - ✅ Tri et ordre naturels
 - ✅ Métadonnées propres à chaque symlink
 - ✅ Code beaucoup plus simple
-- ✅ Pas de cycles possibles (symlinks n'ont pas d'enfants)
+- ✅ Prévention des cycles avec détection
 
-### 🌳 Arborescence Intelligente
+### 🌳 Arborescence Intelligente ✅ COMPLÉTÉ
 
-- [ ] **Auto-collapse global** : Replier tout sauf le chemin actif
-- [ ] **Déplier jusqu'au nœud actuel** : `expandPathToNode()` amélioré
-- [ ] **Focus synchronisé** : Arborescence suit la navigation
-- [ ] **Navigation clavier fluide** : Sans "téléportation" du focus
+- [x] **Auto-collapse global** : `autoCollapseTree()` replie tout sauf le chemin actif
+- [x] **Déplier jusqu'au nœud actuel** : `expandPathToNode()` fonctionnel
+- [x] **Focus synchronisé** : Arborescence suit la navigation
+- [x] **Navigation clavier fluide** : Implémentée avec système d'instance keys
+- [x] **Navigation ArrowLeft** : Remonte au parent si nœud replié/sans enfants
 
 ### 🔗 Navigation via Liens Internes
 
 - [ ] **Sélection intelligente** : Choisir nœud original OU symlink le plus proche
 - [ ] **Distance euclidienne** : Calculer le symlink le plus proche du focus actuel
 - [ ] **Fallback sur original** : Si pas de symlink, ouvrir le nœud réel
+- [ ] **Liens `[[titre]]` cliquables** : Améliorer la navigation par wiki-links
 
-### 🔗 Système d'URL Dynamique
+### 🔗 Système d'URL Dynamique ✅ COMPLÉTÉ
 
-- [ ] **Hash routing** : `#node=abc123` pour pointer vers un nœud
-- [ ] **Persistence refresh** : Rester sur le nœud actif après F5
-- [ ] **Bookmarkabilité** : URLs partageables
-- [ ] **Scope isolation** : `#scope=projects&node=abc123`
-- [ ] **Symlinks hors scope** : Grisés + désactivés
-- [ ] **Mode read-only** : Pour nœuds accessibles mais non modifiables
+- [x] **Hash routing** : `#/node/abc123` pour pointer vers un nœud
+- [x] **Persistence refresh** : Rester sur le nœud actif après F5
+- [x] **Bookmarkabilité** : URLs partageables
+- [x] **Branch isolation** : `?branch=nodeId` pour instances isolées
+- [x] **Symlinks hors branche** : Grisés + désactivés avec icône 🔗🚫
+- [x] **Mode view par défaut** : Affichage lecture avec `?view=edit` optionnel
+- [x] **Partage nœud** : Icône 🔗 pour copier URL du nœud
+- [x] **Partage branche** : Icône 🌳 pour copier URL de branche isolée
+- [x] **Support navigation** : Boutons précédent/suivant du navigateur
+- [x] **Auto-expansion branche** : Branche dépliée automatiquement à l'ouverture
 
 ### ⌨️ Raccourcis & UX
 
-- [ ] **Toggle view/edit** : `Alt+V` ou `Ctrl+Shift+E`
+- [x] **Toggle view/edit** : Bouton [Afficher]/[Éditer] fonctionnel
 - [ ] **Keyboard tips** : Mise à jour + déplacement en bas du right panel
 - [ ] **Modal Actions** : Déplacer bouton Supprimer dedans
 - [ ] **Masquage conditionnel** : Cacher arborescence modale si pas nécessaire
@@ -347,6 +376,6 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 15 Décembre 2025
-**Version actuelle** : V0.7
-**Prochaine milestone** : V0.8 (Features avancées)
+**Dernière mise à jour** : 19 Décembre 2025
+**Version actuelle** : V0.8 (en cours)
+**Prochaine milestone** : V0.9 (Features avancées)
