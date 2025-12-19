@@ -1,4 +1,4 @@
-# 🌟 DeepMemo V0.7
+# 🌟 DeepMemo V0.8
 
 > **Ton second cerveau, organisé et connecté**
 
@@ -69,6 +69,14 @@ DeepMemo/
 - LocalStorage pour la persistence
 
 ## 📝 Notes de version
+
+**V0.8** (Décembre 2025)
+- ✅ Refonte complète des liens symboliques (type dédié, titres indépendants)
+- ✅ Système d'URL dynamiques (bookmarks, mode branche isolée, partage)
+- ✅ Auto-collapse intelligent de l'arborescence
+- ✅ Mode view par défaut avec toggle view/edit
+- ✅ Navigation navigateur (back/forward)
+- ✅ Détection de cycles et symlinks externes
 
 **V0.7** (Décembre 2025)
 - ✅ Restructuration en multifile (HTML + CSS + JS séparés)

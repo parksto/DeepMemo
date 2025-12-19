@@ -71,6 +71,7 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
 ```javascript
 {
   id: "node_1702234567890_abc123",
+  type: "node",
   title: "📝 Ma note",
   content: "Contenu de la note",
   children: [],
@@ -79,8 +80,7 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
   modified: 1702234567890,
   links: [],
   backlinks: [],
-  tags: ["important"],
-  symlinkedIn: []
+  tags: ["important"]
 }
 ```
 
@@ -88,6 +88,7 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
 ```javascript
 {
   id: "node_1702234567891_def456",
+  type: "node",
   title: "💼 Projet X",
   content: "Description du projet.\nVoir aussi [[Contacts]] pour l'équipe.",
   children: [
@@ -99,8 +100,7 @@ DeepMemo est une application **single-page** (SPA) en vanilla JavaScript, HTML e
   modified: 1702234567900,
   links: ["Contacts"],
   backlinks: [],
-  tags: ["projet", "urgent"],
-  symlinkedIn: []
+  tags: ["projet", "urgent"]
 }
 ```
 

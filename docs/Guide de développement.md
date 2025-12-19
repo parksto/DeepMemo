@@ -250,7 +250,7 @@ git push origin feature/ma-feature
 
 ### Projet
 - **Repo GitHub** : `git@github.com:parksto/DeepMemo.git`
-- **Version actuelle** : V0.7
+- **Version actuelle** : V0.8
 - **Statut** : Développement actif
 
 ---
