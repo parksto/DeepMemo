@@ -14,16 +14,17 @@ python3 -m http.server 8000
 # Ouvrir http://localhost:8000
 ```
 
-## ✨ Features V0.8
+## ✨ Features V0.8 (✅ 100% complété)
 
 - 🌳 **Hiérarchie infinie** - Nœuds récursifs sans limite
-- 🔗 **Liens symboliques** - Un nœud dans plusieurs endroits
-- 📎 **Wiki-links** - `[[Titre]]` crée des liens automatiques
-- 🏷️ **Tags intelligents** - Auto-complétion + tag cloud
-- 🔍 **Recherche temps réel** - Dans titres, contenus et tags
-- 🔗 **URLs bookmarkables** - Partage de nœuds ou branches
-- 🎨 **Drag & Drop** - Déplacer, dupliquer, lier
-- ⌨️ **Keyboard-first** - Navigation complète au clavier
+- 🔗 **Liens symboliques** - Un nœud dans plusieurs endroits, renommables indépendamment
+- 🏷️ **Tags intelligents** - Auto-complétion contextuelle + tag cloud par branche
+- 🔍 **Recherche temps réel** - Dans titres, contenus et tags (Ctrl+K)
+- 🔗 **URLs bookmarkables** - Partage de nœuds ou branches isolées (`?branch=X#/node/Y`)
+- 🎨 **Drag & Drop complet** - Déplacer, dupliquer (Ctrl), lier (Ctrl+Alt), réorganiser
+- ⌨️ **Keyboard-first** - Navigation complète au clavier avec raccourcis documentés
+- 🌲 **Mode branche** - Isolation d'une sous-arborescence avec symlinks externes désactivés
+- 🎯 **Auto-collapse intelligent** - Arborescence se replie automatiquement sur le chemin actif
 
 ## ⌨️ Raccourcis essentiels
 
@@ -48,11 +49,13 @@ python3 -m http.server 8000
 
 ## 📝 Changelog
 
-**V0.8** (Décembre 2025) - Symlinks & URLs dynamiques
-- Refonte complète des liens symboliques (type dédié, titres indépendants)
-- Système d'URL dynamiques (bookmarks, mode branche isolée)
-- Auto-collapse intelligent de l'arborescence
-- Détection de cycles et symlinks externes
+**V0.8** (20 Décembre 2025) - ✅ COMPLÈTE
+- 🔗 Refonte complète des liens symboliques (type dédié, renommables indépendamment)
+- 🌐 Système d'URL dynamiques (bookmarks, mode branche isolée)
+- 🎯 Auto-collapse intelligent de l'arborescence avec focus visuel symlinks
+- 🎨 **Drag & Drop complet** (arbre + enfants, Ctrl/Ctrl+Alt/Shift, prévention cycles)
+- 🎨 UI polish (modales, breadcrumb intelligent, raccourcis clavier documentés)
+- 🐛 Corrections bugs (renommage symlinks, focus visuel après navigation)
 
 **V0.7** - Restructuration multifile
 **V0.6** - Version single-file de référence

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
-  <title>DeepMemo V0.7</title>
+  <title>DeepMemo V0.8</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="src/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -23,13 +23,10 @@
 
       <div class="sidebar-actions">
         <button class="btn" onclick="app.createRootNode()">➕ Nouveau nœud</button>
-        <div class="import-zone">
+        <div class="import-export-zone">
           <input type="file" id="importFile" accept=".json" onchange="app.importData(event)">
-          <label for="importFile" class="btn-import">📂 Importer JSON</label>
-        </div>
-        <div class="shortcuts-hint">
-          <kbd>Alt+N</kbd> Nouveau • <kbd>Ctrl+K</kbd> Recherche<br>
-          <kbd>Alt+E</kbd> Éditeur • <kbd>↑↓←→</kbd> Arbre
+          <label for="importFile" class="btn-import">📂 Importer</label>
+          <button class="btn-import" onclick="app.exportData()">💾 Exporter</button>
         </div>
       </div>
 
@@ -96,8 +93,6 @@
           <button class="btn btn-secondary btn-small" id="toggleViewMode" onclick="app.toggleViewMode()">👁️ Afficher</button>
           <button class="btn btn-secondary btn-small" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" onclick="app.openActionModal()">⚙️ Actions...</button>
-          <button class="btn btn-secondary btn-small" onclick="app.deleteCurrentNode()">🗑️ Supprimer</button>
-          <button class="btn btn-secondary btn-small" onclick="app.exportData()">💾 Exporter</button>
         </div>
       </div>
     </div>
@@ -175,13 +170,15 @@
           <button class="btn btn-secondary btn-small" id="actionDuplicate" onclick="app.selectAction('duplicate')" style="flex: 1; border-radius: 8px;">
             📋 Dupliquer
           </button>
+          <button class="btn btn-secondary btn-small" id="actionDelete" onclick="app.selectAction('delete')" style="flex: 1; border-radius: 8px;">
+            🗑️ Supprimer
+          </button>
         </div>
 
-        <div id="actionDescription" style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; min-height: 40px;">
-          Sélectionne une action ci-dessus
+        <div id="actionDescription" style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; min-height: 40px; display: none;">
         </div>
 
-        <div class="node-selector" id="actionNodeSelector"></div>
+        <div class="node-selector" id="actionNodeSelector" style="display: none;"></div>
       </div>
       <div class="modal-actions">
         <button class="btn btn-secondary btn-small" onclick="app.closeActionModal()">Annuler</button>
@@ -190,6 +187,6 @@
     </div>
   </div>
 
-  <script src="src/js/app.js"></script>
+  <script type="module" src="src/js/app-new.js"></script>
 </body>
 </html>

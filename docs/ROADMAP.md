@@ -20,11 +20,11 @@
 - [x] Affichage des enfants en cartes cliquables
 
 #### Liens
-- [x] Wiki-links `[[Nom du nœud]]` dans le contenu
 - [x] Liens symboliques (un nœud dans plusieurs emplacements)
 - [x] Backlinks automatiques
 - [x] Suppression des symlinks sans toucher l'original
 - [x] Détection des liens cassés
+- [ ] Wiki-links `[[Nom du nœud]]` cliquables (REPOUSSÉ V0.9+)
 
 #### Tags
 - [x] Système de tags dédié (champ séparé)
@@ -60,9 +60,12 @@
 #### Raccourcis clavier
 - [x] `Alt+N` : Nouveau nœud
 - [x] `Alt+E` : Focus éditeur
+- [x] `Alt+V` : Toggle view/edit
 - [x] `Ctrl+K` : Recherche
 - [x] `Escape` : Remonter au parent
 - [x] `↑↓←→` : Navigation arbre
+- [x] `Enter` : Activer nœud
+- [x] Documentation complète dans panneau droit
 
 #### Persistance
 - [x] LocalStorage pour les données
@@ -199,12 +202,15 @@ DeepMemo/
 - [x] **Navigation clavier fluide** : Implémentée avec système d'instance keys
 - [x] **Navigation ArrowLeft** : Remonte au parent si nœud replié/sans enfants
 
-### 🔗 Navigation via Liens Internes
+### 🔗 Navigation via Liens Internes (REPOUSSÉ V0.9+)
 
+**Note** : Fonctionnalité désactivée temporairement car le matching par titre est fragile (doublons, renommages). Nécessite refonte avec syntaxe `[[id:titre]]` ou auto-complétion intelligente.
+
+- [ ] **Wiki-links refactorés** : Syntaxe pointant vers ID au lieu de titre
+- [ ] **Auto-complétion** : Sélection intelligente à la saisie
 - [ ] **Sélection intelligente** : Choisir nœud original OU symlink le plus proche
 - [ ] **Distance euclidienne** : Calculer le symlink le plus proche du focus actuel
 - [ ] **Fallback sur original** : Si pas de symlink, ouvrir le nœud réel
-- [ ] **Liens `[[titre]]` cliquables** : Améliorer la navigation par wiki-links
 
 ### 🔗 Système d'URL Dynamique ✅ COMPLÉTÉ
 
@@ -219,32 +225,33 @@ DeepMemo/
 - [x] **Support navigation** : Boutons précédent/suivant du navigateur
 - [x] **Auto-expansion branche** : Branche dépliée automatiquement à l'ouverture
 
-### ⌨️ Raccourcis & UX
+### ⌨️ Raccourcis & UX ✅ COMPLÉTÉ
 
 - [x] **Toggle view/edit** : Bouton [Afficher]/[Éditer] fonctionnel
-- [ ] **Keyboard tips** : Mise à jour + déplacement en bas du right panel
-- [ ] **Modal Actions** : Déplacer bouton Supprimer dedans
-- [ ] **Masquage conditionnel** : Cacher arborescence modale si pas nécessaire
+- [x] **Raccourci Alt+V** : Toggle view/edit au clavier
+- [x] **Keyboard tips** : Documentation complète en bas du right panel
+- [x] **Modal Actions** : Bouton Supprimer déplacé dans modal
+- [x] **Masquage conditionnel** : Arborescence modale masquée par défaut
+- [x] **Triangles harmonisés** : Toggles du modal identiques à l'arbre principal
 
-### 👁️ Améliorations UI
+### 👁️ Améliorations UI ✅ COMPLÉTÉ
 
-- [ ] **Breadcrumb intelligent** : `.../parent/noeud_actuel` avec niveaux de taille
-- [ ] **Tags right panel** : Ne pas dupliquer avec center panel
-- [ ] **Import/Export** : Regrouper + harmoniser styles
-- [ ] **Titre contextuel** : Adapter selon profondeur (racine, niveau 1, niveau N)
+- [x] **Breadcrumb intelligent** : `.../parent/noeud_actuel` avec niveaux de taille
+- [x] **Import/Export** : Regroupés dans sidebar + styles harmonisés
+- [ ] **Tags right panel** : Ne pas dupliquer avec center panel (priorité basse)
 
-### 📄 Documentation & Tests
+### 📄 Documentation & Tests ✅ COMPLÉTÉ
 
-- [ ] **Audit .md files** : Cohérence et mise à jour
-- [ ] **JSDoc complet** : Documenter toutes les fonctions
-- [ ] **Guide migration** : Expliquer passage V0.7 → V0.8
-- [ ] **Tests manuels** : Checklist validation des symlinks
+- [x] **Audit .md files** : CLAUDE.md, TODO.md, ROADMAP.md mis à jour (20 déc 2025)
+- [x] **Documentation V0.8** : Complète et à jour
+- [ ] **JSDoc complet** : Documenter toutes les fonctions (priorité basse)
+- [ ] **Tests manuels** : Checklist validation des symlinks (priorité basse)
 
-### 🐛 Bugs Critiques à Corriger
+### 🐛 Bugs Critiques ✅ CORRIGÉS
 
-- [ ] **Bug noms identiques** : Investigation + fix (utiliser IDs partout)
-- [ ] **Références circulaires** : Protection lors création symlinks
-- [ ] **Perte de données** : Audit complet avant release
+- [x] **Bug noms identiques** : RÉSOLU - Utilisation exclusive des IDs
+- [x] **Références circulaires** : RÉSOLU - Détection automatique avec icône 🔄
+- [x] **Perte de données** : RÉSOLU - Système symlinks refactoré
 
 ---
 
@@ -376,6 +383,17 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 19 Décembre 2025
-**Version actuelle** : V0.8 (en cours)
+**Dernière mise à jour** : 20 Décembre 2025
+**Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ + DÉPLOYÉ)
 **Prochaine milestone** : V0.9 (Features avancées)
+
+---
+
+## 🎉 V0.8 - MIGRATION FINALE COMPLÉTÉE
+
+### ✅ Déploiement final (20 décembre 2025)
+- [x] **index.html** : Bascule vers `app-new.js` (type="module")
+- [x] **app.js → app-backup.js** : Legacy code conservé pour référence
+- [x] **Drag & drop simplifié** : Modificateur Shift supprimé (Ctrl + Ctrl+Alt uniquement)
+- [x] **Tests validation** : Toutes fonctionnalités opérationnelles en production
+- [x] **Documentation finale** : CLAUDE.md, TODO.md, ROADMAP.md à jour

@@ -25,9 +25,9 @@ Chaque nœud possède :
 - État persistant entre les sessions
 
 ### 🔗 Système de liens
-- **Wiki-links** : `[[Nom du nœud]]` crée des liens automatiques
-- **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (comme `ln -s` sous Linux)
+- **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (comme `ln -s` sous Linux), renommables indépendamment
 - **Backlinks** : Voir automatiquement tous les nœuds qui pointent vers le nœud actuel
+- **Wiki-links** : ⚠️ `[[Nom du nœud]]` temporairement désactivé (V0.9+ - refonte avec IDs)
 
 ### 🏷️ Tags
 - Système de tags dédié
@@ -55,11 +55,13 @@ Chaque nœud possède :
 - **Sidebar redimensionnable** : Ajustable à la souris
 - **Auto-collapse** : Arborescence repliée sauf chemin actif
 
-### 🎨 Drag & Drop
-- Déplacer des nœuds dans l'arborescence
-- Dupliquer (Ctrl + drag)
-- Créer des liens symboliques (Ctrl+Alt + drag)
-- Réorganiser l'ordre (drag sur zones haut/bas)
+### 🎨 Drag & Drop (V0.8 - Complet)
+- **Déplacer** : Glisser-déposer pour changer de parent ou réorganiser
+- **Dupliquer** : Ctrl + drag pour copier avec descendants
+- **Lier** : Ctrl+Alt + drag pour créer un lien symbolique
+- **Zones précises** : Indicateurs visuels before/after/inside
+- **Prévention cycles** : Détection automatique des références circulaires
+- **Support complet** : Fonctionne dans arbre ET liste enfants
 
 ### ⌨️ Raccourcis clavier
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
@@ -68,14 +70,18 @@ Chaque nœud possède :
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
-## 🏗️ Architecture actuelle (V0.8)
+## 🏗️ Architecture actuelle (V0.8 - Modulaire ES6)
 
 ### Format
-- **Multifile** : HTML + CSS + JS séparés
+- **Multifile modulaire** : HTML + CSS + JS ES6 modules
 - `index.html` : Structure HTML minimale
-- `src/css/style.css` : Tous les styles
-- `src/js/app.js` : Toute la logique
-- Vanilla JavaScript (pas de framework)
+- `src/css/` : Styles organisés (base, layout, components, utilities)
+- `src/js/app-new.js` : Point d'entrée principal
+- `src/js/core/` : Gestion données
+- `src/js/features/` : Modules fonctionnels (tree, editor, search, tags, drag-drop, modals)
+- `src/js/ui/` : Composants UI (toast, panels)
+- `src/js/utils/` : Utilitaires (routing, keyboard, helpers)
+- **100% Vanilla** JavaScript ES6+ (pas de framework)
 - CSS Variables pour le theming
 - LocalStorage pour la persistence
 

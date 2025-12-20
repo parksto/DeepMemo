@@ -24,3 +24,7 @@ build/
 
 # OS
 Thumbs.db
+
+# Claude Code
+.claude/
+CLAUDE.md

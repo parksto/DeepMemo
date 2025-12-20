@@ -1,0 +1,3238 @@
+    const app = {
+      data: { nodes: {}, rootNodes: [] },
+      currentNodeId: null,
+      currentInstanceKey: null, // Instance key du nœud sélectionné (pour active state)
+      sidebarVisible: true,
+      rightPanelVisible: true,
+      focusedTreeNodeId: null,
+      focusedInstanceKey: null, // Clé unique pour l'instance focusée (nodeId@parentId)
+      searchVisible: false,
+      searchResults: [],
+      selectedSearchResultIndex: 0,
+      expandedNodes: new Set(), // Mémoriser les nœuds dépliés (utilise instance keys)
+      symlinkModalExpandedNodes: new Set(), // État expand/collapse pour la modal symlink
+      actionModalExpandedNodes: new Set(), // État expand/collapse pour la modal actions
+      showAllTags: false, // Afficher tous les tags du cloud
+      viewMode: 'view', // 'view' (markdown rendered) ou 'edit'
+      branchMode: false, // Mode branche isolée activé ?
+      branchRootId: null, // ID du nœud racine de la branche isolée
+      isInitializing: true, // Flag pour éviter d'écraser l'URL pendant l'init
+
+      // Créer une clé unique pour une instance de nœud dans l'arbre
+      getInstanceKey(nodeId, parentContext) {
+        return parentContext === null ? `${nodeId}@root` : `${nodeId}@${parentContext}`;
+      },
+
+      // ===== GESTION DES URL =====
+
+      // Parser l'URL pour extraire les paramètres
+      parseURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const branchId = urlParams.get('branch');
+
+        const hash = window.location.hash;
+        let nodeId = null;
+        let view = 'view';
+
+        if (hash.startsWith('#/node/')) {
+          const parts = hash.substring(7).split('?');
+          nodeId = parts[0];
+
+          if (parts[1]) {
+            const hashParams = new URLSearchParams(parts[1]);
+            view = hashParams.get('view') || 'view';
+          }
+        }
+
+        return { branchId, nodeId, view };
+      },
+
+      // Mettre à jour l'URL sans recharger la page
+      updateURL(nodeId, options = {}) {
+        // Ne pas mettre à jour l'URL pendant l'initialisation
+        if (this.isInitializing) return;
+
+        const { replaceHistory = true } = options;
+
+        // Construire le hash
+        let hash = `#/node/${nodeId}`;
+        if (this.viewMode === 'edit') {
+          hash += `?view=edit`;
+        }
+
+        // Construire les query params
+        let search = '';
+        if (this.branchMode && this.branchRootId) {
+          search = `?branch=${this.branchRootId}`;
+        }
+
+        const newURL = `${window.location.pathname}${search}${hash}`;
+
+        if (replaceHistory) {
+          window.history.replaceState({}, '', newURL);
+        } else {
+          window.history.pushState({}, '', newURL);
+        }
+      },
+
+      // Activer le mode branche isolée
+      enableBranchMode(nodeId) {
+        const node = this.data.nodes[nodeId];
+        if (!node) return false;
+
+        this.branchMode = true;
+        this.branchRootId = nodeId;
+
+        // S'assurer que la branche est dépliée
+        const instanceKey = this.getInstanceKey(nodeId, null);
+        this.expandedNodes.add(instanceKey);
+        localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+
+        return true;
+      },
+
+      // Vérifier si un nœud est accessible en mode branche
+      isNodeInBranch(nodeId) {
+        if (!this.branchMode) return true;
+        if (nodeId === this.branchRootId) return true;
+
+        // Remonter les parents jusqu'à trouver branchRootId
+        let current = nodeId;
+        while (current) {
+          if (current === this.branchRootId) return true;
+          const node = this.data.nodes[current];
+          if (!node) return false;
+          current = node.parent;
+        }
+
+        return false;
+      },
+
+      // Écouter les changements d'URL (boutons précédent/suivant du navigateur)
+      setupURLListener() {
+        window.addEventListener('popstate', () => {
+          const { branchId, nodeId, view } = this.parseURL();
+
+          // Changer le mode branche si nécessaire
+          if (branchId && this.data.nodes[branchId]) {
+            if (!this.branchMode || this.branchRootId !== branchId) {
+              this.enableBranchMode(branchId);
+              this.render(); // Re-render l'arborescence
+            }
+          } else if (this.branchMode) {
+            // Désactiver le mode branche
+            this.branchMode = false;
+            this.branchRootId = null;
+            this.render();
+          }
+
+          // Changer le mode view si nécessaire
+          if (view && view !== this.viewMode) {
+            this.viewMode = view;
+            this.updateViewMode();
+          }
+
+          // Naviguer vers le nœud
+          if (nodeId && this.data.nodes[nodeId] && this.isNodeInBranch(nodeId)) {
+            this.selectNode(nodeId);
+          }
+        });
+
+        // Écouter aussi les changements de hash sans popstate
+        window.addEventListener('hashchange', (e) => {
+          // Éviter de traiter si c'est déjà géré par popstate
+          if (e.oldURL && e.newURL && e.oldURL !== e.newURL) {
+            const { nodeId, view } = this.parseURL();
+
+            if (view && view !== this.viewMode) {
+              this.viewMode = view;
+              this.updateViewMode();
+            }
+
+            if (nodeId && this.data.nodes[nodeId] && this.isNodeInBranch(nodeId)) {
+              // Ne pas appeler selectNode si on est déjà sur ce nœud
+              if (this.currentNodeId !== nodeId) {
+                this.selectNode(nodeId);
+              }
+            }
+          }
+        });
+      },
+
+      init() {
+        // Charger le mode de vue depuis localStorage
+        const savedViewMode = localStorage.getItem('deepmemo_viewMode');
+        if (savedViewMode) this.viewMode = savedViewMode;
+
+        // Charger l'état du right panel depuis localStorage
+        const savedRightPanelState = localStorage.getItem('deepmemo_rightPanelVisible');
+        if (savedRightPanelState !== null) {
+          this.rightPanelVisible = savedRightPanelState === 'true';
+          // Appliquer l'état initial
+          const panel = document.querySelector('.right-panel');
+          const externalBtn = document.querySelector('.right-panel-toggle-external');
+          if (!this.rightPanelVisible) {
+            panel.classList.add('hidden');
+            externalBtn.style.display = 'flex';
+          } else {
+            panel.classList.remove('hidden');
+            externalBtn.style.display = 'none';
+          }
+        }
+
+        this.loadData();
+        // Initialiser les backlinks pour les données existantes
+        if (this.data.rootNodes.length > 0) {
+          this.updateBacklinks();
+        }
+
+        // Créer les exemples si nécessaire
+        if (this.data.rootNodes.length === 0) {
+          this.createExampleNodes();
+        }
+
+        // Parser l'URL pour déterminer le nœud à afficher
+        const { branchId, nodeId, view } = this.parseURL();
+
+        // Activer le mode branche si demandé
+        if (branchId && this.data.nodes[branchId]) {
+          this.enableBranchMode(branchId);
+        }
+
+        // Appliquer le mode view depuis l'URL (priorité sur localStorage)
+        if (view) {
+          this.viewMode = view;
+        }
+
+        // Render initial
+        this.render();
+        this.updateNodeCounter();
+        this.setupKeyboardShortcuts();
+        this.setupSidebarResizer();
+        this.setupURLListener();
+
+        // Sélectionner le nœud cible
+        let targetNode = null;
+
+        // 1. Si un nodeId est dans l'URL, l'utiliser
+        if (nodeId && this.data.nodes[nodeId]) {
+          // Vérifier que le nœud est accessible en mode branche
+          if (this.isNodeInBranch(nodeId)) {
+            targetNode = nodeId;
+          }
+        }
+
+        // 2. Sinon, sélectionner le premier nœud disponible
+        if (!targetNode) {
+          const availableRoots = this.branchMode
+            ? [this.branchRootId]
+            : this.data.rootNodes;
+
+          if (availableRoots.length > 0) {
+            targetNode = availableRoots[0];
+          }
+        }
+
+        // Sélectionner le nœud
+        if (targetNode) {
+          this.selectNode(targetNode);
+        }
+
+        // Fin de l'initialisation
+        this.isInitializing = false;
+      },
+
+      createExampleNodes() {
+        const w = this.generateId(), n1 = this.generateId(), n2 = this.generateId();
+        this.data.nodes[w] = {
+          id: w,
+          type: 'node',
+          title: '👋 Bienvenue',
+          content: 'Bienvenue dans DeepMemo !\n\nUtilise Ctrl+K pour rechercher.\n\nTu peux créer des liens : [[📝 Notes]] et [[💡 Idées]]',
+          children: [n1, n2],
+          parent: null,
+          created: Date.now(),
+          modified: Date.now(),
+          links: ['📝 Notes', '💡 Idées'],
+          backlinks: [],
+          tags: ['bienvenue', 'guide']
+        };
+        this.data.nodes[n1] = {
+          id: n1,
+          type: 'node',
+          title: '📝 Notes',
+          content: 'Tes notes ici...\n\nRetour vers [[👋 Bienvenue]]',
+          children: [],
+          parent: w,
+          created: Date.now(),
+          modified: Date.now(),
+          links: ['👋 Bienvenue'],
+          backlinks: [w],
+          tags: ['note', 'exemple']
+        };
+        this.data.nodes[n2] = {
+          id: n2,
+          type: 'node',
+          title: '💡 Idées',
+          content: 'Tes idées ici...\n\nVoir aussi [[📝 Notes]]',
+          children: [],
+          parent: w,
+          created: Date.now(),
+          modified: Date.now(),
+          links: ['📝 Notes'],
+          backlinks: [w],
+          tags: ['idée', 'brainstorming']
+        };
+        this.data.rootNodes = [w];
+        this.updateBacklinks();
+        this.saveData();
+        // Déplier le nœud de bienvenue par défaut
+        this.expandedNodes.add(w);
+        this.render();
+      },
+
+      generateId() {
+        return 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      },
+
+      // Échapper les caractères HTML pour éviter les injections
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      },
+
+      setupKeyboardShortcuts() {
+        const searchInput = document.getElementById('searchInput');
+        const searchModal = document.getElementById('searchModal');
+
+        document.addEventListener('keydown', (e) => {
+          if (e.altKey && e.key === 'n') {
+            e.preventDefault();
+            this.currentNodeId ? this.createChildNode() : this.createRootNode();
+            this.showToast('Nouveau nœud créé', '➕');
+          }
+          if (e.altKey && e.key === 'e') {
+            e.preventDefault();
+            const editor = document.getElementById('nodeContent');
+            if (editor) {
+              editor.focus();
+              this.showToast('Mode édition', '✏️');
+            }
+          }
+          if (e.key === 'Escape' && this.currentNodeId && !this.searchVisible) {
+            e.preventDefault();
+            this.goToParent();
+          }
+          if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            this.openSearch();
+          }
+          if (!['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && !this.searchVisible) {
+            this.handleTreeNavigation(e);
+          }
+        });
+
+        searchInput.addEventListener('input', () => this.performSearch(searchInput.value));
+        searchInput.addEventListener('keydown', (e) => this.handleSearchNavigation(e));
+        searchModal.addEventListener('click', (e) => {
+          if (e.target === searchModal) this.closeSearch();
+        });
+      },
+
+      setupSidebarResizer() {
+        const resizer = document.getElementById('sidebarResizer');
+        const sidebar = document.querySelector('.sidebar');
+        let isResizing = false;
+        let startX = 0;
+        let startWidth = 0;
+
+        // Charger la largeur sauvegardée
+        const savedWidth = localStorage.getItem('deepmemo_sidebarWidth');
+        if (savedWidth) {
+          sidebar.style.width = savedWidth + 'px';
+        }
+
+        resizer.addEventListener('mousedown', (e) => {
+          isResizing = true;
+          startX = e.clientX;
+          startWidth = sidebar.offsetWidth;
+          resizer.classList.add('resizing');
+          document.body.style.cursor = 'ew-resize';
+          document.body.style.userSelect = 'none';
+          e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+          if (!isResizing) return;
+
+          const delta = e.clientX - startX;
+          const newWidth = startWidth + delta;
+          const minWidth = 265;
+          const maxWidth = 600;
+
+          if (newWidth >= minWidth && newWidth <= maxWidth) {
+            sidebar.style.width = newWidth + 'px';
+          }
+        });
+
+        document.addEventListener('mouseup', () => {
+          if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            // Sauvegarder la largeur
+            localStorage.setItem('deepmemo_sidebarWidth', sidebar.offsetWidth);
+          }
+        });
+      },
+
+      handleTreeNavigation(e) {
+        const visibleNodes = this.getVisibleTreeNodes();
+        if (visibleNodes.length === 0) return;
+
+        if (!this.focusedInstanceKey) {
+          if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
+            e.preventDefault();
+            this.focusedInstanceKey = visibleNodes[0];
+            this.updateTreeFocus();
+          }
+          return;
+        }
+
+        const currentIndex = visibleNodes.indexOf(this.focusedInstanceKey);
+        if (currentIndex === -1) return;
+
+        // Extraire le nodeId de l'instance key
+        const nodeId = this.focusedInstanceKey.split('@')[0];
+
+        switch(e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            if (currentIndex < visibleNodes.length - 1) {
+              this.focusedInstanceKey = visibleNodes[currentIndex + 1];
+              this.updateTreeFocus();
+              this.scrollTreeNodeIntoView(this.focusedInstanceKey);
+            }
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            if (currentIndex > 0) {
+              this.focusedInstanceKey = visibleNodes[currentIndex - 1];
+              this.updateTreeFocus();
+              this.scrollTreeNodeIntoView(this.focusedInstanceKey);
+            }
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            this.expandTreeNode(this.focusedInstanceKey);
+            break;
+          case 'ArrowLeft':
+            e.preventDefault();
+            // Si le nœud est déjà replié ou n'a pas d'enfants, remonter au parent
+            const element = document.querySelector(`[data-instance-key="${this.focusedInstanceKey}"]`);
+            const treeNode = element?.closest('.tree-node');
+            const isExpanded = treeNode?.classList.contains('expanded');
+            const node = this.data.nodes[nodeId];
+            const displayNode = node?.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+            const hasChildren = displayNode && displayNode.children.length > 0;
+
+            if (isExpanded && hasChildren) {
+              // Si le nœud est ouvert et a des enfants, le replier
+              this.collapseTreeNode(this.focusedInstanceKey);
+            } else if (node?.parent !== undefined && node.parent !== null) {
+              // Sinon, remonter au parent
+              // L'instance key a le format: nodeId@parentContext
+              // Par exemple: "child@parent@root" ou "child@parent@grandparent@root"
+              const atIndex = this.focusedInstanceKey.indexOf('@');
+              if (atIndex === -1) {
+                // Pas de parent (nœud racine), ne rien faire
+                break;
+              }
+
+              const parentContext = this.focusedInstanceKey.substring(atIndex + 1);
+
+              if (parentContext === 'root') {
+                // Le parent est la racine (nœud de niveau 1), ne rien faire
+                break;
+              }
+
+              // Extraire le parent ID du contexte
+              // parentContext peut être "parent@root" ou "parent@grandparent@root"
+              const parentAtIndex = parentContext.indexOf('@');
+              let parentInstanceKey;
+
+              if (parentAtIndex === -1) {
+                // Cas impossible normalement, mais par sécurité
+                parentInstanceKey = this.getInstanceKey(node.parent, null);
+              } else {
+                const parentId = parentContext.substring(0, parentAtIndex);
+                const grandParentContext = parentContext.substring(parentAtIndex + 1);
+                parentInstanceKey = this.getInstanceKey(parentId, grandParentContext === 'root' ? null : grandParentContext);
+              }
+
+              this.focusedInstanceKey = parentInstanceKey;
+              this.updateTreeFocus();
+              this.scrollTreeNodeIntoView(this.focusedInstanceKey);
+            }
+            break;
+          case 'Enter':
+            e.preventDefault();
+            this.currentInstanceKey = this.focusedInstanceKey; // Sync avec le highlight
+            this.selectNode(nodeId);
+            break;
+        }
+      },
+
+      getVisibleTreeNodes() {
+        const visible = [];
+        const traverse = (nodeId, parentContext, isRootLevel = false) => {
+          const instanceKey = this.getInstanceKey(nodeId, parentContext);
+          const node = this.data.nodes[nodeId];
+          const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
+
+          // Vérifier si ce nœud est réellement visible (rendu dans le DOM)
+          if (!element) return;
+
+          visible.push(instanceKey);
+
+          const parent = element?.closest('.tree-node');
+
+          // Pour les symlinks, afficher les enfants du nœud cible
+          const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+          const hasChildren = displayNode && displayNode.children.length > 0;
+
+          if (hasChildren && parent?.classList.contains('expanded')) {
+            // Traverser les enfants
+            displayNode.children.forEach(childId => traverse(childId, instanceKey, false));
+          }
+        };
+
+        // Parcourir tous les nœuds racines (y compris les symlinks à la racine)
+        this.data.rootNodes.forEach(nodeId => traverse(nodeId, null, true));
+
+        return visible;
+      },
+
+      updateTreeFocus() {
+        document.querySelectorAll('.tree-node-content').forEach(el => el.classList.remove('focused'));
+
+        // Si focusedInstanceKey n'est pas défini mais qu'on a un currentNodeId,
+        // trouver la première instance visible du nœud
+        if (!this.focusedInstanceKey && this.currentNodeId) {
+          const elements = document.querySelectorAll(`[data-node-id="${this.currentNodeId}"]`);
+          if (elements.length > 0) {
+            const instanceKey = elements[0].getAttribute('data-instance-key');
+            if (instanceKey) {
+              this.focusedInstanceKey = instanceKey;
+            }
+          }
+        }
+
+        if (this.focusedInstanceKey) {
+          const element = document.querySelector(`[data-instance-key="${this.focusedInstanceKey}"]`);
+          if (element) element.classList.add('focused');
+        }
+      },
+
+      updateTreeActive() {
+        document.querySelectorAll('.tree-node-content').forEach(el => el.classList.remove('active'));
+
+        // Si currentInstanceKey n'est pas défini mais qu'on a un currentNodeId,
+        // trouver la première instance visible du nœud
+        if (!this.currentInstanceKey && this.currentNodeId) {
+          const elements = document.querySelectorAll(`[data-node-id="${this.currentNodeId}"]`);
+          if (elements.length > 0) {
+            const instanceKey = elements[0].getAttribute('data-instance-key');
+            if (instanceKey) {
+              this.currentInstanceKey = instanceKey;
+            }
+          }
+        }
+
+        if (this.currentInstanceKey) {
+          const element = document.querySelector(`[data-instance-key="${this.currentInstanceKey}"]`);
+          if (element) {
+            element.classList.add('active');
+          }
+        }
+      },
+
+      scrollTreeNodeIntoView(instanceKey) {
+        const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
+        if (element) element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      },
+
+      // Déplier le chemin complet vers un nœud
+      expandPathToNode(nodeId) {
+        const path = [];
+        let currentId = nodeId;
+
+        // Collecter tous les parents
+        while (currentId) {
+          const node = this.data.nodes[currentId];
+          if (node) {
+            if (node.parent !== null) {
+              path.unshift(node.parent); // Ajouter le parent (pas le nœud lui-même)
+            }
+            currentId = node.parent;
+          } else break;
+        }
+
+        // Déplier tous les nœuds du chemin
+        path.forEach(id => {
+          this.expandedNodes.add(id);
+        });
+
+        // Sauvegarder
+        localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+      },
+
+      // Auto-collapse : replier toute l'arborescence sauf le chemin vers le nœud actif
+      autoCollapseTree() {
+        if (!this.currentInstanceKey) return;
+
+        // Construire le chemin en utilisant currentInstanceKey
+        // Format: "nodeId@parent@grandparent@root"
+        const pathInstanceKeys = new Set();
+
+        // Parser currentInstanceKey pour extraire tous les nœuds du chemin
+        const parts = this.currentInstanceKey.split('@');
+
+        // Exemple: "child@parent@root" -> parts = ["child", "parent", "root"]
+        // On doit créer les instance keys:
+        // - "parent@root" (parent au niveau racine)
+        // - "child@parent@root" (le nœud actif)
+
+        // Construire les instance keys du chemin en partant de la racine
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const nodeId = parts[i];
+          if (nodeId === 'root') continue; // Ignorer 'root'
+
+          // Construire le contexte parent pour cette instance
+          // Si i = parts.length - 2, context = null (nœud de niveau 1)
+          // Sinon, context = tous les parts après i+1
+          let context = null;
+          if (i < parts.length - 2) {
+            // Il y a des parents au-dessus
+            context = parts.slice(i + 1).join('@');
+          }
+
+          const instanceKey = this.getInstanceKey(nodeId, context);
+          pathInstanceKeys.add(instanceKey);
+        }
+
+        // Récupérer le nœud actif et vérifier s'il a des enfants
+        const currentNodeId = parts[0];
+        const currentNode = this.data.nodes[currentNodeId];
+
+        // Si c'est un symlink, obtenir le nœud cible pour vérifier les enfants
+        const displayNode = currentNode && currentNode.type === 'symlink'
+          ? this.data.nodes[currentNode.targetId]
+          : currentNode;
+
+        // Ajouter le nœud actif lui-même s'il a des enfants
+        if (displayNode && displayNode.children && displayNode.children.length > 0) {
+          pathInstanceKeys.add(this.currentInstanceKey);
+        }
+
+        // Remplacer expandedNodes par seulement les nœuds du chemin
+        this.expandedNodes = pathInstanceKeys;
+
+        // Sauvegarder
+        localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+      },
+
+      expandTreeNode(instanceKey) {
+        const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
+        const parent = element?.closest('.tree-node');
+        const toggle = element?.querySelector('.tree-node-toggle');
+        if (parent && !parent.classList.contains('expanded') && toggle) {
+          parent.classList.add('expanded');
+          toggle.textContent = '▼';
+          this.expandedNodes.add(instanceKey); // Sauvegarder l'état avec instance key
+          localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+        }
+      },
+
+      collapseTreeNode(instanceKey) {
+        const element = document.querySelector(`[data-instance-key="${instanceKey}"]`);
+        const parent = element?.closest('.tree-node');
+        const toggle = element?.querySelector('.tree-node-toggle');
+        if (parent && parent.classList.contains('expanded') && toggle) {
+          parent.classList.remove('expanded');
+          toggle.textContent = '▶';
+          this.expandedNodes.delete(instanceKey); // Sauvegarder l'état avec instance key
+          localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+        }
+      },
+
+      openSearch(prefillText = '') {
+        this.searchVisible = true;
+        const modal = document.getElementById('searchModal');
+        const input = document.getElementById('searchInput');
+        modal.classList.add('active');
+        
+        // Pré-remplir si un texte est fourni
+        if (prefillText) {
+          input.value = prefillText;
+          this.performSearch(prefillText);
+        } else {
+          this.performSearch('');
+        }
+        
+        setTimeout(() => {
+          input.focus();
+          if (prefillText) {
+            input.select(); // Sélectionner le texte pour faciliter la modification
+          }
+        }, 100);
+      },
+
+      closeSearch() {
+        this.searchVisible = false;
+        const modal = document.getElementById('searchModal');
+        const input = document.getElementById('searchInput');
+        modal.classList.remove('active');
+        input.value = '';
+        this.searchResults = [];
+        this.selectedSearchResultIndex = 0;
+      },
+
+      performSearch(query) {
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (!query.trim()) {
+          resultsContainer.innerHTML = '<div class="search-empty"><div class="search-empty-icon">💭</div><div>Tape pour rechercher dans tes nœuds</div></div>';
+          this.searchResults = [];
+          return;
+        }
+
+        const results = [];
+        const queryLower = query.toLowerCase();
+
+        Object.values(this.data.nodes).forEach(node => {
+          const titleMatch = node.title.toLowerCase().includes(queryLower);
+          const contentMatch = node.content.toLowerCase().includes(queryLower);
+          const tagsMatch = node.tags && node.tags.some(tag => tag.toLowerCase().includes(queryLower));
+
+          if (titleMatch || contentMatch || tagsMatch) {
+            const path = this.getNodePath(node.id);
+            let preview = '';
+            
+            // Si match dans les tags, le mentionner
+            if (tagsMatch && !titleMatch) {
+              const matchingTags = node.tags.filter(tag => tag.toLowerCase().includes(queryLower));
+              preview = `🏷️ Tags: ${matchingTags.join(', ')}`;
+            } else if (contentMatch) {
+              const index = node.content.toLowerCase().indexOf(queryLower);
+              const start = Math.max(0, index - 50);
+              const end = Math.min(node.content.length, index + query.length + 50);
+              preview = (start > 0 ? '...' : '') + node.content.substring(start, end) + (end < node.content.length ? '...' : '');
+            } else {
+              preview = node.content.substring(0, 100);
+            }
+
+            results.push({ 
+              id: node.id, 
+              title: node.title, 
+              path: path, 
+              preview: preview, 
+              matchInTitle: titleMatch,
+              matchInTags: tagsMatch && !titleMatch
+            });
+          }
+        });
+
+        this.searchResults = results;
+        this.selectedSearchResultIndex = 0;
+        this.renderSearchResults(query);
+      },
+
+      getNodePath(nodeId) {
+        const path = [];
+        let currentId = nodeId;
+        while (currentId) {
+          const node = this.data.nodes[currentId];
+          if (node) {
+            path.unshift(node.title);
+            currentId = node.parent;
+          } else break;
+        }
+        return path.join(' › ');
+      },
+
+      renderSearchResults(query) {
+        const resultsContainer = document.getElementById('searchResults');
+
+        if (this.searchResults.length === 0) {
+          resultsContainer.innerHTML = `<div class="search-empty"><div class="search-empty-icon">🤷</div><div>Aucun résultat pour "${query}"</div></div>`;
+          return;
+        }
+
+        let html = '';
+        this.searchResults.forEach((result, index) => {
+          const isSelected = index === this.selectedSearchResultIndex;
+          const titleHighlighted = this.highlightText(result.title, query);
+          const previewHighlighted = this.highlightText(result.preview, query);
+
+          html += `
+            <div class="search-result-item ${isSelected ? 'selected' : ''}" 
+                 onclick="app.selectSearchResult(${index})" data-result-index="${index}">
+              <div class="search-result-title">${titleHighlighted}</div>
+              <div class="search-result-path">${result.path}</div>
+              <div class="search-result-preview">${previewHighlighted}</div>
+            </div>
+          `;
+        });
+
+        resultsContainer.innerHTML = html;
+        this.scrollSearchResultIntoView();
+      },
+
+      highlightText(text, query) {
+        if (!query.trim()) return text;
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<span class="search-result-highlight">$1</span>');
+      },
+
+      handleSearchNavigation(e) {
+        if (this.searchResults.length === 0) return;
+
+        switch(e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            this.selectedSearchResultIndex = (this.selectedSearchResultIndex + 1) % this.searchResults.length;
+            this.renderSearchResults(document.getElementById('searchInput').value);
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            this.selectedSearchResultIndex = (this.selectedSearchResultIndex - 1 + this.searchResults.length) % this.searchResults.length;
+            this.renderSearchResults(document.getElementById('searchInput').value);
+            break;
+          case 'Enter':
+            e.preventDefault();
+            if (this.searchResults[this.selectedSearchResultIndex]) {
+              this.selectSearchResult(this.selectedSearchResultIndex);
+            }
+            break;
+          case 'Escape':
+            e.preventDefault();
+            this.closeSearch();
+            break;
+        }
+      },
+
+      selectSearchResult(index) {
+        if (!this.searchResults[index]) return;
+        const result = this.searchResults[index];
+        this.closeSearch();
+        
+        // Déplier l'arborescence jusqu'au nœud
+        this.expandPathToNode(result.id);
+        this.render(); // Re-render pour afficher les nœuds dépliés
+        
+        this.selectNode(result.id);
+        
+        // Scroll vers le nœud dans l'arborescence
+        setTimeout(() => {
+          this.scrollTreeNodeIntoView(result.id);
+        }, 100);
+        
+        this.showToast('Nœud ouvert', '🔍');
+      },
+
+      scrollSearchResultIntoView() {
+        const selectedElement = document.querySelector('.search-result-item.selected');
+        if (selectedElement) selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      },
+
+      goToParent() {
+        if (!this.currentNodeId) return;
+        const node = this.data.nodes[this.currentNodeId];
+        if (node.parent) {
+          this.selectNode(node.parent);
+          this.showToast('Remonté au parent', '⬆️');
+        } else {
+          this.showToast('Déjà à la racine', '🏠');
+        }
+      },
+
+      toggleSidebar() {
+        this.sidebarVisible = !this.sidebarVisible;
+        const sidebar = document.querySelector('.sidebar');
+        const externalBtn = document.querySelector('.sidebar-toggle-external');
+        
+        sidebar.classList.toggle('hidden');
+        
+        // Afficher/cacher le bouton externe
+        if (this.sidebarVisible) {
+          externalBtn.style.display = 'none';
+        } else {
+          externalBtn.style.display = 'flex';
+        }
+      },
+
+      toggleRightPanel() {
+        this.rightPanelVisible = !this.rightPanelVisible;
+        const panel = document.querySelector('.right-panel');
+        const externalBtn = document.querySelector('.right-panel-toggle-external');
+
+        panel.classList.toggle('hidden');
+
+        // Afficher/cacher le bouton externe
+        if (this.rightPanelVisible) {
+          externalBtn.style.display = 'none';
+        } else {
+          externalBtn.style.display = 'flex';
+        }
+
+        // Sauvegarder l'état dans localStorage
+        localStorage.setItem('deepmemo_rightPanelVisible', this.rightPanelVisible);
+      },
+
+      createRootNode() {
+        const id = this.generateId();
+        this.data.nodes[id] = {
+          id,
+          type: 'node',
+          title: 'Nouveau nœud',
+          content: '',
+          children: [],
+          parent: null,
+          created: Date.now(),
+          modified: Date.now(),
+          links: [],
+          tags: []
+        };
+        this.data.rootNodes.push(id);
+        this.saveData();
+        this.render();
+        this.selectNode(id);
+        this.updateNodeCounter();
+
+        // Auto-select le titre pour saisie immédiate
+        setTimeout(() => {
+          const titleInput = document.getElementById('nodeTitle');
+          if (titleInput) {
+            titleInput.focus();
+            titleInput.select();
+          }
+        }, 100);
+      },
+
+      createChildNode() {
+        if (!this.currentNodeId) return;
+        const id = this.generateId();
+        this.data.nodes[id] = {
+          id,
+          type: 'node',
+          title: 'Nouvel enfant',
+          content: '',
+          children: [],
+          parent: this.currentNodeId,
+          created: Date.now(),
+          modified: Date.now(),
+          links: [],
+          tags: []
+        };
+        this.data.nodes[this.currentNodeId].children.push(id);
+        this.saveData();
+        this.render();
+        this.updateChildren(); // Rafraîchir la liste des enfants
+        this.selectNode(id);
+        this.updateNodeCounter();
+
+        // Auto-select le titre pour saisie immédiate
+        setTimeout(() => {
+          const titleInput = document.getElementById('nodeTitle');
+          if (titleInput) {
+            titleInput.focus();
+            titleInput.select();
+          }
+        }, 100);
+      },
+
+      selectNode(id) {
+        // Gérer les symlinks : afficher le contenu du nœud cible
+        const node = this.data.nodes[id];
+        if (!node) return;
+
+        // Mémoriser l'ID sélectionné (peut être un symlink)
+        this.currentNodeId = id;
+        this.focusedTreeNodeId = id;
+
+        // Note: currentInstanceKey et focusedInstanceKey peuvent déjà être définis
+        // par le onclick handler dans render(). Dans ce cas, on les garde tels quels.
+        // Si ils ne sont pas définis (appel direct à selectNode), on les définira
+        // après le render() dans updateTreeActive() et updateTreeFocus()
+
+        // Pour les symlinks, obtenir le nœud cible pour afficher son contenu
+        const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+        if (!displayNode) {
+          // Symlink cassé - permettre quand même la sélection pour pouvoir le supprimer
+          document.getElementById('emptyState').style.display = 'none';
+          document.getElementById('editorContainer').style.display = 'flex';
+
+          document.getElementById('nodeTitle').value = node.title + ' (CASSÉ)';
+          const contentEditor = document.getElementById('nodeContent');
+          contentEditor.value = '⚠️ Ce lien symbolique pointe vers un nœud qui n\'existe plus.\n\nVous pouvez supprimer ce lien cassé.';
+          contentEditor.disabled = true;
+
+          this.updateBreadcrumb();
+          this.updateRightPanel();
+          this.updateDeleteButton();
+          this.render();
+          this.showToast('Lien symbolique cassé', '⚠️');
+          return;
+        }
+
+        // Réactiver l'éditeur si il était désactivé
+        document.getElementById('nodeContent').disabled = false;
+
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('editorContainer').style.display = 'flex';
+
+        // Afficher le titre et le contenu du nœud cible (ou du nœud normal)
+        document.getElementById('nodeTitle').value = displayNode.title;
+        const contentEditor = document.getElementById('nodeContent');
+        contentEditor.value = displayNode.content || '';
+
+        // Auto-resize du textarea
+        this.autoResizeTextarea(contentEditor);
+
+        document.getElementById('nodeMeta').textContent =
+          `Créé: ${new Date(displayNode.created).toLocaleDateString()}`;
+
+        // Afficher le preview avec liens cliquables si le contenu contient des liens
+        const preview = document.getElementById('contentPreview');
+        if (displayNode.content && displayNode.content.includes('[[')) {
+          preview.style.display = 'block';
+          preview.innerHTML = '<strong>🔎 Aperçu avec liens :</strong><br><br>' +
+            this.renderContentWithLinks(displayNode.content).replace(/\n/g, '<br>');
+        } else {
+          preview.style.display = 'none';
+        }
+
+        // Déplier l'arborescence pour afficher le nœud sélectionné
+        this.expandPathToNode(id);
+
+        this.updateBreadcrumb();
+        this.updateChildren();
+        this.updateRightPanel();
+        this.updateDeleteButton();
+        this.updateActionsButton();
+        this.renderTags();
+        this.updateViewMode(); // Mettre à jour le mode view/edit
+
+        // Auto-collapse : replier toute l'arborescence sauf le chemin actif
+        this.autoCollapseTree();
+
+        this.render();
+        this.updateTreeFocus(); // Appliquer la classe focused (outline) après le render
+        this.updateTreeActive(); // Appliquer la classe active (fond bleu) après le render
+
+        // Mettre à jour l'URL
+        this.updateURL(id);
+
+        // Mettre à jour le lien de partage
+        this.updateShareLink();
+
+        // Auto-scroll pour garder le nœud actif visible
+        setTimeout(() => {
+          this.scrollTreeNodeIntoView(this.currentInstanceKey);
+        }, 50);
+      },
+
+      // Mettre à jour le lien de partage
+      updateShareLink() {
+        const shareLink = document.getElementById('shareLink');
+        if (!shareLink || !this.currentNodeId) return;
+
+        // Construire l'URL complète
+        const baseURL = window.location.origin + window.location.pathname;
+        let search = '';
+        if (this.branchMode && this.branchRootId) {
+          search = `?branch=${this.branchRootId}`;
+        }
+        let hash = `#/node/${this.currentNodeId}`;
+        if (this.viewMode === 'edit') {
+          hash += `?view=edit`;
+        }
+
+        const fullURL = baseURL + search + hash;
+        shareLink.href = fullURL;
+
+        // Mettre à jour également le lien de branche
+        this.updateShareBranchLink();
+      },
+
+      // Mettre à jour le lien de partage de branche
+      updateShareBranchLink() {
+        const shareBranchLink = document.getElementById('shareBranchLink');
+        if (!shareBranchLink || !this.currentNodeId) return;
+
+        // Construire l'URL de branche isolée
+        const baseURL = window.location.origin + window.location.pathname;
+        let hash = `#/node/${this.currentNodeId}`;
+        if (this.viewMode === 'edit') {
+          hash += `?view=edit`;
+        }
+
+        const fullURL = `${baseURL}?branch=${this.currentNodeId}${hash}`;
+        shareBranchLink.href = fullURL;
+      },
+
+      // Partager le nœud (copier l'URL dans le presse-papier)
+      shareNode(event) {
+        event.preventDefault();
+
+        const shareLink = document.getElementById('shareLink');
+        const url = shareLink.href;
+
+        // Copier dans le presse-papier
+        navigator.clipboard.writeText(url).then(() => {
+          this.showToast('Lien copié dans le presse-papier', '📋');
+        }).catch(() => {
+          // Fallback si clipboard API n'est pas disponible
+          this.showToast('Lien disponible via clic droit', '🔗');
+        });
+      },
+
+      // Partager la branche (copier l'URL de branche dans le presse-papier)
+      shareBranch(event) {
+        event.preventDefault();
+
+        const shareBranchLink = document.getElementById('shareBranchLink');
+        const url = shareBranchLink.href;
+
+        // Copier dans le presse-papier
+        navigator.clipboard.writeText(url).then(() => {
+          this.showToast('Lien de branche copié dans le presse-papier', '🌳');
+        }).catch(() => {
+          // Fallback si clipboard API n'est pas disponible
+          this.showToast('Lien disponible via clic droit', '🌳');
+        });
+      },
+
+      // Auto-resize du textarea selon son contenu et l'espace disponible
+      autoResizeTextarea(textarea) {
+        if (!textarea) return;
+
+        const childrenSection = document.getElementById('childrenSection');
+        const hasChildren = childrenSection && childrenSection.style.display !== 'none';
+
+        // Gérer la classe CSS selon la présence d'enfants
+        if (hasChildren) {
+          textarea.classList.remove('expanded');
+        } else {
+          textarea.classList.add('expanded');
+        }
+
+        // Calculer la hauteur du textarea
+        textarea.style.height = 'auto';
+        const scrollHeight = textarea.scrollHeight;
+        const minHeight = 100;
+
+        let maxHeight;
+        if (hasChildren) {
+          // Si on a des enfants, limiter la hauteur pour laisser de la place
+          maxHeight = 400;
+        } else {
+          // Si pas d'enfants, calculer l'espace disponible dans la fenêtre
+          const editorContainer = document.getElementById('editorContainer');
+          const contentHeader = document.querySelector('.content-header');
+          const contentActions = document.querySelector('.content-actions');
+          const breadcrumb = document.getElementById('breadcrumb');
+
+          if (editorContainer && contentHeader && contentActions && breadcrumb) {
+            const windowHeight = window.innerHeight;
+            const usedHeight = breadcrumb.offsetHeight + contentHeader.offsetHeight + contentActions.offsetHeight + 100; // marges + padding
+            const availableHeight = windowHeight - usedHeight;
+            maxHeight = Math.floor(Math.max(400, availableHeight));
+          } else {
+            maxHeight = 400;
+          }
+        }
+
+        textarea.style.height = Math.floor(Math.min(Math.max(scrollHeight, minHeight), maxHeight)) + 'px';
+      },
+
+      updateBreadcrumb() {
+        const breadcrumb = document.getElementById('breadcrumb');
+        const path = [];
+        let currentId = this.currentNodeId;
+
+        while (currentId) {
+          const node = this.data.nodes[currentId];
+          if (node) {
+            path.unshift({ id: currentId, title: node.title });
+            currentId = node.parent;
+          } else break;
+        }
+
+        let html = '<span class="breadcrumb-item" onclick="app.selectNode(null)">🏠</span>';
+        path.forEach((item, index) => {
+          if (index > 0) html += '<span class="breadcrumb-separator">›</span>';
+          const isCurrent = index === path.length - 1;
+          html += `<span class="breadcrumb-item ${isCurrent ? 'current' : ''}" 
+                   ${!isCurrent ? `onclick="app.selectNode('${item.id}')"` : ''}>
+                   ${item.title}</span>`;
+        });
+
+        breadcrumb.innerHTML = html;
+      },
+
+      updateChildren() {
+        const node = this.data.nodes[this.currentNodeId];
+        const section = document.getElementById('childrenSection');
+        const grid = document.getElementById('childrenGrid');
+
+        // Pour les symlinks, afficher les enfants du nœud cible
+        const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+        if (!displayNode) {
+          section.style.display = 'none';
+          return;
+        }
+
+        const totalChildren = displayNode.children.length;
+
+        if (totalChildren === 0) {
+          section.style.display = 'none';
+          return;
+        }
+
+        section.style.display = 'block';
+        document.getElementById('childrenCount').textContent = totalChildren;
+
+        grid.innerHTML = '';
+
+        // Afficher tous les enfants (nœuds réguliers + symlinks)
+        displayNode.children.forEach(childId => {
+          const child = this.data.nodes[childId];
+          if (!child) return;
+
+          const isSymlink = child.type === 'symlink';
+          const displayNode = isSymlink ? this.data.nodes[child.targetId] : child;
+
+          if (!displayNode) {
+            // Symlink cassé
+            const card = document.createElement('div');
+            card.className = 'child-card broken-symlink';
+            card.style.opacity = '0.5';
+            card.innerHTML = `
+              <div class="child-card-icon">⚠️</div>
+              <div class="child-card-title">${child.title} (cassé)</div>
+              <div class="child-card-preview">Lien symbolique cassé</div>
+            `;
+            grid.appendChild(card);
+            return;
+          }
+
+          const icon = isSymlink ? '🔗' : (displayNode.children.length > 0 ? '📂' : '📄');
+          const preview = displayNode.content?.substring(0, 50) || 'Vide';
+
+          const card = document.createElement('div');
+          card.className = isSymlink ? 'child-card symlink-card' : 'child-card';
+          if (isSymlink) {
+            card.style.border = '1px dashed var(--accent)';
+            card.style.opacity = '0.9';
+          }
+
+          // Pour les symlinks, cliquer ouvre le nœud cible
+          const targetId = isSymlink ? child.targetId : childId;
+          card.onclick = () => this.selectNode(targetId);
+
+          // Drag & Drop
+          card.setAttribute('draggable', 'true');
+          card.addEventListener('dragstart', (e) => this.handleDragStart(e, childId));
+          card.addEventListener('dragend', (e) => this.handleDragEnd(e));
+          card.addEventListener('dragover', (e) => this.handleDragOver(e));
+          card.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+          card.addEventListener('drop', (e) => this.handleDrop(e, childId));
+
+          const titleStyle = isSymlink ? 'font-style: italic;' : '';
+          const badge = isSymlink ? ' <span class="symlink-badge">lien</span>' : '';
+
+          card.innerHTML = `
+            <div class="child-card-icon">${icon}</div>
+            <div class="child-card-title" style="${titleStyle}">${child.title}${badge}</div>
+            <div class="child-card-preview">${preview}</div>
+          `;
+
+          grid.appendChild(card);
+        });
+      },
+
+      updateRightPanel() {
+        const node = this.data.nodes[this.currentNodeId];
+        const panel = document.getElementById('panelBody');
+
+        // Pour les symlinks, afficher les infos du nœud cible
+        const displayNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+        if (!displayNode) {
+          panel.innerHTML = '<div class="info-section"><h3>⚠️ Lien cassé</h3></div>';
+          return;
+        }
+
+        let html = '<div class="info-section"><h3>Structure</h3>';
+        html += `<div class="info-item"><div class="info-label">Enfants</div>${displayNode.children.length} nœud(s)</div>`;
+
+        if (node.parent) {
+          const parentNode = this.data.nodes[node.parent];
+          html += `<div class="info-item"><div class="info-label">Parent</div>${parentNode.title}</div>`;
+        }
+
+        // Si c'est un symlink, montrer aussi le nœud cible
+        if (node.type === 'symlink') {
+          html += `<div class="info-item"><div class="info-label">🔗 Pointe vers</div>${displayNode.title}</div>`;
+        }
+
+        html += '</div>';
+
+        // Section Liens
+        html += '<div class="info-section"><h3>🔗 Liens</h3>';
+        if (displayNode.links && displayNode.links.length > 0) {
+          displayNode.links.forEach(linkTitle => {
+            const targetNode = this.findNodeByTitle(linkTitle);
+            if (targetNode) {
+              html += `<div class="info-item link-item" onclick="app.selectNode('${targetNode.id}')" title="Cliquer pour ouvrir">
+                → ${linkTitle}
+              </div>`;
+            } else {
+              html += `<div class="info-item broken-link">→ ${linkTitle} (non trouvé)</div>`;
+            }
+          });
+        } else {
+          html += '<div class="info-item" style="opacity: 0.5;">Aucun lien</div>';
+        }
+        html += '</div>';
+
+        // Section Backlinks
+        html += '<div class="info-section"><h3>⬅️ Mentionné dans</h3>';
+        if (displayNode.backlinks && displayNode.backlinks.length > 0) {
+          displayNode.backlinks.forEach(backlinkId => {
+            const sourceNode = this.data.nodes[backlinkId];
+            if (sourceNode) {
+              html += `<div class="info-item link-item" onclick="app.selectNode('${backlinkId}')" title="Cliquer pour ouvrir">
+                ← ${sourceNode.title}
+              </div>`;
+            }
+          });
+        } else {
+          html += '<div class="info-item" style="opacity: 0.5;">Aucun backlink</div>';
+        }
+        html += '</div>';
+
+        // Section Symlinks - Trouver les symlinks qui pointent vers le nœud affiché
+        html += '<div class="info-section"><h3>🔗 Liens symboliques</h3>';
+        // Si on affiche un symlink, chercher les symlinks vers le nœud cible
+        const targetId = node.type === 'symlink' ? node.targetId : this.currentNodeId;
+        const symlinksToThisNode = Object.values(this.data.nodes).filter(n =>
+          n.type === 'symlink' && n.targetId === targetId
+        );
+
+        if (symlinksToThisNode.length > 0) {
+          html += '<div class="info-label">Ce nœud est référencé par :</div>';
+          symlinksToThisNode.forEach(symlink => {
+            const parentNode = symlink.parent === null ? null : this.data.nodes[symlink.parent];
+            const locationText = parentNode ? `📂 ${parentNode.title}` : '🏠 Racine';
+
+            html += `<div class="info-item" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <span class="link-item" onclick="app.selectNode('${symlink.id}')" style="flex: 1; cursor: pointer;" title="Cliquer pour ouvrir">
+                ${locationText} → ${symlink.title}
+              </span>
+            </div>`;
+          });
+        } else {
+          html += '<div class="info-item" style="opacity: 0.5;">Aucun lien symbolique</div>';
+        }
+        html += '</div>';
+
+        // Section Tags
+        html += '<div class="info-section"><h3>🏷️ Tags</h3>';
+        if (displayNode.tags && displayNode.tags.length > 0) {
+          displayNode.tags.forEach(tag => {
+            const escapedTag = this.escapeHtml(tag);
+            html += `<div class="info-item link-item"
+                          onclick="app.openSearch('${escapedTag}')"
+                          style="cursor: pointer;"
+                          title="Cliquer pour rechercher ce tag">
+                       🏷️ ${escapedTag}
+                     </div>`;
+          });
+        } else {
+          html += '<div class="info-item" style="opacity: 0.5;">Aucun tag</div>';
+        }
+        html += '</div>';
+
+        // Section Tags Cloud de la branche
+        html += '<div class="info-section"><h3>☁️ Tags de la branche</h3>';
+        const branchTags = this.collectBranchTags();
+        
+        if (branchTags.length > 0) {
+          // Calculer les tailles pour le cloud (basé sur la fréquence)
+          const maxCount = Math.max(...branchTags.map(t => t.count));
+          const minSize = 11;
+          const maxSize = 18;
+          
+          const maxTagsToShow = 10;
+          const tagsToDisplay = this.showAllTags ? branchTags : branchTags.slice(0, maxTagsToShow);
+          const remainingCount = branchTags.length - maxTagsToShow;
+          
+          html += '<div class="tag-cloud">';
+          tagsToDisplay.forEach(item => {
+            // Taille proportionnelle à la fréquence
+            const size = minSize + ((item.count / maxCount) * (maxSize - minSize));
+            const escapedTag = this.escapeHtml(item.tag);
+            
+            html += `
+              <div class="tag-cloud-item" 
+                   style="--tag-size: ${size}px;"
+                   onclick="app.openSearch('${escapedTag}')"
+                   title="${item.count} occurrence(s) - Cliquer pour rechercher">
+                🏷️ ${escapedTag}
+              </div>
+            `;
+          });
+          
+          // Bouton pour afficher plus
+          if (!this.showAllTags && remainingCount > 0) {
+            html += `
+              <div class="tag-cloud-item" 
+                   style="--tag-size: 12px; cursor: pointer; background: var(--accent); color: white;"
+                   onclick="app.toggleShowAllTags()"
+                   title="Afficher ${remainingCount} tag(s) de plus">
+                + ${remainingCount}
+              </div>
+            `;
+          }
+          
+          // Bouton pour afficher moins
+          if (this.showAllTags && branchTags.length > maxTagsToShow) {
+            html += `
+              <div class="tag-cloud-item" 
+                   style="--tag-size: 12px; cursor: pointer; background: var(--bg-tertiary);"
+                   onclick="app.toggleShowAllTags()"
+                   title="Réduire">
+                − Réduire
+              </div>
+            `;
+          }
+          
+          html += '</div>';
+        } else {
+          html += '<div class="info-item" style="opacity: 0.5;">Aucun tag dans la branche</div>';
+        }
+        html += '</div>';
+
+        html += '<div class="info-section"><h3>Statistiques</h3>';
+        const content = displayNode.content || '';
+        html += `<div class="info-item"><div class="info-label">Caractères</div>${content.length}</div>`;
+        html += `<div class="info-item"><div class="info-label">Mots</div>${content.split(/\s+/).filter(w => w).length}</div>`;
+        html += '</div>';
+
+        panel.innerHTML = html;
+      },
+
+      saveCurrentNode() {
+        if (!this.currentNodeId) return;
+        const node = this.data.nodes[this.currentNodeId];
+
+        if (node.type === 'symlink') {
+          // Pour un symlink : sauvegarder le titre sur le symlink lui-même
+          node.title = document.getElementById('nodeTitle').value;
+          node.modified = Date.now();
+
+          // Sauvegarder le contenu sur le nœud cible
+          const targetNode = this.data.nodes[node.targetId];
+          if (targetNode) {
+            targetNode.content = document.getElementById('nodeContent').value;
+            targetNode.modified = Date.now();
+
+            // Parser les liens dans le contenu
+            targetNode.links = this.parseLinks(targetNode.content);
+          }
+        } else {
+          // Pour un nœud normal : sauvegarder titre et contenu normalement
+          node.title = document.getElementById('nodeTitle').value;
+          node.content = document.getElementById('nodeContent').value;
+          node.modified = Date.now();
+
+          // Parser les liens dans le contenu
+          node.links = this.parseLinks(node.content);
+        }
+
+        // Mettre à jour tous les backlinks
+        this.updateBacklinks();
+
+        this.saveData();
+        this.render();
+        this.updateBreadcrumb();
+        this.updateChildren();
+        this.updateRightPanel();
+      },
+
+      deleteCurrentNode() {
+        const node = this.data.nodes[this.currentNodeId];
+        if (!node) return;
+
+        // Message différent pour les symlinks
+        const isSymlink = node.type === 'symlink';
+        const confirmMessage = isSymlink
+          ? 'Supprimer ce lien symbolique ?'
+          : 'Supprimer ce nœud et tous ses enfants ?';
+
+        if (!confirm(confirmMessage)) return;
+
+        // Si c'est un symlink, on supprime juste le symlink (pas le nœud cible)
+        if (isSymlink) {
+          // Retirer des enfants du parent
+          if (node.parent) {
+            const parent = this.data.nodes[node.parent];
+            parent.children = parent.children.filter(id => id !== this.currentNodeId);
+          } else {
+            this.data.rootNodes = this.data.rootNodes.filter(id => id !== this.currentNodeId);
+          }
+
+          // Supprimer juste le symlink
+          delete this.data.nodes[this.currentNodeId];
+
+          this.showToast('Lien symbolique supprimé', '🔗');
+        } else {
+          // Suppression récursive normale pour les nœuds
+          const deleteRecursive = (id) => {
+            const n = this.data.nodes[id];
+            n.children.forEach(childId => deleteRecursive(childId));
+            delete this.data.nodes[id];
+          };
+
+          const wasChild = !!node.parent;
+          const parentId = node.parent;
+
+          if (node.parent) {
+            const parent = this.data.nodes[node.parent];
+            parent.children = parent.children.filter(id => id !== this.currentNodeId);
+          } else {
+            this.data.rootNodes = this.data.rootNodes.filter(id => id !== this.currentNodeId);
+          }
+
+          deleteRecursive(this.currentNodeId);
+
+        }
+
+        // Navigation après suppression
+        const wasChild = !!node.parent;
+        const parentId = node.parent;
+
+        // Si on supprime un enfant, sélectionner le parent
+        if (wasChild && parentId && this.data.nodes[parentId]) {
+          this.selectNode(parentId);
+        } else {
+          this.currentNodeId = null;
+          document.getElementById('emptyState').style.display = 'flex';
+          document.getElementById('editorContainer').style.display = 'none';
+        }
+
+        this.saveData();
+        this.render();
+        this.updateNodeCounter();
+      },
+
+      // Mettre à jour le bouton supprimer selon le contexte
+      updateDeleteButton() {
+        const deleteBtn = document.getElementById('deleteBtn');
+        if (!deleteBtn) return;
+
+        // Vérifier si on regarde un symlink depuis un contexte spécifique
+        // Pour l'instant, on laisse toujours "Supprimer le nœud"
+        // Un vrai système de contexte viendrait ici
+        deleteBtn.textContent = '🗑️ Supprimer';
+        deleteBtn.onclick = () => this.deleteCurrentNode();
+      },
+
+      // Mettre à jour le bouton Actions selon le contexte (désactiver sur nœud racine)
+      updateActionsButton() {
+        const node = this.data.nodes[this.currentNodeId];
+        if (!node) return;
+
+        // Trouver le bouton Actions dans le HTML
+        const actionsButtons = document.querySelectorAll('.content-actions button');
+        actionsButtons.forEach(btn => {
+          if (btn.textContent.includes('Actions')) {
+            // Désactiver si c'est un nœud racine (parent === null)
+            if (node.parent === null) {
+              btn.disabled = true;
+              btn.style.opacity = '0.5';
+              btn.style.cursor = 'not-allowed';
+            } else {
+              btn.disabled = false;
+              btn.style.opacity = '1';
+              btn.style.cursor = 'pointer';
+            }
+          }
+        });
+      },
+
+
+      render() {
+        const container = document.getElementById('treeContainer');
+        container.innerHTML = '';
+
+        const renderNode = (nodeId, parentContext = null) => {
+          const node = this.data.nodes[nodeId];
+          if (!node) return null;
+
+          // Déterminer le type de nœud
+          const isSymlink = node.type === 'symlink';
+
+          // DÉTECTION DE CYCLE : Si c'est un symlink, vérifier que le nœud cible
+          // n'est pas déjà dans la chaîne des parents (évite les boucles infinies)
+          if (isSymlink && node.targetId) {
+            // Construire la liste des IDs dans le parent context
+            const ancestorIds = parentContext ? parentContext.split('@').filter(id => id !== 'root') : [];
+            ancestorIds.push(nodeId); // Ajouter le symlink lui-même
+
+            // Si le targetId est déjà un ancêtre, c'est une référence circulaire
+            if (ancestorIds.includes(node.targetId)) {
+              // Afficher le symlink comme "circulaire" sans ses enfants
+              const instanceKey = this.getInstanceKey(nodeId, parentContext);
+              const isActive = instanceKey === this.currentInstanceKey;
+
+              const div = document.createElement('div');
+              div.className = 'tree-node';
+              const content = document.createElement('div');
+              content.className = 'tree-node-content circular-symlink' + (isActive ? ' active' : '');
+              content.setAttribute('data-node-id', nodeId);
+              content.setAttribute('data-instance-key', instanceKey);
+              content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">🔄</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (circulaire)</span>';
+
+              // Rendre cliquable
+              content.onclick = () => {
+                this.currentInstanceKey = instanceKey;
+                this.focusedInstanceKey = instanceKey;
+                this.selectNode(nodeId);
+              };
+
+              div.appendChild(content);
+              return div;
+            }
+          }
+
+          // SYMLINK EXTERNE : Si en mode branche, vérifier si le symlink pointe hors de la branche
+          let isExternalSymlink = false;
+          if (isSymlink && node.targetId && this.branchMode) {
+            isExternalSymlink = !this.isNodeInBranch(node.targetId);
+          }
+
+          // Pour les symlinks, obtenir le nœud cible pour afficher ses enfants
+          const displayNode = isSymlink ? this.data.nodes[node.targetId] : node;
+          if (!displayNode) {
+            // Symlink cassé : afficher quand même le symlink mais cliquable
+            const instanceKey = this.getInstanceKey(nodeId, parentContext);
+            const isActive = instanceKey === this.currentInstanceKey;
+
+            const div = document.createElement('div');
+            div.className = 'tree-node';
+            const content = document.createElement('div');
+            content.className = 'tree-node-content broken-symlink' + (isActive ? ' active' : '');
+            content.setAttribute('data-node-id', nodeId);
+            content.setAttribute('data-instance-key', instanceKey);
+            content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">⚠️</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (lien cassé)</span>';
+
+            // Rendre cliquable pour permettre la suppression
+            content.onclick = () => {
+              this.currentInstanceKey = instanceKey;
+              this.focusedInstanceKey = instanceKey;
+              this.selectNode(nodeId);
+            };
+
+            div.appendChild(content);
+            return div;
+          }
+
+          // Clé unique pour cette instance
+          const instanceKey = this.getInstanceKey(nodeId, parentContext);
+
+          // Active seulement si c'est la bonne instance
+          const isActive = instanceKey === this.currentInstanceKey;
+
+          // Les symlinks n'ont jamais d'enfants directs (children[] est vide)
+          // Mais on peut afficher les enfants du nœud cible
+          const hasChildren = displayNode.children.length > 0;
+
+          const div = document.createElement('div');
+          // Utiliser l'état mémorisé avec la clé d'instance
+          const isExpanded = this.expandedNodes.has(instanceKey);
+          div.className = 'tree-node' + (isExpanded ? ' expanded' : '');
+          if (isSymlink) div.classList.add('symlink-node');
+
+          const content = document.createElement('div');
+          content.className = 'tree-node-content' + (isActive ? ' active' : '');
+          content.setAttribute('data-node-id', nodeId);
+          content.setAttribute('data-instance-key', instanceKey);
+
+          if (hasChildren) {
+            const toggle = document.createElement('span');
+            toggle.className = 'tree-node-toggle';
+            toggle.textContent = isExpanded ? '▼' : '▶';
+            toggle.onclick = (e) => {
+              e.stopPropagation();
+              div.classList.toggle('expanded');
+
+              // Sauvegarder l'état avec la clé d'instance
+              if (div.classList.contains('expanded')) {
+                this.expandedNodes.add(instanceKey);
+                toggle.textContent = '▼';
+              } else {
+                this.expandedNodes.delete(instanceKey);
+                toggle.textContent = '▶';
+              }
+
+              // Sauvegarder dans localStorage
+              localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+            };
+            content.appendChild(toggle);
+          } else {
+            const spacer = document.createElement('span');
+            spacer.style.width = '16px';
+            content.appendChild(spacer);
+          }
+
+          const icon = document.createElement('span');
+          icon.className = 'tree-node-icon';
+          icon.textContent = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : '📄';
+          content.appendChild(icon);
+
+          const title = document.createElement('span');
+          title.className = 'tree-node-title';
+          title.textContent = node.title; // Titre du nœud lui-même (peut être différent de la cible si symlink)
+
+          // Griser les symlinks externes
+          if (isExternalSymlink) {
+            title.style.opacity = '0.4';
+            title.style.fontStyle = 'italic';
+          }
+
+          content.appendChild(title);
+
+          if (isSymlink) {
+            const badge = document.createElement('span');
+            badge.className = 'symlink-badge';
+            badge.textContent = isExternalSymlink ? 'externe' : 'lien';
+            if (isExternalSymlink) {
+              badge.style.opacity = '0.5';
+            }
+            content.appendChild(badge);
+          }
+
+          content.onclick = () => {
+            // Ne pas permettre de cliquer sur les symlinks externes
+            if (isExternalSymlink) {
+              this.showToast('⚠️ Lien externe à la branche (non accessible)', '🚫');
+              return;
+            }
+
+            this.currentInstanceKey = instanceKey;
+            this.focusedInstanceKey = instanceKey;
+            // Toujours sélectionner le nodeId (qui est soit un node, soit un symlink)
+            // selectNode() va gérer le cas symlink en interne
+            this.selectNode(nodeId);
+          };
+
+          // Drag & Drop
+          content.setAttribute('draggable', 'true');
+          content.addEventListener('dragstart', (e) => this.handleDragStart(e, nodeId));
+          content.addEventListener('dragend', (e) => this.handleDragEnd(e));
+          content.addEventListener('dragover', (e) => this.handleDragOver(e));
+          content.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+          content.addEventListener('drop', (e) => this.handleDrop(e, nodeId));
+
+          div.appendChild(content);
+
+          if (hasChildren) {
+            const childrenDiv = document.createElement('div');
+            childrenDiv.className = 'tree-node-children';
+
+            // Afficher les enfants du nœud cible (pour symlinks) ou du nœud lui-même
+            displayNode.children.forEach(childId => {
+              const childElement = renderNode(childId, instanceKey);
+              if (childElement) childrenDiv.appendChild(childElement);
+            });
+
+            div.appendChild(childrenDiv);
+          }
+
+          return div;
+        };
+
+        // Rendre les nœuds : en mode branche, seulement la branche isolée
+        const rootNodesToRender = this.branchMode
+          ? [this.branchRootId]
+          : this.data.rootNodes;
+
+        rootNodesToRender.forEach(nodeId => {
+          const element = renderNode(nodeId, null);
+          if (element) container.appendChild(element);
+        });
+      },
+
+      updateNodeCounter() {
+        const count = Object.keys(this.data.nodes).length;
+        document.getElementById('nodeCounter').textContent = `${count} nœud${count > 1 ? 's' : ''}`;
+      },
+
+      showToast(message, icon) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastIcon').textContent = icon;
+        document.getElementById('toastMessage').textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      },
+
+      saveData() {
+        localStorage.setItem('deepmemo_data', JSON.stringify(this.data));
+        // Sauvegarder aussi l'état des nœuds dépliés
+        localStorage.setItem('deepmemo_expanded', JSON.stringify([...this.expandedNodes]));
+      },
+
+      loadData() {
+        const stored = localStorage.getItem('deepmemo_data');
+        if (stored) {
+          this.data = JSON.parse(stored);
+          // Migrer les anciens symlinks vers le nouveau format si nécessaire
+          this.migrateSymlinks();
+        }
+
+        // Restaurer l'état des nœuds dépliés
+        const expandedStored = localStorage.getItem('deepmemo_expanded');
+        if (expandedStored) {
+          this.expandedNodes = new Set(JSON.parse(expandedStored));
+        }
+      },
+
+      // Migration automatique des symlinks de l'ancien format vers le nouveau
+      migrateSymlinks() {
+        let migrated = false;
+
+        // Ajouter type: 'node' à tous les nœuds qui n'en ont pas
+        Object.values(this.data.nodes).forEach(node => {
+          if (!node.type) {
+            node.type = 'node';
+            migrated = true;
+          }
+        });
+
+        // Convertir les symlinks de l'ancien format (symlinkedIn[]) vers de vrais nœuds
+        Object.values(this.data.nodes).forEach(node => {
+          if (node.symlinkedIn && node.symlinkedIn.length > 0) {
+            node.symlinkedIn.forEach(parentId => {
+              // Créer un nouveau nœud symlink
+              const symlinkId = this.generateId();
+              const symlink = {
+                id: symlinkId,
+                type: 'symlink',
+                title: node.title, // Même titre par défaut
+                targetId: node.id,
+                parent: parentId,
+                children: [],
+                created: Date.now(),
+                modified: Date.now()
+              };
+
+              // Ajouter le symlink aux nodes
+              this.data.nodes[symlinkId] = symlink;
+
+              // Ajouter le symlink aux enfants du parent
+              if (parentId === null) {
+                if (!this.data.rootNodes.includes(symlinkId)) {
+                  this.data.rootNodes.push(symlinkId);
+                }
+              } else {
+                const parent = this.data.nodes[parentId];
+                if (parent && !parent.children.includes(symlinkId)) {
+                  parent.children.push(symlinkId);
+                }
+              }
+
+              migrated = true;
+            });
+
+            // Supprimer l'ancien champ symlinkedIn
+            delete node.symlinkedIn;
+          }
+        });
+
+        // Sauvegarder si migration effectuée
+        if (migrated) {
+          console.log('✅ Migration des symlinks effectuée');
+          this.saveData();
+        }
+      },
+
+      exportData() {
+        const dataStr = JSON.stringify(this.data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'deepmemo-export-' + Date.now() + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('Exporté', '💾');
+      },
+
+      importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (!imported.nodes || !imported.rootNodes) {
+              alert('Fichier JSON invalide');
+              return;
+            }
+
+            const nodeCount = Object.keys(imported.nodes).length;
+            if (confirm(`Importer ${nodeCount} nœud(s) ? Cela écrasera tes données actuelles.`)) {
+              this.data = imported;
+              this.currentNodeId = null;
+              this.saveData();
+              this.render();
+              this.updateNodeCounter();
+              
+              document.getElementById('emptyState').style.display = 'flex';
+              document.getElementById('editorContainer').style.display = 'none';
+              
+              this.showToast(`${nodeCount} nœud(s) importés`, '📥');
+            }
+          } catch (err) {
+            alert('Erreur lors de l\'import : ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+      },
+
+      // ===== LIENS =====
+
+      // Parser les liens [[comme ça]] dans le contenu
+      parseLinks(content) {
+        const regex = /\[\[([^\]]+)\]\]/g;
+        const links = [];
+        let match;
+        while ((match = regex.exec(content)) !== null) {
+          links.push(match[1].trim());
+        }
+        return [...new Set(links)]; // Dédupliquer
+      },
+
+      // Trouver un nœud par son titre
+      findNodeByTitle(title) {
+        return Object.values(this.data.nodes).find(
+          node => node.title.toLowerCase() === title.toLowerCase()
+        );
+      },
+
+      // Mettre à jour tous les backlinks
+      updateBacklinks() {
+        // Reset tous les backlinks
+        Object.values(this.data.nodes).forEach(node => {
+          if (!node.backlinks) node.backlinks = [];
+          node.backlinks = [];
+        });
+
+        // Recalculer les backlinks
+        Object.values(this.data.nodes).forEach(sourceNode => {
+          if (!sourceNode.links) return;
+          sourceNode.links.forEach(linkTitle => {
+            const targetNode = this.findNodeByTitle(linkTitle);
+            if (targetNode) {
+              if (!targetNode.backlinks) targetNode.backlinks = [];
+              if (!targetNode.backlinks.includes(sourceNode.id)) {
+                targetNode.backlinks.push(sourceNode.id);
+              }
+            }
+          });
+        });
+      },
+
+      // Rendre le contenu avec liens cliquables
+      renderContentWithLinks(content) {
+        return content.replace(/\[\[([^\]]+)\]\]/g, (match, title) => {
+          const node = this.findNodeByTitle(title.trim());
+          if (node) {
+            return `<span class="node-link" onclick="app.selectNode('${node.id}'); event.stopPropagation();">${title}</span>`;
+          }
+          return `<span class="broken-link" title="Nœud non trouvé">${title}</span>`;
+        });
+      },
+
+      // ===== SYMLINKS =====
+
+      selectedNodeForSymlink: null,
+
+      // ===== ACTIONS (Déplacer/Lien/Dupliquer) =====
+
+      selectedAction: null,
+      selectedDestination: null,
+
+      // Ouvrir la modal d'actions
+      openActionModal() {
+        if (!this.currentNodeId) return;
+        this.selectedAction = null;
+        this.selectedDestination = null;
+        
+        // Reset l'interface
+        document.querySelectorAll('#actionMove, #actionLink, #actionDuplicate').forEach(btn => {
+          btn.classList.remove('btn');
+          btn.classList.add('btn-secondary');
+        });
+        document.getElementById('actionDescription').textContent = 'Sélectionne une action ci-dessus';
+        document.getElementById('confirmActionBtn').disabled = true;
+        document.getElementById('actionNodeSelector').innerHTML = '';
+        
+        document.getElementById('actionModal').classList.add('active');
+      },
+
+      // Fermer la modal d'actions
+      closeActionModal() {
+        document.getElementById('actionModal').classList.remove('active');
+        this.selectedAction = null;
+        this.selectedDestination = null;
+      },
+
+      // Sélectionner une action
+      selectAction(action) {
+        this.selectedAction = action;
+        this.selectedDestination = null;
+        
+        // Mettre à jour les boutons
+        document.querySelectorAll('#actionMove, #actionLink, #actionDuplicate').forEach(btn => {
+          btn.classList.remove('btn');
+          btn.classList.add('btn-secondary');
+        });
+        
+        const actionBtn = document.getElementById('action' + action.charAt(0).toUpperCase() + action.slice(1));
+        actionBtn.classList.remove('btn-secondary');
+        actionBtn.classList.add('btn');
+        
+        // Mettre à jour la description
+        const descriptions = {
+          move: '↗️ <strong>Déplacer</strong> : Le nœud sera retiré de son emplacement actuel et placé dans la destination.',
+          link: '🔗 <strong>Lien symbolique</strong> : Le nœud restera à sa place ET apparaitra aussi dans la destination.',
+          duplicate: '📋 <strong>Dupliquer</strong> : Une copie complète sera créée dans la destination (avec tous ses enfants).'
+        };
+        document.getElementById('actionDescription').innerHTML = descriptions[action];
+        
+        // Afficher le sélecteur de destination
+        this.renderActionNodeSelector();
+        
+        document.getElementById('confirmActionBtn').disabled = true;
+      },
+
+      // Afficher le sélecteur de nœuds pour les actions
+      renderActionNodeSelector() {
+        const selector = document.getElementById('actionNodeSelector');
+        selector.innerHTML = '';
+        
+        // Fonction récursive pour créer l'arbre
+        const renderNode = (nodeId, level = 0) => {
+          if (nodeId === this.currentNodeId) return null;
+          if (this.isDescendantOf(nodeId, this.currentNodeId)) return null;
+
+          const node = this.data.nodes[nodeId];
+          const hasChildren = node.children.length > 0;
+          const isExpanded = this.actionModalExpandedNodes.has(nodeId);
+          
+          const nodeDiv = document.createElement('div');
+          nodeDiv.style.marginBottom = '2px';
+          
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'node-selector-item';
+          contentDiv.setAttribute('data-node-id', nodeId);
+          contentDiv.style.paddingLeft = (level * 20 + 10) + 'px';
+          contentDiv.style.display = 'flex';
+          contentDiv.style.alignItems = 'center';
+          contentDiv.style.gap = '8px';
+          
+          if (hasChildren) {
+            const toggle = document.createElement('span');
+            toggle.style.width = '16px';
+            toggle.style.height = '16px';
+            toggle.style.display = 'flex';
+            toggle.style.alignItems = 'center';
+            toggle.style.justifyContent = 'center';
+            toggle.style.fontSize = '10px';
+            toggle.style.cursor = 'pointer';
+            toggle.style.color = 'var(--text-secondary)';
+            toggle.textContent = isExpanded ? '▼' : '▶';
+            toggle.onclick = (e) => {
+              e.stopPropagation();
+              if (this.actionModalExpandedNodes.has(nodeId)) {
+                this.actionModalExpandedNodes.delete(nodeId);
+              } else {
+                this.actionModalExpandedNodes.add(nodeId);
+              }
+              this.renderActionNodeSelector();
+            };
+            contentDiv.appendChild(toggle);
+          } else {
+            const spacer = document.createElement('span');
+            spacer.style.width = '16px';
+            contentDiv.appendChild(spacer);
+          }
+          
+          const icon = document.createElement('span');
+          icon.style.fontSize = '16px';
+          icon.textContent = hasChildren ? '📂' : '📄';
+          contentDiv.appendChild(icon);
+          
+          const title = document.createElement('span');
+          title.textContent = node.title;
+          title.style.flex = '1';
+          title.style.fontSize = '14px';
+          title.style.whiteSpace = 'nowrap';
+          title.style.overflow = 'hidden';
+          title.style.textOverflow = 'ellipsis';
+          contentDiv.appendChild(title);
+          
+          contentDiv.onclick = () => {
+            this.selectActionDestination(nodeId);
+          };
+          
+          nodeDiv.appendChild(contentDiv);
+          
+          if (hasChildren && isExpanded) {
+            const childrenDiv = document.createElement('div');
+            node.children.forEach(childId => {
+              const childNode = renderNode(childId, level + 1);
+              if (childNode) childrenDiv.appendChild(childNode);
+            });
+            nodeDiv.appendChild(childrenDiv);
+          }
+          
+          return nodeDiv;
+        };
+        
+        const rootDiv = document.createElement('div');
+        rootDiv.className = 'node-selector-item';
+        rootDiv.style.marginBottom = '8px';
+        rootDiv.style.fontWeight = '600';
+        rootDiv.innerHTML = '🏠 Racine';
+        rootDiv.onclick = () => this.selectActionDestination(null);
+        selector.appendChild(rootDiv);
+        
+        this.data.rootNodes.forEach(nodeId => {
+          const nodeElement = renderNode(nodeId, 0);
+          if (nodeElement) selector.appendChild(nodeElement);
+        });
+      },
+
+      // Vérifier si un nœud est descendant d'un autre
+      isDescendantOf(nodeId, ancestorId) {
+        let current = nodeId;
+        while (current) {
+          const node = this.data.nodes[current];
+          if (!node) return false;
+          if (node.parent === ancestorId) return true;
+          current = node.parent;
+        }
+        return false;
+      },
+
+      // Vérifier si créer un symlink de targetId dans parentId créerait un cycle
+      wouldCreateCycle(targetId, parentId) {
+        // Si on crée un symlink vers targetId dans parentId,
+        // cela créerait un cycle si targetId est un ancêtre de parentId
+        if (parentId === null) return false; // Racine, pas de cycle possible
+
+        // Vérifier si targetId est un ancêtre de parentId
+        let current = parentId;
+        while (current) {
+          if (current === targetId) return true; // Cycle détecté !
+          const node = this.data.nodes[current];
+          if (!node) return false;
+          current = node.parent;
+        }
+
+        return false;
+      },
+
+      // Vérifier si déplacer nodeId dans newParentId créerait un cycle via des symlinks
+      // Cette fonction vérifie récursivement tous les descendants de nodeId pour voir
+      // si l'un d'eux contient un symlink qui pointe vers un ancêtre de newParentId
+      wouldCreateCycleWithMove(nodeId, newParentId) {
+        if (newParentId === null) return false; // Racine, pas de cycle
+
+        // Collecter tous les ancêtres du nouveau parent (la chaîne où on veut déplacer)
+        const ancestorIds = [newParentId]; // Inclure le parent lui-même
+        let current = newParentId;
+        while (current) {
+          const node = this.data.nodes[current];
+          if (!node) break;
+          if (node.parent) ancestorIds.push(node.parent);
+          current = node.parent;
+        }
+
+        // Vérifier récursivement tous les descendants de nodeId
+        const checkDescendants = (currentId) => {
+          const node = this.data.nodes[currentId];
+          if (!node) return false;
+
+          // Si c'est un symlink, vérifier que son targetId n'est pas dans les ancêtres
+          if (node.type === 'symlink' && node.targetId) {
+            if (ancestorIds.includes(node.targetId)) {
+              return true; // Cycle détecté !
+            }
+          }
+
+          // Vérifier récursivement les enfants
+          if (node.children) {
+            for (const childId of node.children) {
+              if (checkDescendants(childId)) return true;
+            }
+          }
+
+          return false;
+        };
+
+        return checkDescendants(nodeId);
+      },
+
+      // Sélectionner une destination
+      selectActionDestination(targetId) {
+        this.selectedDestination = targetId;
+        document.querySelectorAll('#actionNodeSelector .node-selector-item').forEach(el => el.classList.remove('selected'));
+        // Sélectionner l'élément par son data-node-id
+        const selector = targetId === null
+          ? '#actionNodeSelector .node-selector-item[style*="font-weight: 600"]' // Racine
+          : `#actionNodeSelector .node-selector-item[data-node-id="${targetId}"]`;
+        const element = document.querySelector(selector);
+        if (element) {
+          element.classList.add('selected');
+        }
+        document.getElementById('confirmActionBtn').disabled = false;
+      },
+
+      // Confirmer l'action
+      confirmAction() {
+        if (!this.selectedAction || this.selectedDestination === undefined) return;
+
+        // Si on est sur un symlink, utiliser le nœud cible pour les actions
+        const node = this.data.nodes[this.currentNodeId];
+        const targetNodeId = node && node.type === 'symlink' ? node.targetId : this.currentNodeId;
+
+        switch(this.selectedAction) {
+          case 'move':
+            this.moveNode(targetNodeId, this.selectedDestination);
+            break;
+          case 'link':
+            this.createSymlinkTo(targetNodeId, this.selectedDestination);
+            break;
+          case 'duplicate':
+            this.duplicateNode(targetNodeId, this.selectedDestination);
+            break;
+        }
+
+        this.closeActionModal();
+      },
+
+      // Dupliquer un nœud à une position spécifique (before/after)
+      duplicateNodeAt(nodeId, targetId, position) {
+        const targetNode = this.data.nodes[targetId];
+        const parentId = targetNode.parent;
+        
+        // Dupliquer le nœud (récursif)
+        const duplicateRecursive = (originalId, newParentId) => {
+          const original = this.data.nodes[originalId];
+          const newId = this.generateId();
+          
+          this.data.nodes[newId] = {
+            id: newId,
+            title: original.title + ' (copie)',
+            content: original.content,
+            children: [],
+            parent: newParentId,
+            created: Date.now(),
+            modified: Date.now(),
+            links: [...(original.links || [])],
+            tags: [...(original.tags || [])],
+            backlinks: []
+          };
+
+          // Dupliquer récursivement les enfants
+          original.children.forEach(childId => {
+            const newChildId = duplicateRecursive(childId, newId);
+            this.data.nodes[newId].children.push(newChildId);
+          });
+
+          return newId;
+        };
+
+        const newNodeId = duplicateRecursive(nodeId, parentId);
+        
+        // Obtenir le tableau des enfants du parent cible
+        let childrenArray;
+        if (parentId === null) {
+          childrenArray = this.data.rootNodes;
+        } else {
+          childrenArray = this.data.nodes[parentId].children;
+        }
+        
+        // Trouver la position de la cible
+        const targetIndex = childrenArray.indexOf(targetId);
+        
+        // Insérer selon la position
+        if (position === 'before') {
+          childrenArray.splice(targetIndex, 0, newNodeId);
+        } else { // 'after'
+          childrenArray.splice(targetIndex + 1, 0, newNodeId);
+        }
+        
+        this.saveData();
+        this.render();
+        this.updateChildren();
+        this.updateNodeCounter();
+        this.showToast('Nœud dupliqué à la position', '📋');
+      },
+
+      // Réorganiser l'ordre des nœuds (siblings)
+      reorderNodes(draggedId, targetId, position) {
+        const draggedNode = this.data.nodes[draggedId];
+        const targetNode = this.data.nodes[targetId];
+        const newParentId = targetNode.parent; // Parent de la CIBLE
+        const oldParentId = draggedNode.parent;
+        
+        // Retirer le nœud dragué de son ancien parent
+        if (oldParentId === null) {
+          this.data.rootNodes = this.data.rootNodes.filter(id => id !== draggedId);
+        } else {
+          this.data.nodes[oldParentId].children = this.data.nodes[oldParentId].children.filter(id => id !== draggedId);
+        }
+        
+        // Obtenir le tableau des enfants du parent de la cible (APRÈS le retrait)
+        let childrenArray;
+        if (newParentId === null) {
+          childrenArray = this.data.rootNodes;
+        } else {
+          childrenArray = this.data.nodes[newParentId].children;
+        }
+        
+        // Trouver la position de la cible
+        const targetIndex = childrenArray.indexOf(targetId);
+        
+        // Insérer selon la position
+        if (position === 'before') {
+          childrenArray.splice(targetIndex, 0, draggedId);
+        } else { // 'after'
+          childrenArray.splice(targetIndex + 1, 0, draggedId);
+        }
+        
+        // Mettre à jour le parent du nœud dragué
+        draggedNode.parent = newParentId;
+        
+        this.saveData();
+        this.render();
+        this.updateChildren();
+        this.showToast('Ordre modifié', '🔄');
+      },
+
+      // Déplacer un nœud
+      moveNode(nodeId, newParentId) {
+        const node = this.data.nodes[nodeId];
+        const oldParent = node.parent;
+
+        // PROTECTION : Ne pas déplacer dans ses propres descendants
+        if (newParentId !== null && this.isDescendantOf(newParentId, nodeId)) {
+          this.showToast('⚠️ Impossible : destination invalide', '🔄');
+          return;
+        }
+
+        // PROTECTION SYMLINKS : Vérifier qu'aucun descendant ne contient un symlink
+        // qui créerait une référence circulaire
+        if (this.wouldCreateCycleWithMove(nodeId, newParentId)) {
+          this.showToast('⚠️ Impossible : cela créerait une référence circulaire', '🔄');
+          return;
+        }
+
+        // Retirer de l'ancien parent
+        if (oldParent === null) {
+          this.data.rootNodes = this.data.rootNodes.filter(id => id !== nodeId);
+        } else {
+          const oldParentNode = this.data.nodes[oldParent];
+          oldParentNode.children = oldParentNode.children.filter(id => id !== nodeId);
+        }
+
+        // Ajouter au nouveau parent
+        if (newParentId === null) {
+          this.data.rootNodes.push(nodeId);
+        } else {
+          this.data.nodes[newParentId].children.push(nodeId);
+        }
+
+        node.parent = newParentId;
+
+        this.saveData();
+        this.render();
+        this.updateChildren(); // Rafraîchir la liste des enfants
+        this.showToast('Nœud déplacé', '↗️');
+      },
+
+      // Créer un symlink (nouveau format : vrai nœud de type symlink)
+      createSymlinkTo(nodeId, parentId) {
+        const targetNode = this.data.nodes[nodeId];
+        if (!targetNode) return;
+
+        // Vérifier que le symlink n'existe pas déjà
+        if (parentId === targetNode.parent) {
+          this.showToast('Lien déjà existant', '⚠️');
+          return;
+        }
+
+        // PROTECTION CYCLE 1 : Vérifier que le nœud cible n'est pas un ancêtre du parent
+        if (this.wouldCreateCycle(nodeId, parentId)) {
+          this.showToast('⚠️ Impossible : cela créerait une référence circulaire', '🔄');
+          return;
+        }
+
+        // PROTECTION CYCLE 2 : Vérifier que les descendants du nœud cible ne contiennent pas
+        // de symlink qui pointerait vers un ancêtre de parentId
+        if (this.wouldCreateCycleWithMove(nodeId, parentId)) {
+          this.showToast('⚠️ Impossible : cela créerait une référence circulaire', '🔄');
+          return;
+        }
+
+        // Vérifier s'il existe déjà un symlink vers ce nœud dans ce parent
+        const parent = parentId === null ? null : this.data.nodes[parentId];
+        const siblings = parentId === null ? this.data.rootNodes : (parent ? parent.children : []);
+
+        const existingSymlink = siblings.find(childId => {
+          const child = this.data.nodes[childId];
+          return child && child.type === 'symlink' && child.targetId === nodeId;
+        });
+
+        if (existingSymlink) {
+          this.showToast('Lien déjà existant', '⚠️');
+          return;
+        }
+
+        // Créer le nouveau nœud symlink
+        const symlinkId = this.generateId();
+        this.data.nodes[symlinkId] = {
+          id: symlinkId,
+          type: 'symlink',
+          title: targetNode.title, // Même titre que la cible par défaut
+          targetId: nodeId,
+          parent: parentId,
+          children: [],
+          created: Date.now(),
+          modified: Date.now()
+        };
+
+        // Ajouter le symlink aux enfants du parent
+        if (parentId === null) {
+          this.data.rootNodes.push(symlinkId);
+        } else {
+          parent.children.push(symlinkId);
+        }
+
+        this.saveData();
+        this.render();
+        this.updateChildren();
+        this.updateRightPanel();
+        this.showToast('Lien symbolique créé', '🔗');
+      },
+
+      // Dupliquer un nœud (récursif avec tous ses enfants)
+      duplicateNode(nodeId, newParentId) {
+        const duplicateRecursive = (originalId, parentId) => {
+          const original = this.data.nodes[originalId];
+          const newId = this.generateId();
+          
+          // Copier le nœud
+          this.data.nodes[newId] = {
+            id: newId,
+            title: original.title + ' (copie)',
+            content: original.content,
+            children: [],
+            parent: parentId,
+            created: Date.now(),
+            modified: Date.now(),
+            links: [...(original.links || [])],
+            tags: [...(original.tags || [])],
+            backlinks: []
+            // Note: on ne copie pas symlinkedIn pour éviter les liens cassés
+          };
+
+          // Dupliquer récursivement les enfants
+          original.children.forEach(childId => {
+            const newChildId = duplicateRecursive(childId, newId);
+            this.data.nodes[newId].children.push(newChildId);
+          });
+
+          return newId;
+        };
+
+        const newNodeId = duplicateRecursive(nodeId, newParentId);
+
+        // Ajouter au parent
+        if (newParentId === null) {
+          this.data.rootNodes.push(newNodeId);
+        } else {
+          this.data.nodes[newParentId].children.push(newNodeId);
+        }
+
+        this.saveData();
+        this.render();
+        this.updateChildren(); // Rafraîchir la liste des enfants
+        this.updateNodeCounter();
+        this.showToast('Nœud dupliqué', '📋');
+      },
+
+      // Ouvrir la modal pour créer un symlink
+      openSymlinkModal() {
+        if (!this.currentNodeId) return;
+        this.selectedNodeForSymlink = null;
+        this.renderNodeSelector();
+        document.getElementById('symlinkModal').classList.add('active');
+      },
+
+      // Fermer la modal symlink
+      closeSymlinkModal() {
+        document.getElementById('symlinkModal').classList.remove('active');
+        this.selectedNodeForSymlink = null;
+      },
+
+      // Afficher le sélecteur de nœuds
+      renderNodeSelector() {
+        const selector = document.getElementById('nodeSelector');
+        selector.innerHTML = '';
+        
+        // Fonction récursive pour créer l'arbre
+        const renderNode = (nodeId, level = 0) => {
+          if (nodeId === this.currentNodeId) return null; // Ne pas lier à soi-même
+
+          const node = this.data.nodes[nodeId];
+          const hasChildren = node.children.length > 0;
+          const isExpanded = this.symlinkModalExpandedNodes.has(nodeId);
+          
+          const nodeDiv = document.createElement('div');
+          nodeDiv.style.marginBottom = '2px';
+          
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'node-selector-item';
+          contentDiv.setAttribute('data-node-id', nodeId);
+          contentDiv.style.paddingLeft = (level * 20 + 10) + 'px';
+          contentDiv.style.display = 'flex';
+          contentDiv.style.alignItems = 'center';
+          contentDiv.style.gap = '8px';
+          
+          if (hasChildren) {
+            const toggle = document.createElement('span');
+            toggle.style.width = '16px';
+            toggle.style.height = '16px';
+            toggle.style.display = 'flex';
+            toggle.style.alignItems = 'center';
+            toggle.style.justifyContent = 'center';
+            toggle.style.fontSize = '10px';
+            toggle.style.cursor = 'pointer';
+            toggle.style.color = 'var(--text-secondary)';
+            toggle.textContent = isExpanded ? '▼' : '▶';
+            toggle.onclick = (e) => {
+              e.stopPropagation();
+              if (this.symlinkModalExpandedNodes.has(nodeId)) {
+                this.symlinkModalExpandedNodes.delete(nodeId);
+              } else {
+                this.symlinkModalExpandedNodes.add(nodeId);
+              }
+              this.renderNodeSelector();
+            };
+            contentDiv.appendChild(toggle);
+          } else {
+            const spacer = document.createElement('span');
+            spacer.style.width = '16px';
+            contentDiv.appendChild(spacer);
+          }
+          
+          const icon = document.createElement('span');
+          icon.style.fontSize = '16px';
+          icon.textContent = hasChildren ? '📂' : '📄';
+          contentDiv.appendChild(icon);
+          
+          const title = document.createElement('span');
+          title.textContent = node.title;
+          title.style.flex = '1';
+          title.style.fontSize = '14px';
+          title.style.whiteSpace = 'nowrap';
+          title.style.overflow = 'hidden';
+          title.style.textOverflow = 'ellipsis';
+          contentDiv.appendChild(title);
+          
+          contentDiv.onclick = () => {
+            this.selectSymlinkTarget(nodeId);
+          };
+          
+          nodeDiv.appendChild(contentDiv);
+          
+          if (hasChildren && isExpanded) {
+            const childrenDiv = document.createElement('div');
+            node.children.forEach(childId => {
+              const childNode = renderNode(childId, level + 1);
+              if (childNode) childrenDiv.appendChild(childNode);
+            });
+            nodeDiv.appendChild(childrenDiv);
+          }
+          
+          return nodeDiv;
+        };
+        
+        const rootDiv = document.createElement('div');
+        rootDiv.className = 'node-selector-item';
+        rootDiv.style.marginBottom = '8px';
+        rootDiv.style.fontWeight = '600';
+        rootDiv.innerHTML = '🏠 Racine';
+        rootDiv.onclick = () => this.selectSymlinkTarget(null);
+        selector.appendChild(rootDiv);
+        
+        this.data.rootNodes.forEach(nodeId => {
+          const nodeElement = renderNode(nodeId, 0);
+          if (nodeElement) selector.appendChild(nodeElement);
+        });
+      },
+
+
+
+      // Sélectionner une destination pour le symlink
+      selectSymlinkTarget(targetId) {
+        this.selectedNodeForSymlink = targetId;
+        document.querySelectorAll('#nodeSelector .node-selector-item').forEach(el => el.classList.remove('selected'));
+        // Sélectionner l'élément par son data-node-id
+        const selector = targetId === null
+          ? '#nodeSelector .node-selector-item[style*="font-weight: 600"]' // Racine
+          : `#nodeSelector .node-selector-item[data-node-id="${targetId}"]`;
+        const element = document.querySelector(selector);
+        if (element) {
+          element.classList.add('selected');
+        }
+      },
+
+      // Confirmer la création du symlink (nouveau format)
+      confirmSymlink() {
+        if (!this.currentNodeId) return;
+
+        // Si on est sur un symlink, utiliser le nœud cible
+        const node = this.data.nodes[this.currentNodeId];
+        const targetNodeId = node && node.type === 'symlink' ? node.targetId : this.currentNodeId;
+
+        const targetParent = this.selectedNodeForSymlink;
+
+        // Utiliser la nouvelle fonction createSymlinkTo
+        this.createSymlinkTo(targetNodeId, targetParent);
+
+        this.closeSymlinkModal();
+      },
+
+
+      // ===== DRAG & DROP =====
+
+      draggedNodeId: null,
+      dragModifiers: { ctrl: false, alt: false, shift: false }, // Stocker les modificateurs
+      dropPosition: null, // 'before', 'after', 'inside'
+
+      handleDragStart(e, nodeId) {
+        this.draggedNodeId = nodeId;
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'all'; // Permettre toutes les actions
+        e.dataTransfer.setData('text/plain', nodeId);
+        
+        // Capturer les modificateurs au début
+        this.dragModifiers = {
+          ctrl: e.ctrlKey || e.metaKey,
+          alt: e.altKey,
+          shift: e.shiftKey
+        };
+      },
+
+      handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        // Supprimer tous les indicateurs
+        document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+      },
+
+      handleDragOver(e) {
+        e.preventDefault();
+        
+        // Mettre à jour les modificateurs en temps réel
+        this.dragModifiers = {
+          ctrl: e.ctrlKey || e.metaKey,
+          alt: e.altKey,
+          shift: e.shiftKey
+        };
+        
+        // Déterminer l'action selon les modificateurs
+        if (this.dragModifiers.ctrl && this.dragModifiers.alt) {
+          e.dataTransfer.dropEffect = 'link';
+        } else if (this.dragModifiers.ctrl) {
+          e.dataTransfer.dropEffect = 'copy';
+        } else {
+          e.dataTransfer.dropEffect = 'move';
+        }
+        
+        // Supprimer les anciens indicateurs
+        document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+        
+        const element = e.currentTarget;
+        if (element.classList.contains('dragging')) return;
+        
+        // Calculer la position relative de la souris dans l'élément
+        const rect = element.getBoundingClientRect();
+        
+        // Détecter si c'est une child-card (grille horizontale) ou tree-node (arbre vertical)
+        const isChildCard = element.classList.contains('child-card');
+        
+        if (isChildCard) {
+          // GRILLE HORIZONTALE : utiliser mouseX (gauche/droite)
+          const mouseX = e.clientX - rect.left;
+          const width = rect.width;
+          
+          if (mouseX < width * 0.33) {
+            // Zone gauche : insérer AVANT (à gauche)
+            this.dropPosition = 'before';
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator left';
+            element.appendChild(indicator);
+          } else if (mouseX > width * 0.67) {
+            // Zone droite : insérer APRÈS (à droite)
+            this.dropPosition = 'after';
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator right';
+            element.appendChild(indicator);
+          } else {
+            // Zone milieu : déposer DEDANS
+            this.dropPosition = 'inside';
+            element.classList.add('drag-over');
+          }
+        } else {
+          // ARBRE VERTICAL : utiliser mouseY (haut/bas)
+          const mouseY = e.clientY - rect.top;
+          const height = rect.height;
+          
+          if (mouseY < height * 0.33) {
+            // Zone haute : insérer AVANT (au-dessus)
+            this.dropPosition = 'before';
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator top';
+            element.appendChild(indicator);
+          } else if (mouseY > height * 0.67) {
+            // Zone basse : insérer APRÈS (en-dessous)
+            this.dropPosition = 'after';
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator bottom';
+            element.appendChild(indicator);
+          } else {
+            // Zone milieu : déposer DEDANS
+            this.dropPosition = 'inside';
+            element.classList.add('drag-over');
+          }
+        }
+      },
+
+      handleDragLeave(e) {
+        e.currentTarget.classList.remove('drag-over');
+        // Ne pas supprimer les indicateurs ici, seulement dans dragOver
+      },
+
+      handleDrop(e, targetNodeId) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+        document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+
+        const draggedId = this.draggedNodeId;
+        const position = this.dropPosition; // 'before', 'after', 'inside'
+        
+        // Ne rien faire si on drop sur soi-même
+        if (draggedId === targetNodeId) return;
+        
+        // Ne pas permettre de drop sur ses propres descendants
+        if (this.isDescendantOf(targetNodeId, draggedId)) {
+          this.showToast('Impossible : destination invalide', '⚠️');
+          return;
+        }
+
+        const { ctrl, alt, shift } = this.dragModifiers;
+
+        // Shift = Ouvrir la modal pour choisir
+        if (shift) {
+          this.currentNodeId = draggedId;
+          this.selectedDestination = targetNodeId;
+          this.openDragDropMenu();
+          return;
+        }
+
+        // Déterminer l'action selon la position et les modificateurs
+        if (position === 'before' || position === 'after') {
+          // ZONES HAUT/BAS : insérer avant/après
+          if (ctrl && !alt) {
+            // Ctrl seul : DUPLIQUER et insérer avant/après
+            this.duplicateNodeAt(draggedId, targetNodeId, position);
+          } else {
+            // Par défaut (et Ctrl+Alt) : DÉPLACER et insérer avant/après
+            this.reorderNodes(draggedId, targetNodeId, position);
+          }
+        } else {
+          // ZONE MILIEU : déposer DEDANS (changer de parent)
+          this.handleInsideAction(draggedId, targetNodeId);
+        }
+      },
+
+      // Gérer l'action "inside" (déposer dedans)
+      handleInsideAction(draggedId, targetNodeId) {
+        const { ctrl, alt } = this.dragModifiers;
+        
+        let action;
+        if (ctrl && alt) {
+          action = 'link';
+        } else if (ctrl) {
+          action = 'duplicate';
+        } else {
+          action = 'move';
+        }
+
+        switch(action) {
+          case 'move':
+            this.moveNode(draggedId, targetNodeId);
+            break;
+          case 'link':
+            this.createSymlinkTo(draggedId, targetNodeId);
+            break;
+          case 'duplicate':
+            this.duplicateNode(draggedId, targetNodeId);
+            break;
+        }
+      },
+
+      openDragDropMenu() {
+        // Ouvrir directement la modal d'actions avec la destination pré-sélectionnée
+        this.openActionModal();
+        
+        // Sélectionner automatiquement la destination
+        setTimeout(() => {
+          const targetElement = document.querySelector(`#actionNodeSelector [data-node-id="${this.selectedDestination}"]`);
+          if (targetElement) {
+            targetElement.click();
+          } else {
+            // Si c'est la racine
+            if (this.selectedDestination === null) {
+              const racineElement = document.querySelector('#actionNodeSelector .node-selector-item');
+              if (racineElement) racineElement.click();
+            }
+          }
+        }, 100);
+      },
+
+      // ===== TAGS =====
+
+      tagAutocompleteIndex: 0,
+      tagAutocompleteSuggestions: [],
+
+      // Gérer l'input des tags (Enter pour ajouter)
+      handleTagInput(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          
+          // Vérifier si l'autocomplete est visible
+          const autocomplete = document.getElementById('tagAutocomplete');
+          const isAutocompleteVisible = autocomplete && autocomplete.style.display !== 'none';
+          
+          // Si l'autocomplete est visible ET qu'on a des suggestions, les utiliser
+          if (isAutocompleteVisible && this.tagAutocompleteSuggestions.length > 0) {
+            const suggestion = this.tagAutocompleteSuggestions[this.tagAutocompleteIndex];
+            if (suggestion) {
+              const tagToAdd = suggestion.tag;
+              event.target.value = ''; // Vider AVANT addTag
+              this.hideTagAutocomplete();
+              this.addTag(tagToAdd);
+              return;
+            }
+          }
+          
+          // Sinon, ajouter le texte tapé
+          const tag = event.target.value.trim();
+          if (tag) {
+            event.target.value = ''; // Vider AVANT addTag
+            this.hideTagAutocomplete();
+            this.addTag(tag);
+          }
+        } else if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          this.navigateTagAutocomplete(1);
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          this.navigateTagAutocomplete(-1);
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          this.hideTagAutocomplete();
+        }
+      },
+
+      // Autocomplete des tags
+      handleTagAutocomplete(event) {
+        const input = event.target.value.trim().toLowerCase();
+        if (!input) {
+          this.hideTagAutocomplete();
+          return;
+        }
+
+        // Collecter tous les tags avec priorité aux enfants
+        const allTags = this.collectAllTagsForAutocomplete();
+        
+        // Filtrer par l'input
+        const suggestions = allTags
+          .filter(t => t.tag.toLowerCase().includes(input))
+          .slice(0, 10); // Max 10 suggestions
+
+        if (suggestions.length === 0) {
+          this.hideTagAutocomplete();
+          return;
+        }
+
+        this.tagAutocompleteSuggestions = suggestions;
+        this.tagAutocompleteIndex = 0;
+        this.renderTagAutocomplete();
+      },
+
+      // Collecter TOUS les tags (branche + global) pour l'autocomplete
+      collectAllTagsForAutocomplete() {
+        const tagMap = new Map();
+        
+        // 1. Collecter les tags de la branche d'abord
+        const collectFromBranch = (nodeId) => {
+          const node = this.data.nodes[nodeId];
+          if (!node || !node.tags) return;
+          
+          node.tags.forEach(tag => {
+            if (!tagMap.has(tag)) {
+              tagMap.set(tag, { tag, count: 0, inBranch: true });
+            }
+            tagMap.get(tag).count++;
+          });
+          
+          if (node.children) {
+            node.children.forEach(childId => collectFromBranch(childId));
+          }
+        };
+
+        if (this.currentNodeId) {
+          collectFromBranch(this.currentNodeId);
+        }
+
+        // 2. Collecter tous les autres tags (global)
+        Object.values(this.data.nodes).forEach(node => {
+          if (!node.tags) return;
+          
+          // Si ce nœud n'est pas dans la branche
+          const isInBranch = node.id === this.currentNodeId || 
+                            (this.currentNodeId && this.isDescendantOf(node.id, this.currentNodeId));
+          
+          if (!isInBranch) {
+            node.tags.forEach(tag => {
+              if (!tagMap.has(tag)) {
+                tagMap.set(tag, { tag, count: 0, inBranch: false });
+              }
+              if (!tagMap.get(tag).inBranch) {
+                tagMap.get(tag).count++;
+              }
+            });
+          }
+        });
+
+        // Trier : branche en premier, puis par fréquence
+        return Array.from(tagMap.values())
+          .sort((a, b) => {
+            if (a.inBranch && !b.inBranch) return -1;
+            if (!a.inBranch && b.inBranch) return 1;
+            return b.count - a.count;
+          });
+      },
+
+      // Afficher l'autocomplete
+      showTagAutocomplete() {
+        const input = document.getElementById('tagInput');
+        if (input.value.trim()) {
+          this.handleTagAutocomplete({ target: input });
+        }
+      },
+
+      // Cacher l'autocomplete
+      hideTagAutocomplete() {
+        setTimeout(() => {
+          document.getElementById('tagAutocomplete').style.display = 'none';
+          // IMPORTANT : Vider les suggestions quand on cache l'autocomplete
+          this.tagAutocompleteSuggestions = [];
+          this.tagAutocompleteIndex = 0;
+        }, 200); // Délai pour permettre le clic
+      },
+
+      // Naviguer dans l'autocomplete
+      navigateTagAutocomplete(direction) {
+        if (this.tagAutocompleteSuggestions.length === 0) return;
+        
+        this.tagAutocompleteIndex = 
+          (this.tagAutocompleteIndex + direction + this.tagAutocompleteSuggestions.length) 
+          % this.tagAutocompleteSuggestions.length;
+        
+        this.renderTagAutocomplete();
+      },
+
+      // Afficher les suggestions
+      renderTagAutocomplete() {
+        const container = document.getElementById('tagAutocomplete');
+        
+        if (this.tagAutocompleteSuggestions.length === 0) {
+          container.style.display = 'none';
+          return;
+        }
+
+        container.innerHTML = '';
+        
+        this.tagAutocompleteSuggestions.forEach((item, index) => {
+          const isSelected = index === this.tagAutocompleteIndex;
+          const badge = item.inBranch ? '🌳 branche' : '🌍 global';
+          
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'tag-autocomplete-item' + (isSelected ? ' selected' : '');
+          itemDiv.onmousedown = () => this.selectTagSuggestion(index);
+          
+          const tagSpan = document.createElement('span');
+          tagSpan.textContent = `🏷️ ${item.tag}`;
+          
+          const badgeSpan = document.createElement('span');
+          badgeSpan.className = 'tag-autocomplete-badge';
+          badgeSpan.textContent = `${badge} ×${item.count}`;
+          
+          itemDiv.appendChild(tagSpan);
+          itemDiv.appendChild(badgeSpan);
+          container.appendChild(itemDiv);
+        });
+
+        container.style.display = 'block';
+      },
+
+      // Sélectionner une suggestion
+      selectTagSuggestion(index) {
+        const suggestion = this.tagAutocompleteSuggestions[index];
+        if (suggestion) {
+          const input = document.getElementById('tagInput');
+          if (input) input.value = ''; // Vider AVANT addTag
+          this.hideTagAutocomplete();
+          this.addTag(suggestion.tag);
+        }
+      },
+
+      // Toggle l'affichage de tous les tags
+      toggleShowAllTags() {
+        this.showAllTags = !this.showAllTags;
+        this.updateRightPanel();
+      },
+
+      // Collecter tous les tags de la branche avec comptage
+      collectBranchTags() {
+        const tagMap = new Map();
+        
+        // Récursif pour collecter les tags des descendants
+        const collectFromNode = (nodeId) => {
+          const node = this.data.nodes[nodeId];
+          if (!node) return;
+          
+          if (node.tags) {
+            node.tags.forEach(tag => {
+              if (!tagMap.has(tag)) {
+                tagMap.set(tag, { tag, count: 0, inBranch: true });
+              }
+              const entry = tagMap.get(tag);
+              entry.count++;
+            });
+          }
+          
+          // Parcourir les enfants RÉCURSIVEMENT
+          if (node.children && node.children.length > 0) {
+            node.children.forEach(childId => collectFromNode(childId));
+          }
+        };
+
+        // Commencer par le nœud actuel
+        if (this.currentNodeId) {
+          collectFromNode(this.currentNodeId);
+        }
+
+        // Convertir en array et trier par count
+        return Array.from(tagMap.values())
+          .sort((a, b) => b.count - a.count);
+      },
+
+      // Ajouter un tag
+      addTag(tag) {
+        if (!this.currentNodeId) return;
+        
+        const node = this.data.nodes[this.currentNodeId];
+        if (!node.tags) node.tags = [];
+        
+        // Nettoyer le tag (trim et normaliser en lowercase)
+        tag = tag.trim().toLowerCase();
+        
+        if (!tag) return;
+        
+        // Ne pas ajouter si déjà présent
+        if (node.tags.includes(tag)) {
+          this.showToast('Tag déjà existant', '⚠️');
+          // Remettre le focus quand même
+          setTimeout(() => {
+            const input = document.getElementById('tagInput');
+            if (input) input.focus();
+          }, 100);
+          return;
+        }
+        
+        node.tags.push(tag);
+        this.saveData();
+        this.renderTags();
+        this.updateRightPanel();
+        this.showToast('Tag ajouté', '🏷️');
+        
+        // Remettre le focus pour continuer à ajouter des tags
+        setTimeout(() => {
+          const input = document.getElementById('tagInput');
+          if (input) input.focus();
+        }, 100);
+      },
+
+      // Supprimer un tag
+      removeTag(tag) {
+        if (!this.currentNodeId) return;
+        
+        const node = this.data.nodes[this.currentNodeId];
+        if (!node.tags) return;
+        
+        node.tags = node.tags.filter(t => t !== tag);
+        this.saveData();
+        this.renderTags();
+        this.updateRightPanel();
+        this.showToast('Tag supprimé', '🗑️');
+      },
+
+      // Afficher les tags
+      renderTags() {
+        if (!this.currentNodeId) return;
+        
+        const node = this.data.nodes[this.currentNodeId];
+        const container = document.getElementById('tagsContainer');
+        
+        // Vider complètement le container
+        container.innerHTML = '';
+        
+        // Ajouter les tags existants
+        if (node.tags && node.tags.length > 0) {
+          node.tags.forEach(tag => {
+            const tagEl = document.createElement('div');
+            tagEl.className = 'tag';
+            tagEl.style.cursor = 'pointer';
+            tagEl.title = 'Cliquer pour rechercher ce tag';
+            
+            // Utiliser textContent pour éviter l'injection HTML
+            const tagText = document.createElement('span');
+            tagText.textContent = `🏷️ ${tag}`;
+            tagText.onclick = (e) => {
+              e.stopPropagation();
+              this.openSearch(tag);
+            };
+            
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'tag-remove';
+            removeBtn.textContent = '✕';
+            removeBtn.onclick = (e) => {
+              e.stopPropagation();
+              this.removeTag(tag);
+            };
+            
+            tagEl.appendChild(tagText);
+            tagEl.appendChild(removeBtn);
+            container.appendChild(tagEl);
+          });
+        }
+        
+        // Recréer le wrapper avec l'input ET l'autocomplete
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'tag-input';
+        input.id = 'tagInput';
+        input.placeholder = '+ tag';
+        input.onkeydown = (e) => this.handleTagInput(e);
+        input.oninput = (e) => this.handleTagAutocomplete(e);
+        input.onfocus = () => this.showTagAutocomplete();
+        input.onblur = () => this.hideTagAutocomplete();
+        
+        const autocompleteDiv = document.createElement('div');
+        autocompleteDiv.className = 'tag-autocomplete';
+        autocompleteDiv.id = 'tagAutocomplete';
+        autocompleteDiv.style.display = 'none';
+        
+        wrapper.appendChild(input);
+        wrapper.appendChild(autocompleteDiv);
+        container.appendChild(wrapper);
+      },
+
+      // Toggle entre mode édition et affichage markdown
+      toggleViewMode() {
+        this.viewMode = this.viewMode === 'edit' ? 'view' : 'edit';
+        localStorage.setItem('deepmemo_viewMode', this.viewMode);
+        this.updateViewMode();
+
+        // Mettre à jour l'URL et le lien de partage
+        if (this.currentNodeId) {
+          this.updateURL(this.currentNodeId);
+          this.updateShareLink();
+        }
+      },
+
+      // Mettre à jour l'affichage selon le mode
+      updateViewMode() {
+        const toggleBtn = document.getElementById('toggleViewMode');
+        const contentEditor = document.getElementById('nodeContent');
+        const contentPreview = document.getElementById('contentPreview');
+
+        if (this.viewMode === 'view') {
+          // Mode affichage : afficher le rendu markdown
+          toggleBtn.textContent = '✏️ Éditer';
+          contentEditor.style.display = 'none';
+          contentPreview.style.display = 'block';
+
+          if (this.currentNodeId) {
+            const node = this.data.nodes[this.currentNodeId];
+            if (node && node.content) {
+              const renderedContent = marked.parse(node.content);
+              contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
+            } else {
+              contentPreview.innerHTML = '<div class="markdown-content"><em>Aucun contenu</em></div>';
+            }
+          }
+        } else {
+          // Mode édition : afficher le textarea
+          toggleBtn.textContent = '👁️ Afficher';
+          contentEditor.style.display = 'block';
+          contentPreview.style.display = 'none';
+          // Adapter la taille du textarea au contenu
+          this.autoResizeTextarea(contentEditor);
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => app.init());

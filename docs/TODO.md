@@ -2,7 +2,7 @@
 
 > **Backlog de développement** - Liste des tâches en cours et à venir pour DeepMemo V0.8+
 
-**Dernière mise à jour** : 19 Décembre 2025
+**Dernière mise à jour** : 20 Décembre 2025
 
 ---
 
@@ -18,26 +18,28 @@
 
 ---
 
-## 🔗 Liens internes (PARTIELLEMENT FAIT)
+## 🔗 Liens internes (REPOUSSÉ)
 
-### ⚠️ À FAIRE
+### ⚠️ DÉSACTIVÉ - À REFAIRE PLUS TARD
 
-**Audit complet du système** :
-- Faire un point sur le système de liens interne à DeepMemo
-- Vérifier ce qui est en place et ce qui fonctionne
-- S'assurer que tout ce qui est envisagé est implémenté
-- Tester les cas limites
+**Raison** :
+- Les wiki-links `[[titre]]` posent problème car le matching par titre est fragile
+- Problèmes : doublons de titres, renommages, ambiguïté
+- Nécessite une refonte complète pour pointer vers ID au lieu de titre
+- Code supprimé temporairement (editor.js + components.css)
 
-**Sélection intelligente** :
-- Quand on accède à un nœud via un lien interne `[[titre]]`
+**Solution future envisagée** :
+- Syntaxe `[[id:titre]]` ou `[[titre#id]]`
+- Auto-complétion intelligente à la saisie
+- Sélection du bon nœud parmi les doublons
+- Mise à jour automatique du titre affiché si le nœud cible est renommé
+
+**Sélection intelligente (pour plus tard)** :
+- Quand on accède à un nœud via un lien interne
 - Dans l'arborescence : sélectionner le nœud réel si pas de symlink
 - Sinon : sélectionner le symlink OU le nœud réel le plus proche du focus actuel
 - Calculer la distance euclidienne pour choisir la meilleure option
 - Fallback sur l'original si aucun symlink disponible
-
-**Amélioration navigation** :
-- Rendre les liens `[[titre]]` cliquables dans le preview
-- Améliorer l'UX de navigation par wiki-links
 
 ---
 
@@ -91,70 +93,76 @@
 
 ---
 
-## 🪟 Fenêtre modale
+## ✅ COMPLÉTÉ - 🪟 Fenêtre modale
 
-### ⚠️ À FAIRE
+- ✅ Bouton [Supprimer] ajouté dans la fenêtre modale d'[Actions]
+- ✅ Bouton [Supprimer] retiré du center-panel (duplication supprimée)
+- ✅ Arborescence du modal masquée par défaut
+- ✅ Affichage de l'arborescence seulement quand une action est sélectionnée
+- ✅ Texte "Sélectionne une action ci-dessus" supprimé
+- ✅ Triangles de toggle harmonisés avec l'arbre principal
 
-**Réorganisation des actions** :
-- Déplacer le bouton [Supprimer] dans la fenêtre modale d'[Actions]
-- Regrouper toutes les actions destructives au même endroit
-- Améliorer la cohérence de l'interface
-
-**Optimisation de l'espace** :
-- Le bloc prêt à accueillir l'arborescence peut être masqué
-- Ne l'afficher que quand on choisit une action qui le nécessite
-- Rendre la modale plus légère par défaut
+**Implémentation** :
+- Fonction `deleteNode()` dans modals.js
+- Gestion différenciée symlinks vs nœuds normaux
+- CSS harmonisé pour `.node-selector-toggle`
+- Affichage conditionnel de `.node-selector` via CSS
 
 ---
 
-## ⌨️ Raccourcis clavier (PARTIELLEMENT FAIT)
-
-### ✅ Complété
+## ✅ COMPLÉTÉ - ⌨️ Raccourcis clavier
 
 - ✅ Toggle view/edit via bouton [Afficher]/[Éditer] fonctionnel
+- ✅ Raccourci clavier `Alt+V` pour toggle view/edit implémenté
+- ✅ Documentation des raccourcis clavier ajoutée dans le panneau droit
+- ✅ Bloc keyboard tips positionné en bas du right panel (dans zone défilante)
+- ✅ Présentation améliorée avec sections et titre
 
-### ⚠️ À FAIRE
-
-**Raccourci clavier dédié** :
-- Ajouter `Alt+V` ou `Ctrl+Shift+E` pour toggle view/edit
-- Permettre de basculer sans utiliser la souris
-- Améliorer la productivité
-
-**Mise à jour des keyboard tips** :
-- Mettre à jour le bloc avec tous les raccourcis actuels
-- Inclure les nouveaux raccourcis de navigation
-- Déplacer le bloc en bas du right panel
-- Améliorer la présentation visuelle
-
-**Raccourcis actuels à documenter** :
+**Raccourcis documentés** :
 - `Alt+N` : Nouveau nœud
 - `Alt+E` : Focus éditeur
 - `Ctrl+K` : Recherche
+- `Alt+V` : Toggle view/edit
+- `↑↓` : Naviguer arbre (haut/bas)
+- `→` : Déplier nœud
+- `←` : Replier nœud / Remonter au parent si déjà replié
+- `Enter` : Activer nœud sélectionné
 - `Escape` : Remonter au parent
-- `↑↓←→` : Navigation arbre
-- `Enter` : Sélectionner nœud focusé
-- (À ajouter) `Alt+V` : Toggle view/edit
+
+**Implémentation** :
+- Raccourcis dans `keyboard.js`
+- Documentation générée dynamiquement dans `editor.js` (updateRightPanel)
+- CSS dans `components.css` (.shortcuts-hint, .shortcuts-title, .shortcuts-section)
 
 ---
 
 ## 👁️ Affichage divers
 
-### ⚠️ À FAIRE
+### ✅ COMPLÉTÉ
 
 **Harmonisation Export/Import** :
-- Regrouper les boutons [Exporter] et [Importer]
-- Harmoniser leurs styles pour cohérence visuelle
-- Positionner de manière logique dans l'interface
+- ✅ Boutons [Exporter] et [Importer] regroupés dans la sidebar
+- ✅ Styles harmonisés (classe `.btn-import` commune)
+- ✅ Zone dédiée `.import-export-zone` avec flexbox
+- ✅ Label raccourci de "Importer JSON" à "Importer"
+
+### ✅ COMPLÉTÉ
 
 **Breadcrumb intelligent** :
-- Format : `.../[nom du nœud parent]/[nom du nœud actuel]`
-- Nœud actuel : taille normale
-- Chemin parent : plus petit et légèrement transparent
-- Adaptation selon contexte :
+- ✅ Format : `.../[nom du nœud parent]/[nom du nœud actuel]`
+- ✅ Nœud actuel : taille normale
+- ✅ Chemin parent : plus petit et légèrement transparent
+- ✅ Adaptation selon contexte :
   - Nœud racine : pas de chemin parent
   - Nœud de niveau 1 : pas de `.../ `
-  - Instances isolées : adapter selon `branchRootId`
-- Améliorer la lisibilité de la navigation
+  - Instances isolées : adapté selon `branchRootId`
+- ✅ Amélioration de la lisibilité de la navigation
+
+**Implémentation** :
+- Fonction `updateBreadcrumb()` dans editor.js
+- Calcul du chemin complet avec getNodePath()
+- Gestion spéciale pour racines et mode branche
+- Styles CSS différenciés pour ancêtres (.breadcrumb-ancestor)
 
 ---
 
@@ -203,39 +211,53 @@
 
 ## 📊 Résumé de l'avancement
 
-### V0.8 - Progression globale : ~75% complété
+### V0.8 - Progression globale : ✅ 100% COMPLÉTÉ
 
-**✅ Complété (6/10 sections principales)** :
-1. Arborescence intelligente
+**✅ Complété (11/11 sections principales)** :
+1. Arborescence intelligente (avec focus visuel symlinks)
 2. Liens symboliques refactorés
 3. URL dynamique complet
 4. Documentation mise à jour
 5. Bug critique résolu
 6. Mode view par défaut
+7. **Fenêtre modale améliorée** (Actions + Delete + arborescence masquable)
+8. **Raccourcis clavier complets** (Alt+V + documentation)
+9. **UI polish** (Export/Import harmonisés, keyboard tips, toggles)
+10. **Breadcrumb intelligent** (Format `.../parent/actuel` avec styles adaptés)
+11. **Drag & drop complet** (arbre + enfants, modificateurs clavier, prévention cycles)
 
-**⚠️ En attente (4/10 sections)** :
-1. Navigation via liens internes (sélection intelligente)
-2. Tags (éviter duplication UI)
-3. Fenêtres modales (amélioration UX)
-4. Raccourcis clavier et affichage divers
+**🔧 Bugs corrigés** :
+- ✅ Renommage symlinks (sauvegarde titre sur symlink, pas target)
+- ✅ Suffixe " (lien)" supprimé à la création
+- ✅ Focus visuel après navigation via symlinks
+
+**⚠️ Priorité basse (polish)** :
+- Tags (éviter duplication UI dans right panel)
+
+**🔮 Repoussé pour V0.9+** :
+- Navigation via liens internes `[[titre]]` - Nécessite refonte complète (pointer vers ID)
 
 ---
 
 ## 🎯 Priorités suggérées pour la suite
 
-### Haute priorité (Impact UX majeur)
-1. **Navigation via liens `[[titre]]` cliquables** - Feature importante pour l'UX quotidienne
-2. **Raccourci clavier toggle view/edit** - Productivité
-3. **Breadcrumb intelligent** - Améliore la navigation
+### ✅ Migration finale V0.8 - COMPLÉTÉE
+1. ✅ **Basculement index.html** - `app-new.js` chargé en production
+2. ✅ **Renommage legacy** - `app.js` → `app-backup.js` (référence)
+3. ✅ **Drag & drop simplifié** - Modificateur Shift supprimé
+4. ✅ **Tests fonctionnels** - Toutes fonctionnalités validées
 
-### Priorité moyenne (Polish UI)
-4. **Tags sans duplication** - Nettoyer l'interface
-5. **Export/Import harmonisés** - Cohérence visuelle
-6. **Keyboard tips à jour** - Documentation utilisateur
+### 🎉 V0.8 - 100% DÉPLOYÉE
 
-### Priorité basse (Nice to have)
-7. **Modal Actions optimisée** - Amélioration mineure
-8. **Bouton Supprimer dans modal** - Réorganisation
+**Prochaine étape : V0.9 (Features Avancées)**
+
+### Priorité basse (Polish UI)
+- **Tags sans duplication** - Nettoyer l'interface right panel
+
+### Futur (V0.9+)
+- **Wiki-links refactorés** - Syntaxe `[[id:titre]]` avec auto-complétion
+- **Vue liste nested** - Indentation visuelle style todo-list
+- **Export Markdown** - Export avec structure préservée
 
 ---
 
