@@ -48,6 +48,13 @@ Chaque nœud possède :
 - **Partage facile** : Icônes 🔗 (nœud) et 🌳 (branche)
 - **Navigation navigateur** : Support des boutons précédent/suivant
 
+### 📦 Export/Import de Branche (V0.8)
+- **Export local** : Exporter un nœud + tous ses descendants
+- **Import non-destructif** : Importer comme enfants du nœud actuel
+- **Régénération des IDs** : Évite les conflits avec les nœuds existants
+- **Conservation des symlinks** : Relations préservées dans la branche importée
+- **Partage collaboratif** : Première étape pour utilisation multi-utilisateurs
+
 ### 📄 Affichage et Rendu (V0.7+)
 - **Markdown rendering** : Affichage formaté du contenu
 - **Mode view par défaut** : Lecture prioritaire sur édition
@@ -67,6 +74,7 @@ Chaque nœud possède :
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
 - `Alt+E` : Focus sur l'éditeur
 - `Ctrl+K` : Recherche globale
+- `Ctrl+V` : Alterner mode affichage/édition
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
@@ -120,7 +128,7 @@ Chaque nœud possède :
 ### Features à implémenter
 - [ ] Navigation via liens `[[titre]]` cliquables
 - [ ] Vue liste nested (enfants = contenu principal)
-- [ ] Export/Import amélioré (Markdown, Notion, Obsidian)
+- [ ] Export/Import formats externes (Markdown, Notion, Obsidian)
 - [ ] Thèmes personnalisables
 - [ ] Permissions multi-user (chmod-style)
 - [ ] Types de nœuds actifs (avec scripts)
@@ -159,4 +167,4 @@ Projet personnel - Pas de licence définie pour le moment.
 
 ---
 
-**DeepMemo V0.8** - 19 Décembre 2025
+**DeepMemo V0.8** - 23 Décembre 2025

@@ -69,8 +69,10 @@
 
 #### Persistance
 - [x] LocalStorage pour les données
-- [x] Export JSON
-- [x] Import JSON
+- [x] Export JSON global
+- [x] Import JSON global
+- [x] Export de branche (nœud + descendants)
+- [x] Import de branche (non-destructif, avec régénération IDs)
 - [x] Sauvegarde auto à chaque modification
 
 #### Rendu et Affichage (V0.7+)
@@ -270,6 +272,7 @@ DeepMemo/
 - [ ] Couleurs personnalisées par tag
 
 ### Export/Import amélioré
+- [x] Export/Import de branche locale (V0.8 - Complété)
 - [ ] Export en Markdown (avec structure)
 - [ ] Import depuis Notion
 - [ ] Import depuis Obsidian
@@ -383,7 +386,7 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 20 Décembre 2025
+**Dernière mise à jour** : 23 Décembre 2025
 **Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ + DÉPLOYÉ)
 **Prochaine milestone** : V0.9 (Features avancées)
 
@@ -397,3 +400,12 @@ DeepMemo/
 - [x] **Drag & drop simplifié** : Modificateur Shift supprimé (Ctrl + Ctrl+Alt uniquement)
 - [x] **Tests validation** : Toutes fonctionnalités opérationnelles en production
 - [x] **Documentation finale** : CLAUDE.md, TODO.md, ROADMAP.md à jour
+
+### ✅ Export/Import de branche (23 décembre 2025)
+- [x] **Export branche** : Exporter nœud + descendants récursivement
+- [x] **Import branche** : Importer comme enfants du nœud actuel
+- [x] **Régénération IDs** : Éviter conflits avec nœuds existants
+- [x] **Merge non-destructif** : Conserver données existantes
+- [x] **Conservation symlinks** : Relations préservées dans branche importée
+- [x] **Interface utilisateur** : Boutons ⬇️/⬆️ dans actions du nœud
+- [x] **Documentation** : README, ARCHITECTURE, ROADMAP mis à jour

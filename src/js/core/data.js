@@ -140,6 +140,144 @@ export function importData(event, onSuccess) {
 }
 
 /**
+ * Collect a node and all its descendants recursively
+ * @param {string} nodeId - Root node ID
+ * @returns {Object} Object with nodes dictionary
+ */
+function collectBranchNodes(nodeId) {
+  const branchNodes = {};
+
+  const collectRecursive = (id) => {
+    const node = data.nodes[id];
+    if (!node || branchNodes[id]) return; // Already collected or doesn't exist
+
+    branchNodes[id] = node;
+
+    // Recursively collect children
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(childId => collectRecursive(childId));
+    }
+  };
+
+  collectRecursive(nodeId);
+  return branchNodes;
+}
+
+/**
+ * Export a branch (node + descendants) as JSON file
+ * @param {string} nodeId - Root node ID to export
+ */
+export function exportBranch(nodeId) {
+  const node = data.nodes[nodeId];
+  if (!node) {
+    alert('Nœud introuvable');
+    return;
+  }
+
+  const branchNodes = collectBranchNodes(nodeId);
+  const nodeCount = Object.keys(branchNodes).length;
+
+  const branchData = {
+    type: 'deepmemo-branch',
+    version: '1.0',
+    branchRootId: nodeId,
+    exported: Date.now(),
+    nodeCount: nodeCount,
+    nodes: branchNodes
+  };
+
+  const dataStr = JSON.stringify(branchData, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `deepmemo-branch-${node.title.replace(/[^a-z0-9]/gi, '_')}-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Import a branch as children of current node
+ * @param {Event} event - File input change event
+ * @param {string} parentId - Parent node ID (or null for root)
+ * @param {Function} onSuccess - Callback on successful import
+ */
+export function importBranch(event, parentId, onSuccess) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+
+      // Validate branch format
+      if (imported.type !== 'deepmemo-branch' || !imported.nodes || !imported.branchRootId) {
+        alert('Fichier de branche invalide. Utilise l\'import global pour les exports complets.');
+        return;
+      }
+
+      const nodeCount = Object.keys(imported.nodes).length;
+      if (!confirm(`Importer ${nodeCount} nœud(s) comme enfants du nœud actuel ?`)) {
+        return;
+      }
+
+      // Generate new IDs to avoid conflicts
+      const oldToNewId = {};
+      Object.keys(imported.nodes).forEach(oldId => {
+        oldToNewId[oldId] = generateId();
+      });
+
+      // Import nodes with new IDs
+      const importedRootId = oldToNewId[imported.branchRootId];
+
+      Object.entries(imported.nodes).forEach(([oldId, oldNode]) => {
+        const newId = oldToNewId[oldId];
+        const newNode = {
+          ...oldNode,
+          id: newId,
+          parent: oldId === imported.branchRootId
+            ? parentId
+            : (oldNode.parent ? oldToNewId[oldNode.parent] : null),
+          children: oldNode.children.map(childId => oldToNewId[childId]),
+          modified: Date.now()
+        };
+
+        // Update targetId for symlinks
+        if (newNode.type === 'symlink' && newNode.targetId) {
+          newNode.targetId = oldToNewId[newNode.targetId] || newNode.targetId;
+        }
+
+        data.nodes[newId] = newNode;
+      });
+
+      // Attach to parent or root
+      if (parentId === null) {
+        if (!data.rootNodes.includes(importedRootId)) {
+          data.rootNodes.push(importedRootId);
+        }
+      } else {
+        const parent = data.nodes[parentId];
+        if (parent && !parent.children.includes(importedRootId)) {
+          parent.children.push(importedRootId);
+        }
+      }
+
+      saveData();
+
+      if (onSuccess) {
+        onSuccess(nodeCount, importedRootId);
+      }
+    } catch (err) {
+      alert('Erreur lors de l\'import : ' + err.message);
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/**
  * Find a node by its title
  * @param {string} title - Node title to search
  * @returns {Object|undefined} Found node or undefined

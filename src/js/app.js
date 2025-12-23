@@ -331,6 +331,43 @@ const app = {
   },
 
   /**
+   * Export current branch
+   */
+  exportBranch() {
+    if (!this.currentNodeId) {
+      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      return;
+    }
+
+    DataModule.exportBranch(this.currentNodeId);
+    showToast('Branche exportée', '⬇️');
+  },
+
+  /**
+   * Import branch as children of current node
+   */
+  importBranch(event) {
+    if (!this.currentNodeId) {
+      showToast('Sélectionne d\'abord un nœud parent', 'ℹ️');
+      event.target.value = ''; // Reset file input
+      return;
+    }
+
+    DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
+      this.render();
+      this.updateNodeCounter();
+      showToast(`${nodeCount} nœud(s) importés`, '⬆️');
+
+      // Optionally select the imported root
+      if (importedRootId) {
+        setTimeout(() => {
+          this.selectNodeById(importedRootId);
+        }, 100);
+      }
+    });
+  },
+
+  /**
    * Toggle sidebar
    */
   toggleSidebar() {

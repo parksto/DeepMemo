@@ -93,6 +93,11 @@
           <button class="btn btn-secondary btn-small" id="toggleViewMode" onclick="app.toggleViewMode()">👁️ Afficher</button>
           <button class="btn btn-secondary btn-small" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" onclick="app.openActionModal()">⚙️ Actions...</button>
+          <div style="margin-left: auto; display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-small" onclick="app.exportBranch()" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
+            <input type="file" id="importBranchFile" accept=".json" onchange="app.importBranch(event)" style="display: none;">
+            <label for="importBranchFile" class="btn btn-secondary btn-small" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
+          </div>
         </div>
       </div>
     </div>

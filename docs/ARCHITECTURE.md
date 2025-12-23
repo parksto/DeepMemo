@@ -188,9 +188,13 @@ export let data = { nodes: {}, rootNodes: [] };
 export function saveData()
 export function loadData()
 export function exportData()
-export function importData(event)
+export function importData(event, onSuccess)
+export function exportBranch(nodeId)
+export function importBranch(event, parentId, onSuccess)
 export function findNodeByTitle(title)
-export function generateId(type = 'node')
+export function isDescendantOf(nodeId, ancestorId)
+export function wouldCreateCycle(targetId, parentId)
+export function wouldCreateCycleWithMove(nodeId, newParentId)
 ```
 
 ### features/tree.js
@@ -457,7 +461,40 @@ enableBranchMode(nodeId);
 
 ### Export/Import JSON
 
-Boutons dans la sidebar pour exporter/importer toute la base de données.
+**Export/Import global** :
+- Boutons dans la sidebar pour exporter/importer toute la base de données
+- Format : `{nodes: {...}, rootNodes: [...]}`
+- Import global **écrase** toutes les données existantes
+
+**Export/Import de branche (V0.8)** :
+- Boutons dans les actions du nœud actuel (en bas à droite)
+- **Export** : Exporte un nœud + tous ses descendants récursivement
+- **Import** : Importe comme enfants du nœud actuel (non-destructif)
+- **Régénération des IDs** : Évite les conflits avec les nœuds existants
+- Format spécial : `{type: 'deepmemo-branch', branchRootId: '...', nodes: {...}}`
+
+```javascript
+// Format export branche
+{
+  type: 'deepmemo-branch',
+  version: '1.0',
+  branchRootId: 'node_xxx',  // ID du nœud racine exporté
+  exported: 1234567890,       // Timestamp
+  nodeCount: 42,              // Nombre de nœuds
+  nodes: {                    // Nœuds de la branche
+    'node_xxx': {...},
+    'node_yyy': {...}
+  }
+}
+```
+
+**Processus d'import de branche** :
+1. Validation du format (`type === 'deepmemo-branch'`)
+2. Génération de nouveaux IDs pour tous les nœuds (via `generateId()`)
+3. Création d'une map `oldId → newId`
+4. Mise à jour des relations (parent, children, targetId pour symlinks)
+5. Attachement au nœud parent actuel
+6. Merge dans `data.nodes` existant (sans écraser)
 
 ---
 
@@ -537,4 +574,4 @@ Boutons dans la sidebar pour exporter/importer toute la base de données.
 ---
 
 **Document technique V0.8**
-Dernière mise à jour : 20 Décembre 2025
+Dernière mise à jour : 23 Décembre 2025
