@@ -2,7 +2,51 @@
 
 > **Backlog de développement** - Liste des tâches en cours et à venir pour DeepMemo V0.8+
 
-**Dernière mise à jour** : 20 Décembre 2025
+**Dernière mise à jour** : 24 Décembre 2025
+
+---
+
+## ✅ COMPLÉTÉ - 📘 Contenu de démo par défaut (24 déc 2025)
+
+- ✅ Création de `src/js/core/default-data.js` avec 26 nœuds pédagogiques
+- ✅ Modification de `loadData()` pour charger le contenu si localStorage vide
+- ✅ Structure progressive : Bienvenue → Interface → Features → Future → Premiers pas
+- ✅ Format pédagogique : [Fonctionnalité → Ce que ça permet → Exemple]
+- ✅ Concepts futurs clarifiés (types = nœuds, triggers multi-nœuds, API externe)
+
+**Implémentation** :
+- Module `default-data.js` avec fonction `getDefaultData()`
+- Chargement automatique au premier lancement
+- Sauvegarde dans localStorage pour persistence
+
+---
+
+## ✅ COMPLÉTÉ - 🎨 UX Polish (24 déc 2025)
+
+### 1. Reset du scroll à la navigation
+- ✅ Ajout de `scrollTo(0, 0)` dans `displayNode()`
+- ✅ Scroll revient en haut à chaque nœud affiché
+
+### 2. Mode affichage par défaut
+- ✅ `viewMode = 'view'` au lieu de `'edit'`
+- ✅ Démarrage en mode lecture
+
+### 3. Right panel masqué par défaut
+- ✅ `rightPanelVisible = false` dans `panels.js`
+- ✅ Interface épurée, ouverture via [i]
+
+### 4. Toggle pour choisir la police
+- ✅ Classe CSS `.system-font` pour override
+- ✅ Section "Préférences" dans right panel
+- ✅ Fonctions `initFontPreference()` et `toggleFontPreference()`
+- ✅ Sauvegarde dans localStorage (`deepmemo_fontPreference`)
+- ✅ Support Sto (défaut) et polices système (optionnel)
+
+**Fichiers modifiés** :
+- `src/js/features/editor.js` - Reset scroll + toggle police
+- `src/js/ui/panels.js` - Right panel masqué
+- `src/js/app.js` - Gestion préférence police
+- `src/css/base.css` - Classe `.system-font`
 
 ---
 

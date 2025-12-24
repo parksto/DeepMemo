@@ -5,7 +5,7 @@
 
 // State
 let sidebarVisible = true;
-let rightPanelVisible = true;
+let rightPanelVisible = false; // Default: hidden (can be opened with [i] button)
 
 /**
  * Initialize panels state from localStorage
@@ -14,12 +14,14 @@ export function initPanels() {
   const savedRightPanelState = localStorage.getItem('deepmemo_rightPanelVisible');
   if (savedRightPanelState !== null) {
     rightPanelVisible = savedRightPanelState === 'true';
-    if (!rightPanelVisible) {
-      const panel = document.querySelector('.right-panel');
-      const externalBtn = document.querySelector('.right-panel-toggle-external');
-      if (panel) panel.classList.add('hidden');
-      if (externalBtn) externalBtn.style.display = 'flex';
-    }
+  }
+
+  // Apply right panel state (whether from localStorage or default)
+  if (!rightPanelVisible) {
+    const panel = document.querySelector('.right-panel');
+    const externalBtn = document.querySelector('.right-panel-toggle-external');
+    if (panel) panel.classList.add('hidden');
+    if (externalBtn) externalBtn.style.display = 'flex';
   }
 
   // Initialize sidebar resizer

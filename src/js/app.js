@@ -38,6 +38,7 @@ const app = {
     // Initialize panels and view mode
     PanelsModule.initPanels();
     EditorModule.initViewMode();
+    this.initFontPreference();
 
     // Setup search input handler
     SearchModule.setupSearchInput();
@@ -429,6 +430,40 @@ const app = {
   },
   toggleViewMode() {
     EditorModule.toggleViewMode();
+  },
+
+  /**
+   * Initialize font preference from localStorage
+   */
+  initFontPreference() {
+    const preference = localStorage.getItem('deepmemo_fontPreference');
+    if (preference === 'system') {
+      document.body.classList.add('system-font');
+    }
+  },
+
+  /**
+   * Toggle font preference between custom (Sto) and system fonts
+   */
+  toggleFontPreference() {
+    const isSystemFont = document.body.classList.contains('system-font');
+
+    if (isSystemFont) {
+      // Switch to custom font (Sto)
+      document.body.classList.remove('system-font');
+      localStorage.setItem('deepmemo_fontPreference', 'custom');
+      showToast('Police personnalisée activée', '✨');
+    } else {
+      // Switch to system font
+      document.body.classList.add('system-font');
+      localStorage.setItem('deepmemo_fontPreference', 'system');
+      showToast('Police système activée', '🔤');
+    }
+
+    // Re-render right panel to update checkbox
+    if (this.currentNodeId) {
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+    }
   },
 
   /**

@@ -4,6 +4,7 @@
  */
 
 import { generateId } from '../utils/helpers.js';
+import { getDefaultData } from './default-data.js';
 
 /**
  * Data state
@@ -22,6 +23,7 @@ export function saveData() {
 
 /**
  * Load data from localStorage
+ * If no data exists, load default demo content
  */
 export function loadData() {
   const stored = localStorage.getItem('deepmemo_data');
@@ -30,6 +32,13 @@ export function loadData() {
     data.nodes = parsed.nodes || {};
     data.rootNodes = parsed.rootNodes || [];
     migrateSymlinks();
+  } else {
+    // First-time user: load default demo content
+    console.log('📘 Bienvenue dans DeepMemo ! Chargement du contenu de démonstration...');
+    const defaultData = getDefaultData();
+    data.nodes = defaultData.nodes;
+    data.rootNodes = defaultData.rootNodes;
+    saveData();
   }
 }
 

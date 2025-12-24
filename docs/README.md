@@ -55,12 +55,23 @@ Chaque nœud possède :
 - **Conservation des symlinks** : Relations préservées dans la branche importée
 - **Partage collaboratif** : Première étape pour utilisation multi-utilisateurs
 
+### 📘 Contenu de Démonstration (V0.8)
+- **Tutoriel interactif** : 26 nœuds pédagogiques au premier lancement
+- **Structure progressive** : Découverte par l'exploration de l'arborescence
+- **Fonctionnalités actuelles** : Nœuds, symlinks, tags, branche, export/import, raccourcis
+- **Vision future** : Types actifs, triggers multi-nœuds, API externe, multi-user
+- **Format pédagogique** : [Fonctionnalité → Ce que ça permet → Exemple concret]
+- **Suppressible** : Instructions pour supprimer le contenu de démo incluses
+
 ### 📄 Affichage et Rendu (V0.7+)
 - **Markdown rendering** : Affichage formaté du contenu
-- **Mode view par défaut** : Lecture prioritaire sur édition
-- **Toggle view/edit** : Bouton [Afficher]/[Éditer]
+- **Mode view par défaut** : Lecture prioritaire sur édition (V0.8)
+- **Toggle view/edit** : Bouton [Afficher]/[Éditer] + raccourci Alt+V
 - **Sidebar redimensionnable** : Ajustable à la souris
 - **Auto-collapse** : Arborescence repliée sauf chemin actif
+- **Scroll reset** : Retour en haut du contenu à chaque navigation (V0.8)
+- **Right panel masqué** : Interface épurée par défaut, ouverture via [i] (V0.8)
+- **Choix de police** : Toggle Sto (personnalisée) vs système (V0.8)
 
 ### 🎨 Drag & Drop (V0.8 - Complet)
 - **Déplacer** : Glisser-déposer pour changer de parent ou réorganiser
@@ -74,7 +85,7 @@ Chaque nœud possède :
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
 - `Alt+E` : Focus sur l'éditeur
 - `Ctrl+K` : Recherche globale
-- `Ctrl+V` : Alterner mode affichage/édition
+- `Alt+V` : Alterner mode affichage/édition
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
@@ -167,4 +178,4 @@ Projet personnel - Pas de licence définie pour le moment.
 
 ---
 
-**DeepMemo V0.8** - 23 Décembre 2025
+**DeepMemo V0.8** - 24 Décembre 2025

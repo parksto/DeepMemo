@@ -12,7 +12,7 @@ import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
 
 // View mode state
-let viewMode = 'edit'; // 'edit' or 'view'
+let viewMode = 'view'; // 'edit' or 'view' (default: view)
 
 /**
  * Initialize view mode from localStorage
@@ -70,6 +70,12 @@ export function displayNode(nodeId, renderCallback) {
 
   // Set current node for view mode
   setCurrentNodeId(nodeId);
+
+  // Reset scroll to top when displaying a node
+  const contentBody = document.querySelector('.content-body');
+  if (contentBody) {
+    contentBody.scrollTo(0, 0);
+  }
 
   // Update UI components
   updateBreadcrumb(nodeId);
@@ -420,6 +426,20 @@ function updateRightPanel(currentNodeId) {
       </div>
       <div class="shortcuts-section">
         <div><kbd>Esc</kbd> Remonter au parent</div>
+      </div>
+    </div>
+  `;
+
+  // Font preference toggle
+  const isSystemFont = document.body.classList.contains('system-font');
+  html += `
+    <div class="info-section">
+      <h3>Préférences</h3>
+      <div class="info-item" style="cursor: pointer;" onclick="window.app.toggleFontPreference()">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Police système</span>
+          <span style="font-size: 1.2em;">${isSystemFont ? '✅' : '☐'}</span>
+        </div>
       </div>
     </div>
   `;

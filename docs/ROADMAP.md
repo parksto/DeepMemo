@@ -81,6 +81,9 @@
 - [x] Sidebar redimensionnable
 - [x] Scroll horizontal si contenu large
 - [x] Favicon personnalisé
+- [x] Reset du scroll à la navigation (V0.8)
+- [x] Right panel masqué par défaut (V0.8)
+- [x] Toggle choix de police (Sto vs système) (V0.8)
 
 #### URL Dynamiques et Navigation (V0.8)
 - [x] Système d'URL dynamique avec hash routing
@@ -100,6 +103,15 @@
 - [x] Prévention des boucles infinies
 - [x] Icône 🔄 pour symlinks circulaires
 - [x] Icône 🔗🚫 pour symlinks externes (hors branche)
+
+#### Contenu de Démonstration (V0.8)
+- [x] Tutoriel interactif au premier lancement (26 nœuds pédagogiques)
+- [x] Structure progressive : Bienvenue → Interface → Features → Future → Premiers pas
+- [x] Format pédagogique : [Fonctionnalité → Ce que ça permet → Exemple]
+- [x] Fonctionnalités V0.8 documentées avec exemples concrets
+- [x] Concepts futurs clarifiés (types = nœuds, triggers multi-nœuds, API externe)
+- [x] Chargement automatique si localStorage vide
+- [x] Instructions pour supprimer le contenu de démo incluses
 
 ---
 
@@ -386,7 +398,7 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 23 Décembre 2025
+**Dernière mise à jour** : 24 Décembre 2025
 **Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ + DÉPLOYÉ)
 **Prochaine milestone** : V0.9 (Features avancées)
 
@@ -409,3 +421,14 @@ DeepMemo/
 - [x] **Conservation symlinks** : Relations préservées dans branche importée
 - [x] **Interface utilisateur** : Boutons ⬇️/⬆️ dans actions du nœud
 - [x] **Documentation** : README, ARCHITECTURE, ROADMAP mis à jour
+
+### ✅ Contenu de démo + UX Polish (24 décembre 2025)
+- [x] **Contenu de démo** : 26 nœuds pédagogiques au premier lancement
+  - Structure progressive : Bienvenue → Interface → Features → Future → Premiers pas
+  - Format pédagogique : [Fonctionnalité → Ce que ça permet → Exemple]
+  - Concepts futurs clarifiés (types = nœuds, triggers multi-nœuds, API externe)
+- [x] **Reset scroll** : Retour en haut du contenu à chaque navigation
+- [x] **Mode affichage** : Démarrage en mode lecture (au lieu d'édition)
+- [x] **Right panel** : Masqué par défaut (interface épurée)
+- [x] **Toggle police** : Choix entre Sto (personnalisée) et polices système
+- [x] **Documentation complète** : CLAUDE.md, README, docs/ tous à jour

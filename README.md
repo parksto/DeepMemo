@@ -25,6 +25,8 @@ python3 -m http.server 8000
 - ⌨️ **Keyboard-first** - Navigation complète au clavier avec raccourcis documentés
 - 🌲 **Mode branche** - Isolation d'une sous-arborescence avec symlinks externes désactivés
 - 🎯 **Auto-collapse intelligent** - Arborescence se replie automatiquement sur le chemin actif
+- 📘 **Contenu de démo** - Tutoriel interactif au premier lancement (26 nœuds pédagogiques)
+- 🎨 **UX polish** - Mode lecture par défaut, scroll reset, panneau droit masqué, choix de police
 
 ## ⌨️ Raccourcis essentiels
 
@@ -49,12 +51,14 @@ python3 -m http.server 8000
 
 ## 📝 Changelog
 
-**V0.8** (20 Décembre 2025) - ✅ COMPLÈTE
+**V0.8** (24 Décembre 2025) - ✅ COMPLÈTE
 - 🔗 Refonte complète des liens symboliques (type dédié, renommables indépendamment)
 - 🌐 Système d'URL dynamiques (bookmarks, mode branche isolée)
 - 🎯 Auto-collapse intelligent de l'arborescence avec focus visuel symlinks
-- 🎨 **Drag & Drop complet** (arbre + enfants, Ctrl/Ctrl+Alt/Shift, prévention cycles)
-- 🎨 UI polish (modales, breadcrumb intelligent, raccourcis clavier documentés)
+- 🎨 **Drag & Drop complet** (arbre + enfants, Ctrl/Ctrl+Alt, prévention cycles)
+- 📤 **Export/Import de branche** (partage local, régénération IDs, merge non-destructif)
+- 📘 **Contenu de démo par défaut** (26 nœuds pédagogiques, tutoriel interactif)
+- 🎨 **UX polish** (mode lecture par défaut, scroll reset, right panel masqué, toggle police)
 - 🐛 Corrections bugs (renommage symlinks, focus visuel après navigation)
 
 **V0.7** - Restructuration multifile
