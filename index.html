@@ -50,12 +50,12 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="text" class="content-title-input" id="nodeTitle"
                    placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
-            <a href="#" id="shareLink" title="Partager ce nœud (clic pour copier, clic droit pour copier le lien)"
+            <a href="#" id="shareLink" title="Copier l'URL de ce nœud (préserve le contexte actuel)"
                style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
                onmouseover="this.style.opacity='1'"
                onmouseout="this.style.opacity='0.6'"
                onclick="app.shareNode(event)">🔗</a>
-            <a href="#" id="shareBranchLink" title="Partager comme branche isolée (clic pour copier, clic droit pour copier le lien)"
+            <a href="#" id="shareBranchLink" title="Copier l'URL en mode branche isolée (vue focus)"
                style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
                onmouseover="this.style.opacity='1'"
                onmouseout="this.style.opacity='0.6'"

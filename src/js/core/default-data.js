@@ -57,8 +57,9 @@ DeepMemo est un outil de prise de notes **hiérarchique**, **flexible** et **pui
 
 - **Organiser tes idées** en arborescence infinie
 - **Lier des informations** entre elles (symlinks, tags)
+- **Attacher des fichiers** (images, PDFs, documents)
 - **Retrouver rapidement** ce que tu cherches
-- **Partager des branches** avec d'autres personnes
+- **Exporter et importer** des branches (collaboration locale)
 - **Garder le contrôle** : tes données restent chez toi
 
 ## 🧭 Comment l'utiliser ?
@@ -158,6 +159,7 @@ Affiche le nœud actuellement sélectionné.
 - Le **titre** et le **contenu** du nœud
 - Les **enfants** (cartes cliquables en bas)
 - Les **tags**
+- Les **fichiers attachés** (images, PDFs, documents)
 - Les **boutons d'action** (Nouveau, Actions, Export/Import de branche)
 
 ## 🏷️ Panneau droit : Tags et infos
@@ -167,6 +169,7 @@ Affiche des informations contextuelles.
 **Ce que tu y trouves** :
 - Les **tags** du nœud actuel
 - Le **tag cloud** de la branche (tous les tags avec compteurs)
+- L'**indicateur de stockage** (espace utilisé par les fichiers)
 - Les **raccourcis clavier**
 
 ---
@@ -258,6 +261,7 @@ C'est là que tu **lis et édites** tes nœuds.
 - **Tags** du nœud
 
 ### En bas
+- **Fichiers attachés** : Liste des fichiers joints au nœud (📎 Ajouter un fichier)
 - **Boutons d'action** : Nouveau nœud, Actions, Export/Import de branche
 - **Cartes des enfants** : Cliquables pour naviguer
 
@@ -294,6 +298,18 @@ Tous les tags utilisés dans la **branche actuelle** (le nœud actuel + ses desc
 - Voir d'un coup d'œil les thèmes abordés
 - Identifier les tags les plus utilisés
 - Naviguer par thématique
+
+## 📊 Indicateur de stockage
+
+Affiche l'**espace utilisé** par les fichiers attachés.
+
+**Informations** :
+- Taille utilisée / Limite estimée (~500 MB)
+- Nombre de fichiers attachés
+- Barre de progression visuelle
+
+**Actions** :
+- **🧹 Nettoyer les fichiers orphelins** : Supprime les fichiers non référencés
 
 ## ⌨️ Raccourcis clavier
 
@@ -722,11 +738,11 @@ Le **mode branche** permet d'afficher uniquement une **partie** de ton arbre.
 
 **Isoler** :
 - Travailler sur un sous-projet sans être distrait par le reste
-- Partager une branche spécifique avec quelqu'un d'autre
 - Créer des "espaces de travail" thématiques
+- Bookmarker une branche spécifique pour y revenir rapidement
 
 **Comment ça fonctionne** :
-1. Clique sur l'icône **🌳** (Partager branche) sur un nœud
+1. Clique sur l'icône **🌳** (Mode branche) sur un nœud
 2. L'URL change : \`?branch=nodeId#/node/nodeId\`
 3. Seule la **sous-arborescence** de ce nœud est affichée
 4. Le reste de l'arbre est **masqué**
@@ -741,12 +757,14 @@ En mode branche, les **symlinks qui pointent hors de la branche** sont :
 
 **Pourquoi ?** : Pour éviter de naviguer hors de la branche isolée et maintenir le contexte.
 
-## 🔖 Partage
+## 🔖 URL bookmarkable
 
-Le mode branche génère une **URL bookmarkable** :
-- Tu peux la partager avec quelqu'un
-- La personne voit **uniquement cette branche**
-- Pratique pour la collaboration
+Le mode branche génère une **URL que tu peux bookmarker** :
+- Sauvegarde cette URL dans tes favoris
+- Reviens directement à cette vue isolée
+- Organise ton travail par contexte
+
+⚠️ **Important** : L'URL ne contient **pas les données**, seulement la vue. Pour partager des données avec quelqu'un, utilise **Export branche** (⬇️)
 
 ---
 
@@ -764,10 +782,10 @@ Le mode branche génère une **URL bookmarkable** :
       [ids.branchExample]: {
         id: ids.branchExample,
         type: "node",
-        title: "Exemple : Partager une recette",
-        content: `# Exemple : Partager une branche de recettes
+        title: "Exemple : Travailler sur une branche isolée",
+        content: `# Exemple : Se concentrer sur les recettes uniquement
 
-Imagine que tu as une branche "Recettes" avec des sous-catégories.
+Imagine que tu as une branche "Recettes" noyée dans ton arbre complet.
 
 ## 🗂️ Structure complète
 
@@ -783,35 +801,39 @@ Imagine que tu as une branche "Recettes" avec des sous-catégories.
     └── 🍲 Soupes
 \`\`\`
 
-## 🌳 Mode branche activé
+## 🌳 Mode branche : Isoler la vue
 
-Tu veux partager **uniquement** les recettes avec un ami.
+Tu veux **te concentrer uniquement** sur les recettes, sans distraction.
 
 **Action** :
 1. Va sur le nœud "🍰 Recettes"
-2. Clique sur l'icône **🌳** (Partager branche)
+2. Clique sur l'icône **🌳** (Mode branche)
 3. L'URL devient : \`?branch=node_recettes#/node/node_recettes\`
-4. Copie cette URL et envoie-la à ton ami
+4. **Bookmark cette URL** pour y revenir facilement
 
-**Résultat pour ton ami** :
-- Il voit **uniquement** la branche "Recettes"
-- Pas de "Projets" ni "Notes"
+**Résultat** :
+- Tu vois **uniquement** la branche "Recettes"
+- Pas de "Projets" ni "Notes" dans l'arbre
 - Navigation limitée à cette sous-arborescence
-- Expérience propre et ciblée
+- Expérience **propre et ciblée**
 
-## ⬇️ Bonus : Export de branche
+⚠️ **Important** : L'URL ne contient **pas les données**, juste la vue ! C'est pour toi, sur ton appareil.
 
-Tu peux aussi **exporter** la branche en fichier JSON :
+## 📤 Partager avec quelqu'un d'autre
+
+Pour **vraiment partager les données** avec un ami :
 1. Va sur "🍰 Recettes"
 2. Clique sur **⬇️ Export branche**
-3. Envoie le fichier JSON à ton ami
+3. Envoie le fichier ZIP à ton ami (inclut les recettes + photos !)
 4. Il peut **l'importer** dans son DeepMemo (⬆️ Import branche)
 
-**Avantage** : Les données sont **locales**, pas besoin de serveur !
+**Différence** :
+- **URL** = Vue isolée (pour toi, sur ton appareil)
+- **Export ZIP** = Partage de données (pour quelqu'un d'autre)
 
 ---
 
-**Astuce** : Le mode branche est parfait pour collaborer sans tout partager.`,
+**Astuce** : Le mode branche est parfait pour **organiser ton travail** par contexte.`,
         children: [],
         parent: ids.branch,
         tags: ["exemple", "partage", "collaboration"],
@@ -828,7 +850,7 @@ Tu peux aussi **exporter** la branche en fichier JSON :
         title: "⬇️ Export / Import",
         content: `# Export et Import : Sauvegarde et partage
 
-DeepMemo permet d'**exporter** et **importer** tes données en JSON.
+DeepMemo permet d'**exporter** et **importer** tes données en **format ZIP**.
 
 ## 💾 Deux types d'export/import
 
@@ -839,6 +861,9 @@ DeepMemo permet d'**exporter** et **importer** tes données en JSON.
 **Ce qui est exporté** :
 - **Tout** l'arbre (tous les nœuds racines)
 - **Toutes** les données (contenu, tags, relations)
+- **Tous les fichiers attachés** (images, PDFs, documents)
+
+**Format** : Fichier ZIP contenant \`data.json\` + dossier \`attachments/\`
 
 **Utilité** :
 - Sauvegarder toutes tes données
@@ -854,14 +879,17 @@ DeepMemo permet d'**exporter** et **importer** tes données en JSON.
 **Ce qui est exporté** :
 - Le nœud actuel + **tous ses descendants**
 - Les relations internes (symlinks, enfants)
+- **Les fichiers attachés** de tous les nœuds de la branche
+
+**Format** : Fichier ZIP contenant \`data.json\` + dossier \`attachments/\`
 
 **Utilité** :
-- Partager une branche spécifique (ex: recettes)
+- Partager une branche spécifique (ex: recettes avec photos)
 - Collaborer sans tout partager
 - Réutiliser une structure ailleurs
 
 ✅ **Bonus** : L'import de branche est **non-destructif** :
-- Les IDs sont régénérés automatiquement
+- Les IDs sont régénérés automatiquement (nœuds + fichiers)
 - Pas de conflit avec les nœuds existants
 - La branche est **fusionnée** comme enfants du nœud actuel
 
@@ -890,8 +918,12 @@ Imagine que tu veux partager tes recettes de pâtisserie avec ton frère.
 
 1. Va sur le nœud "🍰 Recettes de pâtisserie"
 2. Clique sur **⬇️ Export branche**
-3. Un fichier JSON est téléchargé : \`deepmemo-branch-Recettes-[timestamp].json\`
+3. Un fichier ZIP est téléchargé : \`deepmemo-branch-Recettes-[timestamp].zip\`
 4. Envoie ce fichier à ton frère (email, Telegram, etc.)
+
+**Contenu du ZIP** :
+- \`data.json\` : Tous les nœuds de la branche
+- \`attachments/\` : Toutes les **photos de recettes** attachées
 
 ## 📥 Étape 2 : Importer la branche
 
@@ -899,7 +931,7 @@ Ton frère ouvre son DeepMemo et :
 1. Crée un nœud "Recettes reçues" (ou n'importe quel nom)
 2. Va sur ce nœud
 3. Clique sur **⬆️ Import branche**
-4. Sélectionne le fichier JSON que tu lui as envoyé
+4. Sélectionne le fichier ZIP que tu lui as envoyé
 
 ## ✅ Résultat
 
@@ -908,6 +940,7 @@ Ton frère a maintenant :
 - Avec tous **tes enfants** (Cookies, Gâteaux, etc.) dedans
 - Tous les **tags** préservés
 - Tous les **symlinks internes** fonctionnels
+- Toutes les **photos de recettes** attachées
 
 **Et toi** :
 - Tu gardes tes recettes intactes
@@ -917,7 +950,7 @@ Ton frère a maintenant :
 
 Si tu modifies une recette, tu peux :
 1. Ré-exporter la branche
-2. Renvoyer le nouveau fichier JSON
+2. Renvoyer le nouveau fichier ZIP
 3. Ton frère importe à nouveau (écrase l'ancienne branche ou crée une nouvelle)
 
 ---
@@ -1758,8 +1791,8 @@ Maintenant que tu as exploré les fonctionnalités, il est temps de **t'appropri
 
 - Va dans la sidebar gauche
 - Clique sur **Exporter**
-- Télécharge le fichier JSON
-- **Garde-le précieusement** (c'est ta sauvegarde !)
+- Télécharge le fichier ZIP
+- **Garde-le précieusement** (c'est ta sauvegarde complète !)
 
 ## 🗑️ Supprimer ce contenu de démo
 
