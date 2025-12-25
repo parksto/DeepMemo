@@ -81,6 +81,15 @@ Chaque nœud possède :
 - **Prévention cycles** : Détection automatique des références circulaires
 - **Support complet** : Fonctionne dans arbre ET liste enfants
 
+### 📱 Progressive Web App (V0.8)
+- **Installation native** : Installable comme une vraie application sur desktop/mobile
+- **Mode offline** : Fonctionne sans connexion Internet (cache intelligent)
+- **Service Worker** : Cache automatique de tous les fichiers statiques
+- **Ouverture standalone** : Lance en fenêtre dédiée (sans barre d'adresse)
+- **Icônes adaptatives** : Générateur d'icônes inclus (`generate-icons.html`)
+- **Déploiement HTTPS** : Compatible GitHub Pages, Netlify, Vercel, etc.
+- **Documentation complète** : Guide installation et test dans `docs/PWA.md`
+
 ### ⌨️ Raccourcis clavier
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
 - `Alt+E` : Focus sur l'éditeur

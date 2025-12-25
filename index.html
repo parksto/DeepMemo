@@ -7,6 +7,7 @@
   <meta name="description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
   <title>DeepMemo V0.8</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="src/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -191,6 +192,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Enregistrement du Service Worker pour PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('[PWA] Service Worker enregistré:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('[PWA] Échec enregistrement Service Worker:', error);
+          });
+      });
+    }
+  </script>
 
   <script type="module" src="src/js/app.js"></script>
 </body>
