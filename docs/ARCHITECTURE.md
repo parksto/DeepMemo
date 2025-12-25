@@ -1,7 +1,7 @@
 # 🏗️ DeepMemo - Architecture Technique V0.8
 
-**Dernière mise à jour** : 20 Décembre 2025
-**Version** : 0.8 (Architecture modulaire ES6)
+**Dernière mise à jour** : 25 Décembre 2025
+**Version** : 0.8 (Architecture modulaire ES6 + PWA + Attachments)
 
 ---
 
@@ -27,15 +27,16 @@ DeepMemo est une **application single-page** (SPA) en vanilla JavaScript ES6, HT
 
 ```
 src/js/
-├── app.js                      # Point d'entrée (~420 lignes)
-├── app-legacy-backup.js        # Ancien monolithique (référence)
+├── app.js                      # Point d'entrée (~830 lignes)
 │
 ├── core/
-│   └── data.js                 # Gestion données + localStorage
+│   ├── data.js                 # Gestion données + localStorage + export/import
+│   ├── attachments.js          # Gestion fichiers joints (IndexedDB)
+│   └── default-data.js         # Contenu de démo par défaut
 │
 ├── features/
 │   ├── tree.js                 # Arborescence + mode branche
-│   ├── editor.js               # Éditeur + breadcrumb
+│   ├── editor.js               # Éditeur + breadcrumb + attachments UI
 │   ├── search.js               # Recherche globale
 │   ├── tags.js                 # Tags + autocomplete
 │   ├── modals.js               # Modales (Move/Link/Duplicate)
@@ -196,6 +197,56 @@ export function isDescendantOf(nodeId, ancestorId)
 export function wouldCreateCycle(targetId, parentId)
 export function wouldCreateCycleWithMove(nodeId, newParentId)
 ```
+
+### core/attachments.js
+
+**Responsabilités** :
+- Gestion des fichiers joints aux nœuds
+- Stockage dans IndexedDB (~500 MB limite)
+- Export/Import ZIP avec fichiers
+- Garbage collection fichiers orphelins
+
+**Exports** :
+```javascript
+export async function initDB()
+export async function saveAttachment(id, blob)
+export async function getAttachment(id)
+export async function deleteAttachment(id)
+export async function listAttachments()
+export async function getTotalSize()
+export function generateAttachmentId()
+export async function cleanOrphans(data)
+export function isIndexedDBAvailable()
+export function formatFileSize(bytes)
+```
+
+**Stockage** :
+- Database : `deepmemo-attachments`
+- Store : `files` (keyPath: `id`)
+- Format ID : `attach_{timestamp}_{random}`
+- Limite : 50 MB par fichier
+
+**Export/Import** :
+- Format ZIP systématique : `data.json` + `attachments/`
+- Rétrocompatibilité JSON simple (détection auto)
+- Régénération IDs lors import branche
+
+### core/default-data.js
+
+**Responsabilités** :
+- Fournir le contenu de démonstration initial
+- Documentation interactive pour nouveaux utilisateurs
+
+**Exports** :
+```javascript
+export function getDefaultData()
+```
+
+**Structure** :
+- 26 nœuds pédagogiques organisés hiérarchiquement
+- Tutoriel progressif : Interface → Fonctionnalités → Vision future
+- Exemples concrets pour chaque feature
+- Format : [Fonctionnalité → Utilité → Exemple pratique]
 
 ### features/tree.js
 

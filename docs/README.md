@@ -86,9 +86,20 @@ Chaque nœud possède :
 - **Mode offline** : Fonctionne sans connexion Internet (cache intelligent)
 - **Service Worker** : Cache automatique de tous les fichiers statiques
 - **Ouverture standalone** : Lance en fenêtre dédiée (sans barre d'adresse)
-- **Icônes adaptatives** : Générateur d'icônes inclus (`generate-icons.html`)
+- **Icônes adaptatives** : Générateur d'icônes (utilisé une fois, supprimé après génération)
 - **Déploiement HTTPS** : Compatible GitHub Pages, Netlify, Vercel, etc.
 - **Documentation complète** : Guide installation et test dans `docs/PWA.md`
+
+### 📎 Fichiers joints (V0.8)
+- **Upload de fichiers** : Attache des fichiers (images, PDFs, documents) à n'importe quel nœud
+- **Stockage IndexedDB** : Limite ~500 MB selon navigateur (vs localStorage limité à ~5-10 MB)
+- **Affichage inline** : Images affichées directement avec syntaxe markdown `![](attachment:ID)`
+- **Liens de téléchargement** : Autres fichiers téléchargeables avec `[nom](attachment:ID)`
+- **Export/Import ZIP** : Format ZIP systématique incluant fichiers + données JSON
+- **Gestion complète** : Upload, download, delete, copie syntaxe, garbage collection
+- **Indicateur stockage** : Barre de progression temps réel dans panneau droit
+- **Types supportés** : Images, PDFs, vidéos, audio, documents (50 MB max par fichier)
+- **Documentation** : Spec complète dans `docs/SPEC-ATTACHMENTS.md`
 
 ### ⌨️ Raccourcis clavier
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
