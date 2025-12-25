@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.1.0';
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)
@@ -12,6 +12,7 @@ const PRECACHE_URLS = [
   '/src/css/components.css',
   '/src/js/app.js',
   '/src/js/core/data.js',
+  '/src/js/core/attachments.js',
   '/src/js/core/default-data.js',
   '/src/js/features/tree.js',
   '/src/js/features/editor.js',
