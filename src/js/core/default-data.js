@@ -36,7 +36,9 @@ export function getDefaultData() {
     triggersExample: `node_${now + 23}_triggers_ex`,
     multiUser: `node_${now + 24}_multi_user`,
     multiUserExample: `node_${now + 25}_multi_user_ex`,
-    firstSteps: `node_${now + 26}_first_steps`,
+    attachments: `node_${now + 26}_attachments`,
+    attachmentsExample: `node_${now + 27}_attachments_ex`,
+    firstSteps: `node_${now + 28}_first_steps`,
   };
 
   return {
@@ -334,6 +336,9 @@ Retrouve rapidement tes notes par tags ou mots-clés.
 ## 🌳 Mode branche
 Isole une sous-arborescence pour travailler au calme.
 
+## 📎 Fichiers joints
+Attache des images, PDFs, documents à tes nœuds.
+
 ## ⬇️ Export/Import
 Sauvegarde et partage tes données (global ou par branche).
 
@@ -343,7 +348,7 @@ Navigue rapidement sans utiliser la souris.
 ---
 
 **Explore les sous-nœuds** pour découvrir chaque fonctionnalité en détail avec des exemples concrets.`,
-        children: [ids.nodes, ids.symlinks, ids.tags, ids.branch, ids.export, ids.keyboard],
+        children: [ids.nodes, ids.symlinks, ids.tags, ids.branch, ids.attachments, ids.export, ids.keyboard],
         parent: ids.root,
         tags: ["fonctionnalités", "guide"],
         links: [],
@@ -973,6 +978,136 @@ DeepMemo est **optimisé pour le clavier**. Voici les principaux raccourcis.
         backlinks: [],
         created: now + 18,
         modified: now + 18
+      },
+
+      // Fonctionnalité : Fichiers joints
+      [ids.attachments]: {
+        id: ids.attachments,
+        type: "node",
+        title: "📎 Fichiers joints",
+        content: `# Attache des fichiers à tes nœuds
+
+DeepMemo te permet d'**attacher des fichiers** (images, PDFs, documents, etc.) à n'importe quel nœud.
+
+## 📤 Uploader un fichier
+
+**Comment faire** :
+1. Sélectionne un nœud
+2. Scroll en bas du panneau central
+3. Clic sur **📎 Ajouter un fichier**
+4. Choisis le fichier à uploader (max 50 MB)
+
+**Fichiers supportés** :
+- Images (PNG, JPG, GIF, SVG...)
+- Documents (PDF, DOC, TXT...)
+- Vidéos (MP4, WEBM...)
+- Audio (MP3, WAV...)
+- Et bien d'autres !
+
+## 🖼️ Affichage inline
+
+**Syntaxe markdown** :
+\`\`\`markdown
+![Description](attachment:attach_ID)
+\`\`\`
+
+**Pour les autres fichiers** (liens de téléchargement) :
+\`\`\`markdown
+[Nom du fichier](attachment:attach_ID)
+\`\`\`
+
+**Astuce** : Utilise le bouton **📋** à côté de chaque fichier pour copier la syntaxe automatiquement !
+
+## 💾 Stockage et export
+
+**Stockage local** :
+- Les fichiers sont stockés dans **IndexedDB** (navigateur)
+- Limite estimée : ~500 MB selon le navigateur
+- Indicateur de stockage visible dans le panneau droit (📊 Stockage)
+
+**Export/Import** :
+- Les exports sont maintenant en **format ZIP**
+- Inclut automatiquement tous les fichiers attachés
+- Import restaure fichiers + données
+
+## 🧹 Nettoyage
+
+**Fichiers orphelins** :
+Si tu supprimes un nœud avec des attachments, les fichiers peuvent rester dans le stockage.
+
+**Solution** :
+- Ouvre le panneau droit (ℹ️)
+- Section **📊 Stockage**
+- Clic sur **🧹 Nettoyer les fichiers orphelins**
+
+---
+
+**Explore le sous-nœud** pour voir un exemple concret d'utilisation d'images inline.`,
+        children: [ids.attachmentsExample],
+        parent: ids.features,
+        tags: ["fichiers", "attachments", "images"],
+        links: [],
+        backlinks: [],
+        created: now + 26,
+        modified: now + 26
+      },
+
+      // Exemple : Fichiers joints
+      [ids.attachmentsExample]: {
+        id: ids.attachmentsExample,
+        type: "node",
+        title: "Exemple : Fichier joint",
+        content: `# Comment ça fonctionne ?
+
+## 1️⃣ Upload
+
+Imagine que tu viens d'uploader une **capture d'écran** de ton interface DeepMemo.
+
+Le fichier apparaît dans la liste des **Fichiers attachés** en bas du panneau central.
+
+## 2️⃣ Copier la syntaxe
+
+À côté du fichier, tu vois :
+- **📋** Copier syntaxe
+- **⬇️** Télécharger
+- **🗑️** Supprimer
+
+Clic sur **📋** copie automatiquement :
+\`\`\`markdown
+![screenshot.png](attachment:attach_1735157234567_abc123)
+\`\`\`
+
+## 3️⃣ Coller dans le contenu
+
+Tu colles cette syntaxe dans le **contenu du nœud**.
+
+Quand tu passes en **mode Affichage** (👁️), l'image s'affiche directement !
+
+## 💡 Cas d'usage
+
+**Documentation technique** :
+- Screenshots de bugs
+- Diagrammes d'architecture
+- Photos de tableaux blancs
+
+**Recettes de cuisine** :
+- Photos des plats
+- PDFs de livres de recettes
+
+**Projets créatifs** :
+- Moodboards (images)
+- Références visuelles
+
+---
+
+**Tu peux tester dès maintenant** en uploadant un fichier sur ce nœud ! 🚀`,
+        children: [],
+        parent: ids.attachments,
+        tags: ["exemple", "attachments"],
+        links: [],
+        backlinks: [],
+        created: now + 27,
+        modified: now + 27
       },
 
       // 🔮 Idées pour la suite

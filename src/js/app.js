@@ -323,18 +323,42 @@ const app = {
   /**
    * Import data
    */
-  importData(event) {
-    DataModule.importData(event, (nodeCount) => {
-      this.currentNodeId = null;
-      this.render();
-      this.updateNodeCounter();
+  async importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-      // Reset UI
-      document.getElementById('emptyState').style.display = 'flex';
-      document.getElementById('editorContainer').style.display = 'none';
+    try {
+      // Detect file type and call appropriate import function
+      if (file.name.endsWith('.zip')) {
+        await DataModule.importDataZIP(event, (nodeCount) => {
+          this.currentNodeId = null;
+          this.render();
+          this.updateNodeCounter();
 
-      showToast(`${nodeCount} nœud(s) importés`, '📥');
-    });
+          // Reset UI
+          document.getElementById('emptyState').style.display = 'flex';
+          document.getElementById('editorContainer').style.display = 'none';
+
+          showToast(`${nodeCount} nœud(s) importés (ZIP)`, '📥');
+        });
+      } else {
+        // Legacy JSON import
+        DataModule.importData(event, (nodeCount) => {
+          this.currentNodeId = null;
+          this.render();
+          this.updateNodeCounter();
+
+          // Reset UI
+          document.getElementById('emptyState').style.display = 'flex';
+          document.getElementById('editorContainer').style.display = 'none';
+
+          showToast(`${nodeCount} nœud(s) importés (JSON)`, '📥');
+        });
+      }
+    } catch (error) {
+      console.error('[App] Import failed:', error);
+      showToast('Erreur lors de l\'import', '⚠️');
+    }
   },
 
   /**
@@ -371,25 +395,50 @@ const app = {
   /**
    * Import branch as children of current node
    */
-  importBranch(event) {
+  async importBranch(event) {
     if (!this.currentNodeId) {
       showToast('Sélectionne d\'abord un nœud parent', 'ℹ️');
       event.target.value = ''; // Reset file input
       return;
     }
 
-    DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
-      this.render();
-      this.updateNodeCounter();
-      showToast(`${nodeCount} nœud(s) importés`, '⬆️');
+    const file = event.target.files[0];
+    if (!file) return;
 
-      // Optionally select the imported root
-      if (importedRootId) {
-        setTimeout(() => {
-          this.selectNodeById(importedRootId);
-        }, 100);
+    try {
+      // Detect file type and call appropriate import function
+      if (file.name.endsWith('.zip')) {
+        await DataModule.importBranchZIP(event, this.currentNodeId, (nodeCount, importedRootId) => {
+          this.render();
+          this.updateNodeCounter();
+          showToast(`${nodeCount} nœud(s) importés (ZIP)`, '⬆️');
+
+          // Optionally select the imported root
+          if (importedRootId) {
+            setTimeout(() => {
+              this.selectNodeById(importedRootId);
+            }, 100);
+          }
+        });
+      } else {
+        // Legacy JSON import
+        DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
+          this.render();
+          this.updateNodeCounter();
+          showToast(`${nodeCount} nœud(s) importés (JSON)`, '⬆️');
+
+          // Optionally select the imported root
+          if (importedRootId) {
+            setTimeout(() => {
+              this.selectNodeById(importedRootId);
+            }, 100);
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.error('[App] Branch import failed:', error);
+      showToast('Erreur lors de l\'import', '⚠️');
+    }
   },
 
   /**
@@ -668,6 +717,18 @@ const app = {
   },
 
   /**
+   * Copy attachment markdown syntax to clipboard
+   */
+  copyAttachmentSyntax(syntax) {
+    navigator.clipboard.writeText(syntax).then(() => {
+      showToast('✅ Syntaxe copiée dans le presse-papier', '📋');
+    }).catch(err => {
+      console.error('[App] Failed to copy syntax:', err);
+      showToast('❌ Erreur lors de la copie', '⚠️');
+    });
+  },
+
+  /**
    * Download an attachment
    */
   async downloadAttachment(attachId, filename) {
@@ -728,6 +789,31 @@ const app = {
     } catch (error) {
       console.error('[App] Failed to delete attachment:', error);
       showToast('❌ Erreur lors de la suppression', '⚠️');
+    }
+  },
+
+  /**
+   * Clean orphaned attachments (files not referenced by any node)
+   */
+  async cleanOrphanedAttachments() {
+    if (!confirm('Nettoyer les fichiers orphelins ? Cette action est irréversible.')) return;
+
+    try {
+      const deletedCount = await AttachmentsModule.cleanOrphans(DataModule.data);
+
+      if (deletedCount > 0) {
+        showToast(`✅ ${deletedCount} fichier(s) orphelin(s) supprimé(s)`, '🧹');
+      } else {
+        showToast('✅ Aucun fichier orphelin trouvé', '🧹');
+      }
+
+      // Refresh right panel to update storage info
+      if (this.currentNodeId) {
+        EditorModule.displayNode(this.currentNodeId, () => this.render());
+      }
+    } catch (error) {
+      console.error('[App] Failed to clean orphaned attachments:', error);
+      showToast('❌ Erreur lors du nettoyage', '⚠️');
     }
   }
 };
