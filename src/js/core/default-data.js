@@ -1305,7 +1305,7 @@ Si Dépenses > 90% des Revenus :
 
 DeepMemo est né d'une idée simple : pouvoir dire à un assistant vocal :
 
-> **"Rajoute dans la liste des choses à faire avec émilien : parler du projet Fitness-Chrono"**
+> **"Rajoute dans la liste des choses à faire avec Émilien : parler du projet Fitness-Chrono"**
 
 Et que ça **fonctionne** : le nœud est créé au bon endroit, et un symlink vers le projet est automatiquement ajouté.
 
@@ -1486,7 +1486,7 @@ Cet exemple montre le **cas d'usage initial** qui a motivé la création de Deep
 
 Imagine que tu dis à ton assistant vocal :
 
-> **"Rajoute dans la \`liste des choses à faire avec émilien\` : \`parler du projet Fitness-Chrono\`"**
+> **"Rajoute dans la \`liste des choses à faire avec Émilien\` : \`parler du projet Fitness-Chrono\`"**
 
 ## 🧩 Ce qui se passe
 
@@ -1496,7 +1496,7 @@ L'assistant vocal envoie une requête à DeepMemo :
 \`\`\`javascript
 POST /api/trigger
 {
-  "targetNode": "liste des choses à faire avec émilien",  // Référence du nœud cible
+  "targetNode": "liste des choses à faire avec Émilien",  // Référence du nœud cible
   "action": "addChild",                                   // Action à déclencher
   "data": {
     "title": "parler du projet Fitness-Chrono"           // Titre du nouveau nœud
@@ -1506,16 +1506,16 @@ POST /api/trigger
 
 ### 2. Recherche du nœud cible
 
-DeepMemo trouve le nœud "Liste des choses à faire avec émilien" :
+DeepMemo trouve le nœud "Liste des choses à faire avec Émilien" :
 - Par **titre exact** (ou fuzzy matching)
-- Par **mot-clé** prédéfini (ex: tu as tagué ce nœud avec "émilien-todos")
+- Par **mot-clé** prédéfini (ex: tu as tagué ce nœud avec "Émilien-todos")
 - Par **ID direct** si tu utilises une syntaxe plus technique
 
 ### 3. Création du nœud enfant
 
 DeepMemo crée automatiquement :
 \`\`\`
-📋 Liste des choses à faire avec émilien
+📋 Liste des choses à faire avec Émilien
 ├── [existant] Regarder le film qu'il m'a recommandé
 ├── [existant] Lui prêter le livre sur l'architecture logicielle
 └── [NOUVEAU] Parler du projet Fitness-Chrono
@@ -1523,14 +1523,14 @@ DeepMemo crée automatiquement :
 
 ### 4. Intelligence : Auto-symlink (grâce au type actif)
 
-**Bonus automatique** : Le nœud "Liste des choses à faire avec émilien" a un **type actif** qui détecte :
+**Bonus automatique** : Le nœud "Liste des choses à faire avec Émilien" a un **type actif** qui détecte :
 - Le mot-clé "projet" dans le titre
 - Un nœud existant nommé "Fitness-Chrono" dans ta branche "Projets"
 
 **Action automatique** :
 Le type actif **crée un symlink** vers la branche "Fitness-Chrono" :
 \`\`\`
-📋 Liste des choses à faire avec émilien
+📋 Liste des choses à faire avec Émilien
 └── Parler du projet Fitness-Chrono
     └── 🔗 [symlink automatique vers] Projet Fitness-Chrono
 \`\`\`
