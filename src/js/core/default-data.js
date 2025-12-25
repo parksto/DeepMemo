@@ -34,9 +34,10 @@ export function getDefaultData() {
     activeNodesExample: `node_${now + 21}_active_nodes_ex`,
     triggers: `node_${now + 22}_triggers`,
     triggersExample: `node_${now + 23}_triggers_ex`,
-    multiUser: `node_${now + 24}_multi_user`,
-    multiUserExample: `node_${now + 25}_multi_user_ex`,
-    firstSteps: `node_${now + 26}_first_steps`,
+    triggersVoiceExample: `node_${now + 24}_triggers_voice_ex`,
+    multiUser: `node_${now + 25}_multi_user`,
+    multiUserExample: `node_${now + 26}_multi_user_ex`,
+    firstSteps: `node_${now + 27}_first_steps`,
   };
 
   return {
@@ -1165,6 +1166,21 @@ Si Dépenses > 90% des Revenus :
         title: "🔔 Triggers (Workflows & Automatisations)",
         content: `# Triggers : Déclencher des actions sur d'autres nœuds
 
+## 🎤 Le cas d'usage qui a tout déclenché
+
+DeepMemo est né d'une idée simple : pouvoir dire à un assistant vocal :
+
+> **"Rajoute dans la liste des choses à faire avec émilien : parler du projet Fitness-Chrono"**
+
+Et que ça **fonctionne** : le nœud est créé au bon endroit, et un symlink vers le projet est automatiquement ajouté.
+
+**Ce cas d'usage combine** :
+- API externe (commande vocale → DeepMemo)
+- Nœuds actifs (la "liste" sait comment gérer l'ajout)
+- Auto-symlink (détection intelligente du projet mentionné)
+
+👉 **Voir l'exemple détaillé ci-dessous** pour comprendre comment ça marcherait.
+
 ## 💡 L'idée principale
 
 Un nœud pourrait **déclencher** des actions sur **un ou plusieurs autres nœuds**, même s'ils ne sont pas ses enfants.
@@ -1245,8 +1261,8 @@ L'API permettrait :
 
 ---
 
-**Exemple concret ci-dessous** 👇`,
-        children: [ids.triggersExample],
+**Exemples concrets ci-dessous** 👇`,
+        children: [ids.triggersExample, ids.triggersVoiceExample],
         parent: ids.future,
         tags: ["futur", "triggers", "automatisation"],
         links: [],
@@ -1322,6 +1338,107 @@ La liste de courses **fusionne** automatiquement :
         modified: now + 23
       },
 
+      // Exemple : Triggers + Commande vocale
+      [ids.triggersVoiceExample]: {
+        id: ids.triggersVoiceExample,
+        type: "node",
+        title: "Exemple : Commande vocale + auto-symlink",
+        content: `# Exemple : La commande vocale qui a inspiré DeepMemo
+
+Cet exemple montre le **cas d'usage initial** qui a motivé la création de DeepMemo.
+
+## 🎤 La commande vocale
+
+Imagine que tu dis à ton assistant vocal :
+
+> **"Rajoute dans la \`liste des choses à faire avec émilien\` : \`parler du projet Fitness-Chrono\`"**
+
+## 🧩 Ce qui se passe
+
+### 1. Parsing de la commande
+
+L'assistant vocal envoie une requête à DeepMemo :
+\`\`\`javascript
+POST /api/trigger
+{
+  "targetNode": "liste des choses à faire avec émilien",  // Référence du nœud cible
+  "action": "addChild",                                   // Action à déclencher
+  "data": {
+    "title": "parler du projet Fitness-Chrono"           // Titre du nouveau nœud
+  }
+}
+\`\`\`
+
+### 2. Recherche du nœud cible
+
+DeepMemo trouve le nœud "Liste des choses à faire avec émilien" :
+- Par **titre exact** (ou fuzzy matching)
+- Par **mot-clé** prédéfini (ex: tu as tagué ce nœud avec "émilien-todos")
+- Par **ID direct** si tu utilises une syntaxe plus technique
+
+### 3. Création du nœud enfant
+
+DeepMemo crée automatiquement :
+\`\`\`
+📋 Liste des choses à faire avec émilien
+├── [existant] Regarder le film qu'il m'a recommandé
+├── [existant] Lui prêter le livre sur l'architecture logicielle
+└── [NOUVEAU] Parler du projet Fitness-Chrono
+\`\`\`
+
+### 4. Intelligence : Auto-symlink (grâce au type actif)
+
+**Bonus automatique** : Le nœud "Liste des choses à faire avec émilien" a un **type actif** qui détecte :
+- Le mot-clé "projet" dans le titre
+- Un nœud existant nommé "Fitness-Chrono" dans ta branche "Projets"
+
+**Action automatique** :
+Le type actif **crée un symlink** vers la branche "Fitness-Chrono" :
+\`\`\`
+📋 Liste des choses à faire avec émilien
+└── Parler du projet Fitness-Chrono
+    └── 🔗 [symlink automatique vers] Projet Fitness-Chrono
+\`\`\`
+
+**Résultat** : Quand tu ouvres cette tâche, tu as **directement accès** à toutes les infos du projet (contexte complet).
+
+## 🎯 Pourquoi c'est puissant ?
+
+**Interface naturelle** :
+- Tu parles comme à un humain
+- Pas besoin de naviguer dans l'arborescence
+- Pas besoin de chercher manuellement le projet lié
+
+**Automatisation intelligente** :
+- Le nœud "liste" **sait** comment gérer ce type d'ajout
+- Il **détecte** les références à d'autres nœuds
+- Il **crée** automatiquement les liens pertinents
+
+**Contexte préservé** :
+- La tâche est liée au projet
+- Tu peux naviguer facilement entre "Liste Émilien" et "Projet Fitness-Chrono"
+- Pas de duplication, juste des **connexions intelligentes**
+
+## 🔮 Vision future
+
+Cette commande illustre **trois concepts** de DeepMemo :
+
+1. **API externe** : Contrôler DeepMemo depuis n'importe où (vocal, Zapier, Home Assistant, etc.)
+2. **Nœuds actifs** : Le nœud "liste" a un comportement intelligent (type personnalisé)
+3. **Triggers multi-nœuds** : Une action déclenche plusieurs effets (création + symlink)
+
+---
+
+**C'est exactement ce genre d'usage fluide et intelligent que DeepMemo vise à rendre possible.**`,
+        children: [],
+        parent: ids.triggers,
+        tags: ["exemple", "vocal", "automatisation", "origine"],
+        links: [],
+        backlinks: [],
+        created: now + 24,
+        modified: now + 24
+      },
+
       // Futur : Multi-utilisateur
       [ids.multiUser]: {
         id: ids.multiUser,
@@ -1380,8 +1497,8 @@ Les modifications seraient **synchronisées** en temps réel :
         tags: ["futur", "collaboration", "permissions"],
         links: [],
         backlinks: [],
-        created: now + 24,
-        modified: now + 24
+        created: now + 25,
+        modified: now + 25
       },
 
       // Exemple : Multi-utilisateur
@@ -1452,8 +1569,8 @@ Quand un développeur modifie du code :
         tags: ["exemple", "équipe", "collaboration"],
         links: [],
         backlinks: [],
-        created: now + 25,
-        modified: now + 25
+        created: now + 26,
+        modified: now + 26
       },
 
       // 🚀 Premiers pas
@@ -1533,8 +1650,8 @@ Quand tu seras à l'aise avec DeepMemo, tu pourras **supprimer** ce nœud "Bienv
         tags: ["guide", "démarrage"],
         links: [],
         backlinks: [],
-        created: now + 26,
-        modified: now + 26
+        created: now + 27,
+        modified: now + 27
       }
     },
     rootNodes: [ids.root]
