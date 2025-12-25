@@ -15,6 +15,7 @@ import * as SearchModule from './features/search.js';
 import * as TagsModule from './features/tags.js';
 import * as ModalsModule from './features/modals.js';
 import * as DragDropModule from './features/drag-drop.js';
+import * as AttachmentsModule from './core/attachments.js';
 
 /**
  * Main Application Object
@@ -29,8 +30,21 @@ const app = {
   /**
    * Initialize the application
    */
-  init() {
+  async init() {
     console.log('🚀 DeepMemo V0.8 - Initialisation...');
+
+    // Initialize IndexedDB for attachments
+    if (AttachmentsModule.isIndexedDBAvailable()) {
+      try {
+        await AttachmentsModule.initDB();
+        console.log('[App] IndexedDB initialized for attachments');
+      } catch (error) {
+        console.error('[App] IndexedDB failed to initialize:', error);
+        showToast('⚠️ Attachments non disponibles (IndexedDB)', '⚠️');
+      }
+    } else {
+      console.warn('[App] IndexedDB not available (private mode?)');
+    }
 
     // Load data from localStorage
     DataModule.loadData();
@@ -572,6 +586,139 @@ const app = {
       this.render();
       this.updateNodeCounter();
     });
+  },
+
+  /**
+   * Trigger file upload input
+   */
+  triggerFileUpload() {
+    const input = document.getElementById('attachmentFileInput');
+    input.click();
+  },
+
+  /**
+   * Handle attachment upload
+   */
+  async handleAttachmentUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check file size limit (50MB)
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    if (file.size > MAX_SIZE) {
+      showToast(`❌ Fichier trop volumineux (max 50MB)`, '⚠️');
+      event.target.value = ''; // Reset input
+      return;
+    }
+
+    try {
+      // Generate attachment ID
+      const attachId = AttachmentsModule.generateAttachmentId();
+
+      // Save file to IndexedDB
+      await AttachmentsModule.saveAttachment(attachId, file);
+
+      // Get current node
+      const node = this.data.nodes[this.currentNodeId];
+      if (!node) return;
+
+      // For symlinks, add to target
+      const targetNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+      if (!targetNode) return;
+
+      // Initialize attachments array if doesn't exist
+      if (!targetNode.attachments) {
+        targetNode.attachments = [];
+      }
+
+      // Add attachment metadata
+      targetNode.attachments.push({
+        id: attachId,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        created: Date.now(),
+        modified: Date.now()
+      });
+
+      // Save data
+      DataModule.saveData();
+
+      // Refresh display
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+
+      showToast(`✅ Fichier ajouté : ${file.name}`, '📎');
+    } catch (error) {
+      console.error('[App] Failed to upload attachment:', error);
+      showToast('❌ Erreur lors de l\'ajout du fichier', '⚠️');
+    }
+
+    // Reset input
+    event.target.value = '';
+  },
+
+  /**
+   * Download an attachment
+   */
+  async downloadAttachment(attachId, filename) {
+    try {
+      const blob = await AttachmentsModule.getAttachment(attachId);
+      if (!blob) {
+        showToast('❌ Fichier introuvable', '⚠️');
+        return;
+      }
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast(`✅ Téléchargement : ${filename}`, '⬇️');
+    } catch (error) {
+      console.error('[App] Failed to download attachment:', error);
+      showToast('❌ Erreur lors du téléchargement', '⚠️');
+    }
+  },
+
+  /**
+   * Delete an attachment
+   */
+  async deleteAttachment(attachId) {
+    if (!confirm('Supprimer ce fichier ?')) return;
+
+    try {
+      // Get current node
+      const node = this.data.nodes[this.currentNodeId];
+      if (!node) return;
+
+      // For symlinks, delete from target
+      const targetNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+      if (!targetNode || !targetNode.attachments) return;
+
+      // Remove from metadata
+      const index = targetNode.attachments.findIndex(a => a.id === attachId);
+      if (index === -1) return;
+
+      const attachment = targetNode.attachments[index];
+      targetNode.attachments.splice(index, 1);
+
+      // Delete from IndexedDB
+      await AttachmentsModule.deleteAttachment(attachId);
+
+      // Save data
+      DataModule.saveData();
+
+      // Refresh display
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+
+      showToast(`✅ Fichier supprimé : ${attachment.name}`, '🗑️');
+    } catch (error) {
+      console.error('[App] Failed to delete attachment:', error);
+      showToast('❌ Erreur lors de la suppression', '⚠️');
+    }
   }
 };
 

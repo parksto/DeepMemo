@@ -10,6 +10,7 @@ import * as TagsModule from './tags.js';
 import { isBranchMode, isNodeInBranch, getBranchRootId } from './tree.js';
 import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
+import * as AttachmentsModule from '../core/attachments.js';
 
 // View mode state
 let viewMode = 'view'; // 'edit' or 'view' (default: view)
@@ -79,6 +80,7 @@ export function displayNode(nodeId, renderCallback) {
 
   // Update UI components
   updateBreadcrumb(nodeId);
+  updateAttachments(nodeId);
   updateChildren(nodeId);
   updateRightPanel(nodeId);
   updateShareLinks(nodeId);
@@ -313,6 +315,84 @@ function updateChildren(currentNodeId) {
     }
 
     grid.appendChild(card);
+  });
+}
+
+/**
+ * Get icon for attachment based on MIME type
+ * @param {string} mimeType - MIME type
+ * @returns {string} - Emoji icon
+ */
+function getAttachmentIcon(mimeType) {
+  if (!mimeType) return '📎';
+
+  if (mimeType.startsWith('image/')) return '🖼️';
+  if (mimeType.startsWith('video/')) return '🎬';
+  if (mimeType.startsWith('audio/')) return '🎵';
+  if (mimeType === 'application/pdf') return '📄';
+  if (mimeType.includes('word') || mimeType.includes('document')) return '📝';
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊';
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📽️';
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return '📦';
+  if (mimeType.includes('text/')) return '📃';
+
+  return '📎';
+}
+
+/**
+ * Update attachments section
+ * @param {string} currentNodeId - Current node ID
+ */
+function updateAttachments(currentNodeId) {
+  const node = data.nodes[currentNodeId];
+  const section = document.getElementById('attachmentsSection');
+  const list = document.getElementById('attachmentsList');
+  const countSpan = document.getElementById('attachmentsCount');
+
+  // For symlinks, display target's attachments
+  const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
+  if (!displayNode) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // Initialize attachments array if doesn't exist
+  if (!displayNode.attachments) {
+    displayNode.attachments = [];
+  }
+
+  const totalAttachments = displayNode.attachments.length;
+
+  if (totalAttachments === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  countSpan.textContent = totalAttachments;
+
+  list.innerHTML = '';
+
+  displayNode.attachments.forEach(attachment => {
+    const item = document.createElement('div');
+    item.className = 'attachment-item';
+
+    const icon = getAttachmentIcon(attachment.type);
+    const formattedSize = AttachmentsModule.formatFileSize(attachment.size);
+
+    item.innerHTML = `
+      <div class="attachment-icon">${icon}</div>
+      <div class="attachment-info">
+        <div class="attachment-name">${escapeHtml(attachment.name)}</div>
+        <div class="attachment-size">${formattedSize}</div>
+      </div>
+      <div class="attachment-actions">
+        <button class="attachment-btn" onclick="app.downloadAttachment('${attachment.id}', '${escapeHtml(attachment.name)}')">⬇️</button>
+        <button class="attachment-btn delete" onclick="app.deleteAttachment('${attachment.id}')">🗑️</button>
+      </div>
+    `;
+
+    list.appendChild(item);
   });
 }
 
