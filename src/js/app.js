@@ -338,24 +338,34 @@ const app = {
   },
 
   /**
-   * Export data
+   * Export data as ZIP with attachments
    */
-  exportData() {
-    DataModule.exportData();
-    showToast('Données exportées', '💾');
+  async exportData() {
+    try {
+      await DataModule.exportDataZIP();
+      showToast('Données exportées (ZIP)', '💾');
+    } catch (error) {
+      console.error('[App] Export failed:', error);
+      showToast('Erreur lors de l\'export', '⚠️');
+    }
   },
 
   /**
-   * Export current branch
+   * Export current branch as ZIP with attachments
    */
-  exportBranch() {
+  async exportBranch() {
     if (!this.currentNodeId) {
       showToast('Sélectionne d\'abord un nœud', 'ℹ️');
       return;
     }
 
-    DataModule.exportBranch(this.currentNodeId);
-    showToast('Branche exportée', '⬇️');
+    try {
+      await DataModule.exportBranchZIP(this.currentNodeId);
+      showToast('Branche exportée (ZIP)', '⬇️');
+    } catch (error) {
+      console.error('[App] Branch export failed:', error);
+      showToast('Erreur lors de l\'export', '⚠️');
+    }
   },
 
   /**
