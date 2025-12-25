@@ -363,15 +363,16 @@ function updateAttachments(currentNodeId) {
 
   const totalAttachments = displayNode.attachments.length;
 
-  if (totalAttachments === 0) {
-    section.style.display = 'none';
-    return;
-  }
-
+  // Always show section (so the "Add file" button is visible)
   section.style.display = 'block';
   countSpan.textContent = totalAttachments;
 
   list.innerHTML = '';
+
+  // If no attachments, just show empty list (button remains visible)
+  if (totalAttachments === 0) {
+    return;
+  }
 
   displayNode.attachments.forEach(attachment => {
     const item = document.createElement('div');
