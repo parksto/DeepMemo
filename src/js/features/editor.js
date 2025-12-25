@@ -10,9 +10,13 @@ import * as TagsModule from './tags.js';
 import { isBranchMode, isNodeInBranch, getBranchRootId } from './tree.js';
 import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
+import * as AttachmentsModule from '../core/attachments.js';
 
 // View mode state
 let viewMode = 'view'; // 'edit' or 'view' (default: view)
+
+// Track active blob URLs for cleanup
+let activeBlobUrls = [];
 
 /**
  * Initialize view mode from localStorage
@@ -25,11 +29,69 @@ export function initViewMode() {
 }
 
 /**
+ * Clean up all active blob URLs to prevent memory leaks
+ */
+function cleanupBlobUrls() {
+  activeBlobUrls.forEach(url => URL.revokeObjectURL(url));
+  activeBlobUrls = [];
+}
+
+/**
+ * Process attachment: URLs in rendered HTML
+ * Replaces attachment:ID with blob URLs from IndexedDB
+ * @param {string} html - Rendered HTML content
+ * @returns {Promise<string>} - HTML with blob URLs
+ */
+async function processAttachmentUrls(html) {
+  // Find all attachment:ID references in href and src attributes
+  const attachmentPattern = /attachment:([a-zA-Z0-9_]+)/g;
+  const matches = [...html.matchAll(attachmentPattern)];
+
+  if (matches.length === 0) {
+    return html;
+  }
+
+  let processedHtml = html;
+
+  // Process each attachment reference
+  for (const match of matches) {
+    const attachmentId = match[1];
+    const fullPattern = match[0]; // "attachment:attach_123"
+
+    try {
+      // Fetch blob from IndexedDB
+      const blob = await AttachmentsModule.getAttachment(attachmentId);
+
+      if (blob) {
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(blob);
+        activeBlobUrls.push(blobUrl);
+
+        // Replace attachment:ID with blob URL
+        processedHtml = processedHtml.replace(fullPattern, blobUrl);
+      } else {
+        console.warn(`[Editor] Attachment not found: ${attachmentId}`);
+        // Replace with error indicator
+        processedHtml = processedHtml.replace(fullPattern, '#attachment-not-found');
+      }
+    } catch (error) {
+      console.error(`[Editor] Error loading attachment ${attachmentId}:`, error);
+      processedHtml = processedHtml.replace(fullPattern, '#attachment-error');
+    }
+  }
+
+  return processedHtml;
+}
+
+/**
  * Display a node in the editor
  * @param {string} nodeId - Node ID to display
  * @param {Function} renderCallback - Callback to trigger tree re-render
  */
 export function displayNode(nodeId, renderCallback) {
+  // Clean up blob URLs from previous node
+  cleanupBlobUrls();
+
   const node = data.nodes[nodeId];
   if (!node) return;
 
@@ -79,6 +141,7 @@ export function displayNode(nodeId, renderCallback) {
 
   // Update UI components
   updateBreadcrumb(nodeId);
+  updateAttachments(nodeId);
   updateChildren(nodeId);
   updateRightPanel(nodeId);
   updateShareLinks(nodeId);
@@ -317,10 +380,97 @@ function updateChildren(currentNodeId) {
 }
 
 /**
+ * Get icon for attachment based on MIME type
+ * @param {string} mimeType - MIME type
+ * @returns {string} - Emoji icon
+ */
+function getAttachmentIcon(mimeType) {
+  if (!mimeType) return '📎';
+
+  if (mimeType.startsWith('image/')) return '🖼️';
+  if (mimeType.startsWith('video/')) return '🎬';
+  if (mimeType.startsWith('audio/')) return '🎵';
+  if (mimeType === 'application/pdf') return '📄';
+  if (mimeType.includes('word') || mimeType.includes('document')) return '📝';
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊';
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📽️';
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return '📦';
+  if (mimeType.includes('text/')) return '📃';
+
+  return '📎';
+}
+
+/**
+ * Update attachments section
+ * @param {string} currentNodeId - Current node ID
+ */
+function updateAttachments(currentNodeId) {
+  const node = data.nodes[currentNodeId];
+  const section = document.getElementById('attachmentsSection');
+  const list = document.getElementById('attachmentsList');
+  const countSpan = document.getElementById('attachmentsCount');
+
+  // For symlinks, display target's attachments
+  const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
+  if (!displayNode) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // Initialize attachments array if doesn't exist
+  if (!displayNode.attachments) {
+    displayNode.attachments = [];
+  }
+
+  const totalAttachments = displayNode.attachments.length;
+
+  // Always show section (so the "Add file" button is visible)
+  section.style.display = 'block';
+  countSpan.textContent = totalAttachments;
+
+  list.innerHTML = '';
+
+  // If no attachments, just show empty list (button remains visible)
+  if (totalAttachments === 0) {
+    return;
+  }
+
+  displayNode.attachments.forEach(attachment => {
+    const item = document.createElement('div');
+    item.className = 'attachment-item';
+
+    const icon = getAttachmentIcon(attachment.type);
+    const formattedSize = AttachmentsModule.formatFileSize(attachment.size);
+
+    // Determine markdown syntax based on type
+    const isImage = attachment.type.startsWith('image/');
+    const markdownSyntax = isImage
+      ? `![${attachment.name}](attachment:${attachment.id})`
+      : `[${attachment.name}](attachment:${attachment.id})`;
+
+    item.innerHTML = `
+      <div class="attachment-icon">${icon}</div>
+      <div class="attachment-info">
+        <div class="attachment-name">${escapeHtml(attachment.name)}</div>
+        <div class="attachment-id" title="ID de l'attachment">ID: ${attachment.id}</div>
+        <div class="attachment-size">${formattedSize}</div>
+      </div>
+      <div class="attachment-actions">
+        <button class="attachment-btn" onclick="app.copyAttachmentSyntax('${escapeHtml(markdownSyntax)}')" title="Copier la syntaxe markdown">📋</button>
+        <button class="attachment-btn" onclick="app.downloadAttachment('${attachment.id}', '${escapeHtml(attachment.name)}')" title="Télécharger">⬇️</button>
+        <button class="attachment-btn delete" onclick="app.deleteAttachment('${attachment.id}')" title="Supprimer">🗑️</button>
+      </div>
+    `;
+
+    list.appendChild(item);
+  });
+}
+
+/**
  * Update right panel
  * @param {string} currentNodeId - Current node ID
  */
-function updateRightPanel(currentNodeId) {
+async function updateRightPanel(currentNodeId) {
   const node = data.nodes[currentNodeId];
   const panel = document.getElementById('panelBody');
 
@@ -430,6 +580,43 @@ function updateRightPanel(currentNodeId) {
     </div>
   `;
 
+  // Storage section
+  html += '<div class="info-section"><h3>📊 Stockage</h3>';
+
+  try {
+    const totalSize = await AttachmentsModule.getTotalSize();
+    const allAttachments = await AttachmentsModule.listAttachments();
+    const attachmentCount = allAttachments.length;
+
+    const formattedSize = AttachmentsModule.formatFileSize(totalSize);
+    const estimatedLimit = 500 * 1024 * 1024; // 500 MB estimated browser limit
+    const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100));
+
+    html += `<div class="info-item">
+      <div class="info-label">Fichiers</div>
+      <div>${formattedSize} / ~500 MB</div>
+    </div>`;
+
+    html += `<div class="storage-bar-container">
+      <div class="storage-bar" style="width: ${percentage}%"></div>
+    </div>`;
+
+    html += `<div class="info-item" style="margin-top: 8px;">
+      <div>${attachmentCount} fichier(s) attaché(s)</div>
+    </div>`;
+
+    html += `<button class="btn btn-secondary btn-small"
+                     style="width: 100%; margin-top: 12px;"
+                     onclick="window.app.cleanOrphanedAttachments()">
+      🧹 Nettoyer les fichiers orphelins
+    </button>`;
+  } catch (error) {
+    console.error('[Editor] Failed to get storage info:', error);
+    html += '<div class="info-item" style="opacity: 0.5;">Erreur de stockage</div>';
+  }
+
+  html += '</div>';
+
   // Font preference toggle
   const isSystemFont = document.body.classList.contains('system-font');
   html += `
@@ -521,7 +708,7 @@ export function toggleViewMode() {
 /**
  * Update display based on current view mode
  */
-export function updateViewMode() {
+export async function updateViewMode() {
   const toggleBtn = document.getElementById('toggleViewMode');
   const contentEditor = document.getElementById('nodeContent');
   const contentPreview = document.getElementById('contentPreview');
@@ -540,7 +727,11 @@ export function updateViewMode() {
 
       if (displayNode?.content) {
         // Use marked.js for markdown rendering (loaded from CDN in index.html)
-        const renderedContent = window.marked ? window.marked.parse(displayNode.content) : displayNode.content;
+        let renderedContent = window.marked ? window.marked.parse(displayNode.content) : displayNode.content;
+
+        // Process attachment: URLs to blob URLs
+        renderedContent = await processAttachmentUrls(renderedContent);
+
         contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
       } else {
         contentPreview.innerHTML = '<div class="markdown-content"><em>Aucun contenu</em></div>';

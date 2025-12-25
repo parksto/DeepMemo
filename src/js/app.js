@@ -15,6 +15,7 @@ import * as SearchModule from './features/search.js';
 import * as TagsModule from './features/tags.js';
 import * as ModalsModule from './features/modals.js';
 import * as DragDropModule from './features/drag-drop.js';
+import * as AttachmentsModule from './core/attachments.js';
 
 /**
  * Main Application Object
@@ -29,8 +30,21 @@ const app = {
   /**
    * Initialize the application
    */
-  init() {
+  async init() {
     console.log('🚀 DeepMemo V0.8 - Initialisation...');
+
+    // Initialize IndexedDB for attachments
+    if (AttachmentsModule.isIndexedDBAvailable()) {
+      try {
+        await AttachmentsModule.initDB();
+        console.log('[App] IndexedDB initialized for attachments');
+      } catch (error) {
+        console.error('[App] IndexedDB failed to initialize:', error);
+        showToast('⚠️ Attachments non disponibles (IndexedDB)', '⚠️');
+      }
+    } else {
+      console.warn('[App] IndexedDB not available (private mode?)');
+    }
 
     // Load data from localStorage
     DataModule.loadData();
@@ -309,63 +323,122 @@ const app = {
   /**
    * Import data
    */
-  importData(event) {
-    DataModule.importData(event, (nodeCount) => {
-      this.currentNodeId = null;
-      this.render();
-      this.updateNodeCounter();
+  async importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-      // Reset UI
-      document.getElementById('emptyState').style.display = 'flex';
-      document.getElementById('editorContainer').style.display = 'none';
+    try {
+      // Detect file type and call appropriate import function
+      if (file.name.endsWith('.zip')) {
+        await DataModule.importDataZIP(event, (nodeCount) => {
+          this.currentNodeId = null;
+          this.render();
+          this.updateNodeCounter();
 
-      showToast(`${nodeCount} nœud(s) importés`, '📥');
-    });
+          // Reset UI
+          document.getElementById('emptyState').style.display = 'flex';
+          document.getElementById('editorContainer').style.display = 'none';
+
+          showToast(`${nodeCount} nœud(s) importés (ZIP)`, '📥');
+        });
+      } else {
+        // Legacy JSON import
+        DataModule.importData(event, (nodeCount) => {
+          this.currentNodeId = null;
+          this.render();
+          this.updateNodeCounter();
+
+          // Reset UI
+          document.getElementById('emptyState').style.display = 'flex';
+          document.getElementById('editorContainer').style.display = 'none';
+
+          showToast(`${nodeCount} nœud(s) importés (JSON)`, '📥');
+        });
+      }
+    } catch (error) {
+      console.error('[App] Import failed:', error);
+      showToast('Erreur lors de l\'import', '⚠️');
+    }
   },
 
   /**
-   * Export data
+   * Export data as ZIP with attachments
    */
-  exportData() {
-    DataModule.exportData();
-    showToast('Données exportées', '💾');
+  async exportData() {
+    try {
+      await DataModule.exportDataZIP();
+      showToast('Données exportées (ZIP)', '💾');
+    } catch (error) {
+      console.error('[App] Export failed:', error);
+      showToast('Erreur lors de l\'export', '⚠️');
+    }
   },
 
   /**
-   * Export current branch
+   * Export current branch as ZIP with attachments
    */
-  exportBranch() {
+  async exportBranch() {
     if (!this.currentNodeId) {
       showToast('Sélectionne d\'abord un nœud', 'ℹ️');
       return;
     }
 
-    DataModule.exportBranch(this.currentNodeId);
-    showToast('Branche exportée', '⬇️');
+    try {
+      await DataModule.exportBranchZIP(this.currentNodeId);
+      showToast('Branche exportée (ZIP)', '⬇️');
+    } catch (error) {
+      console.error('[App] Branch export failed:', error);
+      showToast('Erreur lors de l\'export', '⚠️');
+    }
   },
 
   /**
    * Import branch as children of current node
    */
-  importBranch(event) {
+  async importBranch(event) {
     if (!this.currentNodeId) {
       showToast('Sélectionne d\'abord un nœud parent', 'ℹ️');
       event.target.value = ''; // Reset file input
       return;
     }
 
-    DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
-      this.render();
-      this.updateNodeCounter();
-      showToast(`${nodeCount} nœud(s) importés`, '⬆️');
+    const file = event.target.files[0];
+    if (!file) return;
 
-      // Optionally select the imported root
-      if (importedRootId) {
-        setTimeout(() => {
-          this.selectNodeById(importedRootId);
-        }, 100);
+    try {
+      // Detect file type and call appropriate import function
+      if (file.name.endsWith('.zip')) {
+        await DataModule.importBranchZIP(event, this.currentNodeId, (nodeCount, importedRootId) => {
+          this.render();
+          this.updateNodeCounter();
+          showToast(`${nodeCount} nœud(s) importés (ZIP)`, '⬆️');
+
+          // Optionally select the imported root
+          if (importedRootId) {
+            setTimeout(() => {
+              this.selectNodeById(importedRootId);
+            }, 100);
+          }
+        });
+      } else {
+        // Legacy JSON import
+        DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
+          this.render();
+          this.updateNodeCounter();
+          showToast(`${nodeCount} nœud(s) importés (JSON)`, '⬆️');
+
+          // Optionally select the imported root
+          if (importedRootId) {
+            setTimeout(() => {
+              this.selectNodeById(importedRootId);
+            }, 100);
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.error('[App] Branch import failed:', error);
+      showToast('Erreur lors de l\'import', '⚠️');
+    }
   },
 
   /**
@@ -572,6 +645,176 @@ const app = {
       this.render();
       this.updateNodeCounter();
     });
+  },
+
+  /**
+   * Trigger file upload input
+   */
+  triggerFileUpload() {
+    const input = document.getElementById('attachmentFileInput');
+    input.click();
+  },
+
+  /**
+   * Handle attachment upload
+   */
+  async handleAttachmentUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check file size limit (50MB)
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    if (file.size > MAX_SIZE) {
+      showToast(`❌ Fichier trop volumineux (max 50MB)`, '⚠️');
+      event.target.value = ''; // Reset input
+      return;
+    }
+
+    try {
+      // Generate attachment ID
+      const attachId = AttachmentsModule.generateAttachmentId();
+
+      // Save file to IndexedDB
+      await AttachmentsModule.saveAttachment(attachId, file);
+
+      // Get current node
+      const node = this.data.nodes[this.currentNodeId];
+      if (!node) return;
+
+      // For symlinks, add to target
+      const targetNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+      if (!targetNode) return;
+
+      // Initialize attachments array if doesn't exist
+      if (!targetNode.attachments) {
+        targetNode.attachments = [];
+      }
+
+      // Add attachment metadata
+      targetNode.attachments.push({
+        id: attachId,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        created: Date.now(),
+        modified: Date.now()
+      });
+
+      // Save data
+      DataModule.saveData();
+
+      // Refresh display
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+
+      showToast(`✅ Fichier ajouté : ${file.name}`, '📎');
+    } catch (error) {
+      console.error('[App] Failed to upload attachment:', error);
+      showToast('❌ Erreur lors de l\'ajout du fichier', '⚠️');
+    }
+
+    // Reset input
+    event.target.value = '';
+  },
+
+  /**
+   * Copy attachment markdown syntax to clipboard
+   */
+  copyAttachmentSyntax(syntax) {
+    navigator.clipboard.writeText(syntax).then(() => {
+      showToast('✅ Syntaxe copiée dans le presse-papier', '📋');
+    }).catch(err => {
+      console.error('[App] Failed to copy syntax:', err);
+      showToast('❌ Erreur lors de la copie', '⚠️');
+    });
+  },
+
+  /**
+   * Download an attachment
+   */
+  async downloadAttachment(attachId, filename) {
+    try {
+      const blob = await AttachmentsModule.getAttachment(attachId);
+      if (!blob) {
+        showToast('❌ Fichier introuvable', '⚠️');
+        return;
+      }
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast(`✅ Téléchargement : ${filename}`, '⬇️');
+    } catch (error) {
+      console.error('[App] Failed to download attachment:', error);
+      showToast('❌ Erreur lors du téléchargement', '⚠️');
+    }
+  },
+
+  /**
+   * Delete an attachment
+   */
+  async deleteAttachment(attachId) {
+    if (!confirm('Supprimer ce fichier ?')) return;
+
+    try {
+      // Get current node
+      const node = this.data.nodes[this.currentNodeId];
+      if (!node) return;
+
+      // For symlinks, delete from target
+      const targetNode = node.type === 'symlink' ? this.data.nodes[node.targetId] : node;
+      if (!targetNode || !targetNode.attachments) return;
+
+      // Remove from metadata
+      const index = targetNode.attachments.findIndex(a => a.id === attachId);
+      if (index === -1) return;
+
+      const attachment = targetNode.attachments[index];
+      targetNode.attachments.splice(index, 1);
+
+      // Delete from IndexedDB
+      await AttachmentsModule.deleteAttachment(attachId);
+
+      // Save data
+      DataModule.saveData();
+
+      // Refresh display
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+
+      showToast(`✅ Fichier supprimé : ${attachment.name}`, '🗑️');
+    } catch (error) {
+      console.error('[App] Failed to delete attachment:', error);
+      showToast('❌ Erreur lors de la suppression', '⚠️');
+    }
+  },
+
+  /**
+   * Clean orphaned attachments (files not referenced by any node)
+   */
+  async cleanOrphanedAttachments() {
+    if (!confirm('Nettoyer les fichiers orphelins ? Cette action est irréversible.')) return;
+
+    try {
+      const deletedCount = await AttachmentsModule.cleanOrphans(DataModule.data);
+
+      if (deletedCount > 0) {
+        showToast(`✅ ${deletedCount} fichier(s) orphelin(s) supprimé(s)`, '🧹');
+      } else {
+        showToast('✅ Aucun fichier orphelin trouvé', '🧹');
+      }
+
+      // Refresh right panel to update storage info
+      if (this.currentNodeId) {
+        EditorModule.displayNode(this.currentNodeId, () => this.render());
+      }
+    } catch (error) {
+      console.error('[App] Failed to clean orphaned attachments:', error);
+      showToast('❌ Erreur lors du nettoyage', '⚠️');
+    }
   }
 };
 

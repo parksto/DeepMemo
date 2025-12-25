@@ -10,6 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="src/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <button class="right-panel-toggle-external" onclick="app.toggleRightPanel()">ℹ️</button>
@@ -25,7 +26,7 @@
       <div class="sidebar-actions">
         <button class="btn" onclick="app.createRootNode()">➕ Nouveau nœud</button>
         <div class="import-export-zone">
-          <input type="file" id="importFile" accept=".json" onchange="app.importData(event)">
+          <input type="file" id="importFile" accept=".json,.zip" onchange="app.importData(event)">
           <label for="importFile" class="btn-import">📂 Importer</label>
           <button class="btn-import" onclick="app.exportData()">💾 Exporter</button>
         </div>
@@ -84,6 +85,15 @@
 
           <div class="content-preview" id="contentPreview" style="display: none;"></div>
 
+          <!-- Attachments Section -->
+          <div class="attachments-section" id="attachmentsSection" style="display: none;">
+            <div class="attachments-header">📎 Fichiers attachés (<span id="attachmentsCount">0</span>)</div>
+            <div class="attachments-list" id="attachmentsList"></div>
+            <button class="btn btn-secondary btn-small" id="addAttachmentBtn" onclick="app.triggerFileUpload()">
+              📎 Ajouter un fichier
+            </button>
+          </div>
+
           <div class="children-section" id="childrenSection" style="display: none;">
             <div class="children-header">📂 Nœuds enfants (<span id="childrenCount">0</span>)</div>
             <div class="children-grid" id="childrenGrid"></div>
@@ -96,10 +106,13 @@
           <button class="btn btn-secondary btn-small" onclick="app.openActionModal()">⚙️ Actions...</button>
           <div style="margin-left: auto; display: flex; gap: 8px;">
             <button class="btn btn-secondary btn-small" onclick="app.exportBranch()" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
-            <input type="file" id="importBranchFile" accept=".json" onchange="app.importBranch(event)" style="display: none;">
+            <input type="file" id="importBranchFile" accept=".json,.zip" onchange="app.importBranch(event)" style="display: none;">
             <label for="importBranchFile" class="btn btn-secondary btn-small" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
           </div>
         </div>
+
+        <!-- Hidden file input for attachments -->
+        <input type="file" id="attachmentFileInput" style="display: none;" onchange="app.handleAttachmentUpload(event)">
       </div>
     </div>
 
