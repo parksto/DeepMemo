@@ -2,7 +2,7 @@
 
 > **Concepts, architecture et features détaillées**
 
-DeepMemo est un système de gestion de connaissances personnelles basé sur des nœuds récursifs, interconnectés et actifs. Tout (notes, projets, contacts, fichiers, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
+DeepMemo est un système de gestion de connaissances personnelles basé sur un **réseau hiérarchique** de nœuds récursifs, interconnectés et actifs. Tout (notes, projets, contacts, fichiers, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
 
 ## 🎯 Concept central
 
@@ -19,12 +19,12 @@ Chaque nœud possède :
 ## ✨ Caractéristiques principales
 
 ### 🌳 Hiérarchie flexible
-- Structure arborescente
 - Navigation par breadcrumbs
 - Expansion/collapse de l'arborescence
 - État persistant entre les sessions
 
 ### 🔗 Système de liens
+- **Structure arborescente réticulée** : L'arborescence hiérarchique devient un réseau maillé grâce aux symlinks
 - **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (comme `ln -s` sous Linux), renommables indépendamment
 - **Backlinks** : Voir automatiquement tous les nœuds qui pointent vers le nœud actuel
 - **Wiki-links** : ⚠️ `[[Nom du nœud]]` temporairement désactivé (V0.9+ - refonte avec IDs)

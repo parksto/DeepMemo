@@ -2,7 +2,7 @@
 
 > **Ton second cerveau, organisé et connecté**
 
-Système de gestion de connaissances basé sur des **nœuds récursifs**, où tout (notes, projets, contacts, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
+Système de gestion de connaissances basé sur un **réseau hiérarchique** de nœuds récursifs, où tout (notes, projets, contacts, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
 
 ---
 

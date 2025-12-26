@@ -51,7 +51,7 @@ export function getDefaultData() {
         title: "📘 Bienvenue dans DeepMemo",
         content: `# Bienvenue dans DeepMemo ! 👋
 
-DeepMemo est un outil de prise de notes **hiérarchique**, **flexible** et **puissant**.
+DeepMemo est un outil de prise de notes qui crée un **réseau hiérarchique** de connaissances, **flexible** et **puissant**.
 
 ## 🎯 À quoi ça sert ?
 
@@ -529,6 +529,8 @@ Les nœuds hiérarchiques sont parfaits pour structurer des notes de cours.
         content: `# Les symlinks : Un nœud à plusieurs endroits
 
 Un **lien symbolique** (symlink) est comme un raccourci Windows : il pointe vers un nœud existant.
+
+Les symlinks transforment l'arbre simple en **structure arborescente réticulée** : l'arborescence de base reste hiérarchique, mais les symlinks créent des liens transversaux qui forment un réseau maillé.
 
 ## 🎯 Ce que ça permet
 
