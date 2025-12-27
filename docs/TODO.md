@@ -157,7 +157,7 @@
 ## ✅ COMPLÉTÉ - ⌨️ Raccourcis clavier
 
 - ✅ Toggle view/edit via bouton [Afficher]/[Éditer] fonctionnel
-- ✅ Raccourci clavier `Alt+V` pour toggle view/edit implémenté
+- ✅ Raccourci clavier `Alt+E` pour toggle view/edit implémenté
 - ✅ Documentation des raccourcis clavier ajoutée dans le panneau droit
 - ✅ Bloc keyboard tips positionné en bas du right panel (dans zone défilante)
 - ✅ Présentation améliorée avec sections et titre
@@ -166,7 +166,7 @@
 - `Alt+N` : Nouveau nœud
 - `Alt+E` : Focus éditeur
 - `Ctrl+K` : Recherche
-- `Alt+V` : Toggle view/edit
+- `Alt+E` : Toggle view/edit
 - `↑↓` : Naviguer arbre (haut/bas)
 - `→` : Déplier nœud
 - `←` : Replier nœud / Remonter au parent si déjà replié
@@ -265,7 +265,7 @@
 5. Bug critique résolu
 6. Mode view par défaut
 7. **Fenêtre modale améliorée** (Actions + Delete + arborescence masquable)
-8. **Raccourcis clavier complets** (Alt+V + documentation)
+8. **Raccourcis clavier complets** (Alt+E + documentation)
 9. **UI polish** (Export/Import harmonisés, keyboard tips, toggles)
 10. **Breadcrumb intelligent** (Format `.../parent/actuel` avec styles adaptés)
 11. **Drag & drop complet** (arbre + enfants, modificateurs clavier, prévention cycles)
@@ -286,7 +286,7 @@
 ## 🎯 Priorités suggérées pour la suite
 
 ### ✅ Migration finale V0.8 - COMPLÉTÉE
-1. ✅ **Basculement index.html** - `app-new.js` chargé en production
+1. ✅ **Basculement index.html** - `app.js` chargé en production
 2. ✅ **Renommage legacy** - `app.js` → `app-backup.js` (référence)
 3. ✅ **Drag & drop simplifié** - Modificateur Shift supprimé
 4. ✅ **Tests fonctionnels** - Toutes fonctionnalités validées

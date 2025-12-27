@@ -215,7 +215,7 @@ app.js (point d'entrée)
 - [ ] Toggles harmonisés avec arbre principal
 
 #### ✅ Interface
-- [ ] Toggle view/edit mode (`Alt+V`)
+- [ ] Toggle view/edit mode (`Alt+E`)
 - [ ] Sidebar pliable
 - [ ] Right panel pliable
 - [ ] Resize panneau latéral (265px-600px)

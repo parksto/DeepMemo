@@ -443,8 +443,7 @@ export function setupHashListener(callback)
 
 **Raccourcis** :
 - `Alt+N` : Nouveau nœud
-- `Alt+E` : Focus éditeur
-- `Alt+V` : Toggle view/edit
+- `Alt+E` : Passer en mode édition (avec focus)
 - `Ctrl+K` : Recherche
 - `Escape` : Remonter au parent
 

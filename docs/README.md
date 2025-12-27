@@ -66,7 +66,7 @@ Chaque nœud possède :
 ### 📄 Affichage et Rendu (V0.7+)
 - **Markdown rendering** : Affichage formaté du contenu
 - **Mode view par défaut** : Lecture prioritaire sur édition (V0.8)
-- **Toggle view/edit** : Bouton [Afficher]/[Éditer] + raccourci Alt+V
+- **Toggle view/edit** : Bouton [Afficher]/[Éditer] + raccourci Alt+E
 - **Sidebar redimensionnable** : Ajustable à la souris
 - **Auto-collapse** : Arborescence repliée sauf chemin actif
 - **Scroll reset** : Retour en haut du contenu à chaque navigation (V0.8)
@@ -103,9 +103,8 @@ Chaque nœud possède :
 
 ### ⌨️ Raccourcis clavier
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
-- `Alt+E` : Focus sur l'éditeur
+- `Alt+E` : Passer en mode édition (avec focus automatique)
 - `Ctrl+K` : Recherche globale
-- `Alt+V` : Alterner mode affichage/édition
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
@@ -115,14 +114,14 @@ Chaque nœud possède :
 - **Multifile modulaire** : HTML + CSS + JS ES6 modules
 - `index.html` : Structure HTML minimale
 - `src/css/` : Styles organisés (base, layout, components, utilities)
-- `src/js/app-new.js` : Point d'entrée principal
-- `src/js/core/` : Gestion données
+- `src/js/app.js` : Point d'entrée principal
+- `src/js/core/` : Gestion données (data, attachments, default-data)
 - `src/js/features/` : Modules fonctionnels (tree, editor, search, tags, drag-drop, modals)
 - `src/js/ui/` : Composants UI (toast, panels)
 - `src/js/utils/` : Utilitaires (routing, keyboard, helpers)
 - **100% Vanilla** JavaScript ES6+ (pas de framework)
 - CSS Variables pour le theming
-- LocalStorage pour la persistence
+- LocalStorage + IndexedDB pour la persistence
 
 ### Structure des données
 ```javascript
@@ -166,12 +165,9 @@ Chaque nœud possède :
 
 ## 💡 Vision long-terme
 
-DeepMemo évolue vers :
-- Un système distribué/fédéré
-- Des nœuds "actifs" avec comportements scriptables
-- Une interface vocale
-- Multi-utilisateur avec permissions fines
-- Un véritable "OS pour données personnelles"
+Pour découvrir les directions explorées (nœuds actifs, automatisation, collaboration décentralisée), consulte la section **"🔮 Directions explorées"** dans le contenu de démo de l'application.
+
+**Ton humble et ouvert** : Ces idées sont des pistes de réflexion, pas des promesses. DeepMemo est Open Source (MIT), contributions bienvenues !
 
 ## 🛠️ Développement
 
@@ -185,8 +181,8 @@ python3 -m http.server 8000
 ### Technologies
 - HTML5
 - CSS3 (Variables, Flexbox, Grid)
-- JavaScript ES6+ (Classes, Modules prévu en V0.7)
-- LocalStorage API
+- JavaScript ES6+ (Classes, Modules)
+- LocalStorage + IndexedDB
 
 ## 👤 Auteur
 
@@ -194,8 +190,10 @@ python3 -m http.server 8000
 
 ## 📄 Licence
 
-Projet personnel - Pas de licence définie pour le moment.
+**MIT** - Logiciel libre et open source.
+
+Tu peux utiliser, modifier et distribuer DeepMemo librement. Tes données t'appartiennent, stockées localement dans ton navigateur.
 
 ---
 
-**DeepMemo V0.8** - 24 Décembre 2025
+**DeepMemo V0.8** - Décembre 2025

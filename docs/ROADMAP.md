@@ -60,7 +60,7 @@
 #### Raccourcis clavier
 - [x] `Alt+N` : Nouveau nœud
 - [x] `Alt+E` : Focus éditeur
-- [x] `Alt+V` : Toggle view/edit
+- [x] `Alt+E` : Toggle view/edit
 - [x] `Ctrl+K` : Recherche
 - [x] `Escape` : Remonter au parent
 - [x] `↑↓←→` : Navigation arbre
@@ -242,7 +242,7 @@ DeepMemo/
 ### ⌨️ Raccourcis & UX ✅ COMPLÉTÉ
 
 - [x] **Toggle view/edit** : Bouton [Afficher]/[Éditer] fonctionnel
-- [x] **Raccourci Alt+V** : Toggle view/edit au clavier
+- [x] **Raccourci Alt+E** : Toggle view/edit au clavier
 - [x] **Keyboard tips** : Documentation complète en bas du right panel
 - [x] **Modal Actions** : Bouton Supprimer déplacé dans modal
 - [x] **Masquage conditionnel** : Arborescence modale masquée par défaut
@@ -407,7 +407,7 @@ DeepMemo/
 ## 🎉 V0.8 - MIGRATION FINALE COMPLÉTÉE
 
 ### ✅ Déploiement final (20 décembre 2025)
-- [x] **index.html** : Bascule vers `app-new.js` (type="module")
+- [x] **index.html** : Bascule vers `app.js` (type="module")
 - [x] **app.js → app-backup.js** : Legacy code conservé pour référence
 - [x] **Drag & drop simplifié** : Modificateur Shift supprimé (Ctrl + Ctrl+Alt uniquement)
 - [x] **Tests validation** : Toutes fonctionnalités opérationnelles en production

@@ -1,84 +1,129 @@
-# 🌟 DeepMemo V0.8
+# DeepMemo
 
-> **Ton second cerveau, organisé et connecté**
+> **Ton second cerveau : notes, projets, idées interconnectés**
 
-Système de gestion de connaissances basé sur un **réseau hiérarchique** de nœuds récursifs, où tout (notes, projets, contacts, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
+DeepMemo est un système de gestion de connaissances basé sur un **réseau hiérarchique** de nœuds. Chaque nœud peut contenir d'autres nœuds à l'infini, créant une structure arborescente enrichie de liens symboliques.
+
+**Projet Open Source** (Licence MIT) - Tes données t'appartiennent, stockées localement dans ton navigateur.
 
 ---
 
-## 🚀 Démarrage rapide
+## 🎯 Pourquoi DeepMemo ?
+
+- **Hiérarchie naturelle** : Organise tes pensées comme tu les penses (projets → tâches → sous-tâches)
+- **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (sans duplication)
+- **Mode branche** : Concentre-toi sur une sous-arborescence isolée
+- **Keyboard-first** : Navigation complète au clavier, raccourcis documentés
+- **100% local** : Aucun serveur, aucun tracking, données dans ton navigateur
+
+---
+
+## 🚀 Essayer DeepMemo
+
+### En ligne (démo instantanée)
+
+→ **[deepmemo.org](https://deepmemo.org)** - Prêt à l'emploi avec contenu de démo
+
+### Localement
 
 ```bash
+# Clone le repo
+git clone https://github.com/parksto/DeepMemo.git
 cd DeepMemo
-python3 -m http.server 8000
-# Ouvrir http://localhost:8000
+
+# Lance un serveur HTTP local (nécessaire pour ES6 modules)
+python -m http.server 8000
+
+# Ouvre http://localhost:8000
 ```
 
-## ✨ Features V0.8 (✅ 100% complété)
+**Installable comme PWA** : Icône sur ton bureau, fonctionne offline.
 
-- 🌳 **Hiérarchie infinie** - Nœuds récursifs sans limite
-- 🔗 **Liens symboliques** - Un nœud dans plusieurs endroits, renommables indépendamment
-- 🏷️ **Tags intelligents** - Auto-complétion contextuelle + tag cloud par branche
-- 🔍 **Recherche temps réel** - Dans titres, contenus et tags (Ctrl+K)
-- 🔗 **URLs bookmarkables** - Partage de nœuds ou branches isolées (`?branch=X#/node/Y`)
-- 🎨 **Drag & Drop complet** - Déplacer, dupliquer (Ctrl), lier (Ctrl+Alt), réorganiser
-- ⌨️ **Keyboard-first** - Navigation complète au clavier avec raccourcis documentés
-- 🌲 **Mode branche** - Isolation d'une sous-arborescence avec symlinks externes désactivés
-- 🎯 **Auto-collapse intelligent** - Arborescence se replie automatiquement sur le chemin actif
-- 📘 **Contenu de démo** - Tutoriel interactif au premier lancement (26 nœuds pédagogiques)
-- 🎨 **UX polish** - Mode lecture par défaut, scroll reset, panneau droit masqué, choix de police
+---
 
-## ⌨️ Raccourcis essentiels
+## ✨ Features principales
 
-| Raccourci | Action |
-|-----------|--------|
-| `Alt+N` | Nouveau nœud |
-| `Alt+E` | Focus éditeur |
-| `Ctrl+K` | Recherche |
-| `Escape` | Remonter au parent |
-| `↑↓←→` | Navigation arbre |
+**Organisation** :
+- 🌳 Hiérarchie infinie de nœuds récursifs
+- 🔗 Liens symboliques (renommables indépendamment)
+- 🏷️ Tags avec auto-complétion et tag cloud par branche
+- 📎 Fichiers attachés (images, PDFs, etc.) stockés localement
 
-## 📚 Documentation complète
+**Navigation** :
+- 🔍 Recherche temps réel (titres, contenus, tags)
+- ⌨️ Raccourcis clavier pour tout
+- 🌲 Mode branche (isolation d'une sous-arborescence)
+- 🔖 URLs bookmarkables (`?branch=X#/node/Y`)
 
-**→ [Documentation détaillée](docs/README.md)** - Concepts, architecture, features complètes
+**Partage & Collaboration** :
+- 📤 Export/Import (global ou branche, format ZIP)
+- 🌐 URLs partageables (lecture seule, données locales)
+- 🔐 Souveraineté des données (LocalStorage + IndexedDB)
 
-**Docs par thème** :
-- [ROADMAP.md](docs/ROADMAP.md) - État actuel V0.8 et prochaines étapes
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Structure technique détaillée
-- [Guide de développement.md](docs/Guide%20de%20développement.md) - Pour contribuer
-- [VISION.md](docs/VISION.md) - Vision long-terme (nœuds actifs, types)
-- [TODO.md](docs/TODO.md) - Backlog de développement
+**UX** :
+- 🎨 Drag & Drop complet (déplacer, dupliquer, lier)
+- 📱 Progressive Web App (installable, offline)
+- 📘 Contenu de démo pédagogique au premier lancement
+- 🎨 Interface épurée, mode lecture/édition
 
-## 📝 Changelog
+---
 
-**V0.8** (24 Décembre 2025) - ✅ COMPLÈTE
-- 🔗 Refonte complète des liens symboliques (type dédié, renommables indépendamment)
-- 🌐 Système d'URL dynamiques (bookmarks, mode branche isolée)
-- 🎯 Auto-collapse intelligent de l'arborescence avec focus visuel symlinks
-- 🎨 **Drag & Drop complet** (arbre + enfants, Ctrl/Ctrl+Alt, prévention cycles)
-- 📤 **Export/Import de branche** (partage local, régénération IDs, merge non-destructif)
-- 📘 **Contenu de démo par défaut** (26 nœuds pédagogiques, tutoriel interactif)
-- 🎨 **UX polish** (mode lecture par défaut, scroll reset, right panel masqué, toggle police)
-- 🐛 Corrections bugs (renommage symlinks, focus visuel après navigation)
+## 🌍 Open Source
 
-**V0.7** - Restructuration multifile
-**V0.6** - Version single-file de référence
+**Licence MIT** - Utilise, modifie, distribue librement.
 
-[→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
+**Contributions bienvenues** :
+- Bugs et suggestions : [Issues GitHub](https://github.com/parksto/DeepMemo/issues)
+- Code : [Pull Requests](https://github.com/parksto/DeepMemo/pulls)
+- Documentation : Toujours améliorable !
+
+**Vision long-terme** : Voir [ROADMAP.md](docs/ROADMAP.md) pour les directions explorées (nœuds actifs, automatisation, collaboration décentralisée).
+
+---
+
+## 📚 Documentation
+
+**Pour utilisateurs** :
+- [Guide complet d'utilisation](docs/README.md)
+- [Installation PWA](docs/PWA.md)
+
+**Pour développeurs** :
+- [Architecture technique](docs/ARCHITECTURE.md)
+- [Guide de développement](docs/CONTRIBUTING.md)
+- [Historique et roadmap](docs/ROADMAP.md)
+
+---
 
 ## 🔧 Stack technique
 
-**100% Vanilla** - HTML5, CSS3, JavaScript ES6+ (sans framework)
-**Persistence** - LocalStorage (migration IndexedDB/Backend prévue)
-**Architecture** - Multifile (HTML + CSS + JS séparés)
+**100% Vanilla** : HTML5, CSS3, JavaScript ES6+ (aucun framework)
 
-## 🤝 Contribution
+**Stockage** :
+- LocalStorage (données structurées)
+- IndexedDB (fichiers attachés)
 
-Projet personnel en développement actif. Feedback et contributions bienvenues !
+**Architecture** : Modules ES6, structure multifile
 
-**GitHub** : [parksto/DeepMemo](https://github.com/parksto/DeepMemo)
+**Compatible** : Chrome, Firefox, Safari, Edge (dernières versions)
 
 ---
 
-**DeepMemo** - Développé par Fabien
+## 📝 Version actuelle
+
+**V0.8** (Décembre 2025) - Stable et complète
+
+Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import branche, attachments, PWA installable.
+
+[→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
+
+---
+
+## 👤 Auteur
+
+Développé par **Fabien** ([parksto](https://github.com/parksto))
+
 *Conception mentale depuis 4 ans, développement actif depuis 2024*
+
+---
+
+**DeepMemo** - Ton second cerveau, organisé et connecté 🧠
