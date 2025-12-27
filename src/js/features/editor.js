@@ -139,6 +139,9 @@ export function displayNode(nodeId, renderCallback) {
     contentBody.scrollTo(0, 0);
   }
 
+  // Set current node for tags module (must be before updateRightPanel)
+  TagsModule.setCurrentNodeId(nodeId);
+
   // Update UI components
   updateBreadcrumb(nodeId);
   updateAttachments(nodeId);
@@ -148,7 +151,6 @@ export function displayNode(nodeId, renderCallback) {
   updateViewMode();
 
   // Render tags
-  TagsModule.setCurrentNodeId(nodeId);
   TagsModule.renderTags();
 }
 
