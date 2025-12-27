@@ -530,17 +530,6 @@ export async function updateRightPanel(currentNodeId) {
     });
 
     html += '</div>';
-
-    // Add click handlers after rendering
-    setTimeout(() => {
-      document.querySelectorAll('.tag-cloud-item').forEach(item => {
-        const tag = item.dataset.tag;
-        if (tag) {
-          item.onclick = () => window.app.openSearchWithTag(tag);
-          item.style.cursor = 'pointer';
-        }
-      });
-    }, 0);
   } else {
     html += '<div class="info-item" style="opacity: 0.5;">Aucun tag dans la branche</div>';
   }
@@ -626,6 +615,17 @@ export async function updateRightPanel(currentNodeId) {
   `;
 
   panel.innerHTML = html;
+
+  // Add click handlers to tag cloud items (after DOM insertion)
+  setTimeout(() => {
+    document.querySelectorAll('.tag-cloud-item').forEach(item => {
+      const tag = item.dataset.tag;
+      if (tag) {
+        item.onclick = () => window.app.openSearchWithTag(tag);
+        item.style.cursor = 'pointer';
+      }
+    });
+  }, 0);
 }
 
 /**

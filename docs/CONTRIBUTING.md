@@ -51,7 +51,7 @@ DeepMemo/
 │   ├── README.md                  # Concept et features
 │   ├── ROADMAP.md                 # État actuel et prochaines étapes
 │   ├── ARCHITECTURE.md            # Détails techniques modulaires
-│   ├── Guide de développement.md  # Ce fichier
+│   ├── CONTRIBUTING.md            # Ce fichier
 │   ├── TODO.md                    # Backlog et progression
 │   ├── V0.8-COMPLETE.md           # Récapitulatif V0.8
 │   └── VISION.md                  # Vision long-terme

@@ -122,7 +122,7 @@ Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tag
 
 Développé par **Fabien** ([parksto](https://github.com/parksto))
 
-*Conception mentale depuis 4 ans, développement actif depuis 2024*
+*Conception mentale depuis 5 ans, développement actif depuis 2024*
 
 ---
 
