@@ -190,17 +190,10 @@ export function saveNode(nodeId) {
 export function autoResizeTextarea(textarea) {
   if (!textarea) return;
 
-  const childrenSection = document.getElementById('childrenSection');
-  const hasChildren = childrenSection && childrenSection.style.display !== 'none';
-
-  if (hasChildren) {
-    textarea.classList.remove('expanded');
-  } else {
-    textarea.classList.add('expanded');
-  }
-
+  // Reset height to auto to get accurate scrollHeight
   textarea.style.height = 'auto';
-  textarea.style.height = Math.min(textarea.scrollHeight, hasChildren ? 400 : 2000) + 'px';
+  // Set height to match content (no max-height, parent content-body handles scroll)
+  textarea.style.height = textarea.scrollHeight + 'px';
 }
 
 /**
@@ -565,8 +558,7 @@ async function updateRightPanel(currentNodeId) {
       <div class="shortcuts-section">
         <div><kbd>Alt+N</kbd> Nouveau nœud</div>
         <div><kbd>Ctrl+K</kbd> Recherche</div>
-        <div><kbd>Alt+E</kbd> Focus éditeur</div>
-        <div><kbd>Alt+V</kbd> Toggle vue/édition</div>
+        <div><kbd>Alt+E</kbd> Passer en édition</div>
       </div>
       <div class="shortcuts-section">
         <div><kbd>↑</kbd><kbd>↓</kbd> Naviguer arbre</div>

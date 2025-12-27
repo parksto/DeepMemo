@@ -438,7 +438,6 @@
   width: 100%;
   height: auto;
   min-height: 100px;
-  max-height: 400px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -447,13 +446,8 @@
   font-family: 'Sto Fixed', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;
-  resize: vertical;
   outline: none;
-  overflow-y: auto;
-}
-
-.content-editor.expanded {
-  max-height: none;
+  overflow: hidden;
 }
 
 .content-editor:focus {

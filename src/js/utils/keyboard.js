@@ -20,12 +20,6 @@ export function setupKeyboardShortcuts(handlers) {
       if (handlers.onEditorFocus) handlers.onEditorFocus();
     }
 
-    // Alt+V: Toggle view/edit mode
-    if (e.altKey && e.key === 'v') {
-      e.preventDefault();
-      if (handlers.toggleViewMode) handlers.toggleViewMode();
-    }
-
     // Ctrl+K: Open search
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault();

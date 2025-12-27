@@ -245,9 +245,9 @@ C'est là que tu **lis et édites** tes nœuds.
 - **Mode View** (lecture) : Le contenu est affiché en Markdown rendu
 - **Mode Edit** (édition) : Le contenu est affiché dans un textarea éditable
 
-**Bascule** entre les deux :
-- Clic sur le bouton **[Afficher]** / **[Éditer]**
-- Raccourci clavier : **Alt+V**
+**Passer en mode édition** :
+- Clic sur le bouton **[Éditer]**
+- Raccourci clavier : **Alt+E** (focus automatique dans l'éditeur)
 
 ## 🧩 Sections
 
@@ -315,8 +315,7 @@ Affiche l'**espace utilisé** par les fichiers attachés.
 
 Un rappel des **raccourcis** disponibles :
 - **Alt+N** : Nouveau nœud
-- **Alt+E** : Focus éditeur
-- **Alt+V** : Toggle view/edit
+- **Alt+E** : Passer en édition
 - **Ctrl+K** : Recherche
 - Et bien d'autres !
 
@@ -979,8 +978,7 @@ DeepMemo est **optimisé pour le clavier**. Voici les principaux raccourcis.
 ## 🚀 Navigation
 
 - **Alt+N** : Créer un nouveau nœud enfant
-- **Alt+E** : Focus dans l'éditeur de contenu
-- **Alt+V** : Toggle entre mode View (lecture) et Edit (édition)
+- **Alt+E** : Passer en mode édition (avec focus automatique dans l'éditeur)
 - **Ctrl+K** : Ouvrir la recherche globale
 - **Escape** : Remonter au parent du nœud actuel
 
@@ -1150,39 +1148,59 @@ Quand tu passes en **mode Affichage** (👁️), l'image s'affiche directement !
       [ids.future]: {
         id: ids.future,
         type: "node",
-        title: "🔮 Idées pour la suite",
-        content: `# Ce qui pourrait arriver dans le futur
+        title: "🔮 Directions explorées",
+        content: `# Directions explorées pour DeepMemo
 
-DeepMemo a **plein d'idées** pour devenir encore plus puissant.
+DeepMemo est **un projet en exploration**. Voici quelques directions que nous trouvons prometteuses.
 
-## 🎯 Nœuds actifs (Types personnalisés)
+> ⚠️ **Important** : Ces idées ne sont pas encore implémentées. C'est une réflexion ouverte sur ce qui pourrait être utile.
 
-Imagine des nœuds qui **calculent** automatiquement :
-- Un nœud "Budget" qui additionne revenus et dépenses
-- Un nœud "Recette" qui génère une liste de courses
-- Un nœud "Projet" qui affiche l'avancement en %
+## 🧭 Trois grandes directions
 
-## 🔔 Triggers (Actions automatiques)
+### 1. 🎯 Nœuds actifs (Données intelligentes)
 
-Un nœud peut **déclencher** des actions sur d'autres nœuds :
-- Ajouter une recette → Mettre à jour la liste de courses
-- Terminer une tâche → Notifier le projet parent
-- Budget dépassé → Créer une alerte
+Des nœuds qui ont un **comportement** au lieu d'être simplement du texte :
+- Un "Budget" qui calcule automatiquement solde et alertes
+- Une "Recette" qui génère une liste de courses
+- Un "Cours" qui suit la progression des élèves
 
-## 👥 Multi-utilisateur (Collaboration)
+**Ce qui rend ça intéressant** : Les types eux-mêmes seraient des nœuds. Tu pourrais créer tes propres types ou utiliser ceux partagés par la communauté.
 
-Partager des branches avec **permissions** :
-- Lecture seule
-- Édition limitée
-- Admin complet
-- Comme un système de fichiers (chmod-style)
+### 2. 🔔 Automatisation & Connectivité
+
+Rendre DeepMemo **contrôlable depuis l'extérieur** et capable d'agir sur plusieurs nœuds :
+- **API externe** : Commandes vocales, Zapier, webhooks...
+- **Triggers multi-nœuds** : Une action → plusieurs effets en cascade
+- **Assistants IA** : Agents qui analysent ton graph et proposent des actions
+- **Interopérabilité** : Hub central qui connecte tes outils existants
+
+**Ce qui rend ça intéressant** : DeepMemo devient un hub de ton écosystème numérique, pas un silo isolé.
+
+### 3. 👥 Collaboration & Partage
+
+Permettre le travail collaboratif tout en gardant le contrôle :
+- **Permissions fines** : Qui peut lire/éditer/exécuter quoi
+- **Templates partageables** : Structures prêtes à l'emploi
+- **Souveraineté des données** : Chacun héberge son instance, partage ce qu'il veut
+- **Synchronisation** : Modifications en temps réel
+
+**Ce qui rend ça intéressant** : Collaboration décentralisée. Pas de plateforme centrale qui possède tes données.
+
+## 🌱 Pourquoi partager ces idées ?
+
+DeepMemo est **Open Source (MIT)**. Ces directions sont des pistes de réflexion, pas des promesses.
+
+Si certaines te parlent, tu peux :
+- **Expérimenter** : Tester DeepMemo et voir ce qui manque
+- **Contribuer** : Proposer des idées, du code, de la doc
+- **Partager** : Tes cas d'usage aident à comprendre les besoins réels
 
 ---
 
-**Explore les sous-nœuds** pour comprendre ces concepts avec des exemples.`,
+**Explore les sous-nœuds** pour des exemples concrets de ces concepts.`,
         children: [ids.activeNodes, ids.triggers, ids.multiUser],
         parent: ids.root,
-        tags: ["futur", "idées"],
+        tags: ["futur", "exploration", "open-source"],
         links: [],
         backlinks: [],
         created: now + 19,
@@ -1202,65 +1220,74 @@ Au lieu que tous les nœuds soient "passifs" (juste du texte), certains pourraie
 
 **Le concept clé** : Les **types eux-mêmes sont des nœuds** !
 
+## 🌍 Cas d'usage concrets
+
+### 📚 Éducation collaborative
+
+Un **prof** crée un type "Cours Interactif" avec :
+- Schéma : chapitres, exercices, quizz, ressources
+- Scripts : calcul progression, scoring, certificat
+- Vue : interface pédagogique avec timeline
+
+Les **élèves** forkent le cours dans leur espace :
+- Ils ajoutent leurs notes personnelles
+- Répondent aux exercices (scoring automatique)
+- Le prof voit en temps réel qui bloque où
+
+**Ce qui rend ça intéressant** : Le cours est vivant, adapté à chaque élève, mais partagé depuis une même source.
+
+### 🏢 Documentation vivante d'équipe
+
+Une **équipe** crée un type "Process d'entreprise" :
+- Schéma : étapes, responsables, outils
+- Scripts : alertes si non respecté, stats d'utilisation
+- Vue : flowchart visuel interactif
+
+Chaque process (onboarding, release, support) devient un nœud actif :
+- Toujours à jour (modification propagée)
+- Traçable (qui a changé quoi)
+- Actionnable (boutons "Démarrer le process")
+
+**Ce qui rend ça intéressant** : La doc devient un outil, pas juste du texte oublié dans un wiki.
+
 ## 🧩 Comment ça marcherait ?
 
 ### Les types sont des nœuds descripteurs
 
-Un nœud spécial (appelé "nœud descripteur") peut **définir un type** :
-- Son **schéma de données** : "Ce type contient quels champs ?"
-- Ses **scripts** : "Que fait ce type quand on le sauvegarde ?"
-- Ses **actions** : "Quels boutons afficher ?"
-- Son **affichage** : "Comment le rendre visuellement ?"
+Un nœud spécial peut **définir un type** :
+- **Schéma de données** : Quels champs ?
+- **Scripts** : Que fait-il quand on le sauvegarde ?
+- **Actions** : Quels boutons afficher ?
+- **Affichage** : Comment le rendre visuellement ?
 
-**Exemple** : Tu créerais un nœud "🎨 Type: Budget" qui décrit :
+**Exemple** : Type "Budget"
 \`\`\`javascript
 Schéma :
   - revenus (nombre)
   - dépenses (nombre)
-  - solde (calculé automatiquement)
+  - solde (calculé auto)
 
 Scripts :
   - onSave: "solde = revenus - dépenses"
-  - onAlert: "si solde < 0, ajouter tag 'alerte'"
+  - onAlert: "si solde < 0, tag 'alerte'"
 
 Affichage :
-  - Vue graphique avec barres de progression
+  - Barres de progression colorées
 \`\`\`
 
-### Utiliser un type
+### Bibliothèque partageable
 
-Quand tu crées un nœud normal, tu lui dis "utilise le Type: Budget" :
-- Le nœud **hérite** des comportements du type
-- Il **calcule** automatiquement (grâce aux scripts du type)
-- Il **s'affiche** différemment (grâce à la vue du type)
+**Types personnels** → Créés par toi
+**Types d'équipe** → Partagés avec ton groupe
+**Types communautaires** → Open source, contributifs
 
-## 📚 Bibliothèque de types
+Tu **choisis** les types que tu installes, comme des plugins.
 
-Les types disponibles dépendent de **tes permissions** (multi-utilisateur) :
+## 🛠️ Créer un type = Programmation visuelle
 
-**Types personnels** :
-- Créés par toi
-- Accessibles uniquement à toi
+Tu décris le comportement dans un nœud, DeepMemo l'exécute.
 
-**Types partagés (groupe)** :
-- Créés par ton équipe/famille
-- Accessibles à tous les membres
-
-**Types publics (communauté)** :
-- Créés par la communauté
-- Disponibles pour tous
-
-**Avantage** : Tu **choisis** les types que tu veux utiliser dans une bibliothèque, comme des plugins.
-
-## 🛠️ Créer un type personnalisé
-
-Tu pourrais créer un nœud descripteur avec :
-- Un **schéma** (définir les champs)
-- Des **scripts** (JavaScript)
-- Des **vues** personnalisées
-- Des **actions** disponibles
-
-**C'est de la programmation visuelle** : tu décris le comportement dans un nœud, DeepMemo l'exécute.
+**Pas besoin de coder** (sauf si tu veux des scripts avancés).
 
 ---
 
@@ -1329,12 +1356,14 @@ Si Dépenses > 90% des Revenus :
         modified: now + 21
       },
 
-      // Futur : Triggers
+      // Futur : Automatisation & Connectivité
       [ids.triggers]: {
         id: ids.triggers,
         type: "node",
-        title: "🔔 Triggers (Workflows & Automatisations)",
-        content: `# Triggers : Déclencher des actions sur d'autres nœuds
+        title: "🔔 Automatisation & Connectivité",
+        content: `# Automatisation & Connectivité
+
+Rendre DeepMemo **contrôlable depuis l'extérieur** et capable d'agir intelligemment.
 
 ## 🎤 Le cas d'usage qui a tout déclenché
 
@@ -1342,99 +1371,86 @@ DeepMemo est né d'une idée simple : pouvoir dire à un assistant vocal :
 
 > **"Rajoute dans la liste des choses à faire avec Émilien : parler du projet Fitness-Chrono"**
 
-Et que ça **fonctionne** : le nœud est créé au bon endroit, et un symlink vers le projet est automatiquement ajouté.
+Et que ça **fonctionne** : nœud créé au bon endroit + symlink auto vers le projet.
 
-**Ce cas d'usage combine** :
-- API externe (commande vocale → DeepMemo)
-- Nœuds actifs (la "liste" sait comment gérer l'ajout)
-- Auto-symlink (détection intelligente du projet mentionné)
+**Ce cas combine** : API externe, nœuds actifs, auto-symlink.
 
-👉 **Voir l'exemple détaillé ci-dessous** pour comprendre comment ça marcherait.
+👉 **Voir l'exemple détaillé ci-dessous** pour comprendre comment.
 
-## 💡 L'idée principale
+## 🔌 API externe : Contrôle depuis n'importe où
 
-Un nœud pourrait **déclencher** des actions sur **un ou plusieurs autres nœuds**, même s'ils ne sont pas ses enfants.
-
-**Points clés** :
-- Une action peut trigger **plusieurs nœuds** (workflows)
-- Les actions peuvent être déclenchées **depuis l'extérieur** (API)
-
-## 🧩 Comment ça marcherait ?
-
-### 1. Trigger depuis l'interface
-
-**Exemple** : Tu as une recette et une liste de courses.
-
-Quand tu cliques sur "Ajouter aux courses" sur la recette :
-1. La recette **lit** ses ingrédients (enfants)
-2. Elle **envoie** ces ingrédients à **plusieurs destinations** :
-   - Liste de courses (ajout des items)
-   - Budget mensuel (calcul du coût estimé)
-   - Calendrier (ajoute "Faire les courses" pour demain)
-
-**Résultat** : Une seule action → plusieurs nœuds mis à jour !
-
-### 2. Trigger depuis l'extérieur (API)
-
-DeepMemo pourrait exposer une **API** pour déclencher des actions :
-
-**Exemple** : Automatisation avec un assistant vocal
-\`\`\`javascript
-// Requête HTTP vers DeepMemo
-POST /api/trigger
-{
-  "nodeId": "ma-liste-courses",
-  "action": "addItem",
-  "data": {
-    "nom": "Lait",
-    "quantité": "1L"
-  }
-}
-\`\`\`
+DeepMemo pourrait exposer une **API HTTP** :
 
 **Cas d'usage** :
-- **Assistant vocal** : "Alexa, ajoute du lait à ma liste de courses"
-- **Zapier/IFTTT** : "Quand je reçois un email avec #recette, l'ajouter à DeepMemo"
-- **Home Assistant** : "Quand le frigo est vide, ajouter à la liste de courses"
-- **Webhook** : "Quand un client paie, créer une facture dans DeepMemo"
+- **Assistant vocal** : "Alexa, ajoute X à ma liste"
+- **Email → DeepMemo** : Email avec facture PDF → crée nœud Facture auto
+- **Zapier/IFTTT** : Webhook quand événement → action DeepMemo
+- **Home Assistant** : Frigo vide → ajout liste courses
+- **Scripts perso** : Automatiser ton workflow quotidien
 
-## 🎯 Workflows complexes
+**Ce qui rend ça intéressant** : DeepMemo devient le hub central de ton écosystème numérique.
 
-Une action peut déclencher une **cascade** :
+## ⚡ Triggers multi-nœuds : Workflows en cascade
 
-**Exemple** : "Planifier un repas"
-1. Clic sur "Planifier" sur une recette
-2. **Trigger 1** : Ajouter ingrédients à la liste de courses
-3. **Trigger 2** : Créer une tâche "Faire les courses" dans le planning
-4. **Trigger 3** : Calculer le budget de la semaine (somme des recettes planifiées)
-5. **Trigger 4** : Envoyer une notification si budget > limite
+Une action → plusieurs nœuds mis à jour :
 
-**Résultat** : Un seul clic → 4 nœuds mis à jour automatiquement !
+**Exemple** : "Planifier une recette"
+1. Clic sur "Planifier" sur recette
+2. **→** Ajoute ingrédients à liste de courses
+3. **→** Crée tâche "Faire les courses" dans planning
+4. **→** Calcule impact sur budget semaine
+5. **→** Alerte si budget dépassé
 
-## 🔗 Communication entre nœuds
+**Résultat** : Un clic → 4 nœuds synchronisés automatiquement.
 
-Les nœuds pourraient :
-- **Envoyer des messages** : "Ajoute ces items", "Calcule le total"
-- **Réagir à des événements** : "Quand je reçois un message, faire X"
-- **Se coordonner** : "Ce nœud dépend de cet autre"
-- **Déclencher en cascade** : "Si A alors B, puis C, puis D"
+## 🤖 Assistants IA : Analyse et propositions
 
-## 🌐 API pour automatisations
+Des agents IA qui **comprennent ton graph** :
 
-L'API permettrait :
-- **Lecture** : Lire le contenu d'un nœud
-- **Écriture** : Modifier un nœud
-- **Actions** : Déclencher une action spécifique
-- **Webhooks** : DeepMemo peut notifier d'autres services
+**Agent "Analyste"** :
+- Analyse ton activité
+- Détecte patterns : "Tu passes 60% de ton temps sur X"
+- Propose optimisations
 
-**Avantage** : DeepMemo devient un **hub central** pour tes données personnelles, contrôlable depuis n'importe où.
+**Agent "Chercheur"** :
+- Tu demandes : "Trouve des infos sur [sujet]"
+- Il scrape le web, crée des nœuds, les lie à ton projet
+- Résume les points clés
+
+**Agent "Planificateur"** :
+- "Planifie ma semaine"
+- Analyse tes todos, événements, projets
+- Détecte conflits, propose planning optimal
+
+**Ce qui rend ça intéressant** : L'IA devient un collaborateur qui enrichit ton graph.
+
+## 🌐 Interopérabilité : Hub, pas silo
+
+DeepMemo pourrait **connecter tes outils existants** au lieu de les remplacer :
+
+**Import/Export automatique** :
+- Notion, Obsidian, Roam, Evernote
+- Google Calendar, Todoist, Trello
+- Gmail (emails → nœuds), GitHub (repos → nœuds)
+
+**Workflow intelligent** :
+\`\`\`
+Email reçu avec facture PDF
+→ DeepMemo détecte auto
+→ Crée nœud [Facture] avec données extraites
+→ Lie à [Projet] et [Budget]
+→ Ajoute [Todo] "Payer avant le 15"
+→ Sync avec ton calendrier
+\`\`\`
+
+**Ce qui rend ça intéressant** : DeepMemo orchestre ton écosystème, ne l'isole pas.
 
 ---
 
 **Exemples concrets ci-dessous** 👇`,
         children: [ids.triggersExample, ids.triggersVoiceExample],
         parent: ids.future,
-        tags: ["futur", "triggers", "automatisation"],
+        tags: ["futur", "automatisation", "API", "IA"],
         links: [],
         backlinks: [],
         created: now + 22,
@@ -1609,62 +1625,83 @@ Cette commande illustre **trois concepts** de DeepMemo :
         modified: now + 24
       },
 
-      // Futur : Multi-utilisateur
+      // Futur : Collaboration & Partage
       [ids.multiUser]: {
         id: ids.multiUser,
         type: "node",
-        title: "👥 Multi-utilisateur",
-        content: `# Multi-utilisateur : Collaborer avec permissions
+        title: "👥 Collaboration & Partage",
+        content: `# Collaboration & Partage
 
-## 💡 L'idée
+Permettre le travail collaboratif **tout en gardant le contrôle**.
 
-Partager des branches avec **contrôle précis** des permissions.
+## 🔐 Permissions fines (chmod-style)
 
-## 🔐 Système de permissions
-
-Inspiré du système de fichiers Unix (chmod) :
+Inspiré du système de fichiers Unix :
 - **Lecture (r)** : Voir le nœud et ses enfants
 - **Écriture (w)** : Modifier le contenu
-- **Exécution (x)** : Déclencher des actions (scripts, triggers)
+- **Exécution (x)** : Déclencher actions/scripts
 
 **Niveaux** :
 - **Propriétaire** : Toi (contrôle total)
-- **Groupe** : Un groupe d'utilisateurs (ex: famille, équipe)
-- **Autres** : Tout le monde
+- **Groupe** : Équipe/famille
+- **Autres** : Public
 
-## 🧩 Cas d'usage
+**Cas d'usage** :
+- **Recettes familiales** : Famille peut ajouter, amis peuvent consulter
+- **Projet d'équipe** : Devs modifient code, clients voient roadmap
+- **Notes de cours** : Groupe d'étude ajoute questions, public lit
 
-### 1. Recettes familiales
+## 📋 Templates partageables
 
-- **Toi** : Lecture + Écriture + Exécution
-- **Famille** : Lecture + Écriture (peuvent ajouter des recettes)
-- **Amis** : Lecture uniquement (peuvent consulter)
+Des **structures prêtes à l'emploi** que tu peux forker :
 
-### 2. Projet d'équipe
+**Templates communautaires** :
+- "Business Plan Startup" (structure complète + calculs)
+- "Gestion de Projet Agile" (sprints + backlogs)
+- "Journal de Recherche" (notes + références + graphes)
 
-- **Chef de projet** : Contrôle total
-- **Développeurs** : Écriture sur "Code", Lecture sur "Roadmap"
-- **Clients** : Lecture uniquement sur "Documentation"
+**Tu forks** → adaptes à tes besoins → partages ta version.
 
-### 3. Notes de cours
+**Ce qui rend ça intéressant** : Pas besoin de tout créer from scratch.
 
-- **Toi** : Écriture complète
-- **Groupe d'étude** : Lecture + Ajout de questions
-- **Public** : Lecture uniquement
+## 🌍 Souveraineté des données : Décentralisation
 
-## 🔄 Synchronisation
+**Modèle** :
+- Chacun **héberge son propre graph** (ou choisit un hébergeur de confiance)
+- Les nœuds publics sont accessibles via permissions
+- Pas de plateforme centrale qui possède tes données
 
-Les modifications seraient **synchronisées** en temps réel :
-- Comme Google Docs
-- Voir les curseurs des autres utilisateurs
+**Exemple** :
+\`\`\`
+Jean partage :
+[Recette: Gâteau chocolat]
+  ├─ permissions: world (read)
+
+Alice voit la recette, mais elle reste sur le serveur de Jean.
+Alice commente → crée un nœud chez elle, lié à celui de Jean.
+\`\`\`
+
+**Avantages** :
+- Tes données t'appartiennent vraiment
+- Pas de censure centralisée
+- Pas de pub ciblée invasive
+- Monétisation directe possible (vendre accès à tes nœuds premium si tu veux)
+
+**Ce qui rend ça intéressant** : Alternative crédible aux plateformes centralisées (Facebook, Notion...).
+
+## 🔄 Synchronisation en temps réel
+
+Modifications synchronisées comme Google Docs :
+- Voir les curseurs des autres
 - Résolution automatique des conflits
+- Historique complet des changements
 
 ---
 
 **Exemple concret ci-dessous** 👇`,
         children: [ids.multiUserExample],
         parent: ids.future,
-        tags: ["futur", "collaboration", "permissions"],
+        tags: ["futur", "collaboration", "décentralisation"],
         links: [],
         backlinks: [],
         created: now + 25,
