@@ -5,6 +5,7 @@
 
 import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
+import { updateRightPanel } from './editor.js';
 
 // Autocomplete state
 let tagAutocompleteSuggestions = [];
@@ -118,6 +119,7 @@ function addTag(tag) {
   node.modified = Date.now();
   saveData();
   renderTags();
+  updateRightPanel(currentNodeId); // Update tag cloud in right panel
 
   // Re-focus input for quick multi-tag addition
   setTimeout(() => {
@@ -141,6 +143,7 @@ function removeTag(tag) {
   node.modified = Date.now();
   saveData();
   renderTags();
+  updateRightPanel(currentNodeId); // Update tag cloud in right panel
   showToast('Tag supprimé', '🗑️');
 }
 

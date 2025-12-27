@@ -463,7 +463,7 @@ function updateAttachments(currentNodeId) {
  * Update right panel
  * @param {string} currentNodeId - Current node ID
  */
-async function updateRightPanel(currentNodeId) {
+export async function updateRightPanel(currentNodeId) {
   const node = data.nodes[currentNodeId];
   const panel = document.getElementById('panelBody');
 
