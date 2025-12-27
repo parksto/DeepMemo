@@ -166,7 +166,7 @@ DeepMemo/
 
 ---
 
-## 🚀 V0.8 - Refonte Symlinks & Navigation (EN COURS)
+## 🚀 V0.8 - Refonte Symlinks & Navigation (✅ TERMINÉE)
 
 **Objectif principal** : Refactorisation complète du système de liens symboliques pour plus de robustesse et de flexibilité + système d'URL dynamiques.
 
@@ -271,11 +271,12 @@ DeepMemo/
 
 ## 🌟 V0.9 - Features Avancées
 
-### Vue liste nested
-- [ ] Les enfants deviennent le contenu principal
-- [ ] Indentation visuelle
-- [ ] Todo-list style
-- [ ] Checkboxes pour les tâches
+### Types de nœuds actifs (Fondations)
+- [ ] Système d'implements basique
+- [ ] Propriété `implements: ["node_type_X"]` sur les nœuds
+- [ ] Scripts simples (`onSave`, `onRender`)
+- [ ] Sandbox JavaScript sécurisé
+- [ ] Nœuds descripteurs de types (voir docs/VISION.md)
 
 ### Améliorations des tags
 - [ ] Création rapide de tags par #hashtag dans le contenu
@@ -300,11 +301,13 @@ DeepMemo/
 
 ## 🌟 V1.0 - Système complet
 
-### Types de nœuds actifs
-- [ ] Nœuds avec scripts personnalisés
-- [ ] Calculs automatiques (budget, stats)
-- [ ] Génération automatique (listes de courses depuis recettes)
+### Types avancés et triggers
+- [ ] Résolution de dépendances entre types
+- [ ] Héritage de types (`implements` multiple)
+- [ ] Triggers multi-nœuds (API `triggerNode`)
+- [ ] Vues multiples (card, list, kanban, calendar)
 - [ ] Actions customisées par type
+- [ ] Exemples concrets : recettes → courses, projets agiles, CRM
 
 ### Multi-utilisateur
 - [ ] Permissions chmod-style (rwx par utilisateur/groupe)
@@ -432,3 +435,23 @@ DeepMemo/
 - [x] **Right panel** : Masqué par défaut (interface épurée)
 - [x] **Toggle police** : Choix entre Sto (personnalisée) et polices système
 - [x] **Documentation complète** : CLAUDE.md, README, docs/ tous à jour
+
+### ✅ Progressive Web App (25 décembre 2025)
+- [x] **Manifest PWA** : Configuration complète (nom, icônes, thème)
+- [x] **Service Worker** : Cache-First avec précache et update en arrière-plan
+- [x] **Mode offline** : Fonctionne sans connexion Internet
+- [x] **Installation native** : Desktop et mobile (Chrome, Edge, Safari, etc.)
+- [x] **Icônes** : 192x192 et 512x512 générées depuis favicon.svg
+- [x] **Documentation** : Guide complet dans docs/PWA.md
+- [x] **HTTPS ready** : Compatible GitHub Pages, Netlify, Vercel
+
+### ✅ Fichiers joints (25 décembre 2025)
+- [x] **Stockage IndexedDB** : Jusqu'à ~500 MB selon navigateur
+- [x] **Upload de fichiers** : Images, PDFs, documents (50 MB max par fichier)
+- [x] **Affichage inline** : Images via syntaxe `![](attachment:ID)`
+- [x] **Export/Import ZIP** : Format systématique incluant fichiers + data.json
+- [x] **Gestion complète** : Upload, download, delete, copie syntaxe
+- [x] **Indicateur stockage** : Barre de progression temps réel dans panneau droit
+- [x] **Garbage collection** : Nettoyage manuel des fichiers orphelins
+- [x] **Icônes par type** : Différenciation visuelle selon MIME type
+- [x] **Documentation** : Spec détaillée dans docs/SPEC-ATTACHMENTS.md

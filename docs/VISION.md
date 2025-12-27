@@ -1084,33 +1084,39 @@ applyMigrations(node) {
 
 ## 🚀 Implémentation progressive
 
-### Phase 1 : Fondations (V0.8)
-- [x] Nœuds de base
+### Phase 1 : Fondations (V0.8) ✅
+- [x] Nœuds de base (hiérarchie infinie, symlinks, tags)
+- [x] Arborescence intelligente et navigation
+- [x] Export/Import de branches
+- [x] PWA installable et mode offline
+- [x] Fichiers joints (IndexedDB)
+
+### Phase 2 : Types actifs - Fondations (V0.9)
 - [ ] Système d'implements basique
 - [ ] Scripts simples (onSave, onRender)
 - [ ] Sandbox JavaScript
 
-### Phase 2 : Dépendances (V0.9)
+### Phase 3 : Dépendances (V0.9-V1.0)
 - [ ] Résolution de dépendances
 - [ ] Registry de types
 - [ ] Héritage simple
 - [ ] Requires
 
-### Phase 3 : Triggers (V1.0)
+### Phase 4 : Triggers (V1.0)
 - [ ] API triggerNode
 - [ ] Handlers onTrigger
 - [ ] Exemples concrets (recettes → courses)
 
-### Phase 4 : Vues multiples (V1.1)
+### Phase 5 : Vues multiples (V1.0-V1.1)
 - [ ] Système de templates
 - [ ] Switcher de vues
 - [ ] Vues prédéfinies (card, list, kanban)
 
-### Phase 5 : Avancé (V1.2+)
+### Phase 6 : Avancé (V1.2+)
 - [ ] Versioning et migrations
 - [ ] Marketplace de types
 - [ ] Permissions granulaires
-- [ ] Collaboration
+- [ ] Collaboration temps réel
 
 ---
 
@@ -1132,5 +1138,9 @@ C'est une **plateforme** où :
 
 ---
 
-**Document Vision - Décembre 2024**  
-*Ces concepts seront implémentés progressivement, en commençant par les fondations.*
+---
+
+**Document Vision - Décembre 2025**
+*Ces concepts seront implémentés progressivement, en commençant par les fondations (V0.9+).*
+
+**État actuel** : V0.8 complète - Voir le contenu de démo dans l'application pour une introduction accessible à ces concepts (section "🔮 Directions explorées").

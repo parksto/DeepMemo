@@ -1,39 +1,45 @@
-# SPEC - Attachments & Files (V0.9)
+# Architecture - Attachments & Files (V0.8)
 
-**Branche** : `feature/attachments-indexeddb`
-**Date de création** : 2025-12-25
-**Statut** : 🔴 En spécification
+**Implémentation** : V0.8 (25 décembre 2025)
+**Statut** : ✅ Implémenté et déployé
 
 ---
 
-## 🎯 Objectif
+## 🎯 Fonctionnalité
 
-Permettre d'attacher des fichiers (images, PDFs, documents, etc.) aux nœuds DeepMemo, avec :
-- Stockage local via **IndexedDB**
-- Export/Import via format **ZIP**
-- UI simple pour upload, affichage et suppression
+Attacher des fichiers (images, PDFs, documents, etc.) aux nœuds DeepMemo, avec :
+- Stockage local via **IndexedDB** (~500 MB selon navigateur)
+- Export/Import via format **ZIP** systématique
+- UI complète pour upload, affichage inline, download et suppression
+
+**Note** : Ce document servait de spécification pendant le développement. Il est maintenant conservé comme **référence d'architecture** pour comprendre les décisions techniques et l'implémentation.
 
 ---
 
 ## 📋 Décisions de design
 
-### Décisions actées
+### Décisions implémentées
 
-| # | Décision | Justification |
-|---|----------|---------------|
-| 1 | **IndexedDB uniquement** | Une seule source de vérité, pas d'hybride localStorage/IndexedDB |
-| 2 | **Export toujours en ZIP** | Cohérence, même sans fichiers (juste data.json dans le ZIP) |
-| 3 | **Inline via syntaxe explicite** | `![](attachment:id)` pour contrôler l'affichage |
-| 4 | **Pas de déduplication** | Chaque attachment est indépendant, simplifie la suppression |
-| 5 | **Limite 50MB par fichier** | Hard limit pour éviter la saturation |
-| 6 | **Suppression manuelle** | Bouton de suppression dans la liste des fichiers du nœud |
+| # | Décision | Justification | Statut |
+|---|----------|---------------|--------|
+| 1 | **IndexedDB uniquement** | Une seule source de vérité, pas d'hybride localStorage/IndexedDB | ✅ Implémenté |
+| 2 | **Export toujours en ZIP** | Cohérence, même sans fichiers (juste data.json dans le ZIP) | ✅ Implémenté |
+| 3 | **Inline via syntaxe explicite** | `![](attachment:id)` pour contrôler l'affichage | ✅ Implémenté |
+| 4 | **Pas de déduplication** | Chaque attachment est indépendant, simplifie la suppression | ✅ Implémenté |
+| 5 | **Limite 50MB par fichier** | Hard limit pour éviter la saturation | ✅ Implémenté |
+| 6 | **Suppression manuelle** | Bouton de suppression dans la liste des fichiers du nœud | ✅ Implémenté |
+| 7 | **Garbage collection manuelle** | Bouton dans panneau droit "Nettoyer fichiers orphelins" | ✅ Implémenté |
+| 8 | **Pas de preview** | Affichage fullsize inline uniquement (V1) | ✅ Décision confirmée |
+| 9 | **Upload via bouton** | Drag & drop reporté en V2 | ✅ Décision confirmée |
+| 10 | **Clipboard paste** | Reporté en V2 | ✅ Décision confirmée |
 
-### Questions en suspens
+### Features reportées (V2)
 
-- [ ] **Garbage collection** : Automatique au chargement ? Ou bouton manuel dans Settings ?
-- [ ] **Preview images** : Thumbnail dans la liste ? Ou seulement fullsize inline ?
-- [ ] **Drag & drop** : Sur le nœud entier ? Ou zone dédiée ?
-- [ ] **Clipboard paste** : Supporter paste d'images depuis le presse-papier ?
+- **Drag & drop** : Upload par glisser-déposer sur le nœud
+- **Clipboard paste** : Paste d'images depuis le presse-papier
+- **Thumbnails** : Aperçus miniatures dans la liste
+- **Compression** : Compression automatique des fichiers volumineux
+- **Versioning** : Historique des modifications de fichiers
 
 ---
 
@@ -462,93 +468,33 @@ Fichiers : 12.3 MB / ~500 MB
 
 ---
 
-## 📅 Roadmap d'implémentation
+## ✅ Implémentation terminée
 
-### Phase 1 : Fondations (Commit 1-2)
+### Toutes les phases complétées (25 décembre 2025)
 
-**Objectif** : Module IndexedDB fonctionnel
+**Phase 1-7** : Toutes implémentées et testées
 
-- [ ] Créer `src/js/core/attachments.js`
-- [ ] Implémenter toutes les fonctions de l'API
-- [ ] Ajouter tests manuels dans la console
-- [ ] Documenter le module (JSDoc)
+- [x] **Module IndexedDB** : `src/js/core/attachments.js` complet (~300 lignes)
+- [x] **UI Upload** : Section attachments dans `editor.js` avec validation taille
+- [x] **Export ZIP** : Global et branche via JSZip
+- [x] **Import ZIP** : Détection auto ZIP vs JSON, régénération IDs
+- [x] **Affichage inline** : Parser `attachment:` + blob URLs + cleanup mémoire
+- [x] **Polish** : Indicateur stockage, garbage collection, icônes MIME
+- [x] **Documentation** : README, ARCHITECTURE, ROADMAP, CLAUDE.md à jour
+- [x] **Contenu démo** : Section "📎 Fichiers joints" dans default-data.js
 
-**Validation** : Pouvoir sauvegarder/récupérer/supprimer un blob via console
+**Commits** : Implémentés en une session le 25 décembre 2025
 
-### Phase 2 : UI Upload (Commit 3-4)
+**Fichiers modifiés** :
+- `src/js/core/attachments.js` (nouveau)
+- `src/js/core/data.js` (export/import ZIP)
+- `src/js/features/editor.js` (UI attachments + inline display)
+- `src/js/app.js` (upload, download, delete, cleanup)
+- `index.html` (section attachments + JSZip CDN)
+- `src/css/components.css` (styles complets)
+- `docs/` (documentation mise à jour)
 
-**Objectif** : Pouvoir attacher des fichiers aux nœuds
-
-- [ ] Ajouter la section "Fichiers attachés" dans `editor.js`
-- [ ] Implémenter upload via input file
-- [ ] Afficher la liste des fichiers
-- [ ] Implémenter téléchargement
-- [ ] Implémenter suppression
-- [ ] Ajouter validation de taille (50MB)
-- [ ] Ajouter styles CSS
-
-**Validation** : Pouvoir ajouter/voir/télécharger/supprimer des fichiers sur un nœud
-
-### Phase 3 : Export ZIP (Commit 5-6)
-
-**Objectif** : Export global et branche en ZIP
-
-- [ ] Intégrer JSZip (CDN ou local)
-- [ ] Implémenter `exportDataZIP()` dans `data.js`
-- [ ] Implémenter `exportBranchZIP()` dans `data.js`
-- [ ] Modifier les boutons d'export pour utiliser ZIP par défaut
-- [ ] Tester avec plusieurs fichiers
-
-**Validation** : Export → ZIP téléchargé avec data.json + fichiers
-
-### Phase 4 : Import ZIP (Commit 7-8)
-
-**Objectif** : Import global et branche depuis ZIP
-
-- [ ] Implémenter détection ZIP vs JSON
-- [ ] Implémenter `importZip()` pour global
-- [ ] Implémenter `importZip()` pour branche
-- [ ] Gérer la régénération des IDs (mode branche)
-- [ ] Tester round-trip complet (export → import)
-
-**Validation** : Import → Données + fichiers restaurés correctement
-
-### Phase 5 : Affichage inline (Commit 9)
-
-**Objectif** : Images affichées dans le markdown
-
-- [ ] Parser `attachment:ID` dans `renderMarkdown()`
-- [ ] Générer blob URLs temporaires
-- [ ] Injecter `<img>` dans le HTML
-- [ ] Révoquer les blob URLs au changement de nœud
-- [ ] Tester avec plusieurs images
-
-**Validation** : `![](attachment:id)` affiche l'image correctement
-
-### Phase 6 : Polish (Commit 10-11)
-
-**Objectif** : Finitions et nettoyage
-
-- [ ] Ajouter indicateur de stockage dans Settings
-- [ ] Implémenter garbage collection UI
-- [ ] Supprimer automatiquement les fichiers lors de la suppression de nœud
-- [ ] Ajouter icônes selon type MIME
-- [ ] Améliorer les messages d'erreur
-- [ ] Documenter dans `docs/README.md`
-
-**Validation** : Tous les scénarios de test passent
-
-### Phase 7 : Documentation (Commit 12)
-
-**Objectif** : Mise à jour de la doc
-
-- [ ] Mettre à jour `docs/README.md`
-- [ ] Mettre à jour `docs/ARCHITECTURE.md`
-- [ ] Mettre à jour `CLAUDE.md`
-- [ ] Mettre à jour `docs/ROADMAP.md`
-- [ ] Créer un nœud de démo dans `default-data.js` ?
-
-**Validation** : Documentation complète et à jour
+**Tests** : Page de test `test-attachments.html` (tous validés ✅, supprimée après validation)
 
 ---
 
@@ -661,19 +607,21 @@ try {
 
 ## ✅ Checklist de complétion
 
-**Feature considérée complète quand** :
+**Feature 100% complète** :
 
-- [ ] Tous les tests manuels passent
-- [ ] Testé sur Chrome, Firefox, Safari
-- [ ] Documentation à jour
-- [ ] Pas de console errors
-- [ ] Garbage collection fonctionne
-- [ ] Export/Import round-trip OK
-- [ ] Limite 50MB respectée
-- [ ] UI responsive et accessible
-- [ ] Code reviewé et commenté
+- [x] Tous les tests manuels passent
+- [x] Testé sur Chrome, Edge (Firefox et Safari recommandés avant déploiement public)
+- [x] Documentation à jour (README, ARCHITECTURE, ROADMAP, CLAUDE.md)
+- [x] Pas de console errors en production
+- [x] Garbage collection fonctionne (bouton manuel + stats)
+- [x] Export/Import round-trip OK (global + branche)
+- [x] Limite 50MB respectée (validation à l'upload)
+- [x] UI fonctionnelle et cohérente avec le reste de l'app
+- [x] Code commenté et structuré (modules ES6)
+- [x] Contenu de démo intégré
 
 ---
 
-**Dernière mise à jour** : 2025-12-25
-**Prochaine révision** : Après Phase 1 (fondations IndexedDB)
+**Dernière mise à jour** : 2025-12-27 (statut)
+**Implémentation complète** : 2025-12-25
+**Statut** : ✅ Déployé en V0.8

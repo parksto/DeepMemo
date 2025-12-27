@@ -27,7 +27,6 @@ Chaque nœud possède :
 - **Structure arborescente réticulée** : L'arborescence hiérarchique devient un réseau maillé grâce aux symlinks
 - **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (comme `ln -s` sous Linux), renommables indépendamment
 - **Backlinks** : Voir automatiquement tous les nœuds qui pointent vers le nœud actuel
-- **Wiki-links** : ⚠️ `[[Nom du nœud]]` temporairement désactivé (V0.9+ - refonte avec IDs)
 
 ### 🏷️ Tags
 - Système de tags dédié

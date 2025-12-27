@@ -9,56 +9,35 @@ Une **Progressive Web App** permet d'installer DeepMemo comme une vraie applicat
 ✅ **Ouverture en plein écran** - Sans barre d'adresse du navigateur
 ✅ **Démarrage rapide** - Cache intelligent pour performances optimales
 
-## 📦 Fichiers ajoutés
+---
 
-```
-DeepMemo/
-├── manifest.json           # Configuration PWA
-├── sw.js                   # Service Worker (cache offline)
-├── generate-icons.html     # Générateur d'icônes
-└── icons/                  # Icônes d'application
-    ├── icon-192.png        # (à générer)
-    └── icon-512.png        # (à générer)
-```
+## 📦 Installation
 
-## 🎨 Étape 1 : Générer les icônes
+### Sur Desktop (Chrome, Edge, Brave)
 
-1. **Ouvre** `generate-icons.html` dans ton navigateur
-2. **Clique** sur le bouton "✨ Générer les icônes"
-3. **Télécharge** les deux icônes (`icon-192.png` et `icon-512.png`)
-4. **Place-les** dans le dossier `icons/`
+1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans ton navigateur
+2. **Cherche l'icône d'installation** dans la barre d'adresse (➕ ou icône ordinateur)
+3. **Clique** sur "Installer DeepMemo"
+4. L'application s'ouvre dans une fenêtre dédiée !
 
-Les icônes sont basées sur le `favicon.svg` existant (étoile bleue sur fond noir).
+**Alternative :**
+- Menu ⋮ → "Installer DeepMemo"
 
-## 🧪 Étape 2 : Tester la PWA localement
+### Sur Mobile (Android)
 
-### Démarrer le serveur
+1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans Chrome
+2. **Menu** ⋮ → "Ajouter à l'écran d'accueil"
+3. **Confirme** l'ajout
+4. L'icône apparaît sur ton écran d'accueil !
 
-```bash
-cd C:\Users\parks\Documents\Dev\deepMemo\DeepMemo
-python -m http.server 8000
-```
+### Sur iOS (Safari)
 
-### Ouvrir dans Chrome/Edge
+1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans Safari
+2. **Bouton partage** (icône ↑) → "Sur l'écran d'accueil"
+3. **Nomme** l'application → "Ajouter"
+4. L'icône apparaît sur ton écran d'accueil !
 
-1. Va sur `http://localhost:8000`
-2. Ouvre les **DevTools** (`F12`)
-3. Onglet **Application** → **Service Workers**
-   - Tu devrais voir `sw.js` actif
-4. Onglet **Application** → **Manifest**
-   - Vérifie que tout est OK (nom, icônes, couleurs)
-
-### Installer l'app
-
-**Sur Desktop (Chrome/Edge) :**
-- Icône ➕ dans la barre d'adresse → "Installer DeepMemo"
-- Ou menu ⋮ → "Installer DeepMemo"
-
-**Sur Mobile (Android) :**
-- Menu ⋮ → "Ajouter à l'écran d'accueil"
-
-**Sur iOS (Safari) :**
-- Bouton partage → "Sur l'écran d'accueil"
+---
 
 ## 🔍 Vérifier que ça marche
 
@@ -68,79 +47,116 @@ python -m http.server 8000
 
 ### Test 2 : Mode offline
 1. **Ouvre** l'app installée
-2. **Coupe** le serveur Python (`Ctrl+C`)
-3. **Rafraîchis** l'app (`Ctrl+R`)
+2. **Coupe** ta connexion Internet (Wi-Fi ou données)
+3. **Rafraîchis** l'app (`Ctrl+R` ou `Cmd+R`)
 4. ✅ L'app continue de fonctionner !
 
 ### Test 3 : Cache automatique
-1. **Ouvre** DevTools → **Application** → **Cache Storage**
+1. **Ouvre** DevTools (`F12`) → **Application** → **Cache Storage**
 2. **Vérifie** que `deepmemo-v1.0.0` contient tous les fichiers
 3. ✅ Fichiers CSS, JS, icônes cachés
 
-## 🚀 Déploiement public
+---
 
-### HTTPS obligatoire
+## 🔄 Mises à jour
 
-⚠️ Les PWA nécessitent **HTTPS** (sauf localhost). Pour déployer :
+### L'application se met à jour automatiquement
 
-**Options gratuites :**
-- **GitHub Pages** (HTTPS automatique)
-- **Netlify** (Drag & drop, HTTPS auto)
-- **Vercel** (Git integration)
-- **Cloudflare Pages**
+Le Service Worker vérifie les mises à jour en arrière-plan. Quand une nouvelle version est disponible :
 
-### Déploiement sur GitHub Pages (exemple)
+1. **Ferme complètement** l'application
+2. **Rouvre-la**
+3. ✅ La nouvelle version est installée !
 
-```bash
-# 1. Créer un repo GitHub
-# 2. Push le code
-git add .
-git commit -m "🚀 PWA: Support installation native + mode offline"
-git push origin main
+**Note technique :** Les mises à jour sont appliquées lors de l'activation suivante du Service Worker (fermeture/ouverture de l'app).
 
-# 3. Activer GitHub Pages (Settings → Pages → main branch)
-# 4. Accéder à https://username.github.io/DeepMemo
-# 5. Installer la PWA !
-```
+---
 
-## 🔧 Maintenance
+## 🗑️ Désinstallation
 
-### Mettre à jour le cache
+### Sur Desktop (Chrome, Edge)
 
-Quand tu modifies le code, **incrémente la version** dans `sw.js` :
+1. **Clique-droit** sur l'icône de l'app (barre des tâches ou menu démarrer)
+2. **Sélectionne** "Désinstaller" ou "Supprimer"
+3. **Confirme** la suppression
 
-```javascript
-// sw.js (ligne 2)
-const CACHE_VERSION = 'v1.0.1'; // 👈 Changer ici
-```
+**Alternative :**
+- Menu ⋮ dans l'app → "Désinstaller DeepMemo"
 
-Cela forcera le navigateur à télécharger les nouveaux fichiers.
+### Sur Mobile (Android)
 
-### Débugger le Service Worker
+1. **Appui long** sur l'icône
+2. **Sélectionne** "Désinstaller" ou "Supprimer de l'écran d'accueil"
 
-**Console → erreurs** : Vérifier les logs `[SW]`
-**Application → Service Workers** : Voir l'état (actif, en attente, erreur)
-**Application → Clear storage** : Reset complet si besoin
+### Sur iOS
 
-## 📱 Comportement par plateforme
+1. **Appui long** sur l'icône
+2. **Sélectionne** "Supprimer l'app"
 
-| Plateforme | Installation | Offline | Notifications* |
-|------------|--------------|---------|----------------|
-| **Chrome Desktop** | ✅ | ✅ | ✅ |
-| **Edge Desktop** | ✅ | ✅ | ✅ |
-| **Android Chrome** | ✅ | ✅ | ✅ |
-| **iOS Safari** | ✅ | ✅ | ⚠️ Limité |
-| **Firefox** | ⚠️ Partiel | ✅ | ✅ |
+---
 
-*Les notifications ne sont pas implémentées dans DeepMemo pour l'instant.
+## 🔧 Notes techniques
 
-## 🎉 Prochaines étapes
+### Service Worker
 
-**Fonctionnalités PWA avancées (optionnel) :**
-- [ ] Partage natif (API Web Share)
-- [ ] Notifications push (ex: rappels)
-- [ ] Synchronisation en arrière-plan
-- [ ] Détection de mise à jour automatique
+DeepMemo utilise une stratégie **Cache-First** :
+- Fichiers servis depuis le cache en priorité (démarrage rapide)
+- Mise à jour en arrière-plan quand le réseau est disponible
+- Mode offline complet après la première visite
+
+### Cache
+
+**Fichiers mis en cache :**
+- `index.html`
+- Tous les CSS (`src/css/*.css`)
+- Tous les JS (`src/js/**/*.js`)
+- Icônes PWA
+- Bibliothèques externes (marked.js, JSZip)
+
+**Données utilisateur :**
+- Stockées dans **LocalStorage** (données structurées)
+- Stockées dans **IndexedDB** (fichiers attachés)
+- **Jamais dans le cache Service Worker** (séparation données/code)
+
+### Manifest
+
+Le fichier `manifest.json` définit :
+- **Nom** : "DeepMemo - Ton second cerveau"
+- **Mode** : `standalone` (plein écran)
+- **Thème** : Noir (#0a0a0a)
+- **Icônes** : 192x192 et 512x512
+
+---
+
+## 📱 Compatibilité
+
+| Plateforme | Installation | Offline | Notes |
+|------------|--------------|---------|-------|
+| **Chrome Desktop** | ✅ | ✅ | Support complet |
+| **Edge Desktop** | ✅ | ✅ | Support complet |
+| **Brave Desktop** | ✅ | ✅ | Support complet |
+| **Android Chrome** | ✅ | ✅ | Support complet |
+| **iOS Safari** | ✅ | ✅ | Support complet |
+| **Firefox** | ⚠️ Partiel | ✅ | Installation limitée |
+
+**Note :** Les notifications push ne sont pas implémentées dans DeepMemo (pas nécessaire pour une app de notes locales).
+
+---
+
+## 🎉 Avantages de la PWA
+
+**Pour toi :**
+- 📱 Application native sans téléchargement lourd
+- ⚡ Démarrage instantané (cache local)
+- ✈️ Fonctionne offline (avion, métro, etc.)
+- 🔒 Données privées (pas de serveur distant)
+- 🆓 Gratuit et open source (MIT)
+
+**Pour le projet :**
+- 🌍 Pas de stores (Apple, Google) à gérer
+- 🚀 Déploiement instantané (un simple push)
+- 💰 Zéro coût d'infrastructure
+- 🔧 Mise à jour automatique sans action utilisateur
 
 ---
 
