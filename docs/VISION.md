@@ -1,314 +1,316 @@
-# 🔮 DeepMemo - Vision Long-Terme
+# 🔮 DeepMemo - Long-Term Vision
 
-> **Les concepts avancés qui feront de DeepMemo un véritable "OS pour données personnelles"**
+> **Advanced concepts that will make DeepMemo a true "OS for personal data"**
 
----
-
-## 🎯 Philosophie centrale
-
-DeepMemo commence simple (un seul type : le Nœud) mais **les données peuvent définir leur propre comportement**.
-
-Au lieu de types en dur dans le code, **les types eux-mêmes sont des nœuds** qui décrivent :
-- Leur schéma de données
-- Leurs comportements (scripts)
-- Leurs vues personnalisées
-- Leurs dépendances
-
-**C'est de la POO appliquée aux données personnelles.**
+**[🇫🇷 Version française disponible](./VISION.fr.md)**
 
 ---
 
-## 🧬 Nœuds descripteurs (Types actifs)
+## 🎯 Core Philosophy
 
-### Concept de base
+DeepMemo starts simple (a single type: the Node) but **data can define its own behavior**.
 
-Au lieu de :
+Instead of hardcoded types, **types themselves are nodes** that describe:
+- Their data schema
+- Their behaviors (scripts)
+- Their custom views
+- Their dependencies
+
+**This is OOP applied to personal data.**
+
+---
+
+## 🧬 Descriptor Nodes (Active Types)
+
+### Basic Concept
+
+Instead of:
 ```javascript
 {
-  type: "budget",  // ← Type en dur dans le code
-  title: "Budget Décembre"
+  type: "budget",  // ← Hardcoded type
+  title: "December Budget"
 }
 ```
 
-On aura :
+We'll have:
 ```javascript
 {
-  implements: ["node_type_budget"],  // ← Référence à un nœud descripteur
-  title: "Budget Décembre"
+  implements: ["node_type_budget"],  // ← Reference to a descriptor node
+  title: "December Budget"
 }
 ```
 
-### Exemple complet : Type "Budget"
+### Complete Example: "Budget" Type
 
-**Le nœud descripteur** (définit le type) :
+**The descriptor node** (defines the type):
 ```javascript
 {
   id: "node_type_budget",
   title: "🎨 Type: Budget",
   isTypeDescriptor: true,
-  
-  // === SCHÉMA DE DONNÉES ===
+
+  // === DATA SCHEMA ===
   schema: {
-    revenus: { 
-      type: "number", 
-      required: true,
-      label: "Revenus du mois"
-    },
-    depenses: { 
-      type: "number", 
-      required: true,
-      label: "Dépenses totales"
-    },
-    categorie: { 
-      type: "string",
-      enum: ["personnel", "professionnel", "famille"]
-    },
-    solde: {
+    income: {
       type: "number",
-      computed: true  // Calculé automatiquement
+      required: true,
+      label: "Monthly income"
+    },
+    expenses: {
+      type: "number",
+      required: true,
+      label: "Total expenses"
+    },
+    category: {
+      type: "string",
+      enum: ["personal", "business", "family"]
+    },
+    balance: {
+      type: "number",
+      computed: true  // Automatically calculated
     }
   },
-  
-  // === COMPORTEMENTS ACTIFS ===
+
+  // === ACTIVE BEHAVIORS ===
   scripts: {
-    // Appelé à chaque sauvegarde
+    // Called on every save
     onSave: `
-      // Calcul automatique du solde
-      this.solde = this.revenus - this.depenses;
-      
-      // Ajout auto de tags selon conditions
-      if (this.solde < 0) {
-        this.addTag('alerte');
+      // Automatic balance calculation
+      this.balance = this.income - this.expenses;
+
+      // Auto-add tags based on conditions
+      if (this.balance < 0) {
+        this.addTag('alert');
         this.addTag('deficit');
       } else {
-        this.removeTag('alerte');
+        this.removeTag('alert');
         this.removeTag('deficit');
       }
-      
-      // Notification si seuil dépassé
-      if (this.depenses > this.revenus * 0.9) {
-        app.notify('⚠️ Attention : budget presque épuisé');
+
+      // Notification if threshold exceeded
+      if (this.expenses > this.income * 0.9) {
+        app.notify('⚠️ Warning: budget almost depleted');
       }
     `,
-    
-    // Interface personnalisée
+
+    // Custom interface
     onRender: `
-      const soldeClass = this.solde >= 0 ? 'positive' : 'negative';
-      const percent = (this.depenses / this.revenus * 100).toFixed(1);
-      
+      const balanceClass = this.balance >= 0 ? 'positive' : 'negative';
+      const percent = (this.expenses / this.income * 100).toFixed(1);
+
       return \`
         <div class="budget-widget">
           <div class="budget-header">
             <h3>\${this.title}</h3>
-            <span class="categorie">\${this.categorie}</span>
+            <span class="category">\${this.category}</span>
           </div>
-          
+
           <div class="budget-bars">
-            <div class="bar revenus">
-              <span>Revenus</span>
-              <strong>\${this.revenus}€</strong>
+            <div class="bar income">
+              <span>Income</span>
+              <strong>\${this.income}€</strong>
             </div>
-            <div class="bar depenses" style="width: \${percent}%">
-              <span>Dépenses</span>
-              <strong>\${this.depenses}€</strong>
+            <div class="bar expenses" style="width: \${percent}%">
+              <span>Expenses</span>
+              <strong>\${this.expenses}€</strong>
             </div>
           </div>
-          
-          <div class="budget-solde \${soldeClass}">
-            Solde: <strong>\${this.solde}€</strong>
+
+          <div class="budget-balance \${balanceClass}">
+            Balance: <strong>\${this.balance}€</strong>
           </div>
         </div>
       \`;
     `,
-    
-    // Actions personnalisées
+
+    // Custom actions
     onAction_ExportCSV: `
       const csv = [
-        'Date,Revenus,Depenses,Solde',
-        \`\${this.created},\${this.revenus},\${this.depenses},\${this.solde}\`
+        'Date,Income,Expenses,Balance',
+        \`\${this.created},\${this.income},\${this.expenses},\${this.balance}\`
       ].join('\\n');
-      
+
       app.downloadFile(\`budget-\${this.title}.csv\`, csv);
     `
   },
-  
-  // === VUES PERSONNALISÉES ===
+
+  // === CUSTOM VIEWS ===
   views: {
-    card: "budget-card",      // Vue carte par défaut
-    list: "budget-row",       // Vue ligne dans liste
-    graph: "budget-chart",    // Vue graphique
-    print: "budget-print"     // Version imprimable
+    card: "budget-card",      // Default card view
+    list: "budget-row",       // List row view
+    graph: "budget-chart",    // Graph view
+    print: "budget-print"     // Printable version
   }
 }
 ```
 
-**Un nœud qui l'utilise** :
+**A node using it**:
 ```javascript
 {
   id: "node_budget_dec_2024",
-  title: "Budget Décembre 2024",
-  implements: ["node_type_budget"],  // ← Hérite du type !
-  
-  // Données selon le schéma
-  revenus: 3000,
-  depenses: 2700,
-  categorie: "personnel",
-  
-  // Propriétés calculées automatiquement
-  solde: 300,  // ← Calculé par script onSave
-  
-  // Tags ajoutés automatiquement
-  tags: []  // "alerte" ajouté si solde < 0
+  title: "December 2024 Budget",
+  implements: ["node_type_budget"],  // ← Inherits from the type!
+
+  // Data according to the schema
+  income: 3000,
+  expenses: 2700,
+  category: "personal",
+
+  // Automatically calculated properties
+  balance: 300,  // ← Calculated by onSave script
+
+  // Automatically added tags
+  tags: []  // "alert" added if balance < 0
 }
 ```
 
 ---
 
-## 🔗 Système de dépendances et héritage
+## 🔗 Dependency System and Inheritance
 
-### Héritage de types
+### Type Inheritance
 
 ```javascript
 {
-  id: "node_type_budget_pro",
-  title: "🎨 Type: Budget Professionnel",
-  implements: ["node_type_budget"],  // ← Hérite de Budget de base
-  
-  // Étend le schéma
+  id: "node_type_budget_business",
+  title: "🎨 Type: Business Budget",
+  implements: ["node_type_budget"],  // ← Inherits from base Budget
+
+  // Extends the schema
   schema: {
     ...parent.schema,
-    tva: { type: "number", default: 20 },
-    numero_facture: { type: "string" }
+    vat: { type: "number", default: 20 },
+    invoice_number: { type: "string" }
   },
-  
-  // Override/étend les scripts
+
+  // Override/extend scripts
   scripts: {
     onSave: `
-      // Appeler le parent d'abord
+      // Call parent first
       parent.scripts.onSave.call(this);
-      
-      // Logique spécifique
-      this.montant_ht = this.depenses / (1 + this.tva/100);
-      this.montant_tva = this.depenses - this.montant_ht;
+
+      // Specific logic
+      this.amount_excl_vat = this.expenses / (1 + this.vat/100);
+      this.vat_amount = this.expenses - this.amount_excl_vat;
     `
   }
 }
 ```
 
-### Dépendances entre types
+### Dependencies Between Types
 
 ```javascript
 {
-  id: "node_type_recette",
-  title: "🎨 Type: Recette de cuisine",
-  
-  implements: ["node_type_base"],  // Héritage
-  
+  id: "node_type_recipe",
+  title: "🎨 Type: Cooking Recipe",
+
+  implements: ["node_type_base"],  // Inheritance
+
   requires: [
-    "node_type_ingredient",        // Dépendance forte
-    "node_lib_nutrition",          // Bibliothèque partagée
-    "node_lib_unite_conversion"    // Utilitaire
+    "node_type_ingredient",        // Strong dependency
+    "node_lib_nutrition",          // Shared library
+    "node_lib_unit_conversion"     // Utility
   ],
-  
+
   schema: {
-    portions: { type: "number", default: 4 },
-    temps_prep: { type: "number", label: "Temps (min)" },
-    difficulte: { type: "string", enum: ["facile", "moyen", "difficile"] }
+    servings: { type: "number", default: 4 },
+    prep_time: { type: "number", label: "Time (min)" },
+    difficulty: { type: "string", enum: ["easy", "medium", "hard"] }
   },
-  
+
   scripts: {
-    onGenerateCourses: `
-      // Utilise les dépendances
+    onGenerateShoppingList: `
+      // Use dependencies
       const nutrition = app.require('node_lib_nutrition');
-      const convert = app.require('node_lib_unite_conversion');
-      
+      const convert = app.require('node_lib_unit_conversion');
+
       const ingredients = this.children
         .filter(n => n.implements.includes('node_type_ingredient'));
-      
-      // Ajuster les quantités
+
+      // Adjust quantities
       const adjusted = ingredients.map(ing => ({
-        nom: ing.title,
-        quantite: convert.adjust(ing.quantite, this.portions / 4),
-        unite: ing.unite
+        name: ing.title,
+        quantity: convert.adjust(ing.quantity, this.servings / 4),
+        unit: ing.unit
       }));
-      
-      // Trigger la liste de courses
-      app.triggerNode('node_liste_courses', {
+
+      // Trigger the shopping list
+      app.triggerNode('node_shopping_list', {
         action: 'addMultiple',
         items: adjusted,
         source: this.id
       });
-      
+
       return adjusted;
     `,
-    
-    onCalculNutrition: `
+
+    onCalculateNutrition: `
       const nutrition = app.require('node_lib_nutrition');
-      
+
       const total = this.children
         .filter(n => n.implements.includes('node_type_ingredient'))
-        .reduce((sum, ing) => nutrition.add(sum, ing.valeurs), {});
-      
-      return nutrition.perPortion(total, this.portions);
+        .reduce((sum, ing) => nutrition.add(sum, ing.values), {});
+
+      return nutrition.perServing(total, this.servings);
     `
   }
 }
 ```
 
-### Résolution des dépendances
+### Dependency Resolution
 
 ```javascript
-// Algorithme de résolution
+// Resolution algorithm
 resolveDependencies(nodeId) {
   const deps = new Set();
   const visiting = new Set();
-  
+
   const visit = (id) => {
     if (deps.has(id)) return;
     if (visiting.has(id)) {
       throw new Error(`Circular dependency detected: ${id}`);
     }
-    
+
     visiting.add(id);
     const node = this.data.nodes[id];
-    
-    // Visiter les implements d'abord
+
+    // Visit implements first
     if (node.implements) {
       node.implements.forEach(typeId => visit(typeId));
     }
-    
-    // Puis les requires
+
+    // Then requires
     if (node.requires) {
       node.requires.forEach(depId => visit(depId));
     }
-    
+
     visiting.delete(id);
     deps.add(id);
   };
-  
+
   visit(nodeId);
   return this.topologicalSort([...deps]);
 }
 
-// Ordre topologique
+// Topological sort
 topologicalSort(nodeIds) {
   const sorted = [];
   const visited = new Set();
-  
+
   const visit = (id) => {
     if (visited.has(id)) return;
     visited.add(id);
-    
+
     const node = this.data.nodes[id];
     const deps = [
       ...(node.implements || []),
       ...(node.requires || [])
     ];
-    
+
     deps.forEach(depId => visit(depId));
     sorted.push(id);
   };
-  
+
   nodeIds.forEach(id => visit(id));
   return sorted;
 }
@@ -316,36 +318,36 @@ topologicalSort(nodeIds) {
 
 ---
 
-## ⚡ Trigger de nœuds distants
+## ⚡ Remote Node Triggering
 
 ### Concept
 
-Un nœud peut **déclencher des actions sur d'autres nœuds**, même s'ils ne sont pas ses enfants.
+A node can **trigger actions on other nodes**, even if they're not its children.
 
-**Cas d'usage** :
-- Recette → Ajoute à la liste de courses
-- Tâche terminée → Met à jour le projet parent
-- Budget dépassé → Crée une alerte
-- Contact ajouté → Synchronise avec le calendrier
+**Use cases**:
+- Recipe → Add to shopping list
+- Task completed → Update parent project
+- Budget exceeded → Create an alert
+- Contact added → Sync with calendar
 
-### API de trigger
+### Trigger API
 
 ```javascript
-// Appel d'un trigger
+// Trigger call
 app.triggerNode(targetId, payload)
 
-// Exemple
-app.triggerNode('node_liste_courses_semaine', {
+// Example
+app.triggerNode('node_shopping_list_week', {
   action: 'addMultiple',
   items: [
-    { nom: 'Pommes', qte: 4 },
-    { nom: 'Sucre', qte: '100g' }
+    { name: 'Apples', qty: 4 },
+    { name: 'Sugar', qty: '100g' }
   ],
-  source: 'node_recette_tarte'
+  source: 'node_recipe_pie'
 });
 ```
 
-### Implémentation
+### Implementation
 
 ```javascript
 triggerNode(targetId, payload) {
@@ -353,28 +355,28 @@ triggerNode(targetId, payload) {
   if (!target) {
     throw new Error(`Target node not found: ${targetId}`);
   }
-  
-  // Charger les dépendances si nécessaire
+
+  // Load dependencies if necessary
   const deps = this.resolveDependencies(targetId);
   deps.forEach(depId => this.loadNodeType(depId));
-  
-  // Créer le contexte d'exécution
+
+  // Create execution context
   const context = {
     node: target,
     payload: payload,
     app: this.createSandboxedAPI(),
     console: this.createSandboxedConsole(targetId)
   };
-  
-  // Exécuter le handler onTrigger
+
+  // Execute the onTrigger handler
   if (target.scripts?.onTrigger) {
     return this.executeScript(
-      target.scripts.onTrigger, 
+      target.scripts.onTrigger,
       context
     );
   }
-  
-  // Fallback: chercher un handler d'action spécifique
+
+  // Fallback: look for specific action handler
   const actionHandler = `onTrigger_${payload.action}`;
   if (target.scripts?.[actionHandler]) {
     return this.executeScript(
@@ -382,57 +384,57 @@ triggerNode(targetId, payload) {
       context
     );
   }
-  
+
   console.warn(`No trigger handler for node ${targetId}`);
   return null;
 }
 ```
 
-### Exemple complet : Recette → Liste de courses
+### Complete Example: Recipe → Shopping List
 
-**Type Recette** :
+**Recipe Type**:
 ```javascript
 {
-  id: "node_type_recette",
+  id: "node_type_recipe",
   scripts: {
-    onAction_AjouterAuxCourses: `
-      // Collecter les ingrédients
+    onAction_AddToShopping: `
+      // Collect ingredients
       const ingredients = this.children
         .filter(n => n.implements?.includes('node_type_ingredient'))
         .map(ing => ({
-          nom: ing.title,
-          quantite: ing.quantite,
-          unite: ing.unite,
-          rayon: ing.rayon
+          name: ing.title,
+          quantity: ing.quantity,
+          unit: ing.unit,
+          aisle: ing.aisle
         }));
-      
-      // Trouver ou créer la liste de courses
-      let listeCourses = app.findNodeByTitle('Liste de courses');
-      if (!listeCourses) {
-        listeCourses = app.createRootNode({
-          title: 'Liste de courses',
-          implements: ['node_type_liste_courses']
+
+      // Find or create shopping list
+      let shoppingList = app.findNodeByTitle('Shopping List');
+      if (!shoppingList) {
+        shoppingList = app.createRootNode({
+          title: 'Shopping List',
+          implements: ['node_type_shopping_list']
         });
       }
-      
-      // Trigger l'ajout
-      app.triggerNode(listeCourses.id, {
+
+      // Trigger the addition
+      app.triggerNode(shoppingList.id, {
         action: 'addMultiple',
         items: ingredients,
-        sourceRecette: this.id,
-        sourceRecetteTitle: this.title
+        sourceRecipe: this.id,
+        sourceRecipeTitle: this.title
       });
-      
-      app.notify(\`✓ Ingrédients ajoutés à la liste de courses\`);
+
+      app.notify(\`✓ Ingredients added to shopping list\`);
     `
   }
 }
 ```
 
-**Type Liste de courses** :
+**Shopping List Type**:
 ```javascript
 {
-  id: "node_type_liste_courses",
+  id: "node_type_shopping_list",
   scripts: {
     onTrigger: `
       switch (payload.action) {
@@ -447,64 +449,64 @@ triggerNode(targetId, payload) {
           break;
       }
     `,
-    
+
     handleAddMultiple: `
-      // Grouper par rayon
-      const byRayon = {};
+      // Group by aisle
+      const byAisle = {};
       payload.items.forEach(item => {
-        const rayon = item.rayon || 'Divers';
-        if (!byRayon[rayon]) byRayon[rayon] = [];
-        byRayon[rayon].push(item);
+        const aisle = item.aisle || 'Miscellaneous';
+        if (!byAisle[aisle]) byAisle[aisle] = [];
+        byAisle[aisle].push(item);
       });
-      
-      // Créer/mettre à jour les rayons
-      Object.entries(byRayon).forEach(([rayon, items]) => {
-        let rayonNode = this.children
-          .find(c => c.title === rayon);
-        
-        if (!rayonNode) {
-          rayonNode = app.createChildNode(this.id, {
-            title: rayon,
-            implements: ['node_type_rayon']
+
+      // Create/update aisles
+      Object.entries(byAisle).forEach(([aisle, items]) => {
+        let aisleNode = this.children
+          .find(c => c.title === aisle);
+
+        if (!aisleNode) {
+          aisleNode = app.createChildNode(this.id, {
+            title: aisle,
+            implements: ['node_type_aisle']
           });
         }
-        
-        // Ajouter/fusionner les items
+
+        // Add/merge items
         items.forEach(item => {
-          const existing = rayonNode.children
-            .find(c => c.title === item.nom);
-          
+          const existing = aisleNode.children
+            .find(c => c.title === item.name);
+
           if (existing) {
-            // Fusionner les quantités
-            existing.quantite = this.sumQuantites(
-              existing.quantite, 
-              item.quantite,
-              existing.unite,
-              item.unite
+            // Merge quantities
+            existing.quantity = this.sumQuantities(
+              existing.quantity,
+              item.quantity,
+              existing.unit,
+              item.unit
             );
-            
-            // Ajouter la source
+
+            // Add source
             if (!existing.sources) existing.sources = [];
             existing.sources.push({
-              recette: payload.sourceRecetteTitle,
-              id: payload.sourceRecette
+              recipe: payload.sourceRecipeTitle,
+              id: payload.sourceRecipe
             });
           } else {
-            // Créer nouveau
-            app.createChildNode(rayonNode.id, {
-              title: item.nom,
-              quantite: item.quantite,
-              unite: item.unite,
-              implements: ['node_type_ingredient_courses'],
+            // Create new
+            app.createChildNode(aisleNode.id, {
+              title: item.name,
+              quantity: item.quantity,
+              unit: item.unit,
+              implements: ['node_type_shopping_ingredient'],
               sources: [{
-                recette: payload.sourceRecetteTitle,
-                id: payload.sourceRecette
+                recipe: payload.sourceRecipeTitle,
+                id: payload.sourceRecipe
               }]
             });
           }
         });
       });
-      
+
       app.saveData();
       app.render();
     `
@@ -514,47 +516,47 @@ triggerNode(targetId, payload) {
 
 ---
 
-## 🎨 Vues multiples
+## 🎨 Multiple Views
 
 ### Concept
 
-Chaque type peut définir plusieurs **vues** pour le même nœud :
-- Vue carte (défaut)
-- Vue liste compacte
-- Vue graphique
-- Vue Kanban
-- Vue calendrier
-- Vue imprimable
-- Vue "mode cuisson" (gros texte pour recettes)
+Each type can define multiple **views** for the same node:
+- Card view (default)
+- Compact list view
+- Graph view
+- Kanban view
+- Calendar view
+- Printable view
+- "Cooking mode" view (large text for recipes)
 
-### Définition des vues
+### View Definitions
 
 ```javascript
 {
   id: "node_type_task",
   views: {
-    // === VUE CARTE ===
+    // === CARD VIEW ===
     card: {
       template: `
-        <div class="task-card \${this.priority}" 
+        <div class="task-card \${this.priority}"
              draggable="true"
              data-node-id="\${this.id}">
-          
+
           <div class="task-header">
-            <input type="checkbox" 
-                   \${this.done ? 'checked' : ''} 
+            <input type="checkbox"
+                   \${this.done ? 'checked' : ''}
                    onchange="app.toggleTask('\${this.id}')">
             <span class="task-title \${this.done ? 'done' : ''}">
               \${this.title}
             </span>
           </div>
-          
+
           <div class="task-meta">
             \${this.dueDate ? \`<span class="due-date">\${this.dueDate}</span>\` : ''}
             \${this.assignee ? \`<span class="assignee">\${this.assignee}</span>\` : ''}
             \${this.priority ? \`<span class="priority-badge">\${this.priority}</span>\` : ''}
           </div>
-          
+
           <div class="task-tags">
             \${this.tags.map(t => \`<span class="tag">\${t}</span>\`).join('')}
           </div>
@@ -566,8 +568,8 @@ Chaque type peut définir plusieurs **vues** pour le même nœud :
         .task-card .done { text-decoration: line-through; opacity: 0.6; }
       `
     },
-    
-    // === VUE LISTE ===
+
+    // === LIST VIEW ===
     list: {
       template: `
         <li class="task-item" data-node-id="\${this.id}">
@@ -577,8 +579,8 @@ Chaque type peut définir plusieurs **vues** pour le même nœud :
         </li>
       `
     },
-    
-    // === VUE KANBAN ===
+
+    // === KANBAN VIEW ===
     kanban: {
       template: `
         <div class="kanban-card" draggable="true">
@@ -593,10 +595,10 @@ Chaque type peut définir plusieurs **vues** pour le même nœud :
         </div>
       `,
       column: () => this.status,  // Todo / Doing / Done
-      order: () => this.priority   // Ordre dans la colonne
+      order: () => this.priority   // Order in column
     },
-    
-    // === VUE CALENDRIER ===
+
+    // === CALENDAR VIEW ===
     calendar: {
       template: `
         <div class="calendar-event">
@@ -611,18 +613,18 @@ Chaque type peut définir plusieurs **vues** pour le même nœud :
 }
 ```
 
-### Switcher de vue
+### View Switcher
 
 ```javascript
-// Dans l'UI
+// In the UI
 <div class="view-switcher">
-  <button onclick="app.setView('card')">📇 Cartes</button>
-  <button onclick="app.setView('list')">📋 Liste</button>
+  <button onclick="app.setView('card')">📇 Cards</button>
+  <button onclick="app.setView('list')">📋 List</button>
   <button onclick="app.setView('kanban')">📊 Kanban</button>
-  <button onclick="app.setView('calendar')">📅 Calendrier</button>
+  <button onclick="app.setView('calendar')">📅 Calendar</button>
 </div>
 
-// Dans le code
+// In the code
 setView(viewMode) {
   this.currentView = viewMode;
   this.render();
@@ -630,127 +632,127 @@ setView(viewMode) {
 
 renderNode(nodeId, viewMode = this.currentView) {
   const node = this.data.nodes[nodeId];
-  
-  // Résoudre le type
+
+  // Resolve the type
   const typeNode = this.getNodeType(node);
-  
-  // Utiliser la vue du type
+
+  // Use the type's view
   if (typeNode?.views?.[viewMode]) {
     return this.renderView(node, typeNode.views[viewMode]);
   }
-  
-  // Fallback : vue par défaut
+
+  // Fallback: default view
   return this.renderDefaultView(node);
 }
 
 renderView(node, viewDef) {
-  // Créer le contexte
+  // Create context
   const context = {
     ...node,
     app: this.createSandboxedAPI()
   };
-  
-  // Compiler le template
+
+  // Compile template
   const html = this.compileTemplate(viewDef.template, context);
-  
-  // Créer l'élément
+
+  // Create element
   const el = document.createElement('div');
   el.innerHTML = html;
-  
-  // Injecter le CSS si présent
+
+  // Inject CSS if present
   if (viewDef.css && !this.loadedStyles.has(viewDef.css)) {
     this.injectStyle(viewDef.css);
     this.loadedStyles.add(viewDef.css);
   }
-  
+
   return el.firstElementChild;
 }
 ```
 
 ---
 
-## 🛡️ Sandboxing et sécurité
+## 🛡️ Sandboxing and Security
 
-### Environnement isolé
+### Isolated Environment
 
 ```javascript
 executeScript(script, context) {
-  // API limitée et sécurisée
+  // Limited and secured API
   const sandbox = {
-    // Nœud courant
+    // Current node
     node: context.node,
-    
-    // API app restreinte
+
+    // Restricted app API
     app: {
-      // Lecture seule
+      // Read-only
       findNodeByTitle: this.findNodeByTitle.bind(this),
       findNodeById: (id) => this.data.nodes[id],
-      
-      // Actions autorisées
+
+      // Allowed actions
       createChildNode: this.createChildNode.bind(this),
       triggerNode: this.triggerNode.bind(this),
-      
-      // Utilitaires
+
+      // Utilities
       notify: this.showToast.bind(this),
       downloadFile: this.downloadFile.bind(this),
-      
-      // Pas d'accès à : deleteNode, exportData, etc.
+
+      // No access to: deleteNode, exportData, etc.
     },
-    
-    // Console limitée
+
+    // Limited console
     console: {
       log: (...args) => console.log(`[Script ${context.node.id}]`, ...args),
       warn: (...args) => console.warn(`[Script ${context.node.id}]`, ...args),
       error: (...args) => console.error(`[Script ${context.node.id}]`, ...args)
     },
-    
-    // Payload si trigger
+
+    // Payload if trigger
     payload: context.payload
   };
-  
-  // Pas d'accès à window, document, etc.
+
+  // No access to window, document, etc.
   const fn = new Function(
     ...Object.keys(sandbox),
     `"use strict"; ${script}`
   );
-  
+
   try {
     return fn(...Object.values(sandbox));
   } catch (error) {
     console.error(`Script execution error in ${context.node.id}:`, error);
-    this.showToast(`❌ Erreur dans le script: ${error.message}`, 'error');
+    this.showToast(`❌ Script error: ${error.message}`, 'error');
     return null;
   }
 }
 ```
 
-### Limites et quotas
+### Limits and Quotas
 
 ```javascript
 const SCRIPT_LIMITS = {
-  maxExecutionTime: 5000,     // 5 secondes max
+  maxExecutionTime: 5000,     // 5 seconds max
   maxMemory: 50 * 1024 * 1024, // 50 MB
-  maxTriggersPerExec: 10,      // Max 10 triggers imbriqués
-  maxChildrenCreate: 100       // Max 100 nœuds créés par exec
+  maxTriggersPerExec: 10,      // Max 10 nested triggers
+  maxChildrenCreate: 100       // Max 100 nodes created per exec
 };
 
 executeScriptWithLimits(script, context) {
   const startTime = Date.now();
   const startMemory = performance.memory?.usedJSHeapSize || 0;
-  
-  // Wrapper avec timeout
+
+  // Wrapper with timeout
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Script timeout')), 
+    setTimeout(() => reject(new Error('Script timeout')),
                SCRIPT_LIMITS.maxExecutionTime);
   });
-  
+
   const scriptPromise = Promise.resolve(
     this.executeScript(script, context)
   );
-  
+
   return Promise.race([scriptPromise, timeoutPromise])
     .then(result => {
-      // Vérifier la mémoire
+      // Check memory
       const endMemory = performance.memory?.usedJSHeapSize || 0;
       if (endMemory - startMemory > SCRIPT_LIMITS.maxMemory) {
         console.warn('Script used too much memory');
@@ -762,26 +764,26 @@ executeScriptWithLimits(script, context) {
 
 ---
 
-## 📦 Registry de types et versioning
+## 📦 Type Registry and Versioning
 
-### Registry global
+### Global Registry
 
 ```javascript
 const app = {
   typeRegistry: new Map(),
-  
-  // Enregistrer un type
+
+  // Register a type
   registerType(typeNode) {
     if (this.typeRegistry.has(typeNode.id)) {
       const existing = this.typeRegistry.get(typeNode.id);
-      
-      // Vérifier la version
+
+      // Check version
       if (this.compareVersions(typeNode.version, existing.version) <= 0) {
         console.warn(`Type ${typeNode.id} already registered with newer version`);
         return;
       }
     }
-    
+
     this.typeRegistry.set(typeNode.id, {
       node: typeNode,
       version: typeNode.version || '1.0.0',
@@ -790,101 +792,101 @@ const app = {
       compiledViews: null
     });
   },
-  
-  // Charger un type (avec ses dépendances)
+
+  // Load a type (with its dependencies)
   async loadNodeType(typeId) {
     const entry = this.typeRegistry.get(typeId);
     if (!entry) {
       throw new Error(`Type not found: ${typeId}`);
     }
-    
+
     if (entry.loaded) return;
-    
-    // Charger les dépendances d'abord
+
+    // Load dependencies first
     const deps = this.resolveDependencies(typeId);
     for (const depId of deps) {
       if (depId !== typeId) {
         await this.loadNodeType(depId);
       }
     }
-    
-    // Compiler les scripts
+
+    // Compile scripts
     entry.compiledScripts = this.compileScripts(entry.node.scripts);
-    
-    // Compiler les vues
+
+    // Compile views
     entry.compiledViews = this.compileViews(entry.node.views);
-    
+
     entry.loaded = true;
     console.log(`✓ Type loaded: ${typeId} v${entry.version}`);
   }
 }
 ```
 
-### Versioning et migrations
+### Versioning and Migrations
 
 ```javascript
 {
   id: "node_type_budget",
   version: "2.1.0",
-  
-  // Migrations entre versions
+
+  // Migrations between versions
   migrations: {
     "1.0.0->2.0.0": `
-      // Restructurer les données
-      if (this.depenses && typeof this.depenses === 'object') {
-        this.depensesFixes = this.depenses.fixes || [];
-        this.depensesVariables = this.depenses.variables || [];
-        delete this.depenses;
+      // Restructure data
+      if (this.expenses && typeof this.expenses === 'object') {
+        this.fixedExpenses = this.expenses.fixed || [];
+        this.variableExpenses = this.expenses.variable || [];
+        delete this.expenses;
       }
     `,
-    
+
     "2.0.0->2.1.0": `
-      // Ajouter nouveaux champs avec valeurs par défaut
-      if (!this.devise) {
-        this.devise = 'EUR';
+      // Add new fields with default values
+      if (!this.currency) {
+        this.currency = 'EUR';
       }
     `
   },
-  
-  // Fonction de migration automatique
+
+  // Automatic migration function
   migrate: `
     const currentVersion = this._typeVersion || '1.0.0';
     const targetVersion = '2.1.0';
-    
+
     if (currentVersion === targetVersion) return;
-    
+
     const path = this.getMigrationPath(currentVersion, targetVersion);
     path.forEach(migration => {
       console.log(\`Migrating: \${migration}\`);
       this.migrations[migration].call(this);
     });
-    
+
     this._typeVersion = targetVersion;
     app.saveData();
   `
 }
 
-// Appliquer les migrations automatiquement
+// Apply migrations automatically
 applyMigrations(node) {
   const typeNode = this.getNodeType(node);
   if (!typeNode?.migrations) return;
-  
+
   const currentVersion = node._typeVersion || '1.0.0';
   const targetVersion = typeNode.version;
-  
+
   if (currentVersion === targetVersion) return;
-  
+
   const migrationPath = this.getMigrationPath(
     typeNode.migrations,
     currentVersion,
     targetVersion
   );
-  
+
   migrationPath.forEach(migrationKey => {
     const migration = typeNode.migrations[migrationKey];
     this.executeScript(migration, { node });
   });
-  
+
   node._typeVersion = targetVersion;
   this.saveData();
 }
@@ -892,80 +894,80 @@ applyMigrations(node) {
 
 ---
 
-## 💡 Cas d'usage concrets
+## 💡 Concrete Use Cases
 
-### 1. Système de recettes intelligent
+### 1. Smart Recipe System
 
 ```javascript
-// Type Recette
+// Recipe Type
 {
   implements: ["node_type_base"],
   requires: ["node_lib_nutrition", "node_lib_conversion"],
-  
-  onAction_AjouterAuxCourses: "...",
-  onAction_Multiplier: `
-    const factor = prompt('Multiplier par combien ?');
+
+  onAction_AddToShopping: "...",
+  onAction_Multiply: `
+    const factor = prompt('Multiply by how much?');
     this.children.forEach(ing => {
-      ing.quantite *= factor;
+      ing.quantity *= factor;
     });
-    this.portions *= factor;
+    this.servings *= factor;
   `,
-  onCalculNutrition: "..."
+  onCalculateNutrition: "..."
 }
 
-// Type Ingredient
+// Ingredient Type
 {
   schema: {
-    quantite: "number",
-    unite: "string",
-    rayon: "string"
+    quantity: "number",
+    unit: "string",
+    aisle: "string"
   }
 }
 
-// Type Liste de courses
+// Shopping List Type
 {
   onTrigger_addMultiple: "...",
-  onAction_OptimiserParcours: `
-    // Réorganiser par ordre de parcours magasin
-    const ordreRayons = ['Fruits', 'Légumes', 'Boucherie', ...];
-    this.children.sort((a, b) => 
-      ordreRayons.indexOf(a.rayon) - ordreRayons.indexOf(b.rayon)
+  onAction_OptimizeRoute: `
+    // Reorganize by store layout order
+    const aisleOrder = ['Produce', 'Vegetables', 'Meat', ...];
+    this.children.sort((a, b) =>
+      aisleOrder.indexOf(a.aisle) - aisleOrder.indexOf(b.aisle)
     );
   `
 }
 ```
 
-### 2. Gestion de projet agile
+### 2. Agile Project Management
 
 ```javascript
-// Type Projet
+// Project Type
 {
   views: { card: "...", kanban: "...", burndown: "..." },
-  
-  onCalculVelocity: `
+
+  onCalculateVelocity: `
     const sprints = this.children
       .filter(c => c.implements.includes('node_type_sprint'));
-    
+
     const points = sprints.map(s => s.pointsCompleted);
     return points.reduce((a, b) => a + b, 0) / points.length;
   `
 }
 
-// Type Sprint
+// Sprint Type
 {
   onComplete: `
     this.status = 'completed';
     this.endDate = Date.now();
-    
-    // Calculer vélocité
+
+    // Calculate velocity
     const tasks = this.children
       .filter(c => c.implements.includes('node_type_task'));
-    
+
     this.pointsCompleted = tasks
       .filter(t => t.done)
       .reduce((sum, t) => sum + (t.storyPoints || 0), 0);
-    
-    // Notifier le projet parent
+
+    // Notify parent project
     app.triggerNode(this.parent, {
       action: 'sprintCompleted',
       sprint: this.id,
@@ -974,16 +976,16 @@ applyMigrations(node) {
   `
 }
 
-// Type Task
+// Task Type
 {
   views: { card: "...", kanban: "...", list: "..." },
-  
+
   onStatusChange: `
     if (this.status === 'done') {
       this.completedDate = Date.now();
       this.done = true;
-      
-      // Notifier le sprint
+
+      // Notify sprint
       app.triggerNode(this.parent, {
         action: 'taskCompleted',
         task: this.id
@@ -993,51 +995,51 @@ applyMigrations(node) {
 }
 ```
 
-### 3. CRM personnel
+### 3. Personal CRM
 
 ```javascript
-// Type Contact
+// Contact Type
 {
   schema: {
     email: "string",
-    telephone: "string",
-    entreprise: "string",
-    dernier_contact: "date"
+    phone: "string",
+    company: "string",
+    last_contact: "date"
   },
-  
-  onAction_EnvoyerEmail: `
+
+  onAction_SendEmail: `
     window.location.href = \`mailto:\${this.email}\`;
-    this.dernier_contact = Date.now();
+    this.last_contact = Date.now();
   `,
-  
-  onRappel: `
-    if (Date.now() - this.dernier_contact > 30 * 24 * 60 * 60 * 1000) {
-      app.createChildNode('node_rappels', {
-        title: \`Recontacter \${this.title}\`,
+
+  onReminder: `
+    if (Date.now() - this.last_contact > 30 * 24 * 60 * 60 * 1000) {
+      app.createChildNode('node_reminders', {
+        title: \`Follow up with \${this.title}\`,
         dueDate: Date.now() + 7 * 24 * 60 * 60 * 1000
       });
     }
   `
 }
 
-// Type Projet Client
+// Client Project Type
 {
-  implements: ["node_type_projet"],
-  
+  implements: ["node_type_project"],
+
   schema: {
     client: "reference:node_type_contact",
     budget: "number",
     status: "enum"
   },
-  
+
   onStatusChange: `
     if (this.status === 'completed') {
-      // Créer une facture
-      app.triggerNode('node_factures', {
+      // Create an invoice
+      app.triggerNode('node_invoices', {
         action: 'create',
         client: this.client,
-        montant: this.budget,
-        projet: this.id
+        amount: this.budget,
+        project: this.id
       });
     }
   `
@@ -1046,101 +1048,101 @@ applyMigrations(node) {
 
 ---
 
-## 🎯 Questions ouvertes (à explorer plus tard)
+## 🎯 Open Questions (to explore later)
 
-### Sécurité
-- Comment valider les scripts avant exécution ?
-- Limite de CPU/mémoire par script ?
-- Permissions par type de nœud ?
-- Signature cryptographique des types partagés ?
+### Security
+- How to validate scripts before execution?
+- CPU/memory limits per script?
+- Permissions per node type?
+- Cryptographic signature for shared types?
 
 ### Performance
-- Cache des types compilés
-- Lazy loading des dépendances
-- Web Workers pour scripts lourds ?
-- Virtual DOM pour vues complexes ?
+- Cache for compiled types
+- Lazy loading of dependencies
+- Web Workers for heavy scripts?
+- Virtual DOM for complex views?
 
 ### UX
-- Comment l'utilisateur crée des types ?
-  - UI graphique (type builder)
-  - Monaco Editor intégré pour les scripts
-  - Templates de départ
-- Marketplace de types partagés ?
-- Versioning collaboratif (git-like) ?
+- How do users create types?
+  - Graphical UI (type builder)
+  - Integrated Monaco Editor for scripts
+  - Starter templates
+- Marketplace for shared types?
+- Collaborative versioning (git-like)?
 
 ### Architecture
-- Persistence : LocalStorage → IndexedDB → Backend ?
-- Synchronisation multi-devices
-- Collaboration temps réel
-- Federation (instances DeepMemo qui se parlent)
+- Persistence: LocalStorage → IndexedDB → Backend?
+- Multi-device synchronization
+- Real-time collaboration
+- Federation (DeepMemo instances talking to each other)
 
-### Évolutivité
-- Import/Export de types
-- Compatibilité ascendante des versions
-- Rollback de migrations
-- Tests automatisés des types
+### Scalability
+- Import/Export of types
+- Backward compatibility of versions
+- Migration rollback
+- Automated type testing
 
 ---
 
-## 🚀 Implémentation progressive
+## 🚀 Progressive Implementation
 
-### Phase 1 : Fondations (V0.8) ✅
-- [x] Nœuds de base (hiérarchie infinie, symlinks, tags)
-- [x] Arborescence intelligente et navigation
-- [x] Export/Import de branches
-- [x] PWA installable et mode offline
-- [x] Fichiers joints (IndexedDB)
+### Phase 1: Foundations (V0.8) ✅
+- [x] Base nodes (infinite hierarchy, symlinks, tags)
+- [x] Smart tree and navigation
+- [x] Branch export/import
+- [x] Installable PWA and offline mode
+- [x] File attachments (IndexedDB)
 
-### Phase 2 : Types actifs - Fondations (V0.9)
-- [ ] Système d'implements basique
-- [ ] Scripts simples (onSave, onRender)
-- [ ] Sandbox JavaScript
+### Phase 2: Active Types - Foundations (V0.9)
+- [ ] Basic implements system
+- [ ] Simple scripts (onSave, onRender)
+- [ ] JavaScript sandbox
 
-### Phase 3 : Dépendances (V0.9-V1.0)
-- [ ] Résolution de dépendances
-- [ ] Registry de types
-- [ ] Héritage simple
+### Phase 3: Dependencies (V0.9-V1.0)
+- [ ] Dependency resolution
+- [ ] Type registry
+- [ ] Simple inheritance
 - [ ] Requires
 
-### Phase 4 : Triggers (V1.0)
-- [ ] API triggerNode
-- [ ] Handlers onTrigger
-- [ ] Exemples concrets (recettes → courses)
+### Phase 4: Triggers (V1.0)
+- [ ] triggerNode API
+- [ ] onTrigger handlers
+- [ ] Concrete examples (recipes → shopping)
 
-### Phase 5 : Vues multiples (V1.0-V1.1)
-- [ ] Système de templates
-- [ ] Switcher de vues
-- [ ] Vues prédéfinies (card, list, kanban)
+### Phase 5: Multiple Views (V1.0-V1.1)
+- [ ] Template system
+- [ ] View switcher
+- [ ] Predefined views (card, list, kanban)
 
-### Phase 6 : Avancé (V1.2+)
-- [ ] Versioning et migrations
-- [ ] Marketplace de types
-- [ ] Permissions granulaires
-- [ ] Collaboration temps réel
-
----
-
-## 💭 Philosophie finale
-
-**DeepMemo n'est pas qu'une app de notes.**
-
-C'est une **plateforme** où :
-- Les données se décrivent elles-mêmes
-- Les comportements sont attachés aux données
-- Les utilisateurs peuvent créer leurs propres "apps" internes
-- Tout reste interconnecté et fluide
-
-**C'est de la programmation accessible aux non-programmeurs**, via un système de nœuds descripteurs.
-
-**C'est un second cerveau qui peut apprendre de nouveaux "réflexes"** via les scripts.
-
-**C'est évolutif à l'infini** tout en restant simple à la base : tout est un nœud.
+### Phase 6: Advanced (V1.2+)
+- [ ] Versioning and migrations
+- [ ] Type marketplace
+- [ ] Granular permissions
+- [ ] Real-time collaboration
 
 ---
 
+## 💭 Final Philosophy
+
+**DeepMemo is not just a note-taking app.**
+
+It's a **platform** where:
+- Data describes itself
+- Behaviors are attached to data
+- Users can create their own internal "apps"
+- Everything stays interconnected and fluid
+
+**It's programming made accessible to non-programmers**, through a system of descriptor nodes.
+
+**It's a second brain that can learn new "reflexes"** through scripts.
+
+**It's infinitely scalable** while remaining simple at its core: everything is a node.
+
 ---
 
-**Document Vision - Décembre 2025**
-*Ces concepts seront implémentés progressivement, en commençant par les fondations (V0.9+).*
+---
 
-**État actuel** : V0.8 complète - Voir le contenu de démo dans l'application pour une introduction accessible à ces concepts (section "🔮 Directions explorées").
+**Vision Document - December 2025**
+*These concepts will be implemented progressively, starting with the foundations (V0.9+).*
+
+**Current state**: V0.8 complete - See the demo content in the application for an accessible introduction to these concepts (section "🔮 Future Directions").

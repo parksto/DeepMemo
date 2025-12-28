@@ -1,390 +1,456 @@
-# 🚀 Guide de développement DeepMemo V0.8
+# 🚀 DeepMemo Development Guide V0.9
 
-**Dernière mise à jour** : 20 Décembre 2025
-**Version** : 0.8 (Architecture modulaire ES6)
+> **[Version française](CONTRIBUTING.fr.md)** 🇫🇷
+
+**Last updated**: December 28, 2025
+**Version**: 0.9 (ES6 modular architecture + i18n)
 
 ---
 
-## 📁 Structure du projet
+## 📁 Project structure
 
 ```
 DeepMemo/
-├── index.html                      # Point d'entrée HTML (~190 lignes)
-├── favicon.svg                     # Icône de l'app
+├── index.html                      # HTML entry point (~190 lines)
+├── favicon.svg                     # App icon
 │
 ├── src/
 │   ├── css/
-│   │   ├── style.css              # Import global (~10 lignes)
-│   │   ├── base.css               # Reset + variables CSS (~150 lignes)
-│   │   ├── layout.css             # Structure responsive (~250 lignes)
-│   │   ├── components.css         # Composants UI (~800 lignes)
-│   │   └── utilities.css          # Classes utilitaires (~50 lignes)
+│   │   ├── style.css              # Global import (~10 lines)
+│   │   ├── base.css               # Reset + CSS variables (~150 lines)
+│   │   ├── layout.css             # Responsive structure (~250 lines)
+│   │   ├── components.css         # UI components (~800 lines)
+│   │   ├── mobile.css             # Mobile navigation (~400 lines)
+│   │   └── utilities.css          # Utility classes (~50 lines)
 │   │
 │   └── js/
-│       ├── app.js                 # Point d'entrée (~420 lignes)
-│       ├── app-legacy-backup.js   # Ancien monolithique (référence)
+│       ├── app.js                 # Main entry point (~830 lines)
+│       ├── app-legacy-backup.js   # Old monolithic (reference)
 │       │
 │       ├── core/
-│       │   └── data.js            # Gestion données + localStorage
+│       │   ├── data.js            # Data management + localStorage + ZIP export/import
+│       │   ├── attachments.js     # File attachments (IndexedDB)
+│       │   └── default-data.js    # Default demo content
 │       │
 │       ├── features/
-│       │   ├── tree.js            # Arborescence + mode branche
-│       │   ├── editor.js          # Éditeur + breadcrumb
-│       │   ├── search.js          # Recherche globale
-│       │   ├── tags.js            # Tags + autocomplete
-│       │   ├── modals.js          # Modales (Move/Link/Duplicate)
-│       │   └── drag-drop.js       # Drag & drop complet
+│       │   ├── tree.js            # Sidebar tree + branch mode
+│       │   ├── editor.js          # Editor + breadcrumb + children + attachments UI
+│       │   ├── search.js          # Global search
+│       │   ├── tags.js            # Tag management + autocomplete
+│       │   ├── modals.js          # Modals (Move/Link/Duplicate)
+│       │   └── drag-drop.js       # Drag & drop nodes
 │       │
 │       ├── ui/
-│       │   ├── toast.js           # Notifications toast
-│       │   └── panels.js          # Panneaux latéraux
+│       │   ├── toast.js           # Toast notifications
+│       │   ├── panels.js          # Sidebar panel management
+│       │   └── mobile-tabs.js     # Mobile tab navigation
 │       │
 │       └── utils/
-│           ├── routing.js         # Navigation URL
-│           ├── keyboard.js        # Raccourcis clavier
-│           └── helpers.js         # Fonctions utilitaires
+│           ├── routing.js         # URL navigation
+│           ├── keyboard.js        # Keyboard shortcuts
+│           ├── helpers.js         # Utility functions
+│           └── i18n.js            # Internationalization
+│
+│       └── locales/
+│           ├── fr.js              # French dictionary
+│           └── en.js              # English dictionary
 │
 ├── assets/
-│   └── sto*.ttf                   # Fonts personnalisées
+│   └── sto*.ttf                   # Custom fonts
+│
+├── icons/
+│   ├── icon-192x192.png           # PWA icon
+│   └── icon-512x512.png           # PWA icon
 │
 ├── docs/
-│   ├── README.md                  # Concept et features
-│   ├── ROADMAP.md                 # État actuel et prochaines étapes
-│   ├── ARCHITECTURE.md            # Détails techniques modulaires
-│   ├── CONTRIBUTING.md            # Ce fichier
-│   ├── TODO.md                    # Backlog et progression
-│   ├── V0.8-COMPLETE.md           # Récapitulatif V0.8
-│   └── VISION.md                  # Vision long-terme
+│   ├── README.md                  # Concept and features
+│   ├── ROADMAP.md                 # Current state and next steps
+│   ├── ARCHITECTURE.md            # Technical details (modules)
+│   ├── CONTRIBUTING.md            # This file (English)
+│   ├── CONTRIBUTING.fr.md         # This file (French)
+│   ├── TODO.md                    # Backlog and progress
+│   ├── V0.8-COMPLETE.md           # V0.8 recap
+│   ├── I18N.md                    # i18n system documentation
+│   └── VISION.md                  # Long-term vision
+│
+├── manifest-fr.json               # PWA manifest (French)
+├── manifest-en.json               # PWA manifest (English)
+├── sw.js                          # Service Worker
 │
 ├── .gitignore
-├── .claude/                       # Configuration Claude Code (ignoré)
-└── CLAUDE.md                      # Guide contexte développement (ignoré)
+├── .claude/                       # Claude Code configuration (ignored)
+└── CLAUDE.md                      # Development context guide (ignored)
 ```
 
 ---
 
-## 🛠️ Configuration de l'environnement
+## 🛠️ Environment setup
 
-### Prérequis
+### Prerequisites
 
-- **Navigateur moderne** (Chrome, Firefox, Edge, Safari)
-- **Serveur HTTP local** (requis pour ES6 modules)
-- **Git** (pour le versioning)
-- **Python 3** ou **Node.js** (pour le serveur)
+- **Modern browser** (Chrome, Firefox, Edge, Safari)
+- **Local HTTP server** (required for ES6 modules)
+- **Git** (for versioning)
+- **Python 3** or **Node.js** (for the server)
 
-**Important** : Les modules ES6 ne fonctionnent PAS avec `file://` ! Un serveur HTTP est **obligatoire**.
+**Important**: ES6 modules do NOT work with `file://`! An HTTP server is **mandatory**.
 
-### Lancer l'application
+### Running the application
 
-#### Depuis Python (recommandé)
+#### With Python (recommended)
 ```bash
 cd DeepMemo
 python -m http.server 8000
 ```
 
-#### Depuis Node.js
+#### With Node.js
 ```bash
 cd DeepMemo
 npx http-server -p 8000
 ```
 
-Puis ouvrir : **http://localhost:8000**
+Then open: **http://localhost:8000**
 
 ### Hard refresh
 
-Pour éviter les problèmes de cache avec les modules ES6 :
-- **Windows/Linux** : `Ctrl + Shift + R`
-- **Mac** : `Cmd + Shift + R`
+To avoid cache issues with ES6 modules:
+- **Windows/Linux**: `Ctrl + Shift + R`
+- **Mac**: `Cmd + Shift + R`
 
 ---
 
-## 📚 Lire la documentation
+## 📚 Reading the documentation
 
-Ordre recommandé pour bien comprendre le projet :
+Recommended order to understand the project:
 
-1. **[README.md](../README.md)** - Concept général et features V0.8
-2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture modulaire ES6
-3. **[ROADMAP.md](ROADMAP.md)** - État V0.8 et vision V0.9+
-4. **[TODO.md](TODO.md)** - Backlog et progression détaillée
-5. **[VISION.md](VISION.md)** - Vision long-terme
+1. **[README.md](../README.md)** - General concept and V0.9 features
+2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - ES6 modular architecture
+3. **[ROADMAP.md](ROADMAP.md)** - V0.9 state and V1.0+ vision
+4. **[TODO.md](TODO.md)** - Detailed backlog and progress
+5. **[I18N.md](I18N.md)** - Internationalization system
+6. **[VISION.md](VISION.md)** - Long-term vision
 
 ---
 
-## 🧩 Architecture modulaire
+## 🧩 Modular architecture
 
-### Principes clés
+### Key principles
 
-**V0.8 utilise une architecture modulaire ES6** :
+**V0.9 uses an ES6 modular architecture**:
 
-1. **Imports/exports nommés** pour chaque module
-2. **État local** dans chaque module (non exporté)
-3. **Communication** via callbacks et fonctions exportées
-4. **Pas de state manager global** (simplicité volontaire)
+1. **Named imports/exports** for each module
+2. **Local state** in each module (not exported)
+3. **Communication** via callbacks and exported functions
+4. **No global state manager** (intentional simplicity)
 
-### Exemple de module
+### Module example
 
 ```javascript
 // features/tags.js
 import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
+import { t } from '../utils/i18n.js';
 
-// État local (non exporté)
+// Local state (not exported)
 let tagAutocompleteIndex = 0;
 let tagAutocompleteSuggestions = [];
 
-// Fonction exportée
+// Exported function
 export function updateTagsDisplay(nodeId) {
   const node = data.nodes[nodeId];
   // ...
   saveData();
-  showToast('Tags mis à jour', '🏷️');
+  showToast(t('toast.tagsUpdated'), '🏷️');
 }
 ```
 
-### Flux de données
+### Data flow
 
 ```
-index.html (charge app.js type="module")
+index.html (loads app.js type="module")
     ↓
-app.js (point d'entrée)
+app.js (entry point)
     ↓
-├─→ core/data.js (données)
-├─→ features/tree.js (arbre)
-├─→ features/editor.js (contenu)
+├─→ core/data.js (data)
+├─→ core/attachments.js (files)
+├─→ features/tree.js (tree)
+├─→ features/editor.js (content)
 ├─→ features/drag-drop.js (interactions)
-└─→ utils/routing.js (URL)
+├─→ utils/routing.js (URL)
+└─→ utils/i18n.js (translations)
 ```
 
 ---
 
-## 🧪 Tester l'application
+## 🧪 Testing the application
 
-### Fonctionnalités V0.8 à tester
+### V0.9 features to test
 
-#### ✅ Gestion des nœuds
-- [ ] Créer un nœud racine (`Alt+N`)
-- [ ] Créer un nœud enfant
-- [ ] Éditer le titre et le contenu
-- [ ] Supprimer un nœud (via modal Actions)
-- [ ] Auto-activation au démarrage (pas d'empty state)
+#### ✅ Node management
+- [ ] Create a root node (`Alt+N`)
+- [ ] Create a child node
+- [ ] Edit title and content
+- [ ] Delete a node (via Actions modal)
+- [ ] Auto-activation at startup (no empty state)
 
 #### ✅ Navigation
-- [ ] Breadcrumb intelligent (s'arrête au branchRootId en mode branche)
-- [ ] Bouton 🏠 active le premier nœud
-- [ ] Navigation clavier dans l'arbre (`↑↓←→ + Enter`)
-- [ ] Auto-collapse à l'activation
-- [ ] Expand/collapse manuel (triangle, flèches)
+- [ ] Smart breadcrumb (stops at branchRootId in branch mode)
+- [ ] 🏠 button activates first node
+- [ ] Keyboard navigation in tree (`↑↓←→ + Enter`)
+- [ ] Auto-collapse on activation
+- [ ] Manual expand/collapse (triangle, arrows)
 
-#### ✅ Mode branche isolée
-- [ ] Activer via URL `?branch=nodeId`
-- [ ] Bouton 🌳 pour partager une branche
-- [ ] Symlinks externes désactivés (icône 🔗🚫)
-- [ ] Breadcrumb s'arrête au branchRootId
-- [ ] Navigation identique au mode normal
+#### ✅ Branch isolation mode
+- [ ] Activate via URL `?branch=nodeId`
+- [ ] 🌳 button to share a branch
+- [ ] External symlinks disabled (icon 🔗🚫)
+- [ ] Breadcrumb stops at branchRootId
+- [ ] Navigation identical to normal mode
 
-#### ✅ Liens symboliques
-- [ ] Créer un symlink via drag & drop (`Ctrl+Alt`)
-- [ ] Renommer un symlink (titre indépendant du target)
-- [ ] Éditer le contenu (partagé avec target)
-- [ ] Focus visuel après navigation via symlink
-- [ ] Badge [lien] visible (pas de suffixe " (lien)")
+#### ✅ Symbolic links
+- [ ] Create a symlink via drag & drop (`Ctrl+Alt`)
+- [ ] Rename a symlink (title independent from target)
+- [ ] Edit content (shared with target)
+- [ ] Visual focus after symlink navigation
+- [ ] Badge [link] visible (no " (link)" suffix)
 
 #### ✅ Tags
-- [ ] Ajouter des tags
-- [ ] Auto-complétion intelligente (branche + global)
-- [ ] Tag cloud dans le panel droit
-- [ ] Recherche par tag
+- [ ] Add tags
+- [ ] Smart auto-completion (branch + global)
+- [ ] Tag cloud in right panel
+- [ ] Search by tag
 
-#### ✅ Recherche
-- [ ] Ouvrir la recherche (`Ctrl+K`)
-- [ ] Rechercher dans titres, contenus, tags
-- [ ] Navigation clavier dans les résultats
+#### ✅ Search
+- [ ] Open search (`Ctrl+K`)
+- [ ] Search in titles, contents, tags
+- [ ] Keyboard navigation in results
 
 #### ✅ Drag & Drop
-- [ ] Déplacer un nœud (drag simple)
-- [ ] Dupliquer un nœud (`Ctrl + drag`)
-- [ ] Créer un symlink (`Ctrl+Alt + drag`)
-- [ ] Réorganiser l'ordre (zones before/after/inside)
-- [ ] Indicateurs visuels de position
-- [ ] Prévention cycles (toast d'avertissement)
-- [ ] Support arbre ET cartes enfants
+- [ ] Move a node (simple drag)
+- [ ] Duplicate a node (`Ctrl + drag`)
+- [ ] Create a symlink (`Ctrl+Alt + drag`)
+- [ ] Reorganize order (before/after/inside zones)
+- [ ] Visual position indicators
+- [ ] Cycle prevention (warning toast)
+- [ ] Support for tree AND children cards
 
-#### ✅ Modales
-- [ ] Modal Actions : sélectionner action (Move/Link/Duplicate/Delete)
-- [ ] Arborescence masquable dans modal (toggle)
-- [ ] Toggles harmonisés avec arbre principal
+#### ✅ Modals
+- [ ] Actions modal: select action (Move/Link/Duplicate/Delete)
+- [ ] Collapsible tree in modal (toggle)
+- [ ] Toggles harmonized with main tree
 
 #### ✅ Interface
 - [ ] Toggle view/edit mode (`Alt+E`)
-- [ ] Sidebar pliable
-- [ ] Right panel pliable
-- [ ] Resize panneau latéral (265px-600px)
-- [ ] Raccourcis clavier documentés (right panel)
-- [ ] Export/Import regroupés dans sidebar
+- [ ] Collapsible sidebar
+- [ ] Collapsible right panel
+- [ ] Resize sidebar (265px-600px)
+- [ ] Documented keyboard shortcuts (right panel)
+- [ ] Export/Import grouped in sidebar
+- [ ] Font toggle (Sto vs system fonts)
 
 #### ✅ Export/Import
-- [ ] Exporter en JSON
-- [ ] Importer un JSON
-- [ ] Vérifier l'intégrité des données
+- [ ] Export global as JSON
+- [ ] Export global as ZIP
+- [ ] Export branch as JSON
+- [ ] Export branch as ZIP
+- [ ] Import JSON (destructive)
+- [ ] Import ZIP (with attachments)
+- [ ] Import branch (non-destructive, ID regeneration)
+- [ ] Verify data integrity
+
+#### ✅ Attachments
+- [ ] Upload files (50MB max per file)
+- [ ] Display images inline `![](attachment:ID)`
+- [ ] Link to files `[name](attachment:ID)`
+- [ ] Download attachment
+- [ ] Delete attachment
+- [ ] View storage usage
+- [ ] Clean orphaned files
+
+#### ✅ Internationalization (V0.9)
+- [ ] Auto language detection (browser)
+- [ ] Manual language selector (FR/EN)
+- [ ] UI fully translated
+- [ ] Toast messages translated
+- [ ] Demo content in both languages
+- [ ] Language persistence (localStorage)
+- [ ] Offline translation (PWA)
+
+#### ✅ Mobile (V1.2.0)
+- [ ] Tab bar navigation (🌲 Tree | 📝 Edit | ℹ️ Info)
+- [ ] Touch-friendly buttons (≥44px)
+- [ ] Responsive layouts
+- [ ] Safe area support (notch)
+- [ ] Optimized spacing (portrait/landscape)
 
 ---
 
 ## 🐛 Debugging
 
-### Console navigateur
+### Browser console
 
-Ouvre les DevTools (`F12`) pour :
-- Voir les erreurs JavaScript
-- Inspecter le LocalStorage
-- Debugger le code (sources ES6 modules)
+Open DevTools (`F12`) to:
+- See JavaScript errors
+- Inspect LocalStorage
+- Debug code (ES6 module sources)
 
 ### LocalStorage
 
 ```javascript
-// Dans la console :
-localStorage.getItem('deepmemo_data')        // Voir les données
-localStorage.getItem('deepmemo_viewMode')    // Voir le mode (view/edit)
-localStorage.clear()                          // Reset complet
+// In the console:
+localStorage.getItem('deepmemo_data')          // View data
+localStorage.getItem('deepmemo_viewMode')      // View mode (view/edit)
+localStorage.getItem('deepmemo_language')      // Current language
+localStorage.getItem('deepmemo_fontPreference') // Font choice
+localStorage.clear()                            // Complete reset
 ```
 
-**Note** : `expandedNodes` n'est PAS sauvegardé (recalculé dynamiquement via auto-collapse).
+**Note**: `expandedNodes` is NOT saved (recalculated dynamically via auto-collapse).
 
-### Fichiers à vérifier en cas de bug
+### IndexedDB (attachments)
 
-**Par ordre de complexité** :
+In DevTools → Application → IndexedDB → `deepmemo-attachments`
 
-1. **app.js** - Point d'entrée et coordination
-2. **features/tree.js** - Navigation et arborescence
-3. **features/editor.js** - Affichage et sauvegarde
-4. **features/drag-drop.js** - Interactions drag & drop
-5. **core/data.js** - Données et persistence
-6. **utils/routing.js** - URLs et hash routing
+### Files to check in case of bugs
 
-### Erreurs courantes
+**By order of complexity**:
 
-**Module not found** :
-- Vérifier que le serveur HTTP est lancé (pas `file://`)
-- Vérifier les imports (chemins relatifs corrects)
+1. **app.js** - Entry point and coordination
+2. **features/tree.js** - Navigation and tree structure
+3. **features/editor.js** - Display and saving
+4. **features/drag-drop.js** - Drag & drop interactions
+5. **core/data.js** - Data and persistence
+6. **utils/routing.js** - URLs and hash routing
+7. **utils/i18n.js** - Internationalization
+
+### Common errors
+
+**Module not found**:
+- Verify HTTP server is running (not `file://`)
+- Check imports (correct relative paths)
 - Hard refresh (`Ctrl + Shift + R`)
 
-**LocalStorage plein** :
-- Limite ~5-10 MB selon navigateur
-- Exporter les données avant de nettoyer
-- `localStorage.clear()` en dernier recours
+**LocalStorage full**:
+- Limit ~5-10 MB depending on browser
+- Export data before cleaning
+- `localStorage.clear()` as last resort
 
 ---
 
-## 📝 Conventions de code
+## 📝 Code conventions
 
-### Style JavaScript (ES6)
+### JavaScript style (ES6)
 
-- **Indentation** : 2 espaces
-- **Quotes** : Simple quotes `'...'`
-- **Noms de variables** : `camelCase`
-- **Noms de fonctions** : `camelCase`
-- **Commentaires** : Français ou anglais
-- **Imports** : Toujours en haut du fichier
+- **Indentation**: 2 spaces
+- **Quotes**: Single quotes `'...'`
+- **Variable names**: `camelCase`
+- **Function names**: `camelCase`
+- **Comments**: English or French
+- **Imports**: Always at top of file
 
-**Exemple** :
+**Example**:
 ```javascript
 import { data, saveData } from '../core/data.js';
+import { t } from '../utils/i18n.js';
 
-// État local (non exporté)
+// Local state (not exported)
 let expandedNodes = new Set();
 
-// Fonction exportée
+// Exported function
 export function renderTree() {
   const container = document.getElementById('treeContainer');
   // ...
 }
 ```
 
-### Style CSS
+### CSS style
 
-- **Noms de classes** : `kebab-case`
-- **Variables CSS** : `--nom-variable`
-- **Ordre** : base.css → layout.css → components.css → utilities.css
-- **Imports** : Via `@import` dans `style.css`
+- **Class names**: `kebab-case`
+- **CSS variables**: `--variable-name`
+- **Order**: base.css → layout.css → components.css → mobile.css → utilities.css
+- **Imports**: Via `@import` in `style.css`
 
-### Organisation des modules
+### Module organization
 
-**État local (non exporté)** :
+**Local state (not exported)**:
 ```javascript
-// Variables d'état accessibles uniquement dans le module
+// State variables accessible only within the module
 let branchMode = false;
 let expandedNodes = new Set();
 ```
 
-**Fonctions exportées** :
+**Exported functions**:
 ```javascript
-// API publique du module
+// Public API of the module
 export function renderTree() { ... }
 export function enableBranchMode(nodeId) { ... }
 ```
 
-**Fonctions internes (non exportées)** :
+**Internal functions (not exported)**:
 ```javascript
-// Helpers privés
+// Private helpers
 function getInstanceKey(nodeId, parentContext) { ... }
 ```
 
 ---
 
-## 🎯 Contribuer
+## 🎯 Contributing
 
-### Workflow Git
+### Git workflow
 
 ```bash
-# Créer une branche pour ta feature
-git checkout -b feature/ma-feature
+# Create a branch for your feature
+git checkout -b feature/my-feature
 
-# Développer et tester
+# Develop and test
 
 # Commit
 git add .
-git commit -m "✨ Add: ma feature"
+git commit -m "✨ Add: my feature"
 
 # Push
-git push origin feature/ma-feature
+git push origin feature/my-feature
 ```
 
-### Types de commits
+### Commit types
 
-- `✨ Add:` Nouvelle feature
-- `🐛 Fix:` Correction de bug
+- `✨ Add:` New feature
+- `🐛 Fix:` Bug fix
 - `📝 Docs:` Documentation
 - `♻️ Refactor:` Refactoring
 - `🎨 Style:` CSS/UI
 - `⚡ Perf:` Performance
+- `🌍 i18n:` Internationalization
 
-### Ajouter une nouvelle fonctionnalité
+### Adding a new feature
 
-**Étapes recommandées** :
+**Recommended steps**:
 
-1. **Choisir le bon module** (ou en créer un nouveau)
-2. **Définir l'API publique** (exports)
-3. **Implémenter la logique** (état local + fonctions)
-4. **Tester manuellement**
-5. **Documenter** (commentaires + ARCHITECTURE.md si nécessaire)
-6. **Commit** avec message clair
+1. **Choose the right module** (or create a new one)
+2. **Define the public API** (exports)
+3. **Implement the logic** (local state + functions)
+4. **Test manually**
+5. **Document** (comments + ARCHITECTURE.md if needed)
+6. **Commit** with clear message
 
-**Exemple : Ajouter une feature de favoris**
+**Example: Adding a favorites feature**
 
 ```javascript
-// features/favorites.js (nouveau module)
+// features/favorites.js (new module)
 import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
+import { t } from '../utils/i18n.js';
 
-// État local
+// Local state
 let favorites = new Set();
 
 export function toggleFavorite(nodeId) {
   if (favorites.has(nodeId)) {
     favorites.delete(nodeId);
-    showToast('Retiré des favoris', '⭐');
+    showToast(t('toast.removedFromFavorites'), '⭐');
   } else {
     favorites.add(nodeId);
-    showToast('Ajouté aux favoris', '⭐');
+    showToast(t('toast.addedToFavorites'), '⭐');
   }
   saveFavorites();
 }
@@ -394,145 +460,160 @@ function saveFavorites() {
 }
 ```
 
-Puis dans `app.js` :
+Then in `app.js`:
 ```javascript
 import * as FavoritesModule from './features/favorites.js';
 
-// Exposer la fonction
+// Expose the function
 window.app.toggleFavorite = (nodeId) => FavoritesModule.toggleFavorite(nodeId);
 ```
 
+### Adding a new language
+
+See **[I18N.md](I18N.md)** for complete internationalization guide.
+
+**Quick steps**:
+
+1. Create `src/js/locales/XX.js` (copy `fr.js` and translate)
+2. Create `manifest-XX.json` (translate app name/description)
+3. Update `sw.js` precache (add new files)
+4. Test language detection and manual selection
+
 ---
 
-## 🔧 Technologies utilisées
+## 🔧 Technologies used
 
 ### Frontend
 
-- **HTML5** - Structure sémantique
+- **HTML5** - Semantic structure
 - **CSS3** - Variables, Flexbox, Grid
 - **JavaScript ES6+** - Modules, Classes, Arrow functions
 
-### APIs natives
+### Native APIs
 
 - **ES6 Modules** - Import/export
 - **LocalStorage API** - Persistence
+- **IndexedDB API** - File attachments
 - **Drag & Drop API** - Interactions
 - **FileReader API** - Import/Export
 - **History API** - URL routing (pushState/replaceState)
-- **Clipboard API** - Copie liens de partage
+- **Clipboard API** - Copy share links
 
-### Bibliothèques externes
+### External libraries
 
-- **marked.js** - Rendu Markdown (CDN)
+- **marked.js** - Markdown rendering (CDN)
 
-### Pas d'autres dépendances
+### No other dependencies
 
-- Pas de framework (React, Vue, etc.)
-- Pas de bundler (Webpack, Vite, etc.)
-- Pas de transpiler (Babel, etc.)
-- Tout est vanilla JavaScript moderne
+- No framework (React, Vue, etc.)
+- No bundler (Webpack, Vite, etc.)
+- No transpiler (Babel, etc.)
+- Everything is vanilla modern JavaScript
 
 ---
 
-## 💡 Conseils
+## 💡 Tips
 
-### Approche progressive
+### Progressive approach
 
-1. **Lire ARCHITECTURE.md** - Comprendre les modules
-2. **Tester l'app** - Manipuler toutes les features
-3. **Lire le code** - Commencer par `app.js` puis les modules
-4. **Faire des petites modifications** - Un module à la fois
-5. **Tester fréquemment** - À chaque changement
+1. **Read ARCHITECTURE.md** - Understand the modules
+2. **Test the app** - Manipulate all features
+3. **Read the code** - Start with `app.js` then modules
+4. **Make small changes** - One module at a time
+5. **Test frequently** - After each change
 
-### Garder la simplicité
+### Keep it simple
 
-- **Privilégier les solutions simples** - Pas de sur-ingénierie
-- **Un module = une responsabilité** - Cohésion forte
-- **État local quand possible** - Éviter état global
-- **Tester manuellement** - Pas de tests automatisés (pour l'instant)
+- **Prefer simple solutions** - No over-engineering
+- **One module = one responsibility** - Strong cohesion
+- **Local state when possible** - Avoid global state
+- **Test manually** - No automated tests (for now)
 
 ### Performance
 
-- **Délégation d'événements** - Éviter les listeners multiples
-- **Rendu ciblé** - Pas de re-render complet
-- **LocalStorage rapide** - Mais limité en taille (~5-10 MB)
+- **Event delegation** - Avoid multiple listeners
+- **Targeted rendering** - No complete re-render
+- **LocalStorage is fast** - But limited in size (~5-10 MB)
+- **IndexedDB for files** - Higher limits (~500MB+)
 
-### Éviter les anti-patterns
+### Avoid anti-patterns
 
-❌ **Mauvais** :
+❌ **Bad**:
 ```javascript
-// Import sans extension
-import { data } from '../core/data';  // ❌ Manque .js
+// Import without extension
+import { data } from '../core/data';  // ❌ Missing .js
 
-// État global partagé
-window.myGlobalState = {};  // ❌ Utiliser module local
+// Shared global state
+window.myGlobalState = {};  // ❌ Use local module
 
-// innerHTML avec contenu utilisateur
+// innerHTML with user content
 element.innerHTML = userContent;  // ❌ XSS risk
 ```
 
-✅ **Bon** :
+✅ **Good**:
 ```javascript
-// Import avec extension
+// Import with extension
 import { data } from '../core/data.js';  // ✅
 
-// État local dans module
+// Local state in module
 let myLocalState = {};  // ✅
 
-// textContent pour texte
+// textContent for text
 element.textContent = userContent;  // ✅
 ```
 
 ---
 
-## 📚 Ressources
+## 📚 Resources
 
-### Documentation externe
+### External documentation
 
 - [MDN Web Docs](https://developer.mozilla.org/)
 - [ES6 Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
 - [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
 - [Drag & Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
 - [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API)
 
-### Documentation interne
+### Internal documentation
 
-- **ARCHITECTURE.md** - Détails techniques complets
-- **CLAUDE.md** - Guide contexte pour Claude (ignoré Git)
-- **V0.8-COMPLETE.md** - Récapitulatif de la V0.8
+- **ARCHITECTURE.md** - Complete technical details
+- **I18N.md** - Internationalization system
+- **CLAUDE.md** - Context guide for Claude (Git ignored)
+- **V0.8-COMPLETE.md** - V0.8 recap
 
-### Projet
+### Project
 
-- **Repo GitHub** : `https://github.com/parksto/DeepMemo`
-- **Version actuelle** : V0.8 (Architecture modulaire ES6)
-- **Statut** : ✅ Stable et en production
-- **Prochaine version** : V0.9 (Features avancées)
-
----
-
-## 🚀 Prochaines étapes (V0.9+)
-
-Si tu veux contribuer à la V0.9, voici les features prévues :
-
-### Features avancées
-
-- **Wiki-links refactorés** - Syntaxe `[[id:titre]]` avec auto-complétion
-- **Vue liste nested** - Indentation visuelle style todo-list
-- **Export Markdown** - Structure préservée
-- **Recherche avancée** - Regex, filtres combinés
-
-### Optimisations
-
-- **Virtual scrolling** - Pour grandes arborescences (>500 nœuds)
-- **IndexedDB** - Pour grandes quantités de données
-- **Web Workers** - Recherche asynchrone
-
-Consulte **TODO.md** pour la liste complète et les priorités.
+- **GitHub Repo**: `https://github.com/parksto/DeepMemo`
+- **Current version**: V0.9 (ES6 modular architecture + i18n)
+- **Status**: ✅ Stable and in production
+- **Next version**: V1.0 (Active types)
 
 ---
 
-**Bonne contribution ! 🚀**
+## 🚀 Next steps (V1.0+)
 
-*N'hésite pas à poser des questions ou proposer des améliorations.*
+If you want to contribute to V1.0, here are the planned features:
 
-**Dernière mise à jour** : 20 Décembre 2025
+### Advanced features
+
+- **Active types** - Template-based nodes with custom behaviors
+- **Refactored Wiki-links** - Syntax `[[id:title]]` with auto-completion
+- **Nested list view** - Visual indentation todo-list style
+- **Markdown export** - Structure preserved
+- **Advanced search** - Regex, combined filters
+
+### Optimizations
+
+- **Virtual scrolling** - For large trees (>500 nodes)
+- **Web Workers** - Asynchronous search
+
+See **TODO.md** for the complete list and priorities.
+
+---
+
+**Happy contributing! 🚀**
+
+*Feel free to ask questions or propose improvements.*
+
+**Last updated**: December 28, 2025

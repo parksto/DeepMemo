@@ -1,51 +1,53 @@
 # Architecture - Attachments & Files (V0.8)
 
-**Implémentation** : V0.8 (25 décembre 2025)
-**Statut** : ✅ Implémenté et déployé
+**Implementation**: V0.8 (December 25, 2025)
+**Status**: ✅ Implemented and deployed
+
+> [Français / French version](./SPEC-ATTACHMENTS.fr.md)
 
 ---
 
-## 🎯 Fonctionnalité
+## 🎯 Functionality
 
-Attacher des fichiers (images, PDFs, documents, etc.) aux nœuds DeepMemo, avec :
-- Stockage local via **IndexedDB** (~500 MB selon navigateur)
-- Export/Import via format **ZIP** systématique
-- UI complète pour upload, affichage inline, download et suppression
+Attach files (images, PDFs, documents, etc.) to DeepMemo nodes, with:
+- Local storage via **IndexedDB** (~500 MB depending on browser)
+- Export/Import via systematic **ZIP** format
+- Complete UI for upload, inline display, download and deletion
 
-**Note** : Ce document servait de spécification pendant le développement. Il est maintenant conservé comme **référence d'architecture** pour comprendre les décisions techniques et l'implémentation.
+**Note**: This document served as a specification during development. It is now kept as an **architecture reference** to understand technical decisions and implementation.
 
 ---
 
-## 📋 Décisions de design
+## 📋 Design Decisions
 
-### Décisions implémentées
+### Implemented Decisions
 
-| # | Décision | Justification | Statut |
+| # | Decision | Justification | Status |
 |---|----------|---------------|--------|
-| 1 | **IndexedDB uniquement** | Une seule source de vérité, pas d'hybride localStorage/IndexedDB | ✅ Implémenté |
-| 2 | **Export toujours en ZIP** | Cohérence, même sans fichiers (juste data.json dans le ZIP) | ✅ Implémenté |
-| 3 | **Inline via syntaxe explicite** | `![](attachment:id)` pour contrôler l'affichage | ✅ Implémenté |
-| 4 | **Pas de déduplication** | Chaque attachment est indépendant, simplifie la suppression | ✅ Implémenté |
-| 5 | **Limite 50MB par fichier** | Hard limit pour éviter la saturation | ✅ Implémenté |
-| 6 | **Suppression manuelle** | Bouton de suppression dans la liste des fichiers du nœud | ✅ Implémenté |
-| 7 | **Garbage collection manuelle** | Bouton dans panneau droit "Nettoyer fichiers orphelins" | ✅ Implémenté |
-| 8 | **Pas de preview** | Affichage fullsize inline uniquement (V1) | ✅ Décision confirmée |
-| 9 | **Upload via bouton** | Drag & drop reporté en V2 | ✅ Décision confirmée |
-| 10 | **Clipboard paste** | Reporté en V2 | ✅ Décision confirmée |
+| 1 | **IndexedDB only** | Single source of truth, no localStorage/IndexedDB hybrid | ✅ Implemented |
+| 2 | **Always export as ZIP** | Consistency, even without files (just data.json in the ZIP) | ✅ Implemented |
+| 3 | **Inline via explicit syntax** | `![](attachment:id)` to control display | ✅ Implemented |
+| 4 | **No deduplication** | Each attachment is independent, simplifies deletion | ✅ Implemented |
+| 5 | **50MB limit per file** | Hard limit to avoid saturation | ✅ Implemented |
+| 6 | **Manual deletion** | Delete button in the node's file list | ✅ Implemented |
+| 7 | **Manual garbage collection** | Button in right panel "Clean orphaned files" | ✅ Implemented |
+| 8 | **No preview** | Fullsize inline display only (V1) | ✅ Decision confirmed |
+| 9 | **Upload via button** | Drag & drop postponed to V2 | ✅ Decision confirmed |
+| 10 | **Clipboard paste** | Postponed to V2 | ✅ Decision confirmed |
 
-### Features reportées (V2)
+### Postponed Features (V2)
 
-- **Drag & drop** : Upload par glisser-déposer sur le nœud
-- **Clipboard paste** : Paste d'images depuis le presse-papier
-- **Thumbnails** : Aperçus miniatures dans la liste
-- **Compression** : Compression automatique des fichiers volumineux
-- **Versioning** : Historique des modifications de fichiers
+- **Drag & drop**: Upload by dragging and dropping on the node
+- **Clipboard paste**: Paste images from clipboard
+- **Thumbnails**: Thumbnail previews in the list
+- **Compression**: Automatic compression of large files
+- **Versioning**: File modification history
 
 ---
 
-## 🏗️ Architecture technique
+## 🏗️ Technical Architecture
 
-### Structure de données
+### Data Structure
 
 #### localStorage (`deepmemo_data`)
 
@@ -55,16 +57,16 @@ data = {
     "node_123": {
       id: "node_123",
       type: "note",
-      title: "Ma note avec fichiers",
-      content: "Voici mon diagramme:\n\n![](attachment:attach_001)\n\nEt mon document:\n[Voir le PDF](attachment:attach_002)",
+      title: "My note with files",
+      content: "Here is my diagram:\n\n![](attachment:attach_001)\n\nAnd my document:\n[See the PDF](attachment:attach_002)",
       attachments: [
         {
-          id: "attach_001",           // ID unique (format: attach_${timestamp}_${random})
-          name: "diagram.png",         // Nom original du fichier
+          id: "attach_001",           // Unique ID (format: attach_${timestamp}_${random})
+          name: "diagram.png",         // Original filename
           type: "image/png",           // MIME type
-          size: 45678,                 // Taille en octets
-          created: 1703520000000,      // Timestamp création
-          modified: 1703520000000      // Timestamp dernière modif (pour futur support d'édition)
+          size: 45678,                 // Size in bytes
+          created: 1703520000000,      // Creation timestamp
+          modified: 1703520000000      // Last modification timestamp (for future edit support)
         },
         {
           id: "attach_002",
@@ -75,7 +77,7 @@ data = {
           modified: 1703520100000
         }
       ],
-      // ... autres propriétés standards
+      // ... other standard properties
     }
   }
 }
@@ -83,14 +85,14 @@ data = {
 
 #### IndexedDB (`deepmemo-files`)
 
-**Database name** : `deepmemo-files`
-**Version** : `1`
-**Object Store** : `attachments`
-**Key** : `id` (string, ex: "attach_001")
-**Value** : `Blob` (le fichier binaire)
+**Database name**: `deepmemo-files`
+**Version**: `1`
+**Object Store**: `attachments`
+**Key**: `id` (string, e.g., "attach_001")
+**Value**: `Blob` (the binary file)
 
 ```javascript
-// Structure IndexedDB
+// IndexedDB structure
 {
   "attach_001": Blob { size: 45678, type: "image/png" },
   "attach_002": Blob { size: 234567, type: "application/pdf" }
@@ -99,66 +101,66 @@ data = {
 
 ---
 
-## 🔌 API du module attachments.js
+## 🔌 attachments.js Module API
 
-### Module : `src/js/core/attachments.js`
+### Module: `src/js/core/attachments.js`
 
 ```javascript
 /**
- * Initialise la connexion IndexedDB
+ * Initialize IndexedDB connection
  * @returns {Promise<IDBDatabase>}
  */
 async function initDB()
 
 /**
- * Sauvegarde un fichier dans IndexedDB
- * @param {string} id - ID unique de l'attachment
- * @param {Blob} blob - Le fichier à sauvegarder
+ * Save a file to IndexedDB
+ * @param {string} id - Unique attachment ID
+ * @param {Blob} blob - The file to save
  * @returns {Promise<void>}
  */
 async function saveAttachment(id, blob)
 
 /**
- * Récupère un fichier depuis IndexedDB
- * @param {string} id - ID de l'attachment
- * @returns {Promise<Blob|null>} - Le blob ou null si non trouvé
+ * Retrieve a file from IndexedDB
+ * @param {string} id - Attachment ID
+ * @returns {Promise<Blob|null>} - The blob or null if not found
  */
 async function getAttachment(id)
 
 /**
- * Supprime un fichier d'IndexedDB
- * @param {string} id - ID de l'attachment
+ * Delete a file from IndexedDB
+ * @param {string} id - Attachment ID
  * @returns {Promise<void>}
  */
 async function deleteAttachment(id)
 
 /**
- * Liste tous les IDs stockés dans IndexedDB
- * @returns {Promise<string[]>} - Array des IDs
+ * List all IDs stored in IndexedDB
+ * @returns {Promise<string[]>} - Array of IDs
  */
 async function listAttachments()
 
 /**
- * Récupère la taille totale utilisée
- * @returns {Promise<number>} - Taille en octets
+ * Get total size used
+ * @returns {Promise<number>} - Size in bytes
  */
 async function getTotalSize()
 
 /**
- * Génère un ID unique pour un attachment
+ * Generate a unique ID for an attachment
  * @returns {string} - Format: attach_${timestamp}_${random}
  */
 function generateAttachmentId()
 
 /**
- * Nettoie les fichiers orphelins (présents dans IndexedDB mais pas dans data)
- * @param {Object} data - L'objet data complet
- * @returns {Promise<{deleted: number, freed: number}>} - Stats du nettoyage
+ * Clean orphaned files (present in IndexedDB but not in data)
+ * @param {Object} data - The complete data object
+ * @returns {Promise<{deleted: number, freed: number}>} - Cleanup stats
  */
 async function cleanOrphans(data)
 ```
 
-### Export des fonctions
+### Function Exports
 
 ```javascript
 export {
@@ -175,21 +177,21 @@ export {
 
 ---
 
-## 📦 Format d'export/import
+## 📦 Export/Import Format
 
-### Structure du ZIP
+### ZIP Structure
 
 ```
 deepmemo-export-2025-12-25.zip
-├── data.json                    # Structure complète (nodes, rootNodes, + métadonnées attachments)
+├── data.json                    # Complete structure (nodes, rootNodes, + attachment metadata)
 ├── attachments/
 │   ├── attach_001_diagram.png   # Format: {id}_{name}
 │   ├── attach_002_document.pdf
 │   └── attach_003_video.mp4
-└── metadata.json                # (Optionnel) Métadonnées de l'export
+└── metadata.json                # (Optional) Export metadata
 ```
 
-### metadata.json (optionnel)
+### metadata.json (optional)
 
 ```json
 {
@@ -202,398 +204,398 @@ deepmemo-export-2025-12-25.zip
 }
 ```
 
-### Export global
+### Global Export
 
-**Fonction** : `exportGlobalWithFiles()`
+**Function**: `exportGlobalWithFiles()`
 
-**Workflow** :
-1. Collecter tous les nœuds
-2. Extraire tous les attachments référencés
-3. Créer un ZIP avec JSZip
-4. Ajouter `data.json`
-5. Pour chaque attachment :
-   - Récupérer le blob depuis IndexedDB
-   - Ajouter au ZIP dans `attachments/{id}_{name}`
-6. Générer et télécharger le ZIP
+**Workflow**:
+1. Collect all nodes
+2. Extract all referenced attachments
+3. Create a ZIP with JSZip
+4. Add `data.json`
+5. For each attachment:
+   - Retrieve the blob from IndexedDB
+   - Add to ZIP in `attachments/{id}_{name}`
+6. Generate and download the ZIP
 
-**Nom du fichier** : `deepmemo-export-{timestamp}.zip`
+**Filename**: `deepmemo-export-{timestamp}.zip`
 
-### Export branche
+### Branch Export
 
-**Fonction** : `exportBranchWithFiles(nodeId)`
+**Function**: `exportBranchWithFiles(nodeId)`
 
-**Workflow** :
-1. Collecter le nœud + descendants (fonction existante `collectBranchNodes`)
-2. Extraire uniquement les attachments de cette branche
-3. Même logique que export global, mais scope limité
+**Workflow**:
+1. Collect the node + descendants (existing `collectBranchNodes` function)
+2. Extract only attachments from this branch
+3. Same logic as global export, but limited scope
 
-**Nom du fichier** : `deepmemo-branch-{title}-{timestamp}.zip`
+**Filename**: `deepmemo-branch-{title}-{timestamp}.zip`
 
-### Import ZIP
+### ZIP Import
 
-**Fonction** : `importZip(file, parentId = null)`
+**Function**: `importZip(file, parentId = null)`
 
-**Workflow** :
-1. Détecter si c'est un ZIP (extension `.zip`)
-2. Charger avec JSZip
-3. Extraire `data.json`
-4. Parser les données
-5. Pour chaque attachment référencé :
-   - Chercher le fichier dans `attachments/{id}_{name}`
-   - Si trouvé : sauvegarder dans IndexedDB
-   - Si manquant : logger warning + marquer comme "missing" ?
-6. Merger les données selon le mode (global = écrase, branche = fusionne)
+**Workflow**:
+1. Detect if it's a ZIP (`.zip` extension)
+2. Load with JSZip
+3. Extract `data.json`
+4. Parse data
+5. For each referenced attachment:
+   - Search for the file in `attachments/{id}_{name}`
+   - If found: save to IndexedDB
+   - If missing: log warning + mark as "missing"?
+6. Merge data according to mode (global = overwrite, branch = merge)
 
-**Gestion des IDs** :
-- **Export global** : IDs conservés si import sur instance vide
-- **Export branche** : IDs régénérés (comme actuellement) + remap des attachment IDs
+**ID Management**:
+- **Global export**: IDs preserved if importing on empty instance
+- **Branch export**: IDs regenerated (as currently) + attachment ID remapping
 
-### Import JSON legacy (rétrocompatibilité)
+### Legacy JSON Import (backward compatibility)
 
-Si l'utilisateur importe un ancien JSON (sans fichiers), ça doit continuer de fonctionner.
+If the user imports an old JSON (without files), it should continue to work.
 
-**Workflow** :
-1. Détecter extension `.json`
-2. Parser directement
-3. Merger comme avant
-4. Ignorer les attachments (array vide ou absent)
+**Workflow**:
+1. Detect `.json` extension
+2. Parse directly
+3. Merge as before
+4. Ignore attachments (empty or absent array)
 
 ---
 
-## 🎨 Interface utilisateur
+## 🎨 User Interface
 
-### 1. Upload de fichiers
+### 1. File Upload
 
-**Localisation** : Panneau central, sous le contenu du nœud (en mode Edit)
+**Location**: Central panel, below node content (in Edit mode)
 
-**UI** :
+**UI**:
 ```
 ┌─────────────────────────────────────────────┐
-│ [Titre du nœud]                             │
+│ [Node title]                                │
 │                                             │
-│ [Contenu markdown...]                       │
+│ [Markdown content...]                       │
 │                                             │
 ├─────────────────────────────────────────────┤
-│ 📎 Fichiers attachés (2)                    │
+│ 📎 Attached files (2)                       │
 │                                             │
 │  📄 diagram.png (44.6 KB)        [⬇️] [🗑️]  │
 │  📄 document.pdf (229.1 KB)      [⬇️] [🗑️]  │
 │                                             │
-│  [📎 Ajouter un fichier]                    │
+│  [📎 Add a file]                            │
 └─────────────────────────────────────────────┘
 ```
 
-**Comportement** :
-- Clic sur "Ajouter un fichier" → Input file natif
-- Icône adaptée au type MIME :
+**Behavior**:
+- Click on "Add a file" → Native file input
+- Icon adapted to MIME type:
   - `image/*` → 🖼️
   - `application/pdf` → 📄
   - `video/*` → 🎬
   - `audio/*` → 🎵
-  - Autres → 📎
-- Affichage de la taille (formatée : KB, MB)
-- Bouton ⬇️ : Télécharger le fichier
-- Bouton 🗑️ : Supprimer (avec confirmation)
+  - Others → 📎
+- Size display (formatted: KB, MB)
+- Button ⬇️: Download the file
+- Button 🗑️: Delete (with confirmation)
 
-**Validation** :
-- Vérifier la taille < 50MB
-- Si dépassement : Toast d'erreur "Fichier trop volumineux (max 50MB)"
+**Validation**:
+- Check size < 50MB
+- If exceeded: Error toast "File too large (max 50MB)"
 
-### 2. Affichage inline des images
+### 2. Inline Image Display
 
-**Syntaxe markdown** : `![Description](attachment:attach_001)`
+**Markdown syntax**: `![Description](attachment:attach_001)`
 
-**Rendu** :
-- Parser le markdown
-- Détecter les URLs `attachment:ID`
-- Récupérer le blob depuis IndexedDB
-- Créer un `blob:` URL temporaire
-- Injecter `<img src="blob:..." alt="Description">`
+**Rendering**:
+- Parse markdown
+- Detect `attachment:ID` URLs
+- Retrieve blob from IndexedDB
+- Create a temporary `blob:` URL
+- Inject `<img src="blob:..." alt="Description">`
 
-**Gestion du cache** :
-- Révoquer les blob URLs quand on change de nœud (pour éviter les fuites mémoire)
+**Cache Management**:
+- Revoke blob URLs when changing nodes (to avoid memory leaks)
 - `URL.revokeObjectURL(blobUrl)`
 
-### 3. Liens vers fichiers
+### 3. File Links
 
-**Syntaxe markdown** : `[Voir le document](attachment:attach_002)`
+**Markdown syntax**: `[See the document](attachment:attach_002)`
 
-**Rendu** :
-- Lien cliquable qui télécharge le fichier
-- Ou ouvre dans un nouvel onglet (selon le type)
+**Rendering**:
+- Clickable link that downloads the file
+- Or opens in a new tab (depending on type)
 
-### 4. Indicateur de stockage (Settings)
+### 4. Storage Indicator (Settings)
 
-**Localisation** : Panneau droit, section "Stockage" (nouvelle)
+**Location**: Right panel, "Storage" section (new)
 
-**UI** :
+**UI**:
 ```
-📊 Stockage
+📊 Storage
 
-Fichiers : 12.3 MB / ~500 MB
+Files: 12.3 MB / ~500 MB
 [████████░░░░░░░░░░░░] 2%
 
-15 fichiers attachés
+15 attached files
 
-[🧹 Nettoyer les fichiers orphelins]
+[🧹 Clean orphaned files]
 ```
 
-**Comportement** :
-- Affiche la taille totale utilisée (via `getTotalSize()`)
-- Estimation de la limite (dépend du navigateur, afficher "~500 MB" par défaut)
-- Bouton de nettoyage : exécute `cleanOrphans(data)` et affiche un toast avec le résultat
+**Behavior**:
+- Display total size used (via `getTotalSize()`)
+- Limit estimation (depends on browser, display "~500 MB" by default)
+- Cleanup button: executes `cleanOrphans(data)` and displays a toast with the result
 
 ---
 
-## 🔧 Modifications des modules existants
+## 🔧 Modifications to Existing Modules
 
 ### `src/js/core/data.js`
 
-**Ajouts** :
-- Importer le module `attachments.js`
-- Modifier `exportData()` → renommer en `exportDataJSON()` (legacy)
-- Ajouter `exportDataZIP()` (nouvelle fonction principale)
-- Modifier `exportBranch()` → renommer en `exportBranchJSON()` (legacy)
-- Ajouter `exportBranchZIP()` (nouvelle fonction principale)
-- Modifier `importData()` pour détecter ZIP vs JSON
-- Modifier `importBranch()` pour détecter ZIP vs JSON
-- Ajouter `deleteNodeAttachments(nodeId)` : supprime les fichiers d'un nœud lors de sa suppression
+**Additions**:
+- Import `attachments.js` module
+- Modify `exportData()` → rename to `exportDataJSON()` (legacy)
+- Add `exportDataZIP()` (new main function)
+- Modify `exportBranch()` → rename to `exportBranchJSON()` (legacy)
+- Add `exportBranchZIP()` (new main function)
+- Modify `importData()` to detect ZIP vs JSON
+- Modify `importBranch()` to detect ZIP vs JSON
+- Add `deleteNodeAttachments(nodeId)`: deletes a node's files when deleted
 
 ### `src/js/features/editor.js`
 
-**Ajouts** :
-- Section "Fichiers attachés" sous le contenu
-- Fonction `renderAttachments(node)` : affiche la liste des fichiers
-- Fonction `handleFileUpload(event)` : gère l'upload
-- Fonction `handleFileDelete(attachId)` : gère la suppression
-- Fonction `handleFileDownload(attachId, name)` : télécharge un fichier
-- Modifier `renderMarkdown()` pour parser et afficher les `attachment:` URLs
+**Additions**:
+- "Attached files" section below content
+- Function `renderAttachments(node)`: displays file list
+- Function `handleFileUpload(event)`: handles upload
+- Function `handleFileDelete(attachId)`: handles deletion
+- Function `handleFileDownload(attachId, name)`: downloads a file
+- Modify `renderMarkdown()` to parse and display `attachment:` URLs
 
 ### `src/js/app.js`
 
-**Ajouts** :
-- Initialiser IndexedDB au démarrage : `await initDB()`
-- Gérer les erreurs si IndexedDB n'est pas disponible (mode privé Safari, etc.)
+**Additions**:
+- Initialize IndexedDB on startup: `await initDB()`
+- Handle errors if IndexedDB is not available (Safari private mode, etc.)
 
 ### `index.html`
 
-**Ajouts** :
-- Input file hidden : `<input type="file" id="attachmentInput" style="display:none">`
-- Bouton "Ajouter fichier" dans la section attachments
+**Additions**:
+- Hidden file input: `<input type="file" id="attachmentInput" style="display:none">`
+- "Add file" button in attachments section
 
 ### `src/css/components.css`
 
-**Ajouts** :
-- Styles pour `.attachments-section`
-- Styles pour `.attachment-item`
-- Styles pour les boutons download/delete
+**Additions**:
+- Styles for `.attachments-section`
+- Styles for `.attachment-item`
+- Styles for download/delete buttons
 
 ---
 
-## 📚 Dépendances externes
+## 📚 External Dependencies
 
 ### JSZip
 
-**Version** : `3.10.1` (ou dernière stable)
-**Taille** : ~100 KB (minified)
-**Licence** : MIT
-**CDN** : `https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js`
+**Version**: `3.10.1` (or latest stable)
+**Size**: ~100 KB (minified)
+**License**: MIT
+**CDN**: `https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js`
 
-**Intégration** :
+**Integration**:
 ```html
-<!-- Dans index.html -->
+<!-- In index.html -->
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 ```
 
-**Alternative** : Télécharger le fichier et le servir localement dans `src/vendor/jszip.min.js`
+**Alternative**: Download the file and serve it locally in `src/vendor/jszip.min.js`
 
 ---
 
-## 🧪 Plan de test
+## 🧪 Test Plan
 
-### Tests manuels
+### Manual Tests
 
-**Scénario 1 : Upload basique**
-1. Ouvrir un nœud en mode Edit
-2. Cliquer "Ajouter fichier"
-3. Sélectionner une image < 50MB
-4. Vérifier que le fichier apparaît dans la liste
-5. Vérifier que la taille est correcte
-6. Rafraîchir la page → le fichier est toujours là
+**Scenario 1: Basic Upload**
+1. Open a node in Edit mode
+2. Click "Add file"
+3. Select an image < 50MB
+4. Verify that the file appears in the list
+5. Verify that the size is correct
+6. Refresh the page → the file is still there
 
-**Scénario 2 : Affichage inline**
-1. Ajouter une image à un nœud
-2. Noter l'ID (ex: `attach_001`)
-3. Ajouter dans le contenu : `![Mon diagramme](attachment:attach_001)`
-4. Passer en mode View
-5. Vérifier que l'image s'affiche
+**Scenario 2: Inline Display**
+1. Add an image to a node
+2. Note the ID (e.g., `attach_001`)
+3. Add to content: `![My diagram](attachment:attach_001)`
+4. Switch to View mode
+5. Verify that the image displays
 
-**Scénario 3 : Suppression**
-1. Ajouter un fichier
-2. Cliquer sur le bouton 🗑️
-3. Confirmer la suppression
-4. Vérifier que le fichier disparaît de la liste
-5. Vérifier qu'il est supprimé d'IndexedDB (DevTools → Application → IndexedDB)
+**Scenario 3: Deletion**
+1. Add a file
+2. Click the 🗑️ button
+3. Confirm deletion
+4. Verify that the file disappears from the list
+5. Verify it's deleted from IndexedDB (DevTools → Application → IndexedDB)
 
-**Scénario 4 : Export/Import global**
-1. Créer 2-3 nœuds avec fichiers
-2. Export global → ZIP téléchargé
-3. Vider localStorage + IndexedDB
-4. Import du ZIP
-5. Vérifier que tout est restauré (nœuds + fichiers)
+**Scenario 4: Global Export/Import**
+1. Create 2-3 nodes with files
+2. Global export → ZIP downloaded
+3. Clear localStorage + IndexedDB
+4. Import the ZIP
+5. Verify everything is restored (nodes + files)
 
-**Scénario 5 : Export/Import branche**
-1. Créer une branche avec fichiers
-2. Export branche → ZIP téléchargé
-3. Import sur un autre nœud parent
-4. Vérifier que les fichiers sont bien dupliqués (nouveaux IDs)
+**Scenario 5: Branch Export/Import**
+1. Create a branch with files
+2. Branch export → ZIP downloaded
+3. Import on another parent node
+4. Verify files are duplicated (new IDs)
 
-**Scénario 6 : Limite de taille**
-1. Tenter d'uploader un fichier > 50MB
-2. Vérifier le toast d'erreur
-3. Vérifier que le fichier n'est pas ajouté
+**Scenario 6: Size Limit**
+1. Attempt to upload a file > 50MB
+2. Verify error toast
+3. Verify the file is not added
 
-**Scénario 7 : Garbage collection**
-1. Créer un nœud avec fichier
-2. Supprimer le nœud (mais pas via le bouton de suppression de fichier)
-3. Exécuter le nettoyage
-4. Vérifier que le fichier orphelin est supprimé d'IndexedDB
+**Scenario 7: Garbage Collection**
+1. Create a node with file
+2. Delete the node (but not via the file delete button)
+3. Execute cleanup
+4. Verify the orphaned file is deleted from IndexedDB
 
-### Tests navigateurs
+### Browser Tests
 
 - [ ] Chrome/Edge (Windows, Linux)
 - [ ] Firefox (Windows, Linux)
-- [ ] Safari (macOS, iOS si possible)
+- [ ] Safari (macOS, iOS if possible)
 - [ ] Mobile browsers (Chrome Android, Safari iOS)
 
 ---
 
-## ✅ Implémentation terminée
+## ✅ Completed Implementation
 
-### Toutes les phases complétées (25 décembre 2025)
+### All Phases Completed (December 25, 2025)
 
-**Phase 1-7** : Toutes implémentées et testées
+**Phase 1-7**: All implemented and tested
 
-- [x] **Module IndexedDB** : `src/js/core/attachments.js` complet (~300 lignes)
-- [x] **UI Upload** : Section attachments dans `editor.js` avec validation taille
-- [x] **Export ZIP** : Global et branche via JSZip
-- [x] **Import ZIP** : Détection auto ZIP vs JSON, régénération IDs
-- [x] **Affichage inline** : Parser `attachment:` + blob URLs + cleanup mémoire
-- [x] **Polish** : Indicateur stockage, garbage collection, icônes MIME
-- [x] **Documentation** : README, ARCHITECTURE, ROADMAP, CLAUDE.md à jour
-- [x] **Contenu démo** : Section "📎 Fichiers joints" dans default-data.js
+- [x] **IndexedDB Module**: `src/js/core/attachments.js` complete (~300 lines)
+- [x] **Upload UI**: Attachments section in `editor.js` with size validation
+- [x] **ZIP Export**: Global and branch via JSZip
+- [x] **ZIP Import**: Auto-detection ZIP vs JSON, ID regeneration
+- [x] **Inline Display**: Parse `attachment:` + blob URLs + memory cleanup
+- [x] **Polish**: Storage indicator, garbage collection, MIME icons
+- [x] **Documentation**: README, ARCHITECTURE, ROADMAP, CLAUDE.md updated
+- [x] **Demo Content**: "📎 Attached files" section in default-data.js
 
-**Commits** : Implémentés en une session le 25 décembre 2025
+**Commits**: Implemented in a single session on December 25, 2025
 
-**Fichiers modifiés** :
-- `src/js/core/attachments.js` (nouveau)
-- `src/js/core/data.js` (export/import ZIP)
-- `src/js/features/editor.js` (UI attachments + inline display)
+**Modified Files**:
+- `src/js/core/attachments.js` (new)
+- `src/js/core/data.js` (ZIP export/import)
+- `src/js/features/editor.js` (attachments UI + inline display)
 - `src/js/app.js` (upload, download, delete, cleanup)
-- `index.html` (section attachments + JSZip CDN)
-- `src/css/components.css` (styles complets)
-- `docs/` (documentation mise à jour)
+- `index.html` (attachments section + JSZip CDN)
+- `src/css/components.css` (complete styles)
+- `docs/` (documentation updated)
 
-**Tests** : Page de test `test-attachments.html` (tous validés ✅, supprimée après validation)
-
----
-
-## ⚠️ Risques et limitations
-
-### Risques techniques
-
-| Risque | Impact | Mitigation |
-|--------|--------|------------|
-| **IndexedDB non disponible** (mode privé Safari) | Haut | Détecter au démarrage, afficher un avertissement, désactiver les attachments |
-| **Quota dépassé** | Moyen | Vérifier avant upload, afficher la taille utilisée, limite 50MB/fichier |
-| **Corruption IndexedDB** | Moyen | Mécanisme de détection + réinitialisation, toast d'erreur clair |
-| **Blob URLs non révoqués** (fuite mémoire) | Faible | Cleanup systématique au changement de nœud |
-| **ZIP trop gros** (>500MB) | Faible | Warning si export > 100MB, streaming si possible |
-
-### Limitations connues
-
-- **Pas de versioning** : Un fichier modifié écrase l'ancien (pas d'historique)
-- **Pas d'édition** : Les fichiers sont en lecture seule (pas d'édition inline)
-- **Pas de compression** : Les fichiers sont stockés tels quels (pas de compression en IndexedDB)
-- **Pas de preview** : Pas de thumbnails générés (affichage fullsize uniquement)
-- **Pas de drag & drop** : Upload via bouton uniquement (V1)
-- **Pas de clipboard paste** : Pas de paste d'images depuis presse-papier (V1)
+**Tests**: Test page `test-attachments.html` (all validated ✅, deleted after validation)
 
 ---
 
-## 🔄 Migration et rétrocompatibilité
+## ⚠️ Risks and Limitations
+
+### Technical Risks
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| **IndexedDB unavailable** (Safari private mode) | High | Detect on startup, display warning, disable attachments |
+| **Quota exceeded** | Medium | Check before upload, display used size, 50MB/file limit |
+| **IndexedDB corruption** | Medium | Detection mechanism + reset, clear error toast |
+| **Blob URLs not revoked** (memory leak) | Low | Systematic cleanup on node change |
+| **ZIP too large** (>500MB) | Low | Warning if export > 100MB, streaming if possible |
+
+### Known Limitations
+
+- **No versioning**: A modified file overwrites the old one (no history)
+- **No editing**: Files are read-only (no inline editing)
+- **No compression**: Files are stored as-is (no IndexedDB compression)
+- **No preview**: No generated thumbnails (fullsize display only)
+- **No drag & drop**: Upload via button only (V1)
+- **No clipboard paste**: No pasting images from clipboard (V1)
+
+---
+
+## 🔄 Migration and Backward Compatibility
 
 ### Migration V0.8 → V0.9
 
-**Pas de migration nécessaire** :
-- Les données existantes continuent de fonctionner
-- Les nœuds n'ont simplement pas de fichiers attachés
-- Pas de changement breaking dans la structure de `data`
+**No migration needed**:
+- Existing data continues to work
+- Nodes simply have no attached files
+- No breaking changes in `data` structure
 
-### Rétrocompatibilité
+### Backward Compatibility
 
-**Import JSON simple** :
-- Les exports V0.8 (JSON simple) restent importables
-- Détection automatique de l'absence d'attachments
+**Simple JSON Import**:
+- V0.8 exports (simple JSON) remain importable
+- Automatic detection of attachment absence
 
-**Export rétrocompatible** :
-- On pourrait ajouter un bouton "Exporter en JSON (sans fichiers)" pour legacy
-- Mais pas obligatoire : le ZIP avec juste `data.json` est équivalent
+**Backward-compatible Export**:
+- We could add an "Export as JSON (without files)" button for legacy
+- But not mandatory: the ZIP with just `data.json` is equivalent
 
 ---
 
-## 📝 Notes de développement
+## 📝 Development Notes
 
-### Convention de nommage
+### Naming Convention
 
-**Attachment IDs** : `attach_{timestamp}_{random4digits}`
-- Exemple : `attach_1703520000000_7382`
-- Garantit l'unicité et la traçabilité
+**Attachment IDs**: `attach_{timestamp}_{random4digits}`
+- Example: `attach_1703520000000_7382`
+- Guarantees uniqueness and traceability
 
-**Fichiers dans ZIP** : `{id}_{originalName}`
-- Exemple : `attach_1703520000000_7382_diagram.png`
-- Permet de retrouver facilement le fichier + garde le nom lisible
+**Files in ZIP**: `{id}_{originalName}`
+- Example: `attach_1703520000000_7382_diagram.png`
+- Allows easy file retrieval + keeps readable name
 
-### Gestion des erreurs
+### Error Handling
 
-**Toujours wrapper les appels IndexedDB** :
+**Always wrap IndexedDB calls**:
 ```javascript
 try {
   await saveAttachment(id, blob);
 } catch (error) {
   console.error('[Attachments] Failed to save:', error);
-  showToast('Erreur : impossible de sauvegarder le fichier', 'error');
-  // Rollback si nécessaire
+  showToast('Error: unable to save file', 'error');
+  // Rollback if necessary
 }
 ```
 
-**Types d'erreurs à gérer** :
-- `QuotaExceededError` : Quota dépassé
-- `NotFoundError` : Fichier non trouvé
-- `InvalidStateError` : IndexedDB fermé ou corrompu
-- Network errors (pour JSZip si CDN)
+**Error types to handle**:
+- `QuotaExceededError`: Quota exceeded
+- `NotFoundError`: File not found
+- `InvalidStateError`: IndexedDB closed or corrupted
+- Network errors (for JSZip if CDN)
 
 ### Performance
 
-**Optimisations possibles** :
-- Cache des blob URLs en mémoire (éviter de re-générer à chaque render)
-- Lazy loading des fichiers (charger seulement si affiché)
-- Streaming du ZIP (pour gros exports)
+**Possible Optimizations**:
+- Cache blob URLs in memory (avoid regenerating on each render)
+- Lazy loading of files (load only if displayed)
+- ZIP streaming (for large exports)
 
-**À surveiller** :
-- Temps de parsing du ZIP à l'import
-- Mémoire utilisée lors de l'affichage de nombreuses images
+**To Monitor**:
+- ZIP parsing time on import
+- Memory used when displaying many images
 
 ---
 
-## 🎓 Références
+## 🎓 References
 
-### Documentation IndexedDB
+### IndexedDB Documentation
 
 - [MDN - IndexedDB API](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
 - [MDN - Using IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB)
 
-### Documentation JSZip
+### JSZip Documentation
 
 - [JSZip Documentation](https://stuk.github.io/jszip/)
 - [JSZip API](https://stuk.github.io/jszip/documentation/api_jszip.html)
@@ -605,23 +607,23 @@ try {
 
 ---
 
-## ✅ Checklist de complétion
+## ✅ Completion Checklist
 
-**Feature 100% complète** :
+**Feature 100% complete**:
 
-- [x] Tous les tests manuels passent
-- [x] Testé sur Chrome, Edge (Firefox et Safari recommandés avant déploiement public)
-- [x] Documentation à jour (README, ARCHITECTURE, ROADMAP, CLAUDE.md)
-- [x] Pas de console errors en production
-- [x] Garbage collection fonctionne (bouton manuel + stats)
-- [x] Export/Import round-trip OK (global + branche)
-- [x] Limite 50MB respectée (validation à l'upload)
-- [x] UI fonctionnelle et cohérente avec le reste de l'app
-- [x] Code commenté et structuré (modules ES6)
-- [x] Contenu de démo intégré
+- [x] All manual tests pass
+- [x] Tested on Chrome, Edge (Firefox and Safari recommended before public deployment)
+- [x] Documentation updated (README, ARCHITECTURE, ROADMAP, CLAUDE.md)
+- [x] No console errors in production
+- [x] Garbage collection works (manual button + stats)
+- [x] Export/Import round-trip OK (global + branch)
+- [x] 50MB limit enforced (upload validation)
+- [x] UI functional and consistent with the rest of the app
+- [x] Code commented and structured (ES6 modules)
+- [x] Demo content integrated
 
 ---
 
-**Dernière mise à jour** : 2025-12-27 (statut)
-**Implémentation complète** : 2025-12-25
-**Statut** : ✅ Déployé en V0.8
+**Last updated**: 2025-12-27 (status)
+**Complete implementation**: 2025-12-25
+**Status**: ✅ Deployed in V0.8

@@ -1,489 +1,491 @@
 # 🗺️ DeepMemo - Roadmap
 
-## 📍 État actuel : V0.8 (Décembre 2025)
+> 🌍 **Language versions**: [English](ROADMAP.md) | [Français](ROADMAP.fr.md)
 
-### ✅ Fonctionnalités implémentées
+## 📍 Current state: V0.8 (December 2025)
 
-#### Gestion des nœuds
-- [x] Création/édition/suppression de nœuds
-- [x] Hiérarchie récursive infinie
-- [x] Navigation par breadcrumbs
-- [x] Sélection auto du titre lors de la création
-- [x] Auto-resize du textarea selon le contenu
+### ✅ Implemented features
 
-#### Arborescence
-- [x] Affichage arborescent dans la sidebar
-- [x] Expand/collapse des branches
-- [x] Persistence de l'état expand/collapse (localStorage)
-- [x] Navigation clavier (↑↓←→ + Enter)
-- [x] Focus visuel du nœud actuel
-- [x] Affichage des enfants en cartes cliquables
+#### Node management
+- [x] Create/edit/delete nodes
+- [x] Infinite recursive hierarchy
+- [x] Breadcrumb navigation
+- [x] Auto-select title on creation
+- [x] Auto-resize textarea based on content
 
-#### Liens
-- [x] Liens symboliques (un nœud dans plusieurs emplacements)
-- [x] Backlinks automatiques
-- [x] Suppression des symlinks sans toucher l'original
-- [x] Détection des liens cassés
-- [ ] Wiki-links `[[Nom du nœud]]` cliquables (REPOUSSÉ V1.0+)
+#### Tree view
+- [x] Tree display in sidebar
+- [x] Expand/collapse branches
+- [x] Persist expand/collapse state (localStorage)
+- [x] Keyboard navigation (↑↓←→ + Enter)
+- [x] Visual focus on current node
+- [x] Display children as clickable cards
+
+#### Links
+- [x] Symbolic links (one node in multiple locations)
+- [x] Automatic backlinks
+- [x] Delete symlinks without affecting original
+- [x] Broken link detection
+- [ ] Clickable wiki-links `[[Node name]]` (POSTPONED V1.0+)
 
 #### Tags
-- [x] Système de tags dédié (champ séparé)
-- [x] Auto-complétion intelligente (branche + global)
-- [x] Tag cloud par branche avec compteur
-- [x] Recherche par tag
-- [x] Badges visuels (branche vs global)
+- [x] Dedicated tag system (separate field)
+- [x] Smart auto-completion (branch + global)
+- [x] Tag cloud per branch with counter
+- [x] Search by tag
+- [x] Visual badges (branch vs global)
 
-#### Recherche
-- [x] Recherche globale temps réel (Ctrl+K)
-- [x] Recherche dans titres, contenus et tags
-- [x] Navigation clavier dans les résultats
-- [x] Highlights des correspondances
-- [x] Ouverture directe du nœud trouvé
-- [x] Dépliage automatique du chemin
+#### Search
+- [x] Real-time global search (Ctrl+K)
+- [x] Search in titles, content and tags
+- [x] Keyboard navigation in results
+- [x] Match highlights
+- [x] Direct open of found node
+- [x] Auto-expand path to node
 
 #### Drag & Drop
-- [x] Déplacement de nœuds
-- [x] Duplication (Ctrl + drag)
-- [x] Liens symboliques (Ctrl+Alt + drag)
-- [x] Réorganisation de l'ordre (zones before/after/inside)
-- [x] Indicateurs visuels de position
-- [x] Support arbre + cartes
+- [x] Move nodes
+- [x] Duplicate (Ctrl + drag)
+- [x] Symbolic links (Ctrl+Alt + drag)
+- [x] Reorder (before/after/inside zones)
+- [x] Visual position indicators
+- [x] Support tree + cards
 
 #### Interface
 - [x] Dark theme
-- [x] Sidebar pliable
-- [x] Panel droit pliable
+- [x] Collapsible sidebar
+- [x] Collapsible right panel
 - [x] Responsive (base)
-- [x] Toasts de notification
-- [x] Modales pour actions multiples
+- [x] Notification toasts
+- [x] Modals for multiple actions
 
-#### Raccourcis clavier
-- [x] `Alt+N` : Nouveau nœud
-- [x] `Alt+E` : Focus éditeur
-- [x] `Alt+E` : Toggle view/edit
-- [x] `Ctrl+K` : Recherche
-- [x] `Escape` : Remonter au parent
-- [x] `↑↓←→` : Navigation arbre
-- [x] `Enter` : Activer nœud
-- [x] Documentation complète dans panneau droit
+#### Keyboard shortcuts
+- [x] `Alt+N`: New node
+- [x] `Alt+E`: Focus editor
+- [x] `Alt+E`: Toggle view/edit
+- [x] `Ctrl+K`: Search
+- [x] `Escape`: Go up to parent
+- [x] `↑↓←→`: Tree navigation
+- [x] `Enter`: Activate node
+- [x] Complete documentation in right panel
 
-#### Persistance
-- [x] LocalStorage pour les données
-- [x] Export JSON global
-- [x] Import JSON global
-- [x] Export de branche (nœud + descendants)
-- [x] Import de branche (non-destructif, avec régénération IDs)
-- [x] Sauvegarde auto à chaque modification
+#### Persistence
+- [x] LocalStorage for data
+- [x] Global JSON export
+- [x] Global JSON import
+- [x] Branch export (node + descendants)
+- [x] Branch import (non-destructive, with ID regeneration)
+- [x] Auto-save on every change
 
-#### Rendu et Affichage (V0.7+)
-- [x] Markdown rendering avec mode view/edit toggle
-- [x] Mode view par défaut (lecture)
-- [x] Sidebar redimensionnable
-- [x] Scroll horizontal si contenu large
-- [x] Favicon personnalisé
-- [x] Reset du scroll à la navigation (V0.8)
-- [x] Right panel masqué par défaut (V0.8)
-- [x] Toggle choix de police (Sto vs système) (V0.8)
+#### Rendering and Display (V0.7+)
+- [x] Markdown rendering with view/edit mode toggle
+- [x] View mode by default (reading)
+- [x] Resizable sidebar
+- [x] Horizontal scroll if content is wide
+- [x] Custom favicon
+- [x] Scroll reset on navigation (V0.8)
+- [x] Right panel hidden by default (V0.8)
+- [x] Toggle font choice (Sto vs system) (V0.8)
 
-#### URL Dynamiques et Navigation (V0.8)
-- [x] Système d'URL dynamique avec hash routing
-- [x] URLs bookmarkables `#/node/nodeId`
-- [x] Persistence après refresh
-- [x] Mode branche isolée `?branch=nodeId`
-- [x] Symlinks externes grisés en mode branche
-- [x] Partage de nœud (icône 🔗)
-- [x] Partage de branche isolée (icône 🌳)
-- [x] Support navigation navigateur (back/forward)
-- [x] Auto-collapse arborescence (chemin actif uniquement)
+#### Dynamic URLs and Navigation (V0.8)
+- [x] Dynamic URL system with hash routing
+- [x] Bookmarkable URLs `#/node/nodeId`
+- [x] Persistence after refresh
+- [x] Isolated branch mode `?branch=nodeId`
+- [x] External symlinks grayed out in branch mode
+- [x] Share node (icon 🔗)
+- [x] Share isolated branch (icon 🌳)
+- [x] Browser navigation support (back/forward)
+- [x] Auto-collapse tree (active path only)
 
-#### Liens Symboliques Refactorés (V0.8)
-- [x] Type de nœud `symlink` dédié
-- [x] Titres indépendants pour symlinks
-- [x] Détection de cycles (références circulaires)
-- [x] Prévention des boucles infinies
-- [x] Icône 🔄 pour symlinks circulaires
-- [x] Icône 🔗🚫 pour symlinks externes (hors branche)
+#### Refactored Symbolic Links (V0.8)
+- [x] Dedicated `symlink` node type
+- [x] Independent titles for symlinks
+- [x] Cycle detection (circular references)
+- [x] Infinite loop prevention
+- [x] Icon 🔄 for circular symlinks
+- [x] Icon 🔗🚫 for external symlinks (outside branch)
 
-#### Contenu de Démonstration (V0.8)
-- [x] Tutoriel interactif au premier lancement (26 nœuds pédagogiques)
-- [x] Structure progressive : Bienvenue → Interface → Features → Future → Premiers pas
-- [x] Format pédagogique : [Fonctionnalité → Ce que ça permet → Exemple]
-- [x] Fonctionnalités V0.8 documentées avec exemples concrets
-- [x] Concepts futurs clarifiés (types = nœuds, triggers multi-nœuds, API externe)
-- [x] Chargement automatique si localStorage vide
-- [x] Instructions pour supprimer le contenu de démo incluses
-
----
-
-## 🐛 Bugs connus
-
-### Corrigés en V0.7
-- [x] **Sélection dans les modales** ✅ : Impossible de sélectionner le nœud destination dans les modales d'action/symlink → **CORRIGÉ** (utilisation de `data-node-id` avec `querySelector`)
-
-### Corrigés en V0.8
-- [x] **Bug perte de données - Symlinks avec noms identiques** ✅ : **RÉSOLU** avec la refonte complète du système symlinks. Les symlinks sont maintenant des nœuds de type spécial avec leur propre `id`, ce qui élimine toute confusion basée sur les titres.
-- [x] **Références circulaires** ✅ : **RÉSOLU** avec détection automatique des cycles. Les symlinks qui créeraient une boucle infinie sont détectés et affichés avec l'icône 🔄 sans afficher leurs enfants.
-- [x] **Affichage multiple de symlinks** ✅ : **RÉSOLU** avec le système d'instance keys (`nodeId@parent@grandparent@root`) qui permet de distinguer chaque instance d'un nœud dans l'arbre.
-
-### Priorité moyenne
-- [ ] Parfois les bordures des boutons ont un effet relief (navigateur par défaut)
-
-### Priorité basse
-- [ ] Pas de confirmation avant suppression massive
-- [ ] Pas de limite de profondeur d'arborescence
+#### Demo Content (V0.8)
+- [x] Interactive tutorial on first launch (26 pedagogical nodes)
+- [x] Progressive structure: Welcome → Interface → Features → Future → First steps
+- [x] Pedagogical format: [Feature → What it allows → Example]
+- [x] V0.8 features documented with concrete examples
+- [x] Future concepts clarified (types = nodes, multi-node triggers, external API)
+- [x] Auto-load if localStorage is empty
+- [x] Instructions to delete demo content included
 
 ---
 
-## ✅ V0.7 - Restructuration Multifile (TERMINÉE)
+## 🐛 Known bugs
 
-### Objectifs atteints
+### Fixed in V0.7
+- [x] **Selection in modals** ✅: Impossible to select destination node in action/symlink modals → **FIXED** (using `data-node-id` with `querySelector`)
 
-#### 1. Structure du projet ✅
+### Fixed in V0.8
+- [x] **Data loss bug - Symlinks with identical names** ✅: **RESOLVED** with complete overhaul of symlink system. Symlinks are now special-type nodes with their own `id`, eliminating any title-based confusion.
+- [x] **Circular references** ✅: **RESOLVED** with automatic cycle detection. Symlinks that would create an infinite loop are detected and displayed with icon 🔄 without showing their children.
+- [x] **Multiple symlink display** ✅: **RESOLVED** with instance key system (`nodeId@parent@grandparent@root`) which allows distinguishing each node instance in the tree.
+
+### Medium priority
+- [ ] Sometimes button borders have a relief effect (browser default)
+
+### Low priority
+- [ ] No confirmation before mass deletion
+- [ ] No tree depth limit
+
+---
+
+## ✅ V0.7 - Multifile Restructuring (COMPLETED)
+
+### Achieved objectives
+
+#### 1. Project structure ✅
 ```
 DeepMemo/
-  ├── index.html          (Structure HTML minimale)
+  ├── index.html          (Minimal HTML structure)
   ├── src/
   │   ├── css/
-  │   │   └── style.css   (Tous les styles)
+  │   │   └── style.css   (All styles)
   │   └── js/
-  │       └── app.js      (Toute la logique)
+  │       └── app.js      (All logic)
   ├── reference/
-  │   └── deepmemo-reference.html  (Version single-file)
+  │   └── deepmemo-reference.html  (Single-file version)
   ├── docs/
-  │   └── (documentation complète)
+  │   └── (complete documentation)
   └── .gitignore
 ```
 
-#### 2. Corrections urgentes
-- [x] Fix sélection de nœud dans les modales ✅
-- [ ] Uniformiser les bordures des boutons
-- [ ] Améliorer la gestion des events
+#### 2. Urgent fixes
+- [x] Fix node selection in modals ✅
+- [ ] Standardize button borders
+- [ ] Improve event handling
 
 #### 3. Infrastructure
-- [x] Repo GitHub créé et configuré ✅
-- [x] Documentation complète (README + docs) ✅
-- [x] Structure professionnelle évolutive ✅
+- [x] GitHub repo created and configured ✅
+- [x] Complete documentation (README + docs) ✅
+- [x] Professional scalable structure ✅
 
 ---
 
-## 🚀 V0.8 - Refonte Symlinks & Navigation (✅ TERMINÉE)
+## 🚀 V0.8 - Symlinks & Navigation Overhaul (✅ COMPLETED)
 
-**Objectif principal** : Refactorisation complète du système de liens symboliques pour plus de robustesse et de flexibilité + système d'URL dynamiques.
+**Main objective**: Complete refactoring of symbolic link system for more robustness and flexibility + dynamic URL system.
 
-### 🔗 Refonte des Liens Symboliques ✅ COMPLÉTÉ
+### 🔗 Symbolic Links Overhaul ✅ COMPLETED
 
-**Concept** : Traiter les symlinks comme des "raccourcis Windows" - des nœuds de type spécial qui pointent vers un nœud cible.
+**Concept**: Treat symlinks like "Windows shortcuts" - special-type nodes that point to a target node.
 
-#### Architecture nouvelle
-- [x] **Type de nœud** : Ajouté propriété `type: "node" | "symlink"` à tous les nœuds
-- [x] **Structure symlink** :
+#### New architecture
+- [x] **Node type**: Added `type: "node" | "symlink"` property to all nodes
+- [x] **Symlink structure**:
   ```javascript
   {
     id: "symlink_xxx",
     type: "symlink",
-    title: "Titre custom du raccourci",
-    targetId: "node_abc",  // Pointe vers le nœud réel
+    title: "Custom shortcut title",
+    targetId: "node_abc",  // Points to real node
     parent: "node_xyz",
-    children: [],          // Toujours vide
+    children: [],          // Always empty
     created: timestamp,
     modified: timestamp
   }
   ```
-- [x] **Renommage indépendant** : Le titre du symlink n'affecte pas le nœud cible
-- [x] **Suppression propre** : Supprimer un symlink = supprimer un nœud normal
-- [x] **Détection cycles** : Protection anti-boucle infinie lors de la création via `wouldCreateCycleWithMove()`
-- [x] **Symlinks cassés** : Affichage avec message d'erreur et contenu désactivé
+- [x] **Independent renaming**: Symlink title doesn't affect target node
+- [x] **Clean deletion**: Deleting a symlink = deleting a normal node
+- [x] **Cycle detection**: Anti-infinite loop protection during creation via `wouldCreateCycleWithMove()`
+- [x] **Broken symlinks**: Display with error message and disabled content
 
-#### Rendu et UI
-- [x] Modifier `render()` pour switch sur `node.type` avec pattern `displayNode`
-- [x] Afficher icône 🔗 pour les symlinks
-- [x] Au clic : ouvrir le contenu du `targetId`, pas du symlink
-- [x] Badge visuel distinct des nœuds normaux
-- [x] Code simplifié avec système d'instance keys
+#### Rendering and UI
+- [x] Modify `render()` to switch on `node.type` with `displayNode` pattern
+- [x] Display icon 🔗 for symlinks
+- [x] On click: open content of `targetId`, not symlink
+- [x] Visual badge distinct from normal nodes
+- [x] Simplified code with instance key system
 
-#### Avantages obtenus
-- ✅ Symlinks = enfants normaux dans `children[]`
-- ✅ Tri et ordre naturels
-- ✅ Métadonnées propres à chaque symlink
-- ✅ Code beaucoup plus simple
-- ✅ Prévention des cycles avec détection
+#### Obtained advantages
+- ✅ Symlinks = normal children in `children[]`
+- ✅ Natural sorting and ordering
+- ✅ Metadata specific to each symlink
+- ✅ Much simpler code
+- ✅ Cycle prevention with detection
 
-### 🌳 Arborescence Intelligente ✅ COMPLÉTÉ
+### 🌳 Smart Tree ✅ COMPLETED
 
-- [x] **Auto-collapse global** : `autoCollapseTree()` replie tout sauf le chemin actif
-- [x] **Déplier jusqu'au nœud actuel** : `expandPathToNode()` fonctionnel
-- [x] **Focus synchronisé** : Arborescence suit la navigation
-- [x] **Navigation clavier fluide** : Implémentée avec système d'instance keys
-- [x] **Navigation ArrowLeft** : Remonte au parent si nœud replié/sans enfants
+- [x] **Global auto-collapse**: `autoCollapseTree()` folds everything except active path
+- [x] **Expand to current node**: `expandPathToNode()` functional
+- [x] **Synchronized focus**: Tree follows navigation
+- [x] **Smooth keyboard navigation**: Implemented with instance key system
+- [x] **ArrowLeft navigation**: Go up to parent if node is collapsed/has no children
 
-### 🔗 Navigation via Liens Internes (REPOUSSÉ V1.0+)
+### 🔗 Navigation via Internal Links (POSTPONED V1.0+)
 
-**Note** : Fonctionnalité désactivée temporairement car le matching par titre est fragile (doublons, renommages). Nécessite refonte avec syntaxe `[[id:titre]]` ou auto-complétion intelligente.
+**Note**: Feature temporarily disabled because title-based matching is fragile (duplicates, renames). Needs overhaul with `[[id:title]]` syntax or smart auto-completion.
 
-- [ ] **Wiki-links refactorés** : Syntaxe pointant vers ID au lieu de titre
-- [ ] **Auto-complétion** : Sélection intelligente à la saisie
-- [ ] **Sélection intelligente** : Choisir nœud original OU symlink le plus proche
-- [ ] **Distance euclidienne** : Calculer le symlink le plus proche du focus actuel
-- [ ] **Fallback sur original** : Si pas de symlink, ouvrir le nœud réel
+- [ ] **Refactored wiki-links**: Syntax pointing to ID instead of title
+- [ ] **Auto-completion**: Smart selection during input
+- [ ] **Smart selection**: Choose original node OR nearest symlink
+- [ ] **Euclidean distance**: Calculate symlink closest to current focus
+- [ ] **Fallback to original**: If no symlink, open real node
 
-### 🔗 Système d'URL Dynamique ✅ COMPLÉTÉ
+### 🔗 Dynamic URL System ✅ COMPLETED
 
-- [x] **Hash routing** : `#/node/abc123` pour pointer vers un nœud
-- [x] **Persistence refresh** : Rester sur le nœud actif après F5
-- [x] **Bookmarkabilité** : URLs partageables
-- [x] **Branch isolation** : `?branch=nodeId` pour instances isolées
-- [x] **Symlinks hors branche** : Grisés + désactivés avec icône 🔗🚫
-- [x] **Mode view par défaut** : Affichage lecture avec `?view=edit` optionnel
-- [x] **Partage nœud** : Icône 🔗 pour copier URL du nœud
-- [x] **Partage branche** : Icône 🌳 pour copier URL de branche isolée
-- [x] **Support navigation** : Boutons précédent/suivant du navigateur
-- [x] **Auto-expansion branche** : Branche dépliée automatiquement à l'ouverture
+- [x] **Hash routing**: `#/node/abc123` to point to a node
+- [x] **Refresh persistence**: Stay on active node after F5
+- [x] **Bookmarkability**: Shareable URLs
+- [x] **Branch isolation**: `?branch=nodeId` for isolated instances
+- [x] **Symlinks outside branch**: Grayed out + disabled with icon 🔗🚫
+- [x] **View mode by default**: Reading display with optional `?view=edit`
+- [x] **Share node**: Icon 🔗 to copy node URL
+- [x] **Share branch**: Icon 🌳 to copy isolated branch URL
+- [x] **Navigation support**: Browser back/forward buttons
+- [x] **Auto-expand branch**: Branch automatically expanded on open
 
-### ⌨️ Raccourcis & UX ✅ COMPLÉTÉ
+### ⌨️ Shortcuts & UX ✅ COMPLETED
 
-- [x] **Toggle view/edit** : Bouton [Afficher]/[Éditer] fonctionnel
-- [x] **Raccourci Alt+E** : Toggle view/edit au clavier
-- [x] **Keyboard tips** : Documentation complète en bas du right panel
-- [x] **Modal Actions** : Bouton Supprimer déplacé dans modal
-- [x] **Masquage conditionnel** : Arborescence modale masquée par défaut
-- [x] **Triangles harmonisés** : Toggles du modal identiques à l'arbre principal
+- [x] **Toggle view/edit**: [View]/[Edit] button functional
+- [x] **Alt+E shortcut**: Toggle view/edit with keyboard
+- [x] **Keyboard tips**: Complete documentation at bottom of right panel
+- [x] **Action modal**: Delete button moved to modal
+- [x] **Conditional hiding**: Modal tree hidden by default
+- [x] **Harmonized triangles**: Modal toggles identical to main tree
 
-### 👁️ Améliorations UI ✅ COMPLÉTÉ
+### 👁️ UI Improvements ✅ COMPLETED
 
-- [x] **Breadcrumb intelligent** : `.../parent/noeud_actuel` avec niveaux de taille
-- [x] **Import/Export** : Regroupés dans sidebar + styles harmonisés
-- [ ] **Tags right panel** : Ne pas dupliquer avec center panel (priorité basse)
+- [x] **Smart breadcrumb**: `.../parent/current_node` with sized levels
+- [x] **Import/Export**: Grouped in sidebar + harmonized styles
+- [ ] **Tags right panel**: Don't duplicate with center panel (low priority)
 
-### 📄 Documentation & Tests ✅ COMPLÉTÉ
+### 📄 Documentation & Tests ✅ COMPLETED
 
-- [x] **Audit .md files** : CLAUDE.md, TODO.md, ROADMAP.md mis à jour (20 déc 2025)
-- [x] **Documentation V0.8** : Complète et à jour
-- [ ] **JSDoc complet** : Documenter toutes les fonctions (priorité basse)
-- [ ] **Tests manuels** : Checklist validation des symlinks (priorité basse)
+- [x] **Audit .md files**: CLAUDE.md, TODO.md, ROADMAP.md updated (Dec 20, 2025)
+- [x] **V0.8 documentation**: Complete and up-to-date
+- [ ] **Complete JSDoc**: Document all functions (low priority)
+- [ ] **Manual tests**: Symlink validation checklist (low priority)
 
-### 🐛 Bugs Critiques ✅ CORRIGÉS
+### 🐛 Critical Bugs ✅ FIXED
 
-- [x] **Bug noms identiques** : RÉSOLU - Utilisation exclusive des IDs
-- [x] **Références circulaires** : RÉSOLU - Détection automatique avec icône 🔄
-- [x] **Perte de données** : RÉSOLU - Système symlinks refactoré
-
----
-
-## 🌍 V0.9 - Internationalisation (i18n) - ✅ 95% COMPLÉTÉ
-
-**Contexte stratégique** : DeepMemo est déployé en production sur deepmemo.org et déjà fonctionnel. La priorité est de le rendre accessible à une audience internationale avant d'implémenter des fonctionnalités avancées.
-
-### Système i18n (Fondations) ✅ COMPLÉTÉ
-- [x] Module `i18n.js` lightweight (pas de dépendance externe) - ~240 lignes
-- [x] Support FR/EN minimum (ES optionnel)
-- [x] Dictionnaires de traduction structurés par module - fr.js et en.js (~270 lignes chacun)
-- [x] Fonction `t(key)` pour traduction dynamique avec interpolation
-- [x] Détection automatique de la langue du navigateur
-- [x] Sélecteur manuel de langue dans l'interface (Right panel → Préférences)
-- [x] Persistence dans `localStorage.deepmemo_language`
-- [x] Précache des dictionnaires dans Service Worker (PWA offline)
-
-### Traduction de l'interface ✅ COMPLÉTÉ
-- [x] Labels HTML statiques (`index.html`) - Migration avec data-i18n-*
-- [x] Labels dynamiques générés en JavaScript - Migration complète avec t()
-- [x] Boutons et actions (modales, toasts, confirmations)
-- [x] Placeholders des champs de formulaire
-- [x] Attributs `title` et `aria-label` (accessibilité)
-- [x] Messages d'erreur et avertissements
-- [x] Documentation intégrée (raccourcis clavier, tooltips)
-- [x] **Corrections finales** : 15 strings oubliées identifiées et corrigées (28 déc 2025)
-
-### Contenu de démo multilingue ✅ COMPLÉTÉ
-- [x] `default-data.js` adapté selon langue détectée
-- [x] Version FR (existante) - 26 nœuds pédagogiques
-- [x] Version EN (traduction complète des 26 nœuds)
-- [x] Manifests PWA multilingues (manifest-fr.json, manifest-en.json)
-
-### Tests et validation
-- [ ] Tests sur navigateurs multilingues (FR, EN, ES)
-- [ ] Vérification du fallback (langue non supportée → EN par défaut)
-- [ ] Tests de persistance (changement langue → refresh)
-- [ ] Documentation utilisateur (guide pour changer de langue)
-- [ ] Vérification PWA offline avec dictionnaires précachés
-
-### Améliorations optionnelles (après i18n de base)
-- [ ] Création rapide de tags par #hashtag dans le contenu
-- [ ] Renommage de tags globalement
-- [ ] Fusion de tags
-- [ ] Export en Markdown (avec structure préservée)
-- [ ] Import depuis Notion/Obsidian
+- [x] **Identical names bug**: RESOLVED - Exclusive use of IDs
+- [x] **Circular references**: RESOLVED - Automatic detection with icon 🔄
+- [x] **Data loss**: RESOLVED - Refactored symlink system
 
 ---
 
-## 🌟 V1.0 - Types actifs et système complet
+## 🌍 V0.9 - Internationalization (i18n) - ✅ 95% COMPLETED
 
-### Types de nœuds actifs (Fondations)
+**Strategic context**: DeepMemo is deployed in production on deepmemo.org and already functional. The priority is to make it accessible to an international audience before implementing advanced features.
 
-**Objectif** : Permettre aux nœuds de définir leur propre comportement via scripts, transformant DeepMemo en plateforme extensible.
+### i18n System (Foundations) ✅ COMPLETED
+- [x] Lightweight `i18n.js` module (no external dependency) - ~240 lines
+- [x] Minimum FR/EN support (ES optional)
+- [x] Translation dictionaries structured by module - fr.js and en.js (~270 lines each)
+- [x] `t(key)` function for dynamic translation with interpolation
+- [x] Automatic browser language detection
+- [x] Manual language selector in interface (Right panel → Preferences)
+- [x] Persistence in `localStorage.deepmemo_language`
+- [x] Dictionary precaching in Service Worker (PWA offline)
 
-**Références** : Voir `docs/VISION.md` pour la spécification complète.
+### Interface translation ✅ COMPLETED
+- [x] Static HTML labels (`index.html`) - Migration with data-i18n-*
+- [x] Dynamic labels generated in JavaScript - Complete migration with t()
+- [x] Buttons and actions (modals, toasts, confirmations)
+- [x] Form field placeholders
+- [x] `title` and `aria-label` attributes (accessibility)
+- [x] Error and warning messages
+- [x] Integrated documentation (keyboard shortcuts, tooltips)
+- [x] **Final corrections**: 15 forgotten strings identified and corrected (Dec 28, 2025)
 
-#### Architecture de base
-- [ ] Système d'`implements` basique
-- [ ] Propriété `implements: ["node_type_X"]` sur les nœuds
-- [ ] Scripts simples (`onSave`, `onRender`, `onLoad`)
-- [ ] Sandbox JavaScript sécurisé (eval isolé)
-- [ ] Nœuds descripteurs de types (types = nœuds eux-mêmes)
-- [ ] API de manipulation de nœuds (`getNode`, `updateNode`, `createChild`)
-- [ ] Exemples concrets dans le contenu de démo
+### Multilingual demo content ✅ COMPLETED
+- [x] `default-data.js` adapted according to detected language
+- [x] FR version (existing) - 26 pedagogical nodes
+- [x] EN version (complete translation of 26 nodes)
+- [x] Multilingual PWA manifests (manifest-fr.json, manifest-en.json)
 
-#### Types avancés et triggers
-- [ ] Résolution de dépendances entre types
-- [ ] Héritage de types (`implements` multiple)
-- [ ] Triggers multi-nœuds (API `triggerNode`)
-- [ ] Vues multiples (card, list, kanban, calendar)
-- [ ] Actions customisées par type de nœud
-- [ ] Exemples concrets : recettes → courses, projets agiles, CRM
+### Testing and validation
+- [ ] Tests on multilingual browsers (FR, EN, ES)
+- [ ] Fallback verification (unsupported language → EN by default)
+- [ ] Persistence tests (language change → refresh)
+- [ ] User documentation (guide to change language)
+- [ ] PWA offline verification with precached dictionaries
 
-### Multi-utilisateur
-- [ ] Permissions chmod-style (rwx par utilisateur/groupe)
-- [ ] Partage de branches
-- [ ] Collaboration temps réel
-- [ ] Historique des modifications
-
-### Interface vocale
-- [ ] Commandes vocales (créer, rechercher, naviguer)
-- [ ] Dictée de contenu
-- [ ] Lecture à voix haute
-
-### Architecture distribuée
-- [ ] Backend optionnel (Node.js + PostgreSQL)
-- [ ] Synchronisation multi-devices
-- [ ] Mode offline-first
-- [ ] Fédération entre instances
+### Optional improvements (after basic i18n)
+- [ ] Quick tag creation via #hashtag in content
+- [ ] Global tag renaming
+- [ ] Tag merging
+- [ ] Markdown export (with preserved structure)
+- [ ] Import from Notion/Obsidian
 
 ---
 
-## 💡 Backlog (idées futures)
+## 🌟 V1.0 - Active types and complete system
+
+### Active node types (Foundations)
+
+**Objective**: Allow nodes to define their own behavior via scripts, transforming DeepMemo into an extensible platform.
+
+**References**: See `docs/VISION.md` for complete specification.
+
+#### Basic architecture
+- [ ] Basic `implements` system
+- [ ] `implements: ["node_type_X"]` property on nodes
+- [ ] Simple scripts (`onSave`, `onRender`, `onLoad`)
+- [ ] Secure JavaScript sandbox (isolated eval)
+- [ ] Type descriptor nodes (types = nodes themselves)
+- [ ] Node manipulation API (`getNode`, `updateNode`, `createChild`)
+- [ ] Concrete examples in demo content
+
+#### Advanced types and triggers
+- [ ] Dependency resolution between types
+- [ ] Type inheritance (multiple `implements`)
+- [ ] Multi-node triggers (`triggerNode` API)
+- [ ] Multiple views (card, list, kanban, calendar)
+- [ ] Custom actions per node type
+- [ ] Concrete examples: recipes → shopping list, agile projects, CRM
+
+### Multi-user
+- [ ] chmod-style permissions (rwx per user/group)
+- [ ] Branch sharing
+- [ ] Real-time collaboration
+- [ ] Modification history
+
+### Voice interface
+- [ ] Voice commands (create, search, navigate)
+- [ ] Content dictation
+- [ ] Text-to-speech
+
+### Distributed architecture
+- [ ] Optional backend (Node.js + PostgreSQL)
+- [ ] Multi-device synchronization
+- [ ] Offline-first mode
+- [ ] Federation between instances
+
+---
+
+## 💡 Backlog (future ideas)
 
 ### Interface
-- [ ] Thèmes personnalisables
-- [ ] Mode clair
-- [ ] Vue graphe (network visualization)
-- [ ] Vue calendrier
-- [ ] Vue kanban
-- [ ] Mode zen (focus)
+- [ ] Customizable themes
+- [ ] Light mode
+- [ ] Graph view (network visualization)
+- [ ] Calendar view
+- [ ] Kanban view
+- [ ] Zen mode (focus)
 
-### Productivité
-- [ ] Templates de nœuds
-- [ ] Snippets réutilisables
-- [ ] Macros/Shortcuts personnalisés
-- [ ] Intégrations (Google Calendar, Trello, etc.)
+### Productivity
+- [ ] Node templates
+- [ ] Reusable snippets
+- [ ] Custom macros/shortcuts
+- [ ] Integrations (Google Calendar, Trello, etc.)
 
-### Avancé
+### Advanced
 - [ ] Versioning (git-like)
-- [ ] Branches de travail
-- [ ] Merge de nœuds
-- [ ] Encryption des données sensibles
-- [ ] API REST pour extensions
+- [ ] Work branches
+- [ ] Node merging
+- [ ] Sensitive data encryption
+- [ ] REST API for extensions
 - [ ] Plugin system
 
 ---
 
-## 📊 Métriques de progression
+## 📊 Progress metrics
 
 ### Code
-- **Lignes de code** : ~3600 (V0.6 single-file)
-- **Fonctions** : ~50
-- **Événements** : ~30
-- **Raccourcis clavier** : 7
+- **Lines of code**: ~3600 (V0.6 single-file)
+- **Functions**: ~50
+- **Events**: ~30
+- **Keyboard shortcuts**: 7
 
-### Données
-- **Types de base** : 1 (Nœud)
-- **Propriétés par nœud** : 10
-- **Relations** : parent, children, links, backlinks, symlinks
+### Data
+- **Base types**: 1 (Node)
+- **Properties per node**: 10
+- **Relations**: parent, children, links, backlinks, symlinks
 
-### Tests utilisateur
-- [x] Fabien utilise activement (création de contenu)
-- [ ] Bêta-testeurs externes
-- [ ] Feedback structuré
-
----
-
-## 🎓 Leçons apprises
-
-### Ce qui fonctionne bien
-- ✅ Concept des nœuds récursifs : simple et puissant
-- ✅ Liens symboliques : très utiles en pratique
-- ✅ Tags avec auto-complétion : excellent UX
-- ✅ Drag & drop : intuitif et rapide
-- ✅ Single-file au début : pratique pour prototyper
-
-### Ce qui a été amélioré en V0.7
-- ✅ Single-file → Multifile : beaucoup plus maintenable
-- ✅ Structure de projet professionnelle
-- ✅ UX des modales corrigée
-
-### Ce qui doit encore être amélioré
-- ⚠️ Pas de tests automatisés
-- ⚠️ Performance avec beaucoup de nœuds (>1000) à tester
-- ⚠️ Qualité de code (JSDoc, séparation des responsabilités)
-
-### Décisions techniques validées
-- ✅ Vanilla JS : pas de overhead, contrôle total
-- ✅ LocalStorage : assez pour MVP, migration backend prévue
-- ✅ Dark theme par défaut : préférence utilisateur
-- ✅ Keyboard-first : efficacité maximale
+### User testing
+- [x] Fabien actively uses it (content creation)
+- [ ] External beta-testers
+- [ ] Structured feedback
 
 ---
 
-**Dernière mise à jour** : 27 Décembre 2025 (Réorganisation V0.9 : i18n prioritaire)
-**Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ)
-**Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
-**Prochaine milestone** : V0.9 (Internationalisation)
+## 🎓 Lessons learned
+
+### What works well
+- ✅ Recursive node concept: simple and powerful
+- ✅ Symbolic links: very useful in practice
+- ✅ Tags with auto-completion: excellent UX
+- ✅ Drag & drop: intuitive and fast
+- ✅ Single-file at start: practical for prototyping
+
+### What was improved in V0.7
+- ✅ Single-file → Multifile: much more maintainable
+- ✅ Professional project structure
+- ✅ Modal UX fixed
+
+### What still needs improvement
+- ⚠️ No automated tests
+- ⚠️ Performance with many nodes (>1000) to test
+- ⚠️ Code quality (JSDoc, separation of concerns)
+
+### Validated technical decisions
+- ✅ Vanilla JS: no overhead, full control
+- ✅ LocalStorage: enough for MVP, backend migration planned
+- ✅ Dark theme by default: user preference
+- ✅ Keyboard-first: maximum efficiency
 
 ---
 
-## 🎉 V0.8 - MIGRATION FINALE COMPLÉTÉE
+**Last update**: December 27, 2025 (V0.9 reorganization: i18n priority)
+**Current version**: V0.8 (✅ 100% COMPLETED)
+**Deployment**: ✅ **deepmemo.org** (IN PRODUCTION)
+**Next milestone**: V0.9 (Internationalization)
 
-### ✅ Déploiement final (20 décembre 2025)
-- [x] **index.html** : Bascule vers `app.js` (type="module")
-- [x] **app.js → app-backup.js** : Legacy code conservé pour référence
-- [x] **Drag & drop simplifié** : Modificateur Shift supprimé (Ctrl + Ctrl+Alt uniquement)
-- [x] **Tests validation** : Toutes fonctionnalités opérationnelles en production
-- [x] **Documentation finale** : CLAUDE.md, TODO.md, ROADMAP.md à jour
+---
 
-### ✅ Export/Import de branche (23 décembre 2025)
-- [x] **Export branche** : Exporter nœud + descendants récursivement
-- [x] **Import branche** : Importer comme enfants du nœud actuel
-- [x] **Régénération IDs** : Éviter conflits avec nœuds existants
-- [x] **Merge non-destructif** : Conserver données existantes
-- [x] **Conservation symlinks** : Relations préservées dans branche importée
-- [x] **Interface utilisateur** : Boutons ⬇️/⬆️ dans actions du nœud
-- [x] **Documentation** : README, ARCHITECTURE, ROADMAP mis à jour
+## 🎉 V0.8 - FINAL MIGRATION COMPLETED
 
-### ✅ Contenu de démo + UX Polish (24 décembre 2025)
-- [x] **Contenu de démo** : 26 nœuds pédagogiques au premier lancement
-  - Structure progressive : Bienvenue → Interface → Features → Future → Premiers pas
-  - Format pédagogique : [Fonctionnalité → Ce que ça permet → Exemple]
-  - Concepts futurs clarifiés (types = nœuds, triggers multi-nœuds, API externe)
-- [x] **Reset scroll** : Retour en haut du contenu à chaque navigation
-- [x] **Mode affichage** : Démarrage en mode lecture (au lieu d'édition)
-- [x] **Right panel** : Masqué par défaut (interface épurée)
-- [x] **Toggle police** : Choix entre Sto (personnalisée) et polices système
-- [x] **Documentation complète** : CLAUDE.md, README, docs/ tous à jour
+### ✅ Final deployment (December 20, 2025)
+- [x] **index.html**: Switch to `app.js` (type="module")
+- [x] **app.js → app-backup.js**: Legacy code kept for reference
+- [x] **Simplified drag & drop**: Shift modifier removed (Ctrl + Ctrl+Alt only)
+- [x] **Validation tests**: All features operational in production
+- [x] **Final documentation**: CLAUDE.md, TODO.md, ROADMAP.md up-to-date
 
-### ✅ Progressive Web App (25 décembre 2025)
-- [x] **Manifest PWA** : Configuration complète (nom, icônes, thème)
-- [x] **Service Worker** : Cache-First avec précache et update en arrière-plan
-- [x] **Mode offline** : Fonctionne sans connexion Internet
-- [x] **Installation native** : Desktop et mobile (Chrome, Edge, Safari, etc.)
-- [x] **Icônes** : 192x192 et 512x512 générées depuis favicon.svg
-- [x] **Documentation** : Guide complet dans docs/PWA.md
-- [x] **HTTPS ready** : Compatible GitHub Pages, Netlify, Vercel
+### ✅ Branch export/import (December 23, 2025)
+- [x] **Branch export**: Export node + descendants recursively
+- [x] **Branch import**: Import as children of current node
+- [x] **ID regeneration**: Avoid conflicts with existing nodes
+- [x] **Non-destructive merge**: Preserve existing data
+- [x] **Preserve symlinks**: Relationships preserved in imported branch
+- [x] **User interface**: ⬇️/⬆️ buttons in node actions
+- [x] **Documentation**: README, ARCHITECTURE, ROADMAP updated
 
-### ✅ Fichiers joints (25 décembre 2025)
-- [x] **Stockage IndexedDB** : Jusqu'à ~500 MB selon navigateur
-- [x] **Upload de fichiers** : Images, PDFs, documents (50 MB max par fichier)
-- [x] **Affichage inline** : Images via syntaxe `![](attachment:ID)`
-- [x] **Export/Import ZIP** : Format systématique incluant fichiers + data.json
-- [x] **Gestion complète** : Upload, download, delete, copie syntaxe
-- [x] **Indicateur stockage** : Barre de progression temps réel dans panneau droit
-- [x] **Garbage collection** : Nettoyage manuel des fichiers orphelins
-- [x] **Icônes par type** : Différenciation visuelle selon MIME type
-- [x] **Documentation** : Spec détaillée dans docs/SPEC-ATTACHMENTS.md
+### ✅ Demo content + UX polish (December 24, 2025)
+- [x] **Demo content**: 26 pedagogical nodes on first launch
+  - Progressive structure: Welcome → Interface → Features → Future → First steps
+  - Pedagogical format: [Feature → What it allows → Example]
+  - Future concepts clarified (types = nodes, multi-node triggers, external API)
+- [x] **Scroll reset**: Return to top of content on each navigation
+- [x] **Display mode**: Start in read mode (instead of edit)
+- [x] **Right panel**: Hidden by default (clean interface)
+- [x] **Font toggle**: Choice between Sto (custom) and system fonts
+- [x] **Complete documentation**: CLAUDE.md, README, docs/ all up-to-date
+
+### ✅ Progressive Web App (December 25, 2025)
+- [x] **PWA manifest**: Complete configuration (name, icons, theme)
+- [x] **Service Worker**: Cache-First with precache and background update
+- [x] **Offline mode**: Works without Internet connection
+- [x] **Native installation**: Desktop and mobile (Chrome, Edge, Safari, etc.)
+- [x] **Icons**: 192x192 and 512x512 generated from favicon.svg
+- [x] **Documentation**: Complete guide in docs/PWA.md
+- [x] **HTTPS ready**: Compatible GitHub Pages, Netlify, Vercel
+
+### ✅ File attachments (December 25, 2025)
+- [x] **IndexedDB storage**: Up to ~500 MB depending on browser
+- [x] **File upload**: Images, PDFs, documents (50 MB max per file)
+- [x] **Inline display**: Images via syntax `![](attachment:ID)`
+- [x] **ZIP export/import**: Systematic format including files + data.json
+- [x] **Complete management**: Upload, download, delete, copy syntax
+- [x] **Storage indicator**: Real-time progress bar in right panel
+- [x] **Garbage collection**: Manual cleanup of orphaned files
+- [x] **Icons by type**: Visual differentiation by MIME type
+- [x] **Documentation**: Detailed spec in docs/SPEC-ATTACHMENTS.md

@@ -1,117 +1,126 @@
-# 🏗️ DeepMemo - Architecture Technique V0.8
+# 🏗️ DeepMemo - Technical Architecture V0.9
 
-**Dernière mise à jour** : 25 Décembre 2025
-**Version** : 0.8 (Architecture modulaire ES6 + PWA + Attachments)
+**Last updated**: December 28, 2025
+**Version**: 0.9 (ES6 modular architecture + PWA + Attachments + i18n)
 
----
-
-## 📐 Vue d'ensemble
-
-DeepMemo est une **application single-page** (SPA) en vanilla JavaScript ES6, HTML5 et CSS3, utilisant LocalStorage pour la persistence des données.
-
-**Architecture V0.8** : Modulaire ES6
-- `index.html` : Structure HTML (~190 lignes)
-- `src/css/` : Styles modulaires (~1500 lignes réparties en 5 fichiers)
-- `src/js/` : **11 modules ES6** organisés (~2500 lignes)
-  - `app.js` : Point d'entrée (~420 lignes)
-  - `core/` : Gestion des données
-  - `features/` : Fonctionnalités métier
-  - `ui/` : Interface utilisateur
-  - `utils/` : Utilitaires
+> 📖 **[Version française disponible](./ARCHITECTURE.fr.md)** | **English version**
 
 ---
 
-## 📂 Structure des fichiers
+## 📐 Overview
+
+DeepMemo is a **single-page application** (SPA) built with vanilla JavaScript ES6, HTML5, and CSS3, using LocalStorage for data persistence.
+
+**V0.9 Architecture**: Modular ES6 + Internationalization
+- `index.html`: HTML structure (~190 lines)
+- `src/css/`: Modular styles (~1500 lines across 5 files)
+- `src/js/`: **13 ES6 modules** organized (~3000 lines)
+  - `app.js`: Main entry point (~830 lines)
+  - `core/`: Data management
+  - `features/`: Business features
+  - `ui/`: User interface
+  - `utils/`: Utilities
+
+---
+
+## 📂 File Structure
 
 ### JavaScript (ES6 Modules)
 
 ```
 src/js/
-├── app.js                      # Point d'entrée (~830 lignes)
+├── app.js                      # Entry point (~830 lines)
 │
 ├── core/
-│   ├── data.js                 # Gestion données + localStorage + export/import
-│   ├── attachments.js          # Gestion fichiers joints (IndexedDB)
-│   └── default-data.js         # Contenu de démo par défaut
+│   ├── data.js                 # Data + localStorage + export/import
+│   ├── attachments.js          # File attachments (IndexedDB)
+│   └── default-data.js         # Default demo content
 │
 ├── features/
-│   ├── tree.js                 # Arborescence + mode branche
-│   ├── editor.js               # Éditeur + breadcrumb + attachments UI
-│   ├── search.js               # Recherche globale
+│   ├── tree.js                 # Tree view + branch mode
+│   ├── editor.js               # Editor + breadcrumb + attachments UI
+│   ├── search.js               # Global search
 │   ├── tags.js                 # Tags + autocomplete
-│   ├── modals.js               # Modales (Move/Link/Duplicate)
-│   └── drag-drop.js            # Drag & drop complet
+│   ├── modals.js               # Modals (Move/Link/Duplicate)
+│   └── drag-drop.js            # Complete drag & drop
 │
 ├── ui/
-│   ├── toast.js                # Notifications toast
-│   └── panels.js               # Panneaux latéraux
+│   ├── toast.js                # Toast notifications
+│   ├── panels.js               # Side panels
+│   └── mobile-tabs.js          # Mobile tab navigation
 │
-└── utils/
-    ├── routing.js              # Navigation URL
-    ├── keyboard.js             # Raccourcis clavier
-    └── helpers.js              # Fonctions utilitaires
+├── utils/
+│   ├── routing.js              # URL navigation
+│   ├── keyboard.js             # Keyboard shortcuts
+│   ├── helpers.js              # Utility functions
+│   └── i18n.js                 # Internationalization system
+│
+└── locales/
+    ├── fr.js                   # French dictionary
+    └── en.js                   # English dictionary
 ```
 
-### CSS (Modulaire)
+### CSS (Modular)
 
 ```
 src/css/
-├── style.css                   # Import global (~10 lignes)
-├── base.css                    # Reset + variables CSS (~150 lignes)
-├── layout.css                  # Structure responsive (~250 lignes)
-├── components.css              # Composants UI (~800 lignes)
-└── utilities.css               # Classes utilitaires (~50 lignes)
+├── style.css                   # Global import (~10 lines)
+├── base.css                    # Reset + CSS variables (~150 lines)
+├── layout.css                  # Responsive structure (~250 lines)
+├── components.css              # UI components (~800 lines)
+├── mobile.css                  # Mobile-specific styles (~400 lines)
+└── utilities.css               # Utility classes (~50 lines)
 ```
 
 ---
 
-## 🎯 Principes de conception
+## 🎯 Design Principles
 
-### 1. Modularité ES6
-- **Imports/exports nommés** pour chaque module
-- **État local** dans chaque module (non exporté)
-- **Communication** via callbacks et fonctions exportées
-- **Pas de state manager global** (volontairement simple)
+### 1. ES6 Modularity
+- **Named imports/exports** for each module
+- **Local state** within each module (not exported)
+- **Communication** via callbacks and exported functions
+- **No global state manager** (deliberately simple)
 
-### 2. Minimalisme
-- **Un seul type de base** : le Nœud
-- La structure émerge de l'usage
-- Pas de contraintes imposées
+### 2. Minimalism
+- **Single base type**: the Node
+- Structure emerges from usage
+- No imposed constraints
 
-### 3. Récursivité
-- Tout nœud peut contenir d'autres nœuds
-- Profondeur infinie
-- Pas de distinction entre "conteneur" et "contenu"
+### 3. Recursion
+- Any node can contain other nodes
+- Infinite depth
+- No distinction between "container" and "content"
 
-### 4. Flexibilité
-- Symlinks pour apparitions multiples
-- Tags libres sans hiérarchie
-- Mode branche pour isolation
+### 4. Flexibility
+- Symlinks for multiple appearances
+- Free tags without hierarchy
+- Branch mode for isolation
 
 ---
 
-## 📊 Structure des données
+## 📊 Data Structure
 
-### Le type Nœud
+### The Node Type
 
 ```javascript
 {
   id: String,              // "node_timestamp_random"
-  type: String,            // "note" ou "symlink"
-  title: String,           // Titre du nœud
-  content: String,         // Contenu markdown
-  children: Array<String>, // IDs des enfants directs
-  parent: String | null,   // ID du parent (null = racine)
-  created: Number,         // Timestamp création
-  modified: Number,        // Timestamp modification
-  tags: Array<String>,     // Tags du nœud
+  type: String,            // "note" or "symlink"
+  title: String,           // Node title
+  content: String,         // Markdown content
+  children: Array<String>, // Direct children IDs
+  parent: String | null,   // Parent ID (null = root)
+  created: Number,         // Creation timestamp
+  modified: Number,        // Modification timestamp
+  tags: Array<String>,     // Node tags
 
-  // Pour les symlinks uniquement :
-  targetId: String         // ID du nœud cible (si type === "symlink")
+  // For symlinks only:
+  targetId: String         // Target node ID (if type === "symlink")
 }
 ```
 
-### La structure globale
+### Global Structure
 
 ```javascript
 {
@@ -119,51 +128,51 @@ src/css/
     [nodeId]: Node,
     // ...
   },
-  rootNodes: Array<String> // IDs des nœuds racines
+  rootNodes: Array<String> // Root node IDs
 }
 ```
 
-### Exemple de symlink
+### Symlink Example
 
 ```javascript
-// Nœud original
+// Original node
 {
   id: "node_1702234567894_mno345",
   type: "note",
   title: "👤 Alice",
-  content: "Contact : alice@example.com",
+  content: "Contact: alice@example.com",
   children: [],
   parent: "node_contacts",
-  tags: ["contact", "équipe"]
+  tags: ["contact", "team"]
 }
 
-// Symlink avec titre personnalisé
+// Symlink with custom title
 {
   id: "symlink_1702234567895_pqr678",
   type: "symlink",
-  title: "👤 Alice (Lead Dev)",      // Titre indépendant
+  title: "👤 Alice (Lead Dev)",        // Independent title
   targetId: "node_1702234567894_mno345",
   parent: "node_projet_x",
-  children: [],                       // Toujours vide
-  tags: []                            // Tags indépendants
+  children: [],                         // Always empty
+  tags: []                              // Independent tags
 }
 ```
 
-**Important** : Le renommage d'un symlink ne renomme PAS le nœud cible. Seul le contenu est partagé.
+**Important**: Renaming a symlink does NOT rename the target node. Only content is shared.
 
 ---
 
-## 🔄 Modules clés
+## 🔄 Key Modules
 
-### app.js (Point d'entrée)
+### app.js (Entry Point)
 
-**Responsabilités** :
-- Initialisation de l'application
-- Coordination entre modules
-- Gestion de l'état global (currentNodeId, viewMode)
-- Fonctions globales exposées via `window.app`
+**Responsibilities**:
+- Application initialization
+- Module coordination
+- Global state management (currentNodeId, viewMode)
+- Global functions exposed via `window.app`
 
-**Exports** :
+**Exports**:
 ```javascript
 export class DeepMemoApp {
   init()
@@ -171,19 +180,19 @@ export class DeepMemoApp {
   selectNodeById(nodeId)
   createRootNode()
   createChildNode()
-  // ... fonctions publiques
+  // ... public functions
 }
 ```
 
 ### core/data.js
 
-**Responsabilités** :
-- Gestion de la structure de données
-- Sauvegarde/chargement localStorage
-- Export/Import JSON
-- Opérations CRUD sur les nœuds
+**Responsibilities**:
+- Data structure management
+- localStorage save/load
+- JSON export/import
+- CRUD operations on nodes
 
-**Exports** :
+**Exports**:
 ```javascript
 export let data = { nodes: {}, rootNodes: [] };
 export function saveData()
@@ -200,13 +209,13 @@ export function wouldCreateCycleWithMove(nodeId, newParentId)
 
 ### core/attachments.js
 
-**Responsabilités** :
-- Gestion des fichiers joints aux nœuds
-- Stockage dans IndexedDB (~500 MB limite)
-- Export/Import ZIP avec fichiers
-- Garbage collection fichiers orphelins
+**Responsibilities**:
+- File attachments management
+- IndexedDB storage (~500 MB limit)
+- ZIP export/import with files
+- Orphaned files garbage collection
 
-**Exports** :
+**Exports**:
 ```javascript
 export async function initDB()
 export async function saveAttachment(id, blob)
@@ -220,53 +229,56 @@ export function isIndexedDBAvailable()
 export function formatFileSize(bytes)
 ```
 
-**Stockage** :
-- Database : `deepmemo-attachments`
-- Store : `files` (keyPath: `id`)
-- Format ID : `attach_{timestamp}_{random}`
-- Limite : 50 MB par fichier
+**Storage**:
+- Database: `deepmemo-attachments`
+- Store: `files` (keyPath: `id`)
+- ID format: `attach_{timestamp}_{random}`
+- Limit: 50 MB per file
 
-**Export/Import** :
-- Format ZIP systématique : `data.json` + `attachments/`
-- Rétrocompatibilité JSON simple (détection auto)
-- Régénération IDs lors import branche
+**Export/Import**:
+- Systematic ZIP format: `data.json` + `attachments/`
+- Backward compatibility with simple JSON (auto-detection)
+- ID regeneration on branch import
 
 ### core/default-data.js
 
-**Responsabilités** :
-- Fournir le contenu de démonstration initial
-- Documentation interactive pour nouveaux utilisateurs
+**Responsibilities**:
+- Provide initial demonstration content
+- Interactive documentation for new users
+- Bilingual support (FR/EN) based on detected language
 
-**Exports** :
+**Exports**:
 ```javascript
-export function getDefaultData()
+export function getDefaultData()         // Dispatcher
+export function getDefaultDataFR()       // French content
+export function getDefaultDataEN()       // English content
 ```
 
-**Structure** :
-- 26 nœuds pédagogiques organisés hiérarchiquement
-- Tutoriel progressif : Interface → Fonctionnalités → Vision future
-- Exemples concrets pour chaque feature
-- Format : [Fonctionnalité → Utilité → Exemple pratique]
+**Structure**:
+- 26 pedagogical nodes hierarchically organized
+- Progressive tutorial: Interface → Features → Future vision
+- Concrete examples for each feature
+- Format: [Feature → Utility → Practical example]
 
 ### features/tree.js
 
-**Responsabilités** :
-- Rendu de l'arborescence
-- Navigation clavier dans l'arbre
-- Mode branche isolée
-- Gestion expand/collapse
-- Auto-collapse sur activation
+**Responsibilities**:
+- Tree rendering
+- Keyboard navigation in tree
+- Isolated branch mode
+- Expand/collapse management
+- Auto-collapse on activation
 
-**Variables d'état (non exportées)** :
+**State variables (not exported)**:
 ```javascript
 let branchMode = false;
 let branchRootId = null;
-let expandedNodes = new Set();       // Instance keys dépliés
-let currentInstanceKey = null;       // Nœud actuellement affiché
-let focusedInstanceKey = null;       // Nœud focusé (clavier)
+let expandedNodes = new Set();       // Expanded instance keys
+let currentInstanceKey = null;       // Currently displayed node
+let focusedInstanceKey = null;       // Currently focused node (keyboard)
 ```
 
-**Exports clés** :
+**Key exports**:
 ```javascript
 export function renderTree()
 export function setCurrentInstanceKey(key)
@@ -278,9 +290,9 @@ export function updateTreeFocus()
 export function updateFocusAfterRender(nodeId)
 ```
 
-**Instance Keys** :
+**Instance Keys**:
 
-Un nœud peut apparaître plusieurs fois via symlinks. L'instance key encode le chemin complet :
+A node can appear multiple times via symlinks. The instance key encodes the full path:
 
 ```javascript
 function getInstanceKey(nodeId, parentContext) {
@@ -289,34 +301,34 @@ function getInstanceKey(nodeId, parentContext) {
     : `${nodeId}@${parentContext}`;
 }
 
-// Exemples :
-// - Nœud racine : "node123@root"
-// - Enfant : "node456@node123@root"
-// - Via symlink : "node789@node456@node123@root"
+// Examples:
+// - Root node: "node123@root"
+// - Child: "node456@node123@root"
+// - Via symlink: "node789@node456@node123@root"
 ```
 
-**Deux types d'actions distinctes** :
+**Two Distinct Action Types**:
 
-1. **Pliage/dépliage manuel** (triangle, flèches) :
-   - Modifie `expandedNodes` directement
-   - État préservé
-   - Ne change PAS le nœud actif
+1. **Manual fold/unfold** (triangle, arrows):
+   - Modifies `expandedNodes` directly
+   - State preserved
+   - Does NOT change active node
 
-2. **Activation** (clic titre, Entrée) :
-   - Appelle `setCurrentInstanceKey()`
-   - **Auto-collapse** : vide `expandedNodes` et reconstruit le chemin
-   - Change le nœud actif
+2. **Activation** (click title, Enter):
+   - Calls `setCurrentInstanceKey()`
+   - **Auto-collapse**: empties `expandedNodes` and rebuilds path
+   - Changes active node
 
 ### features/editor.js
 
-**Responsabilités** :
-- Affichage du contenu du nœud
-- Breadcrumb intelligent (s'arrête au branchRootId)
-- Liste des enfants avec cartes cliquables
-- Sauvegarde titre/contenu
-- Toggle view/edit mode
+**Responsibilities**:
+- Node content display
+- Smart breadcrumb (stops at branchRootId)
+- Children list with clickable cards
+- Title/content save
+- View/edit mode toggle
 
-**Exports clés** :
+**Key exports**:
 ```javascript
 export function displayNode(nodeId, onComplete)
 export function saveNode(nodeId)
@@ -325,21 +337,21 @@ export function updateRightPanel(nodeId)
 export function updateViewMode(mode)
 ```
 
-**Sauvegarde symlinks** :
+**Symlink save**:
 ```javascript
 export function saveNode(nodeId) {
   const node = data.nodes[nodeId];
 
   if (node.type === 'symlink') {
     const targetNode = data.nodes[node.targetId];
-    // Titre sauvegardé sur symlink
+    // Title saved on symlink
     node.title = document.getElementById('nodeTitle').value;
     node.modified = Date.now();
-    // Contenu sauvegardé sur target
+    // Content saved on target
     targetNode.content = document.getElementById('nodeContent').value;
     targetNode.modified = Date.now();
   } else {
-    // Nœud normal : tout sauvegardé sur le nœud
+    // Normal node: everything saved on node
     node.title = document.getElementById('nodeTitle').value;
     node.content = document.getElementById('nodeContent').value;
     node.modified = Date.now();
@@ -351,27 +363,27 @@ export function saveNode(nodeId) {
 
 ### features/drag-drop.js
 
-**Responsabilités** :
-- Drag & drop sur arbre et cartes enfants
-- Indicateurs visuels (before/after/inside)
-- Actions selon modificateurs clavier
-- Prévention des cycles
+**Responsibilities**:
+- Drag & drop on tree and child cards
+- Visual indicators (before/after/inside)
+- Actions based on keyboard modifiers
+- Cycle prevention
 
-**API publique** :
+**Public API**:
 ```javascript
 export function initDragDrop(element, nodeId, onDropComplete)
 ```
 
-**Modificateurs clavier** :
-- **Défaut** : Déplacer (move)
-- **Ctrl** : Dupliquer (duplicate)
-- **Ctrl+Alt** : Lien symbolique (symlink)
+**Keyboard modifiers**:
+- **Default**: Move
+- **Ctrl**: Duplicate
+- **Ctrl+Alt**: Symlink
 
-**Zones de drop** :
-- **before/after** (33% haut/bas) : Insert sibling
-- **inside** (33% milieu) : Change parent
+**Drop zones**:
+- **before/after** (33% top/bottom): Insert sibling
+- **inside** (33% middle): Change parent
 
-**Prévention cycles** :
+**Cycle prevention**:
 ```javascript
 function isDescendantOf(targetId, nodeId) {
   if (!targetId || targetId === nodeId) return false;
@@ -384,13 +396,13 @@ function isDescendantOf(targetId, nodeId) {
 
 ### features/tags.js
 
-**Responsabilités** :
-- Gestion des tags
-- Auto-complétion intelligente (branche + global)
-- Tag cloud avec compteurs
-- Recherche par tag
+**Responsibilities**:
+- Tag management
+- Smart autocomplete (branch + global)
+- Tag cloud with counters
+- Search by tag
 
-**Exports clés** :
+**Key exports**:
 ```javascript
 export function updateTagsDisplay(nodeId)
 export function setupTagAutocomplete()
@@ -398,19 +410,19 @@ export function updateTagCloud()
 export function searchByTag(tag)
 ```
 
-**Auto-complétion** :
-- Tags de la branche actuelle (prioritaires)
-- Tags globaux (secondaires)
-- Triés par fréquence
+**Autocomplete**:
+- Current branch tags (priority)
+- Global tags (secondary)
+- Sorted by frequency
 
 ### features/search.js
 
-**Responsabilités** :
-- Recherche globale (titres, contenus, tags)
-- Modal de recherche avec navigation clavier
-- Highlights des résultats
+**Responsibilities**:
+- Global search (titles, content, tags)
+- Search modal with keyboard navigation
+- Result highlights
 
-**Exports clés** :
+**Key exports**:
 ```javascript
 export function openSearch()
 export function closeSearch()
@@ -419,17 +431,17 @@ export function performSearch(query)
 
 ### utils/routing.js
 
-**Responsabilités** :
-- Parsing URL (hash + query params)
-- Mise à jour URL
-- Gestion popstate/hashchange
+**Responsibilities**:
+- URL parsing (hash + query params)
+- URL updates
+- popstate/hashchange handling
 
-**Format URL** :
+**URL format**:
 ```
 ?branch=nodeId#/node/nodeId
 ```
 
-**Exports clés** :
+**Key exports**:
 ```javascript
 export function parseHash()
 export function updateHash(nodeId, branchRootId)
@@ -438,62 +450,89 @@ export function setupHashListener(callback)
 
 ### utils/keyboard.js
 
-**Responsabilités** :
-- Gestion des raccourcis clavier globaux
+**Responsibilities**:
+- Global keyboard shortcuts management
 
-**Raccourcis** :
-- `Alt+N` : Nouveau nœud
-- `Alt+E` : Passer en mode édition (avec focus)
-- `Ctrl+K` : Recherche
-- `Escape` : Remonter au parent
+**Shortcuts**:
+- `Alt+N`: New node
+- `Alt+E`: Switch to edit mode (with focus)
+- `Ctrl+K`: Search
+- `Escape`: Go to parent
+
+### utils/i18n.js (V0.9)
+
+**Responsibilities**:
+- Internationalization system (0 dependencies)
+- Dynamic dictionary loading
+- DOM translation
+- Language detection and persistence
+
+**Key exports**:
+```javascript
+export async function initI18n()
+export function t(key, params)
+export async function setLanguage(lang)
+export function getCurrentLanguage()
+export function translateDOM()
+```
+
+**Features**:
+- Custom interpolation: `{count}` variables and `{{count > 1 ? 's' : ''}}` expressions
+- Auto language detection: `localStorage` → `navigator.language` → fallback
+- DOM auto-translation via `data-i18n*` attributes
+- Dynamic dictionary loading via `import()`
+
+**Supported languages**:
+- French (fr)
+- English (en)
 
 ---
 
-## 🎨 Mode Branche Isolée
+## 🎨 Isolated Branch Mode
 
 ### Concept
 
-Le mode branche permet d'afficher uniquement une sous-arborescence, en isolant une branche spécifique.
+Branch mode allows displaying only a sub-tree, isolating a specific branch.
 
-### Différences avec mode normal
+### Differences from Normal Mode
 
-**Les SEULES différences** :
+**The ONLY differences**:
 
-1. **Nœuds affichés** :
-   - Mode normal : Tout l'arbre (`data.rootNodes`)
-   - Mode branche : Sous-arborescence (`[branchRootId]`)
+1. **Displayed nodes**:
+   - Normal mode: Whole tree (`data.rootNodes`)
+   - Branch mode: Sub-tree (`[branchRootId]`)
 
-2. **Symlinks externes** :
-   - Mode normal : Tous fonctionnels
-   - Mode branche : Symlinks hors branche désactivés
-     - Icône `🔗🚫`, texte grisé (opacity 0.4)
-     - Non-cliquables, toast d'avertissement
-     - Pas de triangle de toggle
+2. **External symlinks**:
+   - Normal mode: All functional
+   - Branch mode: Symlinks outside branch disabled
+     - Icon `🔗🚫`, greyed text (opacity 0.4)
+     - Non-clickable, warning toast
+     - No toggle triangle
 
-3. **Instance keys** :
-   - Mode normal : Chemin complet depuis racine globale
-   - Mode branche : Chemin s'arrête au `branchRootId`
+3. **Instance keys**:
+   - Normal mode: Full path from global root
+   - Branch mode: Path stops at `branchRootId`
 
-**Navigation identique** : Pliage/dépliage, auto-collapse, clavier fonctionnent de la même manière.
+**Identical navigation**: Fold/unfold, auto-collapse, keyboard work the same way.
 
 ### Activation
 
 ```javascript
-// URL avec ?branch=nodeId
+// URL with ?branch=nodeId
 ?branch=node_123#/node/node_456
 
-// Ou programmatique
+// Or programmatic
 enableBranchMode(nodeId);
 ```
 
-### Boutons de partage
+### Share Buttons
 
-- **🔗 (Share Node)** : Préserve le contexte actuel
-  - En mode normal → `#/node/X`
-  - En mode branche → `?branch=root#/node/X`
+- **🔗 (Share Node)**: Preserves current context
+  - In normal mode → `#/node/X`
+  - In branch mode → `?branch=root#/node/X`
 
-- **🌳 (Share Branch)** : Crée toujours une branche isolée
-  - Toujours → `?branch=X#/node/X`
+- **🌳 (Share Branch)**: Always creates isolated branch
+  - Always → `?branch=X#/node/X`
 
 ---
 
@@ -502,55 +541,57 @@ enableBranchMode(nodeId);
 ### LocalStorage
 
 ```javascript
-// Clés utilisées
-'deepmemo_data'     // { nodes: {}, rootNodes: [] }
-'deepmemo_viewMode' // 'view' ou 'edit'
+// Used keys
+'deepmemo_data'           // { nodes: {}, rootNodes: [] }
+'deepmemo_viewMode'       // 'view' or 'edit'
+'deepmemo_language'       // 'fr' or 'en'
+'deepmemo_fontPreference' // 'sto' or 'system'
 ```
 
-**Note** : `expandedNodes` n'est PAS sauvegardé (recalculé dynamiquement via auto-collapse).
+**Note**: `expandedNodes` is NOT saved (dynamically recalculated via auto-collapse).
 
 ### Export/Import JSON
 
-**Export/Import global** :
-- Boutons dans la sidebar pour exporter/importer toute la base de données
-- Format : `{nodes: {...}, rootNodes: [...]}`
-- Import global **écrase** toutes les données existantes
+**Global export/import**:
+- Sidebar buttons to export/import entire database
+- Format: `{nodes: {...}, rootNodes: [...]}`
+- Global import **overwrites** all existing data
 
-**Export/Import de branche (V0.8)** :
-- Boutons dans les actions du nœud actuel (en bas à droite)
-- **Export** : Exporte un nœud + tous ses descendants récursivement
-- **Import** : Importe comme enfants du nœud actuel (non-destructif)
-- **Régénération des IDs** : Évite les conflits avec les nœuds existants
-- Format spécial : `{type: 'deepmemo-branch', branchRootId: '...', nodes: {...}}`
+**Branch export/import (V0.8)**:
+- Buttons in current node actions (bottom right)
+- **Export**: Exports a node + all descendants recursively
+- **Import**: Imports as children of current node (non-destructive)
+- **ID regeneration**: Avoids conflicts with existing nodes
+- Special format: `{type: 'deepmemo-branch', branchRootId: '...', nodes: {...}}`
 
 ```javascript
-// Format export branche
+// Branch export format
 {
   type: 'deepmemo-branch',
   version: '1.0',
-  branchRootId: 'node_xxx',  // ID du nœud racine exporté
+  branchRootId: 'node_xxx',  // Exported root node ID
   exported: 1234567890,       // Timestamp
-  nodeCount: 42,              // Nombre de nœuds
-  nodes: {                    // Nœuds de la branche
+  nodeCount: 42,              // Node count
+  nodes: {                    // Branch nodes
     'node_xxx': {...},
     'node_yyy': {...}
   }
 }
 ```
 
-**Processus d'import de branche** :
-1. Validation du format (`type === 'deepmemo-branch'`)
-2. Génération de nouveaux IDs pour tous les nœuds (via `generateId()`)
-3. Création d'une map `oldId → newId`
-4. Mise à jour des relations (parent, children, targetId pour symlinks)
-5. Attachement au nœud parent actuel
-6. Merge dans `data.nodes` existant (sans écraser)
+**Branch import process**:
+1. Format validation (`type === 'deepmemo-branch'`)
+2. Generate new IDs for all nodes (via `generateId()`)
+3. Create `oldId → newId` map
+4. Update relationships (parent, children, targetId for symlinks)
+5. Attach to current parent node
+6. Merge into existing `data.nodes` (without overwriting)
 
 ---
 
-## 🎨 Thème CSS
+## 🎨 CSS Theme
 
-### Variables CSS (base.css)
+### CSS Variables (base.css)
 
 ```css
 :root {
@@ -566,62 +607,62 @@ enableBranchMode(nodeId);
 }
 ```
 
-### Hiérarchie z-index
+### z-index Hierarchy
 
 ```css
-/* Base : 1 */
-/* Panel toggle : 50 */
-/* Boutons externes : 200 */
-/* Drop indicators : 1000 */
-/* Toast : 1000 */
-/* Search modal : 2000 */
-/* Action modals : 3000 */
+/* Base: 1 */
+/* Panel toggle: 50 */
+/* External buttons: 200 */
+/* Drop indicators: 1000 */
+/* Toast: 1000 */
+/* Search modal: 2000 */
+/* Action modals: 3000 */
 ```
 
 ---
 
 ## ⚡ Performance
 
-### Optimisations actuelles
-- Modules ES6 (tree-shaking possible)
-- Rendu ciblé (pas de re-render complet)
-- Délégation d'événements
-- LocalStorage rapide
+### Current Optimizations
+- ES6 modules (tree-shaking possible)
+- Targeted rendering (no full re-render)
+- Event delegation
+- Fast localStorage
 
-### Limitations actuelles
-- Pas de virtual scrolling (limite ~500 nœuds)
-- Pas de lazy loading
-- Pas de Web Workers
+### Current Limitations
+- No virtual scrolling (limit ~500 nodes)
+- No lazy loading
+- No Web Workers
 
 ---
 
-## 🔐 Sécurité
+## 🔐 Security
 
-### Mesures actuelles
-- Pas de `eval()` ou `innerHTML` avec contenu utilisateur
-- Markdown rendering via marked.js (sécurisé)
+### Current Measures
+- No `eval()` or `innerHTML` with user content
+- Markdown rendering via marked.js (secure)
 
-### À implémenter (futur)
+### To Implement (future)
 - Content Security Policy
-- Sanitization renforcée
-- Encryption optionnelle
+- Enhanced sanitization
+- Optional encryption
 
 ---
 
-## 🚀 Évolutions futures (V0.9+)
+## 🚀 Future Evolutions (V1.0+)
 
-### Features avancées
-- Wiki-links `[[id:titre]]` avec auto-complétion
-- Vue liste nested (indentation visuelle)
-- Export Markdown structuré
-- Recherche avancée (regex, filtres)
+### Advanced Features
+- Wiki-links `[[id:title]]` with autocomplete
+- Nested list view (visual indentation)
+- Structured Markdown export
+- Advanced search (regex, filters)
 
-### Optimisations
-- Virtual scrolling pour grandes arborescences
-- IndexedDB pour grandes données
-- Web Workers pour recherche asynchrone
+### Optimizations
+- Virtual scrolling for large trees
+- IndexedDB for large datasets
+- Web Workers for async search
 
 ---
 
-**Document technique V0.8**
-Dernière mise à jour : 23 Décembre 2025
+**Technical Document V0.9**
+Last updated: December 28, 2025
