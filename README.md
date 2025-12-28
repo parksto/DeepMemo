@@ -2,7 +2,7 @@
 
 > **Your digital second brain: interconnected notes, projects, and ideas**
 
-*[Version française](README.fr.md) • [Documentation](docs/README.md) • [Live Demo](https://deepmemo.ydns.eu)*
+*[Version française](README.fr.md) • [Documentation](docs/README.md) • [Live Demo](https://deepmemo.org)*
 
 ---
 
@@ -37,7 +37,7 @@ From the neurons in your brain to the syntax of language, from evolutionary tree
 
 ### Online (instant demo)
 
-→ **[deepmemo.ydns.eu](https://deepmemo.ydns.eu)** - Ready to use with demo content
+→ **[deepmemo.org](https://deepmemo.org)** - Ready to use with demo content
 
 ### Locally
 

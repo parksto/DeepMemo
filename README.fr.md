@@ -2,7 +2,7 @@
 
 > **Ton second cerveau : notes, projets, idées interconnectés**
 
-*[English version](README.md) • [Documentation](docs/README.md) • [Démo en ligne](https://deepmemo.ydns.eu)*
+*[English version](README.md) • [Documentation](docs/README.md) • [Démo en ligne](https://deepmemo.org)*
 
 ---
 
@@ -36,7 +36,7 @@ Des neurones de ton cerveau à la syntaxe du langage, des arbres évolutifs aux 
 
 ### En ligne (démo instantanée)
 
-→ **[deepmemo.ydns.eu](https://deepmemo.ydns.eu)** - Prêt à l'emploi avec contenu de démo
+→ **[deepmemo.org](https://deepmemo.org)** - Prêt à l'emploi avec contenu de démo
 
 ### Localement
 

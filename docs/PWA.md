@@ -19,7 +19,7 @@ A **Progressive Web App** allows you to install DeepMemo as a real application o
 
 ### On Desktop (Chrome, Edge, Brave)
 
-1. **Open** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) in your browser
+1. **Open** [deepmemo.org](https://deepmemo.org) in your browser
 2. **Look for the install icon** in the address bar (➕ or computer icon)
 3. **Click** on "Install DeepMemo"
 4. The app opens in a dedicated window!
@@ -29,14 +29,14 @@ A **Progressive Web App** allows you to install DeepMemo as a real application o
 
 ### On Mobile (Android)
 
-1. **Open** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) in Chrome
+1. **Open** [deepmemo.org](https://deepmemo.org) in Chrome
 2. **Menu** ⋮ → "Add to Home screen"
 3. **Confirm** the addition
 4. The icon appears on your home screen!
 
 ### On iOS (Safari)
 
-1. **Open** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) in Safari
+1. **Open** [deepmemo.org](https://deepmemo.org) in Safari
 2. **Share button** (↑ icon) → "Add to Home Screen"
 3. **Name** the app → "Add"
 4. The icon appears on your home screen!

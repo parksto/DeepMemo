@@ -19,7 +19,7 @@ Une **Progressive Web App** permet d'installer DeepMemo comme une vraie applicat
 
 ### Sur Desktop (Chrome, Edge, Brave)
 
-1. **Ouvre** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) dans ton navigateur
+1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans ton navigateur
 2. **Cherche l'icône d'installation** dans la barre d'adresse (➕ ou icône ordinateur)
 3. **Clique** sur "Installer DeepMemo"
 4. L'application s'ouvre dans une fenêtre dédiée !
