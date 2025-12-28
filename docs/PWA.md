@@ -1,163 +1,169 @@
-# Guide PWA - DeepMemo
+# PWA Guide - DeepMemo
 
-## 🎯 Qu'est-ce qu'une PWA ?
+*[Version française](PWA.fr.md)*
 
-Une **Progressive Web App** permet d'installer DeepMemo comme une vraie application sur ton ordinateur ou mobile, avec :
+---
 
-✅ **Installation native** - Icône sur le bureau/menu démarrer
-✅ **Mode offline** - Fonctionne sans connexion Internet
-✅ **Ouverture en plein écran** - Sans barre d'adresse du navigateur
-✅ **Démarrage rapide** - Cache intelligent pour performances optimales
+## 🎯 What is a PWA?
+
+A **Progressive Web App** allows you to install DeepMemo as a real application on your computer or mobile, with:
+
+✅ **Native installation** - Icon on desktop/start menu
+✅ **Offline mode** - Works without Internet connection
+✅ **Fullscreen opening** - No browser address bar
+✅ **Fast startup** - Smart cache for optimal performance
 
 ---
 
 ## 📦 Installation
 
-### Sur Desktop (Chrome, Edge, Brave)
+### On Desktop (Chrome, Edge, Brave)
 
-1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans ton navigateur
-2. **Cherche l'icône d'installation** dans la barre d'adresse (➕ ou icône ordinateur)
-3. **Clique** sur "Installer DeepMemo"
-4. L'application s'ouvre dans une fenêtre dédiée !
+1. **Open** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) in your browser
+2. **Look for the install icon** in the address bar (➕ or computer icon)
+3. **Click** on "Install DeepMemo"
+4. The app opens in a dedicated window!
 
-**Alternative :**
-- Menu ⋮ → "Installer DeepMemo"
+**Alternative:**
+- Menu ⋮ → "Install DeepMemo"
 
-### Sur Mobile (Android)
+### On Mobile (Android)
 
-1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans Chrome
-2. **Menu** ⋮ → "Ajouter à l'écran d'accueil"
-3. **Confirme** l'ajout
-4. L'icône apparaît sur ton écran d'accueil !
+1. **Open** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) in Chrome
+2. **Menu** ⋮ → "Add to Home screen"
+3. **Confirm** the addition
+4. The icon appears on your home screen!
 
-### Sur iOS (Safari)
+### On iOS (Safari)
 
-1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans Safari
-2. **Bouton partage** (icône ↑) → "Sur l'écran d'accueil"
-3. **Nomme** l'application → "Ajouter"
-4. L'icône apparaît sur ton écran d'accueil !
-
----
-
-## 🔍 Vérifier que ça marche
-
-### Test 1 : Installation
-✅ L'app s'ouvre dans une fenêtre séparée (sans barre d'adresse)
-✅ L'icône apparaît dans le menu démarrer / écran d'accueil
-
-### Test 2 : Mode offline
-1. **Ouvre** l'app installée
-2. **Coupe** ta connexion Internet (Wi-Fi ou données)
-3. **Rafraîchis** l'app (`Ctrl+R` ou `Cmd+R`)
-4. ✅ L'app continue de fonctionner !
-
-### Test 3 : Cache automatique
-1. **Ouvre** DevTools (`F12`) → **Application** → **Cache Storage**
-2. **Vérifie** que `deepmemo-v1.0.0` contient tous les fichiers
-3. ✅ Fichiers CSS, JS, icônes cachés
+1. **Open** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) in Safari
+2. **Share button** (↑ icon) → "Add to Home Screen"
+3. **Name** the app → "Add"
+4. The icon appears on your home screen!
 
 ---
 
-## 🔄 Mises à jour
+## 🔍 Verify it Works
 
-### L'application se met à jour automatiquement
+### Test 1: Installation
+✅ The app opens in a separate window (no address bar)
+✅ The icon appears in the start menu / home screen
 
-Le Service Worker vérifie les mises à jour en arrière-plan. Quand une nouvelle version est disponible :
+### Test 2: Offline Mode
+1. **Open** the installed app
+2. **Turn off** your Internet connection (Wi-Fi or data)
+3. **Refresh** the app (`Ctrl+R` or `Cmd+R`)
+4. ✅ The app continues to work!
 
-1. **Ferme complètement** l'application
-2. **Rouvre-la**
-3. ✅ La nouvelle version est installée !
-
-**Note technique :** Les mises à jour sont appliquées lors de l'activation suivante du Service Worker (fermeture/ouverture de l'app).
-
----
-
-## 🗑️ Désinstallation
-
-### Sur Desktop (Chrome, Edge)
-
-1. **Clique-droit** sur l'icône de l'app (barre des tâches ou menu démarrer)
-2. **Sélectionne** "Désinstaller" ou "Supprimer"
-3. **Confirme** la suppression
-
-**Alternative :**
-- Menu ⋮ dans l'app → "Désinstaller DeepMemo"
-
-### Sur Mobile (Android)
-
-1. **Appui long** sur l'icône
-2. **Sélectionne** "Désinstaller" ou "Supprimer de l'écran d'accueil"
-
-### Sur iOS
-
-1. **Appui long** sur l'icône
-2. **Sélectionne** "Supprimer l'app"
+### Test 3: Automatic Cache
+1. **Open** DevTools (`F12`) → **Application** → **Cache Storage**
+2. **Verify** that `deepmemo-v1.3.0` contains all files
+3. ✅ CSS, JS files, icons cached
 
 ---
 
-## 🔧 Notes techniques
+## 🔄 Updates
+
+### The Application Updates Automatically
+
+The Service Worker checks for updates in the background. When a new version is available:
+
+1. **Completely close** the application
+2. **Reopen it**
+3. ✅ The new version is installed!
+
+**Technical note:** Updates are applied during the next Service Worker activation (app close/reopen).
+
+---
+
+## 🗑️ Uninstallation
+
+### On Desktop (Chrome, Edge)
+
+1. **Right-click** on the app icon (taskbar or start menu)
+2. **Select** "Uninstall" or "Remove"
+3. **Confirm** the deletion
+
+**Alternative:**
+- Menu ⋮ in the app → "Uninstall DeepMemo"
+
+### On Mobile (Android)
+
+1. **Long press** on the icon
+2. **Select** "Uninstall" or "Remove from Home screen"
+
+### On iOS
+
+1. **Long press** on the icon
+2. **Select** "Remove App"
+
+---
+
+## 🔧 Technical Notes
 
 ### Service Worker
 
-DeepMemo utilise une stratégie **Cache-First** :
-- Fichiers servis depuis le cache en priorité (démarrage rapide)
-- Mise à jour en arrière-plan quand le réseau est disponible
-- Mode offline complet après la première visite
+DeepMemo uses a **Cache-First** strategy:
+- Files served from cache first (fast startup)
+- Updates in background when network is available
+- Full offline mode after first visit
 
 ### Cache
 
-**Fichiers mis en cache :**
+**Cached files:**
 - `index.html`
-- Tous les CSS (`src/css/*.css`)
-- Tous les JS (`src/js/**/*.js`)
-- Icônes PWA
-- Bibliothèques externes (marked.js, JSZip)
+- All CSS (`src/css/*.css`)
+- All JS (`src/js/**/*.js`)
+- PWA icons
+- External libraries (marked.js, JSZip)
+- Internationalization dictionaries (fr.js, en.js)
 
-**Données utilisateur :**
-- Stockées dans **LocalStorage** (données structurées)
-- Stockées dans **IndexedDB** (fichiers attachés)
-- **Jamais dans le cache Service Worker** (séparation données/code)
+**User data:**
+- Stored in **LocalStorage** (structured data)
+- Stored in **IndexedDB** (attached files)
+- **Never in Service Worker cache** (code/data separation)
 
 ### Manifest
 
-Le fichier `manifest.json` définit :
-- **Nom** : "DeepMemo - Ton second cerveau"
-- **Mode** : `standalone` (plein écran)
-- **Thème** : Noir (#0a0a0a)
-- **Icônes** : 192x192 et 512x512
+The `manifest.json` file defines:
+- **Name**: "DeepMemo - Your second brain" (EN) / "Ton second cerveau" (FR)
+- **Mode**: `standalone` (fullscreen)
+- **Theme**: Black (#0a0a0a)
+- **Icons**: 192x192 and 512x512
+- **Localized** (manifest-fr.json, manifest-en.json)
 
 ---
 
-## 📱 Compatibilité
+## 📱 Compatibility
 
-| Plateforme | Installation | Offline | Notes |
-|------------|--------------|---------|-------|
-| **Chrome Desktop** | ✅ | ✅ | Support complet |
-| **Edge Desktop** | ✅ | ✅ | Support complet |
-| **Brave Desktop** | ✅ | ✅ | Support complet |
-| **Android Chrome** | ✅ | ✅ | Support complet |
-| **iOS Safari** | ✅ | ✅ | Support complet |
-| **Firefox** | ⚠️ Partiel | ✅ | Installation limitée |
+| Platform | Installation | Offline | Notes |
+|----------|--------------|---------|-------|
+| **Chrome Desktop** | ✅ | ✅ | Full support |
+| **Edge Desktop** | ✅ | ✅ | Full support |
+| **Brave Desktop** | ✅ | ✅ | Full support |
+| **Android Chrome** | ✅ | ✅ | Full support |
+| **iOS Safari** | ✅ | ✅ | Full support |
+| **Firefox** | ⚠️ Partial | ✅ | Limited installation |
 
-**Note :** Les notifications push ne sont pas implémentées dans DeepMemo (pas nécessaire pour une app de notes locales).
-
----
-
-## 🎉 Avantages de la PWA
-
-**Pour toi :**
-- 📱 Application native sans téléchargement lourd
-- ⚡ Démarrage instantané (cache local)
-- ✈️ Fonctionne offline (avion, métro, etc.)
-- 🔒 Données privées (pas de serveur distant)
-- 🆓 Gratuit et open source (MIT)
-
-**Pour le projet :**
-- 🌍 Pas de stores (Apple, Google) à gérer
-- 🚀 Déploiement instantané (un simple push)
-- 💰 Zéro coût d'infrastructure
-- 🔧 Mise à jour automatique sans action utilisateur
+**Note:** Push notifications are not implemented in DeepMemo (not needed for a local notes app).
 
 ---
 
-**Enjoy ! DeepMemo est maintenant installable comme une vraie app !** 🌟
+## 🎉 PWA Advantages
+
+**For you:**
+- 📱 Native app without heavy download
+- ⚡ Instant startup (local cache)
+- ✈️ Works offline (plane, subway, etc.)
+- 🔒 Private data (no remote server)
+- 🆓 Free and open source (MIT)
+
+**For the project:**
+- 🌍 No stores (Apple, Google) to manage
+- 🚀 Instant deployment (simple push)
+- 💰 Zero infrastructure cost
+- 🔧 Automatic updates without user action
+
+---
+
+**Enjoy! DeepMemo is now installable as a real app!** 🌟

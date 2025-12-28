@@ -1,144 +1,157 @@
-# 📖 DeepMemo - Documentation Complète
+# 📖 DeepMemo - Complete Documentation
 
-> **Concepts, architecture et features détaillées**
+> **Concepts, architecture, and detailed features**
 
-DeepMemo est un système de gestion de connaissances personnelles basé sur un **réseau hiérarchique** de nœuds récursifs, interconnectés et actifs. Tout (notes, projets, contacts, fichiers, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
+*[Version française](README.fr.md)*
 
-## 🎯 Concept central
+---
 
-**Un seul type de base : le Nœud**
+DeepMemo is a personal knowledge management system based on a **hierarchical network** of recursive, interconnected, and active nodes. Everything (notes, projects, contacts, files, ideas) is a node that can contain other nodes infinitely.
 
-Chaque nœud possède :
-- Un titre
-- Du contenu (texte, markdown)
-- Des enfants (autres nœuds)
-- Des liens vers d'autres nœuds
-- Des tags
-- Des propriétés personnalisables
+## 🎯 Core Concept
 
-## ✨ Caractéristiques principales
+**A single base type: the Node**
 
-### 🌳 Hiérarchie flexible
-- Navigation par breadcrumbs
-- Expansion/collapse de l'arborescence
-- État persistant entre les sessions
+Each node has:
+- A title
+- Content (text, markdown)
+- Children (other nodes)
+- Links to other nodes
+- Tags
+- Customizable properties
 
-### 🔗 Système de liens
-- **Structure arborescente réticulée** : L'arborescence hiérarchique devient un réseau maillé grâce aux symlinks
-- **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (comme `ln -s` sous Linux), renommables indépendamment
-- **Backlinks** : Voir automatiquement tous les nœuds qui pointent vers le nœud actuel
+## ✨ Main Features
+
+### 🌳 Flexible Hierarchy
+- Breadcrumb navigation
+- Expand/collapse tree
+- Persistent state between sessions
+
+### 🔗 Link System
+- **Reticular tree structure**: The hierarchical tree becomes a meshed network thanks to symlinks
+- **Symbolic links**: A node can appear in multiple places (like `ln -s` on Linux), independently renameable
+- **Backlinks**: Automatically see all nodes that point to the current node
 
 ### 🏷️ Tags
-- Système de tags dédié
-- Auto-complétion intelligente (tags de la branche + tags globaux)
-- Tag cloud par branche
-- Recherche par tag
+- Dedicated tag system
+- Intelligent auto-completion (branch tags + global tags)
+- Per-branch tag cloud
+- Tag-based search
 
-### 🔍 Recherche globale
-- Recherche temps réel (Ctrl+K)
-- Recherche dans titres, contenus et tags
-- Navigation clavier
-- Highlights des résultats
+### 🔍 Global Search
+- Real-time search (Ctrl+K)
+- Search in titles, content, and tags
+- Keyboard navigation
+- Result highlights
 
-### 🔗 URL Dynamiques (V0.8)
-- **URLs bookmarkables** : `#/node/nodeId`
-- **Persistence après refresh** : Rester sur le nœud actif
-- **Mode branche isolée** : `?branch=nodeId` pour afficher uniquement un sous-arbre
-- **Partage facile** : Icônes 🔗 (nœud) et 🌳 (branche)
-- **Navigation navigateur** : Support des boutons précédent/suivant
+### 🔗 Dynamic URLs (V0.8)
+- **Bookmarkable URLs**: `#/node/nodeId`
+- **Persistence after refresh**: Stay on the active node
+- **Isolated branch mode**: `?branch=nodeId` to display only a subtree
+- **Easy sharing**: Icons 🔗 (node) and 🌳 (branch)
+- **Browser navigation**: Support for back/forward buttons
 
-### 📦 Export/Import de Branche (V0.8)
-- **Export local** : Exporter un nœud + tous ses descendants
-- **Import non-destructif** : Importer comme enfants du nœud actuel
-- **Régénération des IDs** : Évite les conflits avec les nœuds existants
-- **Conservation des symlinks** : Relations préservées dans la branche importée
-- **Partage collaboratif** : Première étape pour utilisation multi-utilisateurs
+### 📦 Branch Export/Import (V0.8)
+- **Local export**: Export a node + all its descendants
+- **Non-destructive import**: Import as children of the current node
+- **ID regeneration**: Avoids conflicts with existing nodes
+- **Symlink preservation**: Relationships preserved in the imported branch
+- **Collaborative sharing**: First step towards multi-user usage
 
-### 📘 Contenu de Démonstration (V0.8)
-- **Tutoriel interactif** : 26 nœuds pédagogiques au premier lancement
-- **Structure progressive** : Découverte par l'exploration de l'arborescence
-- **Fonctionnalités actuelles** : Nœuds, symlinks, tags, branche, export/import, raccourcis
-- **Vision future** : Types actifs, triggers multi-nœuds, API externe, multi-user
-- **Format pédagogique** : [Fonctionnalité → Ce que ça permet → Exemple concret]
-- **Suppressible** : Instructions pour supprimer le contenu de démo incluses
+### 🌍 Internationalization (V0.9)
+- **Bilingual interface**: Full French/English support
+- **Automatic detection**: Language detected from browser settings
+- **Manual switcher**: Toggle FR/EN in the right panel
+- **Bilingual demo content**: 26 educational nodes in both languages
+- **PWA manifests**: Localized app names and descriptions
+- **Offline compatible**: All dictionaries pre-cached
 
-### 📄 Affichage et Rendu (V0.7+)
-- **Markdown rendering** : Affichage formaté du contenu
-- **Mode view par défaut** : Lecture prioritaire sur édition (V0.8)
-- **Toggle view/edit** : Bouton [Afficher]/[Éditer] + raccourci Alt+E
-- **Sidebar redimensionnable** : Ajustable à la souris
-- **Auto-collapse** : Arborescence repliée sauf chemin actif
-- **Scroll reset** : Retour en haut du contenu à chaque navigation (V0.8)
-- **Right panel masqué** : Interface épurée par défaut, ouverture via [i] (V0.8)
-- **Choix de police** : Toggle Sto (personnalisée) vs système (V0.8)
+### 📘 Demo Content (V0.8)
+- **Interactive tutorial**: 26 educational nodes on first launch
+- **Progressive structure**: Discovery through tree exploration
+- **Current features**: Nodes, symlinks, tags, branch, export/import, shortcuts
+- **Future vision**: Active types, multi-node triggers, external API, multi-user
+- **Educational format**: [Feature → What it enables → Concrete example]
+- **Deletable**: Instructions to remove demo content included
 
-### 🎨 Drag & Drop (V0.8 - Complet)
-- **Déplacer** : Glisser-déposer pour changer de parent ou réorganiser
-- **Dupliquer** : Ctrl + drag pour copier avec descendants
-- **Lier** : Ctrl+Alt + drag pour créer un lien symbolique
-- **Zones précises** : Indicateurs visuels before/after/inside
-- **Prévention cycles** : Détection automatique des références circulaires
-- **Support complet** : Fonctionne dans arbre ET liste enfants
+### 📄 Display and Rendering (V0.7+)
+- **Markdown rendering**: Formatted content display
+- **View mode by default**: Reading prioritized over editing (V0.8)
+- **View/edit toggle**: [View]/[Edit] button + Alt+E shortcut
+- **Resizable sidebar**: Mouse-adjustable
+- **Auto-collapse**: Tree collapsed except active path
+- **Scroll reset**: Return to top of content on each navigation (V0.8)
+- **Right panel hidden**: Clean interface by default, open via [i] (V0.8)
+- **Font choice**: Toggle Sto (custom) vs system (V0.8)
+
+### 🎨 Drag & Drop (V0.8 - Complete)
+- **Move**: Drag-and-drop to change parent or reorganize
+- **Duplicate**: Ctrl + drag to copy with descendants
+- **Link**: Ctrl+Alt + drag to create a symbolic link
+- **Precise zones**: Visual indicators before/after/inside
+- **Cycle prevention**: Automatic detection of circular references
+- **Full support**: Works in tree AND children list
 
 ### 📱 Progressive Web App (V0.8)
-- **Installation native** : Installable comme une vraie application sur desktop/mobile
-- **Mode offline** : Fonctionne sans connexion Internet (cache intelligent)
-- **Service Worker** : Cache automatique de tous les fichiers statiques
-- **Ouverture standalone** : Lance en fenêtre dédiée (sans barre d'adresse)
-- **Icônes adaptatives** : Générateur d'icônes (utilisé une fois, supprimé après génération)
-- **Déploiement HTTPS** : Compatible GitHub Pages, Netlify, Vercel, etc.
-- **Documentation complète** : Guide installation et test dans `docs/PWA.md`
+- **Native installation**: Installable as a real app on desktop/mobile
+- **Offline mode**: Works without internet (smart cache)
+- **Service Worker**: Automatic caching of all static files
+- **Standalone opening**: Launches in dedicated window (no address bar)
+- **Adaptive icons**: Icon generator (used once, deleted after generation)
+- **HTTPS deployment**: Compatible with GitHub Pages, Netlify, Vercel, etc.
+- **Complete documentation**: Installation and testing guide in `docs/PWA.md`
 
-### 📎 Fichiers joints (V0.8)
-- **Upload de fichiers** : Attache des fichiers (images, PDFs, documents) à n'importe quel nœud
-- **Stockage IndexedDB** : Limite ~500 MB selon navigateur (vs localStorage limité à ~5-10 MB)
-- **Affichage inline** : Images affichées directement avec syntaxe markdown `![](attachment:ID)`
-- **Liens de téléchargement** : Autres fichiers téléchargeables avec `[nom](attachment:ID)`
-- **Export/Import ZIP** : Format ZIP systématique incluant fichiers + données JSON
-- **Gestion complète** : Upload, download, delete, copie syntaxe, garbage collection
-- **Indicateur stockage** : Barre de progression temps réel dans panneau droit
-- **Types supportés** : Images, PDFs, vidéos, audio, documents (50 MB max par fichier)
-- **Documentation** : Spec complète dans `docs/SPEC-ATTACHMENTS.md`
+### 📎 File Attachments (V0.8)
+- **File upload**: Attach files (images, PDFs, documents) to any node
+- **IndexedDB storage**: ~500 MB limit depending on browser (vs localStorage limited to ~5-10 MB)
+- **Inline display**: Images displayed directly with markdown syntax `![](attachment:ID)`
+- **Download links**: Other files downloadable with `[name](attachment:ID)`
+- **ZIP Export/Import**: Systematic ZIP format including files + JSON data
+- **Complete management**: Upload, download, delete, copy syntax, garbage collection
+- **Storage indicator**: Real-time progress bar in right panel
+- **Supported types**: Images, PDFs, videos, audio, documents (50 MB max per file)
+- **Documentation**: Complete spec in `docs/SPEC-ATTACHMENTS.md`
 
-### ⌨️ Raccourcis clavier
-- `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
-- `Alt+E` : Passer en mode édition (avec focus automatique)
-- `Ctrl+K` : Recherche globale
-- `Escape` : Remonter au parent
-- `↑↓←→` : Navigation dans l'arbre
+### ⌨️ Keyboard Shortcuts
+- `Alt+N`: New node (child if a node is selected, root otherwise)
+- `Alt+E`: Switch to edit mode (with automatic focus)
+- `Ctrl+K`: Global search
+- `Escape`: Go up to parent
+- `↑↓←→`: Navigation in the tree
 
-## 🏗️ Architecture actuelle (V0.8 - Modulaire ES6)
+## 🏗️ Current Architecture (V0.8 - Modular ES6)
 
 ### Format
-- **Multifile modulaire** : HTML + CSS + JS ES6 modules
-- `index.html` : Structure HTML minimale
-- `src/css/` : Styles organisés (base, layout, components, utilities)
-- `src/js/app.js` : Point d'entrée principal
-- `src/js/core/` : Gestion données (data, attachments, default-data)
-- `src/js/features/` : Modules fonctionnels (tree, editor, search, tags, drag-drop, modals)
-- `src/js/ui/` : Composants UI (toast, panels)
-- `src/js/utils/` : Utilitaires (routing, keyboard, helpers)
-- **100% Vanilla** JavaScript ES6+ (pas de framework)
-- CSS Variables pour le theming
-- LocalStorage + IndexedDB pour la persistence
+- **Modular multifile**: HTML + CSS + ES6 modules JS
+- `index.html`: Minimal HTML structure
+- `src/css/`: Organized styles (base, layout, components, utilities)
+- `src/js/app.js`: Main entry point
+- `src/js/core/`: Data management (data, attachments, default-data)
+- `src/js/features/`: Functional modules (tree, editor, search, tags, drag-drop, modals)
+- `src/js/ui/`: UI components (toast, panels)
+- `src/js/utils/`: Utilities (routing, keyboard, helpers, i18n)
+- **100% Vanilla** JavaScript ES6+ (no framework)
+- CSS Variables for theming
+- LocalStorage + IndexedDB for persistence
 
-### Structure des données
+### Data Structure
 ```javascript
 {
   nodes: {
     "node_xxx": {
       id: "node_xxx",
-      type: "node",  // "node" (normal) ou "symlink" (V0.8)
-      title: "Titre",
-      content: "Contenu markdown",
+      type: "node",  // "node" (normal) or "symlink" (V0.8)
+      title: "Title",
+      content: "Markdown content",
       children: ["node_yyy", "node_zzz"],
       parent: "node_parent" | null,
       created: timestamp,
       modified: timestamp,
-      links: ["Titre du nœud lié"],
-      backlinks: ["node_qui_pointe_ici"],
+      links: ["Linked node title"],
+      backlinks: ["node_pointing_here"],
       tags: ["tag1", "tag2"],
-      targetId: "node_target"  // Si type === "symlink" (V0.8)
+      attachments: ["attach_123_abc"],  // IndexedDB IDs (V0.8)
+      targetId: "node_target"  // If type === "symlink" (V0.8)
     }
   },
   rootNodes: ["node_aaa", "node_bbb"]
@@ -147,34 +160,34 @@ Chaque nœud possède :
 
 ## 🎨 Interface
 
-- **Sidebar gauche** : Arborescence complète
-- **Zone centrale** : Éditeur du nœud actuel + enfants en cartes
-- **Panel droit** : Métadonnées, liens, backlinks, tags cloud
-- **Dark theme** par défaut
+- **Left sidebar**: Complete tree
+- **Central zone**: Current node editor + children as cards
+- **Right panel**: Metadata, links, backlinks, tag cloud
+- **Dark theme** by default
 
-## 🚀 Prochaines étapes (V0.9)
+## 🚀 Next Steps (V1.0)
 
-### Features à implémenter
-- [ ] Navigation via liens `[[titre]]` cliquables
-- [ ] Vue liste nested (enfants = contenu principal)
-- [ ] Export/Import formats externes (Markdown, Notion, Obsidian)
-- [ ] Thèmes personnalisables
-- [ ] Permissions multi-user (chmod-style)
-- [ ] Types de nœuds actifs (avec scripts)
+### Features to Implement
+- [ ] Navigation via clickable `[[title]]` links
+- [ ] Nested list view (children = main content)
+- [ ] External format Export/Import (Markdown, Notion, Obsidian)
+- [ ] Customizable themes
+- [ ] Multi-user permissions (chmod-style)
+- [ ] Active node types (with scripts)
 
-## 💡 Vision long-terme
+## 💡 Long-term Vision
 
-Pour découvrir les directions explorées (nœuds actifs, automatisation, collaboration décentralisée), consulte la section **"🔮 Directions explorées"** dans le contenu de démo de l'application.
+To discover explored directions (active nodes, automation, decentralized collaboration), check the **"🔮 Explored Directions"** section in the app's demo content.
 
-**Ton humble et ouvert** : Ces idées sont des pistes de réflexion, pas des promesses. DeepMemo est Open Source (MIT), contributions bienvenues !
+**Humble and open tone**: These ideas are exploratory tracks, not promises. DeepMemo is Open Source (MIT), contributions welcome!
 
-## 🛠️ Développement
+## 🛠️ Development
 
-### Serveur local
+### Local Server
 ```bash
-cd deepMemo
+cd DeepMemo
 python3 -m http.server 8000
-# Puis ouvrir http://localhost:8000
+# Then open http://localhost:8000
 ```
 
 ### Technologies
@@ -183,16 +196,16 @@ python3 -m http.server 8000
 - JavaScript ES6+ (Classes, Modules)
 - LocalStorage + IndexedDB
 
-## 👤 Auteur
+## 👤 Author
 
-**Fabien** - Développeur passionné travaillant sur DeepMemo depuis 4 ans (conception mentale), maintenant en développement actif.
+**Fabien** - Passionate developer working on DeepMemo for 5 years (mental conception), now in active development.
 
-## 📄 Licence
+## 📄 License
 
-**MIT** - Logiciel libre et open source.
+**MIT** - Free and open source software.
 
-Tu peux utiliser, modifier et distribuer DeepMemo librement. Tes données t'appartiennent, stockées localement dans ton navigateur.
+You can use, modify, and distribute DeepMemo freely. Your data belongs to you, stored locally in your browser.
 
 ---
 
-**DeepMemo V0.8** - Décembre 2025
+**DeepMemo V0.9** - December 2025
