@@ -2,6 +2,10 @@
 
 > **Concepts, architecture et features détaillées**
 
+*[English version](README.md)*
+
+---
+
 DeepMemo est un système de gestion de connaissances personnelles basé sur un **réseau hiérarchique** de nœuds récursifs, interconnectés et actifs. Tout (notes, projets, contacts, fichiers, idées) est un nœud qui peut contenir d'autres nœuds à l'infini.
 
 ## 🎯 Concept central
@@ -53,6 +57,14 @@ Chaque nœud possède :
 - **Régénération des IDs** : Évite les conflits avec les nœuds existants
 - **Conservation des symlinks** : Relations préservées dans la branche importée
 - **Partage collaboratif** : Première étape pour utilisation multi-utilisateurs
+
+### 🌍 Internationalisation (V0.9)
+- **Interface bilingue** : Support complet français/anglais
+- **Détection automatique** : Langue détectée depuis les paramètres du navigateur
+- **Sélecteur manuel** : Basculer FR/EN dans le panneau droit
+- **Contenu de démo bilingue** : 26 nœuds pédagogiques dans les deux langues
+- **Manifests PWA** : Noms et descriptions d'app localisés
+- **Compatible offline** : Tous les dictionnaires pré-cachés
 
 ### 📘 Contenu de Démonstration (V0.8)
 - **Tutoriel interactif** : 26 nœuds pédagogiques au premier lancement
@@ -117,7 +129,7 @@ Chaque nœud possède :
 - `src/js/core/` : Gestion données (data, attachments, default-data)
 - `src/js/features/` : Modules fonctionnels (tree, editor, search, tags, drag-drop, modals)
 - `src/js/ui/` : Composants UI (toast, panels)
-- `src/js/utils/` : Utilitaires (routing, keyboard, helpers)
+- `src/js/utils/` : Utilitaires (routing, keyboard, helpers, i18n)
 - **100% Vanilla** JavaScript ES6+ (pas de framework)
 - CSS Variables pour le theming
 - LocalStorage + IndexedDB pour la persistence
@@ -138,6 +150,7 @@ Chaque nœud possède :
       links: ["Titre du nœud lié"],
       backlinks: ["node_qui_pointe_ici"],
       tags: ["tag1", "tag2"],
+      attachments: ["attach_123_abc"],  // IDs IndexedDB (V0.8)
       targetId: "node_target"  // Si type === "symlink" (V0.8)
     }
   },
@@ -152,7 +165,7 @@ Chaque nœud possède :
 - **Panel droit** : Métadonnées, liens, backlinks, tags cloud
 - **Dark theme** par défaut
 
-## 🚀 Prochaines étapes (V0.9)
+## 🚀 Prochaines étapes (V1.0)
 
 ### Features à implémenter
 - [ ] Navigation via liens `[[titre]]` cliquables
@@ -185,7 +198,7 @@ python3 -m http.server 8000
 
 ## 👤 Auteur
 
-**Fabien** - Développeur passionné travaillant sur DeepMemo depuis 4 ans (conception mentale), maintenant en développement actif.
+**Fabien** - Développeur passionné travaillant sur DeepMemo depuis 5 ans (conception mentale), maintenant en développement actif.
 
 ## 📄 Licence
 
@@ -195,4 +208,4 @@ Tu peux utiliser, modifier et distribuer DeepMemo librement. Tes données t'appa
 
 ---
 
-**DeepMemo V0.8** - Décembre 2025
+**DeepMemo V0.9** - Décembre 2025

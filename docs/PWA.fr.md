@@ -1,5 +1,9 @@
 # Guide PWA - DeepMemo
 
+*[English version](PWA.md)*
+
+---
+
 ## 🎯 Qu'est-ce qu'une PWA ?
 
 Une **Progressive Web App** permet d'installer DeepMemo comme une vraie application sur ton ordinateur ou mobile, avec :
@@ -15,7 +19,7 @@ Une **Progressive Web App** permet d'installer DeepMemo comme une vraie applicat
 
 ### Sur Desktop (Chrome, Edge, Brave)
 
-1. **Ouvre** [deepmemo.org](https://deepmemo.org) dans ton navigateur
+1. **Ouvre** [deepmemo.ydns.eu](https://deepmemo.ydns.eu) dans ton navigateur
 2. **Cherche l'icône d'installation** dans la barre d'adresse (➕ ou icône ordinateur)
 3. **Clique** sur "Installer DeepMemo"
 4. L'application s'ouvre dans une fenêtre dédiée !
@@ -53,7 +57,7 @@ Une **Progressive Web App** permet d'installer DeepMemo comme une vraie applicat
 
 ### Test 3 : Cache automatique
 1. **Ouvre** DevTools (`F12`) → **Application** → **Cache Storage**
-2. **Vérifie** que `deepmemo-v1.0.0` contient tous les fichiers
+2. **Vérifie** que `deepmemo-v1.3.0` contient tous les fichiers
 3. ✅ Fichiers CSS, JS, icônes cachés
 
 ---
@@ -112,6 +116,7 @@ DeepMemo utilise une stratégie **Cache-First** :
 - Tous les JS (`src/js/**/*.js`)
 - Icônes PWA
 - Bibliothèques externes (marked.js, JSZip)
+- Dictionnaires d'internationalisation (fr.js, en.js)
 
 **Données utilisateur :**
 - Stockées dans **LocalStorage** (données structurées)
@@ -121,10 +126,11 @@ DeepMemo utilise une stratégie **Cache-First** :
 ### Manifest
 
 Le fichier `manifest.json` définit :
-- **Nom** : "DeepMemo - Ton second cerveau"
+- **Nom** : "DeepMemo - Ton second cerveau" (FR) / "Your second brain" (EN)
 - **Mode** : `standalone` (plein écran)
 - **Thème** : Noir (#0a0a0a)
 - **Icônes** : 192x192 et 512x512
+- **Localisé** (manifest-fr.json, manifest-en.json)
 
 ---
 
