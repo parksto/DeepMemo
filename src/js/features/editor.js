@@ -104,12 +104,12 @@ export function displayNode(nodeId, renderCallback) {
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('editorContainer').style.display = 'flex';
 
-    document.getElementById('nodeTitle').value = node.title + ' (CASSÉ)';
+    document.getElementById('nodeTitle').value = node.title + ' (' + t('labels.badges.broken').toUpperCase() + ')';
     const contentEditor = document.getElementById('nodeContent');
-    contentEditor.value = '⚠️ Ce lien symbolique pointe vers un nœud qui n\'existe plus.\n\nVous pouvez supprimer ce lien cassé.';
+    contentEditor.value = t('alerts.brokenSymlink');
     contentEditor.disabled = true;
 
-    showToast('Lien symbolique cassé', '⚠️');
+    showToast(t('labels.brokenSymlink'), '⚠️');
     return;
   }
 
@@ -129,7 +129,7 @@ export function displayNode(nodeId, renderCallback) {
 
   // Display metadata
   document.getElementById('nodeMeta').textContent =
-    `Créé: ${new Date(displayNode.created).toLocaleDateString()}`;
+    `${t('labels.created')}: ${new Date(displayNode.created).toLocaleDateString()}`;
 
   // Set current node for view mode
   setCurrentNodeId(nodeId);
@@ -316,15 +316,15 @@ function updateChildren(currentNodeId) {
       card.style.opacity = '0.5';
       card.innerHTML = `
         <div class="child-card-icon">⚠️</div>
-        <div class="child-card-title">${escapeHtml(child.title)} (cassé)</div>
-        <div class="child-card-preview">Lien symbolique cassé</div>
+        <div class="child-card-title">${escapeHtml(child.title)} (${t('labels.badges.broken')})</div>
+        <div class="child-card-preview">${t('labels.brokenSymlink')}</div>
       `;
       grid.appendChild(card);
       return;
     }
 
     const icon = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : (childDisplayNode.children.length > 0 ? '📂' : '📄');
-    const preview = childDisplayNode.content?.substring(0, 50) || 'Vide';
+    const preview = childDisplayNode.content?.substring(0, 50) || t('labels.emptyContent');
 
     const card = document.createElement('div');
     card.className = isSymlink ? 'child-card symlink-card' : 'child-card';
@@ -343,7 +343,7 @@ function updateChildren(currentNodeId) {
     // Click handler
     if (isExternalSymlink) {
       card.onclick = () => {
-        showToast('⚠️ Lien externe à la branche (non accessible)', '🚫');
+        showToast(t('toast.externalSymlink'), '🚫');
       };
     } else {
       const targetId = isSymlink ? child.targetId : childId;
@@ -355,7 +355,7 @@ function updateChildren(currentNodeId) {
     }
 
     const titleStyle = isSymlink ? 'font-style: italic;' : '';
-    const badge = isSymlink ? ` <span class="symlink-badge" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${isExternalSymlink ? 'externe' : 'lien'}</span>` : '';
+    const badge = isSymlink ? ` <span class="symlink-badge" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${isExternalSymlink ? t('labels.badges.external') : t('labels.badges.link')}</span>` : '';
 
     card.innerHTML = `
       <div class="child-card-icon">${icon}</div>
@@ -820,7 +820,7 @@ export function deleteNode(nodeId, onSuccess) {
 
     // Delete just the symlink
     delete data.nodes[nodeId];
-    showToast('Lien symbolique supprimé', '🔗');
+    showToast(t('toast.symlinkDeleted'), '🔗');
   } else {
     // Recursive deletion for normal nodes
     const deleteRecursive = (id) => {
