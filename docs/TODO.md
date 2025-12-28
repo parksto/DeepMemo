@@ -1,6 +1,6 @@
 # 📋 DeepMemo - État actuel et prochaines étapes
 
-**Dernière mise à jour** : 27 Décembre 2025
+**Dernière mise à jour** : 27 Décembre 2025 (Réorganisation V0.9 : i18n prioritaire)
 
 ---
 
@@ -43,7 +43,56 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 
 ---
 
-## 🎯 V0.9 - Prochaines priorités
+## 🎯 V0.9 - Internationalisation (i18n)
+
+**Objectif** : Rendre DeepMemo accessible à une audience internationale
+
+**Contexte** : DeepMemo est déjà utile et déployé en production sur deepmemo.org. La priorité est de permettre au plus grand nombre d'en bénéficier avant d'implémenter de nouvelles fonctionnalités complexes.
+
+### Système i18n
+
+**Features** :
+- [ ] Module `i18n.js` lightweight (pas de dépendance externe)
+- [ ] Support FR/EN minimum (ES optionnel)
+- [ ] Dictionnaires de traduction (UI, messages, erreurs)
+- [ ] Détection langue navigateur + sélecteur manuel
+- [ ] Persistence dans `localStorage.deepmemo_lang`
+- [ ] Précache des dictionnaires dans Service Worker (PWA offline)
+
+### Contenu à traduire
+
+**Interface** :
+- [ ] Labels HTML statiques (`index.html`)
+- [ ] Labels dynamiques JS (boutons, modales, toasts)
+- [ ] Placeholders et attributs (`title`, `aria-label`)
+- [ ] Messages d'erreur et confirmations
+
+**Contenu de démo** :
+- [ ] `default-data.js` - Adapter selon langue détectée
+- [ ] Ou garder EN uniquement (universel)
+
+### Tests et validation
+
+- [ ] Tests sur navigateurs multilingues
+- [ ] Vérification fallback (langue non supportée → EN)
+- [ ] Documentation utilisateur (comment changer de langue)
+
+### Améliorations tags (Optionnel - après i18n)
+
+- [ ] Éviter duplication UI (center panel vs right panel)
+- [ ] Création rapide via #hashtag dans le contenu
+- [ ] Renommage de tags globalement
+- [ ] Fusion de tags
+
+### Export/Import formats externes (Optionnel - après i18n)
+
+- [ ] Export Markdown (avec structure préservée)
+- [ ] Import depuis Notion
+- [ ] Import depuis Obsidian
+
+---
+
+## 🔮 V1.0 - Types actifs et système avancé
 
 ### Types de nœuds actifs (Fondations)
 
@@ -61,22 +110,9 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 - `docs/VISION.md` - Spécification complète des types actifs
 - Contenu de démo - Section "🔮 Directions explorées"
 
-### Améliorations tags (Optionnel)
-
-- [ ] Éviter duplication UI (center panel vs right panel)
-- [ ] Création rapide via #hashtag dans le contenu
-- [ ] Renommage de tags globalement
-- [ ] Fusion de tags
-
-### Export/Import formats externes (Optionnel)
-
-- [ ] Export Markdown (avec structure préservée)
-- [ ] Import depuis Notion
-- [ ] Import depuis Obsidian
-
 ---
 
-## 💭 Idées backlog (V1.0+)
+## 💭 Idées backlog (V1.1+)
 
 Voir `docs/ROADMAP.md` section "V1.0 - Système complet" et `docs/VISION.md` pour :
 - Triggers multi-nœuds (API externe, automatisation)
@@ -89,8 +125,8 @@ Voir `docs/ROADMAP.md` section "V1.0 - Système complet" et `docs/VISION.md` pou
 ## 📊 État du projet
 
 **Version actuelle** : V0.8 (Décembre 2025)
-**Statut** : ✅ Stable, documentée, prête pour déploiement public
-**Déploiement** : deepmemo.org (prévu)
+**Statut** : ✅ Stable, documentée, déployée en production
+**Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
 **Licence** : MIT (Open Source)
 
 **Codebase** :
@@ -123,6 +159,6 @@ Voir `docs/ROADMAP.md` section "V1.0 - Système complet" et `docs/VISION.md` pou
 
 ---
 
-**Prochaine session** : Implémentation V0.9 (Types actifs - Fondations)
+**Prochaine session** : Implémentation V0.9 (Internationalisation - i18n)
 
 **Référence historique** : Pour l'historique complet du développement V0.8, voir les commits Git et `CLAUDE.md`.

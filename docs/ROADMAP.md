@@ -24,7 +24,7 @@
 - [x] Backlinks automatiques
 - [x] Suppression des symlinks sans toucher l'original
 - [x] Détection des liens cassés
-- [ ] Wiki-links `[[Nom du nœud]]` cliquables (REPOUSSÉ V0.9+)
+- [ ] Wiki-links `[[Nom du nœud]]` cliquables (REPOUSSÉ V1.0+)
 
 #### Tags
 - [x] Système de tags dédié (champ séparé)
@@ -216,7 +216,7 @@ DeepMemo/
 - [x] **Navigation clavier fluide** : Implémentée avec système d'instance keys
 - [x] **Navigation ArrowLeft** : Remonte au parent si nœud replié/sans enfants
 
-### 🔗 Navigation via Liens Internes (REPOUSSÉ V0.9+)
+### 🔗 Navigation via Liens Internes (REPOUSSÉ V1.0+)
 
 **Note** : Fonctionnalité désactivée temporairement car le matching par titre est fragile (doublons, renommages). Nécessite refonte avec syntaxe `[[id:titre]]` ou auto-complétion intelligente.
 
@@ -269,44 +269,75 @@ DeepMemo/
 
 ---
 
-## 🌟 V0.9 - Features Avancées
+## 🌍 V0.9 - Internationalisation (i18n)
 
-### Types de nœuds actifs (Fondations)
-- [ ] Système d'implements basique
-- [ ] Propriété `implements: ["node_type_X"]` sur les nœuds
-- [ ] Scripts simples (`onSave`, `onRender`)
-- [ ] Sandbox JavaScript sécurisé
-- [ ] Nœuds descripteurs de types (voir docs/VISION.md)
+**Contexte stratégique** : DeepMemo est déployé en production sur deepmemo.org et déjà fonctionnel. La priorité est de le rendre accessible à une audience internationale avant d'implémenter des fonctionnalités avancées.
 
-### Améliorations des tags
+### Système i18n (Fondations)
+- [ ] Module `i18n.js` lightweight (pas de dépendance externe)
+- [ ] Support FR/EN minimum (ES optionnel)
+- [ ] Dictionnaires de traduction structurés par module
+- [ ] Fonction `t(key)` pour traduction dynamique
+- [ ] Détection automatique de la langue du navigateur
+- [ ] Sélecteur manuel de langue dans l'interface
+- [ ] Persistence dans `localStorage.deepmemo_lang`
+- [ ] Précache des dictionnaires dans Service Worker (PWA offline)
+
+### Traduction de l'interface
+- [ ] Labels HTML statiques (`index.html`)
+- [ ] Labels dynamiques générés en JavaScript
+- [ ] Boutons et actions (modales, toasts, confirmations)
+- [ ] Placeholders des champs de formulaire
+- [ ] Attributs `title` et `aria-label` (accessibilité)
+- [ ] Messages d'erreur et avertissements
+- [ ] Documentation intégrée (raccourcis clavier, tooltips)
+
+### Contenu de démo multilingue
+- [ ] `default-data.js` adapté selon langue détectée
+- [ ] Version FR (existante)
+- [ ] Version EN (traduction complète des 26 nœuds)
+- [ ] Version ES (optionnel)
+- [ ] OU décision de garder EN uniquement (plus universel)
+
+### Tests et validation
+- [ ] Tests sur navigateurs multilingues (FR, EN, ES)
+- [ ] Vérification du fallback (langue non supportée → EN par défaut)
+- [ ] Tests de persistance (changement langue → refresh)
+- [ ] Documentation utilisateur (guide pour changer de langue)
+- [ ] Vérification PWA offline avec dictionnaires précachés
+
+### Améliorations optionnelles (après i18n de base)
 - [ ] Création rapide de tags par #hashtag dans le contenu
 - [ ] Renommage de tags globalement
 - [ ] Fusion de tags
-- [ ] Couleurs personnalisées par tag
-
-### Export/Import amélioré
-- [x] Export/Import de branche locale (V0.8 - Complété)
-- [ ] Export en Markdown (avec structure)
-- [ ] Import depuis Notion
-- [ ] Import depuis Obsidian
-- [ ] Export PDF
-
-### Recherche avancée
-- [ ] Filtres combinés (tags + date + type)
-- [ ] Recherche par regex
-- [ ] Sauvegarde de recherches
-- [ ] Historique de recherche
+- [ ] Export en Markdown (avec structure préservée)
+- [ ] Import depuis Notion/Obsidian
 
 ---
 
-## 🌟 V1.0 - Système complet
+## 🌟 V1.0 - Types actifs et système complet
 
-### Types avancés et triggers
+### Types de nœuds actifs (Fondations)
+
+**Objectif** : Permettre aux nœuds de définir leur propre comportement via scripts, transformant DeepMemo en plateforme extensible.
+
+**Références** : Voir `docs/VISION.md` pour la spécification complète.
+
+#### Architecture de base
+- [ ] Système d'`implements` basique
+- [ ] Propriété `implements: ["node_type_X"]` sur les nœuds
+- [ ] Scripts simples (`onSave`, `onRender`, `onLoad`)
+- [ ] Sandbox JavaScript sécurisé (eval isolé)
+- [ ] Nœuds descripteurs de types (types = nœuds eux-mêmes)
+- [ ] API de manipulation de nœuds (`getNode`, `updateNode`, `createChild`)
+- [ ] Exemples concrets dans le contenu de démo
+
+#### Types avancés et triggers
 - [ ] Résolution de dépendances entre types
 - [ ] Héritage de types (`implements` multiple)
 - [ ] Triggers multi-nœuds (API `triggerNode`)
 - [ ] Vues multiples (card, list, kanban, calendar)
-- [ ] Actions customisées par type
+- [ ] Actions customisées par type de nœud
 - [ ] Exemples concrets : recettes → courses, projets agiles, CRM
 
 ### Multi-utilisateur
@@ -401,9 +432,10 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 24 Décembre 2025
-**Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ + DÉPLOYÉ)
-**Prochaine milestone** : V0.9 (Features avancées)
+**Dernière mise à jour** : 27 Décembre 2025 (Réorganisation V0.9 : i18n prioritaire)
+**Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ)
+**Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
+**Prochaine milestone** : V0.9 (Internationalisation)
 
 ---
 
