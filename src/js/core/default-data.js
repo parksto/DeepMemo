@@ -32,34 +32,35 @@ function getDefaultDataFR() {
   const ids = {
     root: `node_${now}_welcome`,
     privacy: `node_${now + 1}_privacy`,
-    interface: `node_${now + 2}_interface`,
-    tree: `node_${now + 3}_tree`,
-    center: `node_${now + 4}_center`,
-    right: `node_${now + 5}_right`,
-    features: `node_${now + 6}_features`,
-    nodes: `node_${now + 7}_nodes`,
-    nodesExample1: `node_${now + 8}_nodes_ex1`,
-    nodesExample2: `node_${now + 9}_nodes_ex2`,
-    symlinks: `node_${now + 10}_symlinks`,
-    symlinksExample: `node_${now + 11}_symlinks_ex`,
-    tags: `node_${now + 12}_tags`,
-    tagsExample: `node_${now + 13}_tags_ex`,
-    branch: `node_${now + 14}_branch`,
-    branchExample: `node_${now + 15}_branch_ex`,
-    export: `node_${now + 16}_export`,
-    exportExample: `node_${now + 17}_export_ex`,
-    keyboard: `node_${now + 18}_keyboard`,
-    future: `node_${now + 19}_future`,
-    activeNodes: `node_${now + 20}_active_nodes`,
-    activeNodesExample: `node_${now + 21}_active_nodes_ex`,
-    triggers: `node_${now + 22}_triggers`,
-    triggersExample: `node_${now + 23}_triggers_ex`,
-    triggersVoiceExample: `node_${now + 24}_triggers_voice_ex`,
-    multiUser: `node_${now + 25}_multi_user`,
-    multiUserExample: `node_${now + 26}_multi_user_ex`,
-    attachments: `node_${now + 27}_attachments`,
-    attachmentsExample: `node_${now + 28}_attachments_ex`,
-    firstSteps: `node_${now + 29}_first_steps`,
+    whyHierarchy: `node_${now + 2}_why_hierarchy`,
+    interface: `node_${now + 3}_interface`,
+    tree: `node_${now + 4}_tree`,
+    center: `node_${now + 5}_center`,
+    right: `node_${now + 6}_right`,
+    features: `node_${now + 7}_features`,
+    nodes: `node_${now + 8}_nodes`,
+    nodesExample1: `node_${now + 9}_nodes_ex1`,
+    nodesExample2: `node_${now + 10}_nodes_ex2`,
+    symlinks: `node_${now + 11}_symlinks`,
+    symlinksExample: `node_${now + 12}_symlinks_ex`,
+    tags: `node_${now + 13}_tags`,
+    tagsExample: `node_${now + 14}_tags_ex`,
+    branch: `node_${now + 15}_branch`,
+    branchExample: `node_${now + 16}_branch_ex`,
+    export: `node_${now + 17}_export`,
+    exportExample: `node_${now + 18}_export_ex`,
+    keyboard: `node_${now + 19}_keyboard`,
+    future: `node_${now + 20}_future`,
+    activeNodes: `node_${now + 21}_active_nodes`,
+    activeNodesExample: `node_${now + 22}_active_nodes_ex`,
+    triggers: `node_${now + 23}_triggers`,
+    triggersExample: `node_${now + 24}_triggers_ex`,
+    triggersVoiceExample: `node_${now + 25}_triggers_voice_ex`,
+    multiUser: `node_${now + 26}_multi_user`,
+    multiUserExample: `node_${now + 27}_multi_user_ex`,
+    attachments: `node_${now + 28}_attachments`,
+    attachmentsExample: `node_${now + 29}_attachments_ex`,
+    firstSteps: `node_${now + 30}_first_steps`,
   };
 
   return {
@@ -99,7 +100,7 @@ Chaque nœud t'explique un aspect de DeepMemo avec des exemples concrets.
 ---
 
 **Commence par explorer les enfants de ce nœud** (regarde juste en dessous, ou dans l'arborescence à gauche). 😊`,
-        children: [ids.privacy, ids.interface, ids.features, ids.future, ids.firstSteps],
+        children: [ids.privacy, ids.whyHierarchy, ids.interface, ids.features, ids.future, ids.firstSteps],
         parent: null,
         tags: ["bienvenue", "guide"],
         links: [],
@@ -151,6 +152,50 @@ DeepMemo est un outil **100% local**. Voici ce que ça signifie :
         backlinks: [],
         created: now + 1,
         modified: now + 1
+      },
+
+      // 🧠 Pourquoi une structure en arbre ?
+      [ids.whyHierarchy]: {
+        id: ids.whyHierarchy,
+        type: "node",
+        title: "🧠 Pourquoi une structure en arbre ?",
+        content: `# Comment pense ton cerveau ?
+
+DeepMemo n'est pas qu'un outil de prise de notes—c'est un **reflet de comment ton esprit fonctionne naturellement**.
+
+## 🌳 Les arbres et réseaux sont partout
+
+Regarde autour de toi : **les structures hiérarchiques sont omniprésentes**.
+
+- **Ton cerveau** → Neurones organisés en dendrites arborescentes et synapses en réseau
+- **Le langage** → Phrases structurées en arbres syntaxiques (sujet, verbe, complément...)
+- **L'évolution** → Arbre buissonnant des espèces (avec des croisements, pas juste des branches)
+- **Les cartes mentales** → Concept central qui se ramifie en sous-idées
+- **Même la musique** → Rythmes divisés hiérarchiquement (mesures → temps → divisions)
+
+## 💡 Pourquoi c'est important ?
+
+**Ton cerveau est câblé comme ça.** Quand tu te souviens de quelque chose, tu ne cherches pas dans une liste linéaire—tu **sautes d'une association à l'autre** dans un réseau de connexions.
+
+DeepMemo embrasse cette réalité :
+- ✅ **Hiérarchie** pour l'organisation (comme tes dossiers)
+- ✅ **Liens symboliques** pour les connexions croisées (comme ton esprit)
+- ✅ **Tags** pour les associations flexibles
+
+## 📚 Pour aller plus loin
+
+Voir le document complet : \`docs/HIERARCHICAL_STRUCTURES.md\` dans le dépôt GitHub.
+
+---
+
+**En bref** : DeepMemo travaille **avec** ton cerveau, pas contre lui.`,
+        children: [],
+        parent: ids.root,
+        tags: ["concept", "cognition", "philosophie"],
+        links: [],
+        backlinks: [],
+        created: now + 2,
+        modified: now + 2
       },
 
       // 🧭 Découvrir l'interface
@@ -1895,34 +1940,35 @@ function getDefaultDataEN() {
   const ids = {
     root: `node_${now}_welcome`,
     privacy: `node_${now + 1}_privacy`,
-    interface: `node_${now + 2}_interface`,
-    tree: `node_${now + 3}_tree`,
-    center: `node_${now + 4}_center`,
-    right: `node_${now + 5}_right`,
-    features: `node_${now + 6}_features`,
-    nodes: `node_${now + 7}_nodes`,
-    nodesExample1: `node_${now + 8}_nodes_ex1`,
-    nodesExample2: `node_${now + 9}_nodes_ex2`,
-    symlinks: `node_${now + 10}_symlinks`,
-    symlinksExample: `node_${now + 11}_symlinks_ex`,
-    tags: `node_${now + 12}_tags`,
-    tagsExample: `node_${now + 13}_tags_ex`,
-    branch: `node_${now + 14}_branch`,
-    branchExample: `node_${now + 15}_branch_ex`,
-    export: `node_${now + 16}_export`,
-    exportExample: `node_${now + 17}_export_ex`,
-    keyboard: `node_${now + 18}_keyboard`,
-    future: `node_${now + 19}_future`,
-    activeNodes: `node_${now + 20}_active_nodes`,
-    activeNodesExample: `node_${now + 21}_active_nodes_ex`,
-    triggers: `node_${now + 22}_triggers`,
-    triggersExample: `node_${now + 23}_triggers_ex`,
-    triggersVoiceExample: `node_${now + 24}_triggers_voice_ex`,
-    multiUser: `node_${now + 25}_multi_user`,
-    multiUserExample: `node_${now + 26}_multi_user_ex`,
-    attachments: `node_${now + 27}_attachments`,
-    attachmentsExample: `node_${now + 28}_attachments_ex`,
-    firstSteps: `node_${now + 29}_first_steps`,
+    whyHierarchy: `node_${now + 2}_why_hierarchy`,
+    interface: `node_${now + 3}_interface`,
+    tree: `node_${now + 4}_tree`,
+    center: `node_${now + 5}_center`,
+    right: `node_${now + 6}_right`,
+    features: `node_${now + 7}_features`,
+    nodes: `node_${now + 8}_nodes`,
+    nodesExample1: `node_${now + 9}_nodes_ex1`,
+    nodesExample2: `node_${now + 10}_nodes_ex2`,
+    symlinks: `node_${now + 11}_symlinks`,
+    symlinksExample: `node_${now + 12}_symlinks_ex`,
+    tags: `node_${now + 13}_tags`,
+    tagsExample: `node_${now + 14}_tags_ex`,
+    branch: `node_${now + 15}_branch`,
+    branchExample: `node_${now + 16}_branch_ex`,
+    export: `node_${now + 17}_export`,
+    exportExample: `node_${now + 18}_export_ex`,
+    keyboard: `node_${now + 19}_keyboard`,
+    future: `node_${now + 20}_future`,
+    activeNodes: `node_${now + 21}_active_nodes`,
+    activeNodesExample: `node_${now + 22}_active_nodes_ex`,
+    triggers: `node_${now + 23}_triggers`,
+    triggersExample: `node_${now + 24}_triggers_ex`,
+    triggersVoiceExample: `node_${now + 25}_triggers_voice_ex`,
+    multiUser: `node_${now + 26}_multi_user`,
+    multiUserExample: `node_${now + 27}_multi_user_ex`,
+    attachments: `node_${now + 28}_attachments`,
+    attachmentsExample: `node_${now + 29}_attachments_ex`,
+    firstSteps: `node_${now + 30}_first_steps`,
   };
 
   return {
@@ -1962,7 +2008,7 @@ Each node explains an aspect of DeepMemo with concrete examples.
 ---
 
 **Start by exploring the children of this node** (look just below, or in the tree on the left). 😊`,
-        children: [ids.privacy, ids.interface, ids.features, ids.future, ids.firstSteps],
+        children: [ids.privacy, ids.whyHierarchy, ids.interface, ids.features, ids.future, ids.firstSteps],
         parent: null,
         tags: ["welcome", "guide"],
         links: [],
@@ -2014,6 +2060,50 @@ In the future, DeepMemo will be able to **optionally** sync across multiple devi
         backlinks: [],
         created: now + 1,
         modified: now + 1
+      },
+
+      // 🧠 Why a tree structure?
+      [ids.whyHierarchy]: {
+        id: ids.whyHierarchy,
+        type: "node",
+        title: "🧠 Why a tree structure?",
+        content: `# How does your brain think?
+
+DeepMemo isn't just a note-taking tool—it's a **reflection of how your mind naturally works**.
+
+## 🌳 Trees and networks are everywhere
+
+Look around you: **hierarchical structures are ubiquitous**.
+
+- **Your brain** → Neurons organized in tree-like dendrites and networked synapses
+- **Language** → Sentences structured in syntax trees (subject, verb, object...)
+- **Evolution** → Bushy tree of species (with crossings, not just branches)
+- **Mind maps** → Central concept branching into sub-ideas
+- **Even music** → Rhythms divided hierarchically (measures → beats → subdivisions)
+
+## 💡 Why does it matter?
+
+**Your brain is wired this way.** When you remember something, you don't search through a linear list—you **jump from one association to another** in a network of connections.
+
+DeepMemo embraces this reality:
+- ✅ **Hierarchy** for organization (like your folders)
+- ✅ **Symbolic links** for cross-connections (like your mind)
+- ✅ **Tags** for flexible associations
+
+## 📚 To go further
+
+See the complete document: \`docs/HIERARCHICAL_STRUCTURES.md\` in the GitHub repository.
+
+---
+
+**In short**: DeepMemo works **with** your brain, not against it.`,
+        children: [],
+        parent: ids.root,
+        tags: ["concept", "cognition", "philosophy"],
+        links: [],
+        backlinks: [],
+        created: now + 2,
+        modified: now + 2
       },
 
       // 🧭 Discover the interface
