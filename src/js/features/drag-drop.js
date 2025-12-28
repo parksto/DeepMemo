@@ -5,6 +5,7 @@
 
 import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
+import { t } from '../utils/i18n.js';
 
 // Drag state
 let draggedNodeId = null;
@@ -156,7 +157,7 @@ function handleDrop(e, targetNodeId, onDropComplete) {
 
   // Don't allow dropping on descendants (cycle prevention)
   if (isDescendantOf(targetNodeId, draggedId)) {
-    showToast('Impossible : destination invalide', '⚠️');
+    showToast(t('toast.invalidDestination'), '⚠️');
     return;
   }
 
@@ -260,7 +261,7 @@ function reorderNodes(draggedId, targetId, position) {
   draggedNode.parent = newParentId;
 
   saveData();
-  showToast('Ordre modifié', '🔄');
+  showToast(t('toast.orderModified'), '🔄');
 }
 
 /**
@@ -286,7 +287,7 @@ function moveNode(nodeId, newParentId) {
   }
 
   saveData();
-  showToast('Nœud déplacé', '📦');
+  showToast(t('toast.nodeMoved'), '📦');
 }
 
 /**
@@ -319,7 +320,7 @@ function createSymlinkTo(targetNodeId, parentId) {
   }
 
   saveData();
-  showToast('Lien symbolique créé', '🔗');
+  showToast(t('toast.symlinkCreated'), '🔗');
 }
 
 /**
@@ -377,7 +378,7 @@ function duplicateNode(nodeId, newParentId) {
   }
 
   saveData();
-  showToast('Nœud dupliqué', '📋');
+  showToast(t('toast.nodeDuplicated'), '📋');
 }
 
 /**
@@ -442,5 +443,5 @@ function duplicateNodeAt(draggedId, targetId, position) {
   }
 
   saveData();
-  showToast('Nœud dupliqué et inséré', '📋');
+  showToast(t('toast.nodeDuplicatedInserted'), '📋');
 }

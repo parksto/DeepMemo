@@ -1,0 +1,267 @@
+/**
+ * DeepMemo - English Dictionary
+ * Complete translation of all UI strings
+ */
+
+export default {
+  // Application metadata
+  app: {
+    title: "DeepMemo",
+    tagline: "Your second brain",
+    nodeCounter: "{count} node{{count > 1 ? 's' : ''}}"
+  },
+
+  // Actions (buttons, commands)
+  actions: {
+    newNode: "New node",
+    import: "Import",
+    export: "Export",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    confirm: "Confirm",
+    close: "Close",
+    move: "Move",
+    link: "Link",
+    duplicate: "Duplicate",
+    edit: "Edit",
+    view: "View",
+    toggleView: "👁️ View",
+    addChild: "Add child",
+    addFile: "Add file",
+    addAttachment: "Add file",
+    openActions: "Actions..."
+  },
+
+  // Toast notifications (~73 messages)
+  toast: {
+    appInit: "Application initialized",
+    saved: "Saved",
+    nodeSelected: "Node selected",
+    nodeCreated: "Node created",
+    rootNodeCreated: "Root node created",
+    childNodeCreated: "Child node created",
+    nodeMoved: "Node moved",
+    nodeDeleted: "Node deleted",
+    symlinkCreated: "Symbolic link created",
+    symlinkDeleted: "Symbolic link deleted",
+    nodeDuplicated: "Node duplicated",
+    nodeDuplicatedInserted: "Node duplicated and inserted",
+    orderModified: "Order modified",
+    branchModeEnabled: "Branch mode enabled",
+    branchRootNotFound: "Branch root node not found",
+    nodeNotFound: "Node not found",
+    alreadyAtRoot: "Already at root",
+    movedToParent: "Moved to parent",
+    linkCopied: "Link copied to clipboard",
+    branchLinkCopied: "Branch link copied to clipboard",
+    copyError: "Copy error",
+    selectNodeFirst: "Select a node first",
+    selectParentFirst: "Select a parent node first",
+    invalidDestination: "Impossible: invalid destination",
+    cannotMoveToDescendant: "Cannot move into own descendants",
+    wouldCreateCycle: "This action would create a cycle",
+    nodeAlreadyExists: "Node already exists at this location",
+    externalSymlink: "⚠️ External link to branch (not accessible)",
+    brokenLink: "⚠️ Broken link",
+    tagAlreadyExists: "Tag already exists",
+    tagAdded: "Tag added",
+    tagRemoved: "Tag removed",
+    dataImported: "{count} node(s) imported",
+    dataImportedJSON: "{count} node(s) imported (JSON)",
+    dataImportedZIP: "{count} node(s) imported (ZIP)",
+    dataExported: "Data exported (ZIP)",
+    branchExported: "Branch exported (ZIP)",
+    branchImported: "{count} node(s) imported",
+    importError: "Import error",
+    exportError: "Export error",
+    attachmentsNotAvailable: "⚠️ Attachments not available (IndexedDB)",
+    fileTooBig: "❌ File too large (max 50MB)",
+    fileAdded: "✅ File added: {name}",
+    fileAddError: "❌ Error adding file",
+    syntaxCopied: "✅ Syntax copied to clipboard",
+    syntaxCopyError: "❌ Copy error",
+    fileNotFound: "❌ File not found",
+    downloadStarted: "✅ Download: {name}",
+    downloadError: "❌ Download error",
+    fileDeleted: "✅ File deleted: {name}",
+    fileDeleteError: "❌ File deletion error",
+    orphansCleaned: "✅ {count} orphaned file(s) deleted",
+    noOrphans: "✅ No orphaned files found",
+    cleanOrphansError: "❌ Cleanup error",
+    customFontEnabled: "Custom font enabled",
+    systemFontEnabled: "System font enabled",
+    languageChanged: "Language changed"
+  },
+
+  // Alert messages
+  alerts: {
+    invalidFile: "Invalid JSON file",
+    invalidBranch: "Invalid branch file. Use global import for full exports.",
+    nodeNotFound: "Node not found",
+    dataJsonNotFound: "data.json file not found in ZIP",
+    importError: "Import error: {message}",
+    exportError: "Export error: {message}"
+  },
+
+  // Confirmation dialogs
+  confirms: {
+    importData: "Import {count} node(s)? This will overwrite your current data.",
+    importDataWithFiles: "Import {count} node(s) and {fileCount} file(s)? This will overwrite your current data.",
+    importBranch: "Import {count} node(s) as children of current node?",
+    importBranchWithFiles: "Import {count} node(s) and {fileCount} file(s) as children of current node?",
+    deleteSymlink: "Delete this symbolic link?",
+    deleteNode: "Delete this node and all its children?",
+    deleteFile: "Delete this file?",
+    cleanOrphans: "Clean orphaned files? This action is irreversible."
+  },
+
+  // Modals
+  modals: {
+    actions: {
+      title: "⚙️ Node Actions",
+      subtitle: "What do you want to do with this node?",
+      move: "↗️ Move",
+      link: "🔗 Link",
+      duplicate: "📋 Duplicate",
+      delete: "🗑️ Delete",
+      cancel: "Cancel",
+      confirm: "✓ Confirm",
+      descriptions: {
+        move: "Move this node to a new parent. All children will follow.",
+        link: "Create a symbolic link of this node to another parent. Content is shared.",
+        duplicate: "Duplicate this node (and its children) to a new parent.",
+        delete: "Warning: deletion is permanent and will also delete all children."
+      },
+      disabledReasons: {
+        currentNode: "Current node",
+        descendant: "Descendant",
+        wouldCycle: "Would create cycle"
+      }
+    },
+    symlink: {
+      title: "🔗 Create Symbolic Link",
+      subtitle: "Choose where to display this node as a symbolic link:",
+      cancel: "Cancel",
+      confirm: "🔗 Create link"
+    },
+    search: {
+      placeholder: "Search in all nodes...",
+      emptyHint: "Type to search in your nodes",
+      noResults: "No results found",
+      navigate: "↑↓ Navigate",
+      open: "Enter Open",
+      close: "Esc Close"
+    }
+  },
+
+  // Placeholders
+  placeholders: {
+    nodeTitle: "Node title",
+    nodeContent: "Write your content here... (Use [[Node name]] to create links)",
+    search: "Search in all nodes...",
+    tagInput: "+ tag"
+  },
+
+  // Labels and metadata
+  labels: {
+    created: "Created",
+    modified: "Modified",
+    children: "📂 Child nodes",
+    parent: "Parent",
+    attachments: "📎 Attached files",
+    tags: "Tags",
+    tagsInBranch: "☁️ Branch tags",
+    noTags: "No tags in branch",
+    storage: "📊 Storage",
+    preferences: "Preferences",
+    language: "Language",
+    french: "Français",
+    english: "English",
+    systemFont: "System font",
+    keyboardShortcuts: "Keyboard shortcuts",
+    structure: "Structure",
+    type: "Type",
+    dates: "Dates",
+    statistics: "Statistics",
+    characters: "Characters",
+    words: "Words",
+    informations: "Information"
+  },
+
+  // Node types and badges
+  nodeTypes: {
+    node: "📄 Node",
+    symlink: "🔗 Symbolic link",
+    brokenSymlink: "Broken symbolic link",
+    badge: {
+      link: "link",
+      external: "external",
+      broken: "broken link",
+      circular: "circular",
+      copy: "copy"
+    }
+  },
+
+  // Messages
+  messages: {
+    welcome: "Welcome to DeepMemo",
+    welcomeSubtitle: "Create your first node to get started",
+    emptyContent: "No content",
+    emptyPreview: "Empty",
+    brokenSymlink: "⚠️ This symbolic link points to a node that no longer exists.\n\nYou can delete this broken link.",
+    newNodeTitle: "New node"
+  },
+
+  // Tooltips
+  tooltips: {
+    shareNode: "Copy URL of this node (preserves current context)",
+    shareBranch: "Copy URL in isolated branch mode (focus view)",
+    goToParent: "Go to parent",
+    goToRoot: "Back to root",
+    exportBranch: "Export this node and its descendants",
+    importBranch: "Import a branch as children",
+    attachmentId: "Attachment ID",
+    copyMarkdown: "Copy markdown syntax",
+    download: "Download",
+    deleteFile: "Delete",
+    tagOccurrences: "{count} occurrence(s) - Click to search"
+  },
+
+  // Keyboard shortcuts
+  keyboard: {
+    newNode: "New node",
+    search: "Search",
+    editMode: "Switch to edit mode",
+    navigateTree: "Navigate tree",
+    expandNode: "Expand node",
+    collapseOrParent: "Collapse / Parent",
+    activateNode: "Activate node",
+    goToParent: "Go to parent"
+  },
+
+  // Storage section
+  storage: {
+    files: "Files",
+    maxSize: " / ~500 MB",
+    filesCount: "{count} attached file(s)",
+    storageError: "Storage error",
+    cleanOrphans: "🧹 Clean orphaned files"
+  },
+
+  // Empty states
+  empty: {
+    icon: "🧩",
+    welcome: "Welcome to DeepMemo",
+    subtitle: "Create your first node to get started",
+    searchPlaceholder: "💭",
+    searchText: "Type to search in your nodes",
+    noResults: "No results found"
+  },
+
+  // Meta (PWA)
+  meta: {
+    title: "DeepMemo V0.9",
+    description: "Knowledge management system based on recursive, interconnected, and active nodes"
+  }
+};

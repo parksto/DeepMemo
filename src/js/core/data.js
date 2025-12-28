@@ -6,6 +6,18 @@
 import { generateId } from '../utils/helpers.js';
 import { getDefaultData } from './default-data.js';
 import * as AttachmentsModule from './attachments.js';
+import { t } from '../utils/i18n.js';
+
+/**
+ * i18n wrappers for alerts and confirms
+ */
+function i18nAlert(key, params = {}) {
+  alert(t(`alerts.${key}`, params));
+}
+
+function i18nConfirm(key, params = {}) {
+  return confirm(t(`confirms.${key}`, params));
+}
 
 /**
  * Data state
@@ -127,12 +139,12 @@ export function importData(event, onSuccess) {
     try {
       const imported = JSON.parse(e.target.result);
       if (!imported.nodes || !imported.rootNodes) {
-        alert('Fichier JSON invalide');
+        i18nAlert('invalidFile');
         return;
       }
 
       const nodeCount = Object.keys(imported.nodes).length;
-      if (confirm(`Importer ${nodeCount} nœud(s) ? Cela écrasera tes données actuelles.`)) {
+      if (i18nConfirm('importData', { count: nodeCount })) {
         data.nodes = imported.nodes;
         data.rootNodes = imported.rootNodes;
         saveData();
@@ -142,7 +154,7 @@ export function importData(event, onSuccess) {
         }
       }
     } catch (err) {
-      alert('Erreur lors de l\'import : ' + err.message);
+      i18nAlert('importError', { message: err.message });
     }
   };
   reader.readAsText(file);
@@ -180,7 +192,7 @@ function collectBranchNodes(nodeId) {
 export function exportBranch(nodeId) {
   const node = data.nodes[nodeId];
   if (!node) {
-    alert('Nœud introuvable');
+    i18nAlert('nodeNotFound');
     return;
   }
 
@@ -223,12 +235,12 @@ export function importBranch(event, parentId, onSuccess) {
 
       // Validate branch format
       if (imported.type !== 'deepmemo-branch' || !imported.nodes || !imported.branchRootId) {
-        alert('Fichier de branche invalide. Utilise l\'import global pour les exports complets.');
+        i18nAlert('invalidBranch');
         return;
       }
 
       const nodeCount = Object.keys(imported.nodes).length;
-      if (!confirm(`Importer ${nodeCount} nœud(s) comme enfants du nœud actuel ?`)) {
+      if (!i18nConfirm('importBranch', { count: nodeCount })) {
         return;
       }
 
@@ -279,7 +291,7 @@ export function importBranch(event, parentId, onSuccess) {
         onSuccess(nodeCount, importedRootId);
       }
     } catch (err) {
-      alert('Erreur lors de l\'import : ' + err.message);
+      i18nAlert('importError', { message: err.message });
       console.error(err);
     }
   };
@@ -433,7 +445,7 @@ export async function exportDataZIP() {
     console.log(`[Export] ZIP created with ${attachmentIds.size} attachments`);
   } catch (error) {
     console.error('[Export] Failed to create ZIP:', error);
-    alert('Erreur lors de l\'export : ' + error.message);
+    i18nAlert('exportError', { message: error.message });
   }
 }
 
@@ -445,7 +457,7 @@ export async function exportBranchZIP(nodeId) {
   try {
     const node = data.nodes[nodeId];
     if (!node) {
-      alert('Nœud introuvable');
+      i18nAlert('nodeNotFound');
       return;
     }
 
@@ -510,7 +522,7 @@ export async function exportBranchZIP(nodeId) {
     console.log(`[Export] Branch ZIP created with ${nodeCount} nodes and ${attachmentIds.size} attachments`);
   } catch (error) {
     console.error('[Export] Failed to create branch ZIP:', error);
-    alert('Erreur lors de l\'export : ' + error.message);
+    i18nAlert('exportError', { message: error.message });
   }
 }
 
@@ -530,7 +542,7 @@ export async function importDataZIP(event, onSuccess) {
     // Extract data.json
     const dataJsonFile = zip.file('data.json');
     if (!dataJsonFile) {
-      alert('Fichier data.json introuvable dans le ZIP');
+      i18nAlert('dataJsonNotFound');
       return;
     }
 
@@ -557,7 +569,7 @@ export async function importDataZIP(event, onSuccess) {
       });
       attachmentCount = attachmentFiles.length;
 
-      if (!confirm(`Importer ${nodeCount} nœud(s) et ${attachmentCount} fichier(s) ? Cela écrasera tes données actuelles.`)) {
+      if (!i18nConfirm('importDataWithFiles', { count: nodeCount, fileCount: attachmentCount })) {
         event.target.value = '';
         return;
       }
@@ -570,7 +582,7 @@ export async function importDataZIP(event, onSuccess) {
         await AttachmentsModule.saveAttachment(attachId, blob);
       }
     } else {
-      if (!confirm(`Importer ${nodeCount} nœud(s) ? Cela écrasera tes données actuelles.`)) {
+      if (!i18nConfirm('importData', { count: nodeCount })) {
         event.target.value = '';
         return;
       }
@@ -611,7 +623,7 @@ export async function importBranchZIP(event, parentId, onSuccess) {
     // Extract data.json
     const dataJsonFile = zip.file('data.json');
     if (!dataJsonFile) {
-      alert('Fichier data.json introuvable dans le ZIP');
+      i18nAlert('dataJsonNotFound');
       return;
     }
 
@@ -640,7 +652,7 @@ export async function importBranchZIP(event, parentId, onSuccess) {
       attachmentCount = attachmentFiles.length;
     }
 
-    if (!confirm(`Importer ${nodeCount} nœud(s) et ${attachmentCount} fichier(s) comme enfants du nœud actuel ?`)) {
+    if (!i18nConfirm('importBranchWithFiles', { count: nodeCount, fileCount: attachmentCount })) {
       event.target.value = '';
       return;
     }

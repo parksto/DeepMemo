@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.1.0';
+const CACHE_VERSION = 'v1.3.1'; // V0.9 - i18n (corrections finales)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)
@@ -10,6 +10,7 @@ const PRECACHE_URLS = [
   '/src/css/base.css',
   '/src/css/layout.css',
   '/src/css/components.css',
+  '/src/css/mobile.css',
   '/src/js/app.js',
   '/src/js/core/data.js',
   '/src/js/core/attachments.js',
@@ -22,12 +23,18 @@ const PRECACHE_URLS = [
   '/src/js/features/drag-drop.js',
   '/src/js/ui/toast.js',
   '/src/js/ui/panels.js',
+  '/src/js/ui/mobile-tabs.js',
   '/src/js/utils/routing.js',
   '/src/js/utils/keyboard.js',
   '/src/js/utils/helpers.js',
+  '/src/js/utils/i18n.js',
+  '/src/js/locales/fr.js',
+  '/src/js/locales/en.js',
   '/favicon.svg',
   '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-512.png',
+  '/manifest-fr.json',
+  '/manifest-en.json'
 ];
 
 // Installation : précache des fichiers essentiels

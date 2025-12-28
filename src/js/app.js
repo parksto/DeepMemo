@@ -16,6 +16,7 @@ import * as TagsModule from './features/tags.js';
 import * as ModalsModule from './features/modals.js';
 import * as DragDropModule from './features/drag-drop.js';
 import * as AttachmentsModule from './core/attachments.js';
+import { initI18n, t, setLanguage, getCurrentLanguage } from './utils/i18n.js';
 
 /**
  * Main Application Object
@@ -31,7 +32,10 @@ const app = {
    * Initialize the application
    */
   async init() {
-    console.log('🚀 DeepMemo V0.8 - Initialisation...');
+    console.log('🚀 DeepMemo V0.9 - Initialisation...');
+
+    // Initialize i18n system
+    await initI18n();
 
     // Initialize IndexedDB for attachments
     if (AttachmentsModule.isIndexedDBAvailable()) {
@@ -40,7 +44,7 @@ const app = {
         console.log('[App] IndexedDB initialized for attachments');
       } catch (error) {
         console.error('[App] IndexedDB failed to initialize:', error);
-        showToast('⚠️ Attachments non disponibles (IndexedDB)', '⚠️');
+        showToast(t('toast.attachmentsNotAvailable'), '⚠️');
       }
     } else {
       console.warn('[App] IndexedDB not available (private mode?)');
@@ -92,7 +96,7 @@ const app = {
     }
 
     // Test toast
-    showToast('Application initialisée', '🎉');
+    showToast(t('toast.appInit'), '🎉');
 
     // Update node counter
     this.updateNodeCounter();
@@ -108,12 +112,12 @@ const app = {
     if (mode === 'branch' && branchRootId) {
       const branchNode = DataModule.data.nodes[branchRootId];
       if (!branchNode) {
-        showToast('Nœud racine de branche introuvable', '⚠️');
+        showToast(t('toast.branchRootNotFound'), '⚠️');
         return;
       }
       TreeModule.enableBranchMode(branchRootId);
       this.render();
-      showToast('Mode branche activé', '🌿');
+      showToast(t('toast.branchModeEnabled'), '🌿');
     } else {
       TreeModule.disableBranchMode();
     }
@@ -127,7 +131,7 @@ const app = {
 
     const node = DataModule.data.nodes[nodeId];
     if (!node) {
-      showToast('Nœud introuvable', '⚠️');
+      showToast(t('toast.nodeNotFound'), '⚠️');
       return;
     }
 
@@ -165,7 +169,7 @@ const app = {
     // Update focus AFTER tree is rendered (to find visible instance key in DOM)
     TreeModule.updateFocusAfterRender(nodeId);
 
-    showToast('Nœud sélectionné', '📄');
+    showToast(t('toast.nodeSelected'), '📄');
   },
 
   /**
@@ -211,9 +215,9 @@ const app = {
     const node = DataModule.data.nodes[this.currentNodeId];
     if (node && node.parent) {
       this.selectNodeById(node.parent);
-      showToast('Remonté au parent', '⬆️');
+      showToast(t('toast.movedToParent'), '⬆️');
     } else {
-      showToast('Déjà à la racine', '🏠');
+      showToast(t('toast.alreadyAtRoot'), '🏠');
     }
   },
 
@@ -222,7 +226,7 @@ const app = {
    */
   updateNodeCounter() {
     const count = Object.keys(this.data.nodes).length;
-    document.getElementById('nodeCounter').textContent = `${count} nœud${count > 1 ? 's' : ''}`;
+    document.getElementById('nodeCounter').textContent = t('app.nodeCounter', { count });
   },
 
   /**
@@ -253,7 +257,7 @@ const app = {
    */
   createChildNode() {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud parent', 'ℹ️');
+      showToast(t('toast.selectParentFirst'), 'ℹ️');
       return;
     }
 
@@ -297,7 +301,7 @@ const app = {
    */
   focusEditor() {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
@@ -339,7 +343,7 @@ const app = {
           document.getElementById('emptyState').style.display = 'flex';
           document.getElementById('editorContainer').style.display = 'none';
 
-          showToast(`${nodeCount} nœud(s) importés (ZIP)`, '📥');
+          showToast(t('toast.dataImportedZIP', { count: nodeCount }), '📥');
         });
       } else {
         // Legacy JSON import
@@ -352,12 +356,12 @@ const app = {
           document.getElementById('emptyState').style.display = 'flex';
           document.getElementById('editorContainer').style.display = 'none';
 
-          showToast(`${nodeCount} nœud(s) importés (JSON)`, '📥');
+          showToast(t('toast.dataImportedJSON', { count: nodeCount }), '📥');
         });
       }
     } catch (error) {
       console.error('[App] Import failed:', error);
-      showToast('Erreur lors de l\'import', '⚠️');
+      showToast(t('toast.importError'), '⚠️');
     }
   },
 
@@ -367,10 +371,10 @@ const app = {
   async exportData() {
     try {
       await DataModule.exportDataZIP();
-      showToast('Données exportées (ZIP)', '💾');
+      showToast(t('toast.dataExported'), '💾');
     } catch (error) {
       console.error('[App] Export failed:', error);
-      showToast('Erreur lors de l\'export', '⚠️');
+      showToast(t('toast.exportError'), '⚠️');
     }
   },
 
@@ -379,16 +383,16 @@ const app = {
    */
   async exportBranch() {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
     try {
       await DataModule.exportBranchZIP(this.currentNodeId);
-      showToast('Branche exportée (ZIP)', '⬇️');
+      showToast(t('toast.branchExported'), '⬇️');
     } catch (error) {
       console.error('[App] Branch export failed:', error);
-      showToast('Erreur lors de l\'export', '⚠️');
+      showToast(t('toast.exportError'), '⚠️');
     }
   },
 
@@ -397,7 +401,7 @@ const app = {
    */
   async importBranch(event) {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud parent', 'ℹ️');
+      showToast(t('toast.selectParentFirst'), 'ℹ️');
       event.target.value = ''; // Reset file input
       return;
     }
@@ -411,7 +415,7 @@ const app = {
         await DataModule.importBranchZIP(event, this.currentNodeId, (nodeCount, importedRootId) => {
           this.render();
           this.updateNodeCounter();
-          showToast(`${nodeCount} nœud(s) importés (ZIP)`, '⬆️');
+          showToast(t('toast.dataImportedZIP', { count: nodeCount }), '⬆️');
 
           // Optionally select the imported root
           if (importedRootId) {
@@ -425,7 +429,7 @@ const app = {
         DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
           this.render();
           this.updateNodeCounter();
-          showToast(`${nodeCount} nœud(s) importés (JSON)`, '⬆️');
+          showToast(t('toast.dataImportedJSON', { count: nodeCount }), '⬆️');
 
           // Optionally select the imported root
           if (importedRootId) {
@@ -437,7 +441,7 @@ const app = {
       }
     } catch (error) {
       console.error('[App] Branch import failed:', error);
-      showToast('Erreur lors de l\'import', '⚠️');
+      showToast(t('toast.importError'), '⚠️');
     }
   },
 
@@ -461,7 +465,7 @@ const app = {
    */
   shareNode(event) {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
@@ -472,9 +476,9 @@ const app = {
       const branchRootId = TreeModule.isBranchMode() ? TreeModule.getBranchRootId() : null;
       const url = RoutingModule.getShareableUrl(this.currentNodeId, branchRootId);
       navigator.clipboard.writeText(url).then(() => {
-        showToast('Lien copié dans le presse-papier', '🔗');
+        showToast(t('toast.linkCopied'), '🔗');
       }).catch(() => {
-        showToast('Erreur lors de la copie', '⚠️');
+        showToast(t('toast.copyError'), '⚠️');
       });
     }
   },
@@ -485,7 +489,7 @@ const app = {
    */
   shareBranch(event) {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
@@ -495,9 +499,9 @@ const app = {
       event.preventDefault();
       const url = RoutingModule.getShareableBranchUrl(this.currentNodeId);
       navigator.clipboard.writeText(url).then(() => {
-        showToast('Lien de branche copié dans le presse-papier', '🌿');
+        showToast(t('toast.branchLinkCopied'), '🌿');
       }).catch(() => {
-        showToast('Erreur lors de la copie', '⚠️');
+        showToast(t('toast.copyError'), '⚠️');
       });
     }
   },
@@ -525,12 +529,12 @@ const app = {
       // Switch to custom font (Sto)
       document.body.classList.remove('system-font');
       localStorage.setItem('deepmemo_fontPreference', 'custom');
-      showToast('Police personnalisée activée', '✨');
+      showToast(t('toast.customFontEnabled'), '✨');
     } else {
       // Switch to system font
       document.body.classList.add('system-font');
       localStorage.setItem('deepmemo_fontPreference', 'system');
-      showToast('Police système activée', '🔤');
+      showToast(t('toast.systemFontEnabled'), '🔤');
     }
 
     // Re-render right panel to update checkbox
@@ -544,7 +548,7 @@ const app = {
    */
   openActionModal() {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
@@ -620,7 +624,7 @@ const app = {
    */
   openSymlinkModal() {
     if (!this.currentNodeId) {
-      showToast('Sélectionne d\'abord un nœud', 'ℹ️');
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
@@ -665,7 +669,7 @@ const app = {
     // Check file size limit (50MB)
     const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
     if (file.size > MAX_SIZE) {
-      showToast(`❌ Fichier trop volumineux (max 50MB)`, '⚠️');
+      showToast(t('toast.fileTooBig'), '⚠️');
       event.target.value = ''; // Reset input
       return;
     }
@@ -706,10 +710,10 @@ const app = {
       // Refresh display
       EditorModule.displayNode(this.currentNodeId, () => this.render());
 
-      showToast(`✅ Fichier ajouté : ${file.name}`, '📎');
+      showToast(t('toast.fileAdded', { name: file.name }), '📎');
     } catch (error) {
       console.error('[App] Failed to upload attachment:', error);
-      showToast('❌ Erreur lors de l\'ajout du fichier', '⚠️');
+      showToast(t('toast.fileAddError'), '⚠️');
     }
 
     // Reset input
@@ -721,10 +725,10 @@ const app = {
    */
   copyAttachmentSyntax(syntax) {
     navigator.clipboard.writeText(syntax).then(() => {
-      showToast('✅ Syntaxe copiée dans le presse-papier', '📋');
+      showToast(t('toast.syntaxCopied'), '📋');
     }).catch(err => {
       console.error('[App] Failed to copy syntax:', err);
-      showToast('❌ Erreur lors de la copie', '⚠️');
+      showToast(t('toast.syntaxCopyError'), '⚠️');
     });
   },
 
@@ -735,7 +739,7 @@ const app = {
     try {
       const blob = await AttachmentsModule.getAttachment(attachId);
       if (!blob) {
-        showToast('❌ Fichier introuvable', '⚠️');
+        showToast(t('toast.fileNotFound'), '⚠️');
         return;
       }
 
@@ -747,10 +751,10 @@ const app = {
       a.click();
       URL.revokeObjectURL(url);
 
-      showToast(`✅ Téléchargement : ${filename}`, '⬇️');
+      showToast(t('toast.downloadStarted', { name: filename }), '⬇️');
     } catch (error) {
       console.error('[App] Failed to download attachment:', error);
-      showToast('❌ Erreur lors du téléchargement', '⚠️');
+      showToast(t('toast.downloadError'), '⚠️');
     }
   },
 
@@ -758,7 +762,7 @@ const app = {
    * Delete an attachment
    */
   async deleteAttachment(attachId) {
-    if (!confirm('Supprimer ce fichier ?')) return;
+    if (!confirm(t('confirms.deleteFile'))) return;
 
     try {
       // Get current node
@@ -785,10 +789,10 @@ const app = {
       // Refresh display
       EditorModule.displayNode(this.currentNodeId, () => this.render());
 
-      showToast(`✅ Fichier supprimé : ${attachment.name}`, '🗑️');
+      showToast(t('toast.fileDeleted', { name: attachment.name }), '🗑️');
     } catch (error) {
       console.error('[App] Failed to delete attachment:', error);
-      showToast('❌ Erreur lors de la suppression', '⚠️');
+      showToast(t('toast.fileDeleteError'), '⚠️');
     }
   },
 
@@ -796,15 +800,15 @@ const app = {
    * Clean orphaned attachments (files not referenced by any node)
    */
   async cleanOrphanedAttachments() {
-    if (!confirm('Nettoyer les fichiers orphelins ? Cette action est irréversible.')) return;
+    if (!confirm(t('confirms.cleanOrphans'))) return;
 
     try {
       const deletedCount = await AttachmentsModule.cleanOrphans(DataModule.data);
 
       if (deletedCount > 0) {
-        showToast(`✅ ${deletedCount} fichier(s) orphelin(s) supprimé(s)`, '🧹');
+        showToast(t('toast.orphansCleaned', { count: deletedCount }), '🧹');
       } else {
-        showToast('✅ Aucun fichier orphelin trouvé', '🧹');
+        showToast(t('toast.noOrphans'), '🧹');
       }
 
       // Refresh right panel to update storage info
@@ -813,8 +817,40 @@ const app = {
       }
     } catch (error) {
       console.error('[App] Failed to clean orphaned attachments:', error);
-      showToast('❌ Erreur lors du nettoyage', '⚠️');
+      showToast(t('toast.cleanOrphansError'), '⚠️');
     }
+  },
+
+  /**
+   * i18n - Change language and refresh UI
+   */
+  async changeLanguage(lang) {
+    await setLanguage(lang);
+
+    // Refresh entire UI
+    this.updateNodeCounter();
+    this.render();
+
+    // Refresh current node if any
+    if (this.currentNodeId) {
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+    }
+
+    showToast(t('toast.languageChanged'), '🌍');
+  },
+
+  /**
+   * i18n - Get current language
+   */
+  getCurrentLanguage() {
+    return getCurrentLanguage();
+  },
+
+  /**
+   * i18n - Translate key
+   */
+  t(key, params) {
+    return t(key, params);
   }
 };
 

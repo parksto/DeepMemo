@@ -52,24 +52,24 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 ### Système i18n
 
 **Features** :
-- [ ] Module `i18n.js` lightweight (pas de dépendance externe)
-- [ ] Support FR/EN minimum (ES optionnel)
-- [ ] Dictionnaires de traduction (UI, messages, erreurs)
-- [ ] Détection langue navigateur + sélecteur manuel
-- [ ] Persistence dans `localStorage.deepmemo_lang`
-- [ ] Précache des dictionnaires dans Service Worker (PWA offline)
+- [x] Module `i18n.js` lightweight (pas de dépendance externe)
+- [x] Support FR/EN minimum (ES optionnel)
+- [x] Dictionnaires de traduction (UI, messages, erreurs)
+- [x] Détection langue navigateur + sélecteur manuel
+- [x] Persistence dans `localStorage.deepmemo_language`
+- [x] Précache des dictionnaires dans Service Worker (PWA offline)
 
 ### Contenu à traduire
 
 **Interface** :
-- [ ] Labels HTML statiques (`index.html`)
-- [ ] Labels dynamiques JS (boutons, modales, toasts)
-- [ ] Placeholders et attributs (`title`, `aria-label`)
-- [ ] Messages d'erreur et confirmations
+- [x] Labels HTML statiques (`index.html`)
+- [x] Labels dynamiques JS (boutons, modales, toasts)
+- [x] Placeholders et attributs (`title`, `aria-label`)
+- [x] Messages d'erreur et confirmations
 
 **Contenu de démo** :
-- [ ] `default-data.js` - Adapter selon langue détectée
-- [ ] Ou garder EN uniquement (universel)
+- [x] `default-data.js` - Version FR et EN complètes (26 nœuds pédagogiques)
+- [x] Détection automatique selon langue du navigateur
 
 ### Tests et validation
 

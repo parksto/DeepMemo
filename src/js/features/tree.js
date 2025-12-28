@@ -6,6 +6,7 @@
 import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
 import { initDragDrop } from './drag-drop.js';
+import { t } from '../utils/i18n.js';
 
 // State
 let currentInstanceKey = null;
@@ -180,7 +181,7 @@ export function renderTree(onNodeClick) {
         content.className = 'tree-node-content circular-symlink' + (isActive ? ' active' : '');
         content.setAttribute('data-node-id', nodeId);
         content.setAttribute('data-instance-key', instanceKey);
-        content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">🔄</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (circulaire)</span>';
+        content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">🔄</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (' + t('nodeTypes.badge.circular') + ')</span>';
 
         content.onclick = () => {
           currentInstanceKey = instanceKey;
@@ -220,7 +221,7 @@ export function renderTree(onNodeClick) {
       content.className = 'tree-node-content broken-symlink' + (isActive ? ' active' : '');
       content.setAttribute('data-node-id', nodeId);
       content.setAttribute('data-instance-key', instanceKey);
-      content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">⚠️</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (lien cassé)</span>';
+      content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">⚠️</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (' + t('nodeTypes.badge.broken') + ')</span>';
 
       content.onclick = () => {
         currentInstanceKey = instanceKey;
@@ -309,7 +310,7 @@ export function renderTree(onNodeClick) {
     // Click handler
     content.onclick = () => {
       if (isExternalSymlink) {
-        showToast('⚠️ Lien externe à la branche (non accessible)', '🚫');
+        showToast(t('toast.externalSymlink'), '🚫');
         return;
       }
 
@@ -621,7 +622,7 @@ export function handleTreeNavigation(e, selectNodeCallback, renderCallback) {
 
         if (isExternalSymlink) {
           // Can't activate external symlinks
-          showToast('⚠️ Lien externe à la branche (non accessible)', '🚫');
+          showToast(t('toast.externalSymlink'), '🚫');
         } else if (selectNodeCallback) {
           selectNodeCallback(nodeId, focusedInstanceKey);
         }

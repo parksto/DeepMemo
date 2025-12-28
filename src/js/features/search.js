@@ -5,6 +5,7 @@
 
 import { data } from '../core/data.js';
 import { highlightText } from '../utils/helpers.js';
+import { t } from '../utils/i18n.js';
 
 // Search state
 let searchVisible = false;
@@ -57,7 +58,7 @@ function performSearch(query) {
   const resultsContainer = document.getElementById('searchResults');
 
   if (!query.trim()) {
-    resultsContainer.innerHTML = '<div class="search-empty"><div class="search-empty-icon">💭</div><div>Tape pour rechercher dans tes nœuds</div></div>';
+    resultsContainer.innerHTML = `<div class="search-empty"><div class="search-empty-icon">💭</div><div>${t('modals.search.emptyHint')}</div></div>`;
     searchResults = [];
     return;
   }
@@ -128,7 +129,7 @@ function renderSearchResults(query) {
   const resultsContainer = document.getElementById('searchResults');
 
   if (searchResults.length === 0) {
-    resultsContainer.innerHTML = '<div class="search-empty"><div class="search-empty-icon">😕</div><div>Aucun résultat trouvé</div></div>';
+    resultsContainer.innerHTML = `<div class="search-empty"><div class="search-empty-icon">😕</div><div>${t('modals.search.noResults')}</div></div>`;
     return;
   }
 

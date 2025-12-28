@@ -11,6 +11,7 @@ import { isBranchMode, isNodeInBranch, getBranchRootId } from './tree.js';
 import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
 import * as AttachmentsModule from '../core/attachments.js';
+import { t, getCurrentLanguage } from '../utils/i18n.js';
 
 // View mode state
 let viewMode = 'view'; // 'edit' or 'view' (default: view)
@@ -182,7 +183,7 @@ export function saveNode(nodeId) {
   }
 
   saveData();
-  showToast('Sauvegardé', '💾');
+  showToast(t('toast.saved'), '💾');
 }
 
 /**
@@ -225,7 +226,7 @@ function updateBreadcrumb(currentNodeId) {
     } else break;
   }
 
-  let html = '<span class="breadcrumb-item breadcrumb-home" onclick="app.goToRoot()" title="Retour à la racine">🏠</span>';
+  let html = `<span class="breadcrumb-item breadcrumb-home" onclick="app.goToRoot()" title="${t('tooltips.goToRoot')}">🏠</span>`;
 
   if (path.length === 0) {
     // No node selected - just show home
@@ -255,7 +256,7 @@ function updateBreadcrumb(currentNodeId) {
     // Parent node (smaller, clickable)
     html += `<span class="breadcrumb-item breadcrumb-parent"
              onclick="app.selectNodeById('${parentNode.id}')"
-             title="Remonter au parent">
+             title="${t('tooltips.goToParent')}">
              ${escapeHtml(parentNode.title)}</span>`;
 
     html += '<span class="breadcrumb-separator">›</span>';
@@ -447,13 +448,13 @@ function updateAttachments(currentNodeId) {
       <div class="attachment-icon">${icon}</div>
       <div class="attachment-info">
         <div class="attachment-name">${escapeHtml(attachment.name)}</div>
-        <div class="attachment-id" title="ID de l'attachment">ID: ${attachment.id}</div>
+        <div class="attachment-id" title="${t('tooltips.attachmentId')}">ID: ${attachment.id}</div>
         <div class="attachment-size">${formattedSize}</div>
       </div>
       <div class="attachment-actions">
-        <button class="attachment-btn" onclick="app.copyAttachmentSyntax('${escapeHtml(markdownSyntax)}')" title="Copier la syntaxe markdown">📋</button>
-        <button class="attachment-btn" onclick="app.downloadAttachment('${attachment.id}', '${escapeHtml(attachment.name)}')" title="Télécharger">⬇️</button>
-        <button class="attachment-btn delete" onclick="app.deleteAttachment('${attachment.id}')" title="Supprimer">🗑️</button>
+        <button class="attachment-btn" onclick="app.copyAttachmentSyntax('${escapeHtml(markdownSyntax)}')" title="${t('tooltips.copyMarkdown')}">📋</button>
+        <button class="attachment-btn" onclick="app.downloadAttachment('${attachment.id}', '${escapeHtml(attachment.name)}')" title="${t('tooltips.download')}">⬇️</button>
+        <button class="attachment-btn delete" onclick="app.deleteAttachment('${attachment.id}')" title="${t('tooltips.deleteFile')}">🗑️</button>
       </div>
     `;
 
@@ -472,36 +473,37 @@ export async function updateRightPanel(currentNodeId) {
   // For symlinks, show target info
   const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
   if (!displayNode) {
-    panel.innerHTML = '<div class="info-section"><h3>⚠️ Lien cassé</h3></div>';
+    panel.innerHTML = `<div class="info-section"><h3>⚠️ ${t('toast.brokenLink')}</h3></div>`;
     return;
   }
 
-  let html = '<div class="info-section"><h3>Structure</h3>';
-  html += `<div class="info-item"><div class="info-label">Enfants</div>${displayNode.children.length} nœud(s)</div>`;
+  let html = `<div class="info-section"><h3>${t('labels.structure')}</h3>`;
+  const childCount = displayNode.children.length;
+  html += `<div class="info-item"><div class="info-label">${t('labels.children')}</div>${t('app.nodeCounter', {count: childCount})}</div>`;
 
   // Show parent
   if (displayNode.parent) {
     const parent = data.nodes[displayNode.parent];
     if (parent) {
-      html += `<div class="info-item"><div class="info-label">Parent</div>${escapeHtml(parent.title)}</div>`;
+      html += `<div class="info-item"><div class="info-label">${t('labels.parent')}</div>${escapeHtml(parent.title)}</div>`;
     }
   }
 
   html += '</div>';
 
   // Show node type
-  html += '<div class="info-section"><h3>Type</h3>';
-  html += `<div class="info-item">${node.type === 'symlink' ? '🔗 Lien symbolique' : '📄 Nœud'}</div>`;
+  html += `<div class="info-section"><h3>${t('labels.type')}</h3>`;
+  html += `<div class="info-item">${node.type === 'symlink' ? t('nodeTypes.symlink') : t('nodeTypes.node')}</div>`;
   html += '</div>';
 
   // Show dates
-  html += '<div class="info-section"><h3>Dates</h3>';
-  html += `<div class="info-item"><div class="info-label">Créé</div>${new Date(displayNode.created).toLocaleString()}</div>`;
-  html += `<div class="info-item"><div class="info-label">Modifié</div>${new Date(displayNode.modified).toLocaleString()}</div>`;
+  html += `<div class="info-section"><h3>${t('labels.dates')}</h3>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.created')}</div>${new Date(displayNode.created).toLocaleString()}</div>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.modified')}</div>${new Date(displayNode.modified).toLocaleString()}</div>`;
   html += '</div>';
 
   // Show branch tags cloud
-  html += '<div class="info-section"><h3>☁️ Tags de la branche</h3>';
+  html += `<div class="info-section"><h3>${t('labels.tagsInBranch')}</h3>`;
   const branchTags = TagsModule.collectBranchTags();
 
   if (branchTags.length > 0) {
@@ -523,7 +525,7 @@ export async function updateRightPanel(currentNodeId) {
         <div class="tag-cloud-item"
              style="--tag-size: ${size}px;"
              data-tag="${escapedTag}"
-             title="${item.count} occurrence(s) - Cliquer pour rechercher">
+             title="${t('tooltips.tagOccurrences', {count: item.count})}">
           🏷️ ${escapedTag}
         </div>
       `;
@@ -531,40 +533,40 @@ export async function updateRightPanel(currentNodeId) {
 
     html += '</div>';
   } else {
-    html += '<div class="info-item" style="opacity: 0.5;">Aucun tag dans la branche</div>';
+    html += `<div class="info-item" style="opacity: 0.5;">${t('labels.noTags')}</div>`;
   }
   html += '</div>';
 
   // Show statistics
-  html += '<div class="info-section"><h3>Statistiques</h3>';
+  html += `<div class="info-section"><h3>${t('labels.statistics')}</h3>`;
   const content = displayNode.content || '';
-  html += `<div class="info-item"><div class="info-label">Caractères</div>${content.length}</div>`;
-  html += `<div class="info-item"><div class="info-label">Mots</div>${content.split(/\s+/).filter(w => w).length}</div>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.characters')}</div>${content.length}</div>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.words')}</div>${content.split(/\s+/).filter(w => w).length}</div>`;
   html += '</div>';
 
   // Keyboard shortcuts
   html += `
     <div class="shortcuts-hint">
-      <div class="shortcuts-title">Raccourcis clavier</div>
+      <div class="shortcuts-title">${t('labels.keyboardShortcuts')}</div>
       <div class="shortcuts-section">
-        <div><kbd>Alt+N</kbd> Nouveau nœud</div>
-        <div><kbd>Ctrl+K</kbd> Recherche</div>
-        <div><kbd>Alt+E</kbd> Passer en édition</div>
+        <div><kbd>Alt+N</kbd> ${t('keyboard.newNode')}</div>
+        <div><kbd>Ctrl+K</kbd> ${t('keyboard.search')}</div>
+        <div><kbd>Alt+E</kbd> ${t('keyboard.editMode')}</div>
       </div>
       <div class="shortcuts-section">
-        <div><kbd>↑</kbd><kbd>↓</kbd> Naviguer arbre</div>
-        <div><kbd>→</kbd> Déplier nœud</div>
-        <div><kbd>←</kbd> Replier / Parent</div>
-        <div><kbd>Entrée</kbd> Activer nœud</div>
+        <div><kbd>↑</kbd><kbd>↓</kbd> ${t('keyboard.navigateTree')}</div>
+        <div><kbd>→</kbd> ${t('keyboard.expandNode')}</div>
+        <div><kbd>←</kbd> ${t('keyboard.collapseOrParent')}</div>
+        <div><kbd>Entrée</kbd> ${t('keyboard.activateNode')}</div>
       </div>
       <div class="shortcuts-section">
-        <div><kbd>Esc</kbd> Remonter au parent</div>
+        <div><kbd>Esc</kbd> ${t('keyboard.goToParent')}</div>
       </div>
     </div>
   `;
 
   // Storage section
-  html += '<div class="info-section"><h3>📊 Stockage</h3>';
+  html += `<div class="info-section"><h3>${t('labels.storage')}</h3>`;
 
   try {
     const totalSize = await AttachmentsModule.getTotalSize();
@@ -576,8 +578,8 @@ export async function updateRightPanel(currentNodeId) {
     const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100));
 
     html += `<div class="info-item">
-      <div class="info-label">Fichiers</div>
-      <div>${formattedSize} / ~500 MB</div>
+      <div class="info-label">${t('storage.files')}</div>
+      <div>${formattedSize}${t('storage.maxSize')}</div>
     </div>`;
 
     html += `<div class="storage-bar-container">
@@ -585,30 +587,48 @@ export async function updateRightPanel(currentNodeId) {
     </div>`;
 
     html += `<div class="info-item" style="margin-top: 8px;">
-      <div>${attachmentCount} fichier(s) attaché(s)</div>
+      <div>${t('storage.filesCount', {count: attachmentCount})}</div>
     </div>`;
 
     html += `<button class="btn btn-secondary btn-small"
                      style="width: 100%; margin-top: 12px;"
                      onclick="window.app.cleanOrphanedAttachments()">
-      🧹 Nettoyer les fichiers orphelins
+      ${t('storage.cleanOrphans')}
     </button>`;
   } catch (error) {
     console.error('[Editor] Failed to get storage info:', error);
-    html += '<div class="info-item" style="opacity: 0.5;">Erreur de stockage</div>';
+    html += `<div class="info-item" style="opacity: 0.5;">${t('storage.storageError')}</div>`;
   }
 
   html += '</div>';
 
-  // Font preference toggle
+  // Preferences section (Font + Language)
   const isSystemFont = document.body.classList.contains('system-font');
+  const currentLang = getCurrentLanguage();
   html += `
     <div class="info-section">
-      <h3>Préférences</h3>
+      <h3>${t('labels.preferences')}</h3>
+
       <div class="info-item" style="cursor: pointer;" onclick="window.app.toggleFontPreference()">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>Police système</span>
+          <span>${t('labels.systemFont')}</span>
           <span style="font-size: 1.2em;">${isSystemFont ? '✅' : '☐'}</span>
+        </div>
+      </div>
+
+      <div class="info-item" style="margin-top: 12px;">
+        <div class="info-label">${t('labels.language')}</div>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button class="btn btn-small ${currentLang === 'fr' ? 'btn-primary' : 'btn-secondary'}"
+                  style="flex: 1;"
+                  onclick="window.app.changeLanguage('fr')">
+            ${t('labels.french')}
+          </button>
+          <button class="btn btn-small ${currentLang === 'en' ? 'btn-primary' : 'btn-secondary'}"
+                  style="flex: 1;"
+                  onclick="window.app.changeLanguage('en')">
+            ${t('labels.english')}
+          </button>
         </div>
       </div>
     </div>
@@ -709,7 +729,7 @@ export async function updateViewMode() {
 
   if (viewMode === 'view') {
     // View mode: show rendered markdown
-    toggleBtn.textContent = '✏️ Éditer';
+    toggleBtn.textContent = `✏️ ${t('actions.edit')}`;
     contentEditor.style.display = 'none';
     contentPreview.style.display = 'block';
 
@@ -728,12 +748,12 @@ export async function updateViewMode() {
 
         contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
       } else {
-        contentPreview.innerHTML = '<div class="markdown-content"><em>Aucun contenu</em></div>';
+        contentPreview.innerHTML = `<div class="markdown-content"><em>${t('messages.emptyContent')}</em></div>`;
       }
     }
   } else {
     // Edit mode: show textarea
-    toggleBtn.textContent = '👁️ Afficher';
+    toggleBtn.textContent = `👁️ ${t('actions.view')}`;
     contentEditor.style.display = 'block';
     contentPreview.style.display = 'none';
     autoResizeTextarea(contentEditor);
@@ -782,8 +802,8 @@ export function deleteNode(nodeId, onSuccess) {
 
   const isSymlink = node.type === 'symlink';
   const confirmMessage = isSymlink
-    ? 'Supprimer ce lien symbolique ?'
-    : 'Supprimer ce nœud et tous ses enfants ?';
+    ? t('confirms.deleteSymlink')
+    : t('confirms.deleteNode');
 
   if (!confirm(confirmMessage)) return;
 

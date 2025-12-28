@@ -1,0 +1,278 @@
+/**
+ * DeepMemo - French (Français) Dictionary
+ * Complete translation of all UI strings
+ */
+
+export default {
+  // Meta tags
+  meta: {
+    title: "DeepMemo V0.9",
+    description: "DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs"
+  },
+
+  // Application metadata
+  app: {
+    title: "DeepMemo",
+    tagline: "Ton second cerveau",
+    nodeCounter: "{count} nœud{{count > 1 ? 's' : ''}}"
+  },
+
+  // Actions (buttons, commands)
+  actions: {
+    newNode: "Nouveau nœud",
+    import: "Importer",
+    export: "Exporter",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    delete: "Supprimer",
+    confirm: "Confirmer",
+    close: "Fermer",
+    move: "Déplacer",
+    link: "Lien",
+    duplicate: "Dupliquer",
+    edit: "Éditer",
+    view: "Afficher",
+    toggleView: "👁️ Afficher",
+    addChild: "Ajouter un enfant",
+    addFile: "Ajouter un fichier",
+    addAttachment: "Ajouter un fichier",
+    openActions: "Actions..."
+  },
+
+  // Toast notifications (~73 messages)
+  toast: {
+    appInit: "Application initialisée",
+    saved: "Sauvegardé",
+    nodeSelected: "Nœud sélectionné",
+    nodeCreated: "Nœud créé",
+    rootNodeCreated: "Nœud racine créé",
+    childNodeCreated: "Nœud enfant créé",
+    nodeMoved: "Nœud déplacé",
+    nodeDeleted: "Nœud supprimé",
+    symlinkCreated: "Lien symbolique créé",
+    symlinkDeleted: "Lien symbolique supprimé",
+    nodeDuplicated: "Nœud dupliqué",
+    nodeDuplicatedInserted: "Nœud dupliqué et inséré",
+    orderModified: "Ordre modifié",
+    branchModeEnabled: "Mode branche activé",
+    branchRootNotFound: "Nœud racine de branche introuvable",
+    nodeNotFound: "Nœud introuvable",
+    alreadyAtRoot: "Déjà à la racine",
+    movedToParent: "Remonté au parent",
+    linkCopied: "Lien copié dans le presse-papier",
+    branchLinkCopied: "Lien de branche copié dans le presse-papier",
+    copyError: "Erreur lors de la copie",
+    selectNodeFirst: "Sélectionne d'abord un nœud",
+    selectParentFirst: "Sélectionne d'abord un nœud parent",
+    invalidDestination: "Impossible : destination invalide",
+    cannotMoveToDescendant: "Impossible de déplacer dans ses propres descendants",
+    wouldCreateCycle: "Cette action créerait un cycle",
+    nodeAlreadyExists: "Le nœud existe déjà à cet emplacement",
+    externalSymlink: "⚠️ Lien externe à la branche (non accessible)",
+    brokenLink: "⚠️ Lien cassé",
+    tagAlreadyExists: "Tag déjà existant",
+    tagAdded: "Tag ajouté",
+    tagRemoved: "Tag supprimé",
+    dataImported: "{count} nœud(s) importés",
+    dataImportedJSON: "{count} nœud(s) importés (JSON)",
+    dataImportedZIP: "{count} nœud(s) importés (ZIP)",
+    dataExported: "Données exportées (ZIP)",
+    branchExported: "Branche exportée (ZIP)",
+    branchImported: "{count} nœud(s) importés",
+    importError: "Erreur lors de l'import",
+    exportError: "Erreur lors de l'export",
+    attachmentsNotAvailable: "⚠️ Attachments non disponibles (IndexedDB)",
+    fileTooBig: "❌ Fichier trop volumineux (max 50MB)",
+    fileAdded: "✅ Fichier ajouté : {name}",
+    fileAddError: "❌ Erreur lors de l'ajout du fichier",
+    syntaxCopied: "✅ Syntaxe copiée dans le presse-papier",
+    syntaxCopyError: "❌ Erreur lors de la copie",
+    fileNotFound: "❌ Fichier introuvable",
+    downloadStarted: "✅ Téléchargement : {name}",
+    downloadError: "❌ Erreur lors du téléchargement",
+    fileDeleted: "✅ Fichier supprimé : {name}",
+    fileDeleteError: "❌ Erreur lors de la suppression",
+    orphansCleaned: "✅ {count} fichier(s) orphelin(s) supprimé(s)",
+    noOrphans: "✅ Aucun fichier orphelin trouvé",
+    cleanOrphansError: "❌ Erreur lors du nettoyage",
+    customFontEnabled: "Police personnalisée activée",
+    systemFontEnabled: "Police système activée",
+    languageChanged: "Langue modifiée"
+  },
+
+  // Alert messages
+  alerts: {
+    invalidFile: "Fichier JSON invalide",
+    invalidBranch: "Fichier de branche invalide. Utilise l'import global pour les exports complets.",
+    nodeNotFound: "Nœud introuvable",
+    dataJsonNotFound: "Fichier data.json introuvable dans le ZIP",
+    importError: "Erreur lors de l'import : {message}",
+    exportError: "Erreur lors de l'export : {message}"
+  },
+
+  // Confirmation dialogs
+  confirms: {
+    importData: "Importer {count} nœud(s) ? Cela écrasera tes données actuelles.",
+    importDataWithFiles: "Importer {count} nœud(s) et {fileCount} fichier(s) ? Cela écrasera tes données actuelles.",
+    importBranch: "Importer {count} nœud(s) comme enfants du nœud actuel ?",
+    importBranchWithFiles: "Importer {count} nœud(s) et {fileCount} fichier(s) comme enfants du nœud actuel ?",
+    deleteSymlink: "Supprimer ce lien symbolique ?",
+    deleteNode: "Supprimer ce nœud et tous ses enfants ?",
+    deleteFile: "Supprimer ce fichier ?",
+    cleanOrphans: "Nettoyer les fichiers orphelins ? Cette action est irréversible."
+  },
+
+  // Modals
+  modals: {
+    actions: {
+      title: "⚙️ Actions sur le nœud",
+      subtitle: "Que veux-tu faire avec ce nœud ?",
+      move: "↗️ Déplacer",
+      link: "🔗 Lien",
+      duplicate: "📋 Dupliquer",
+      delete: "🗑️ Supprimer",
+      cancel: "Annuler",
+      confirm: "✓ Confirmer",
+      descriptions: {
+        move: "Déplace ce nœud vers un nouveau parent. Tous les enfants suivront.",
+        link: "Crée un lien symbolique de ce nœud vers un autre parent. Le contenu est partagé.",
+        duplicate: "Duplique ce nœud (et ses enfants) vers un nouveau parent.",
+        delete: "Attention : la suppression est définitive et supprimera aussi tous les enfants."
+      },
+      disabledReasons: {
+        currentNode: "Nœud actuel",
+        descendant: "Descendant",
+        wouldCycle: "Créerait un cycle"
+      }
+    },
+    symlink: {
+      title: "🔗 Créer un lien symbolique",
+      subtitle: "Choisis où afficher ce nœud comme lien symbolique :",
+      cancel: "Annuler",
+      confirm: "🔗 Créer le lien"
+    },
+    search: {
+      placeholder: "Rechercher dans tous les nœuds...",
+      emptyHint: "Tape pour rechercher dans tes nœuds",
+      noResults: "Aucun résultat trouvé",
+      navigate: "↑↓ Naviguer",
+      open: "Entrée Ouvrir",
+      close: "Esc Fermer"
+    }
+  },
+
+  // Placeholders
+  placeholders: {
+    nodeTitle: "Titre du nœud",
+    nodeContent: "Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)",
+    search: "Rechercher dans tous les nœuds...",
+    tagInput: "+ tag"
+  },
+
+  // Labels and metadata
+  labels: {
+    created: "Créé",
+    modified: "Modifié",
+    children: "📂 Nœuds enfants",
+    parent: "Parent",
+    attachments: "📎 Fichiers attachés",
+    tags: "Tags",
+    tagsInBranch: "☁️ Tags de la branche",
+    noTags: "Aucun tag dans la branche",
+    storage: "📊 Stockage",
+    preferences: "Préférences",
+    language: "Langue",
+    french: "Français",
+    english: "English",
+    systemFont: "Police système",
+    keyboardShortcuts: "Raccourcis clavier",
+    structure: "Structure",
+    type: "Type",
+    dates: "Dates",
+    statistics: "Statistiques",
+    characters: "Caractères",
+    words: "Mots",
+    informations: "Informations"
+  },
+
+  // Node types and badges
+  nodeTypes: {
+    node: "📄 Nœud",
+    symlink: "🔗 Lien symbolique",
+    brokenSymlink: "Lien symbolique cassé",
+    badge: {
+      link: "lien",
+      external: "externe",
+      broken: "lien cassé",
+      circular: "circulaire",
+      copy: "copie"
+    }
+  },
+
+  // Empty states
+  empty: {
+    icon: "🧩"
+  },
+
+  // Messages
+  messages: {
+    welcome: "Bienvenue dans DeepMemo",
+    welcomeSubtitle: "Crée ton premier nœud pour commencer",
+    emptyContent: "Aucun contenu",
+    emptyPreview: "Vide",
+    brokenSymlink: "⚠️ Ce lien symbolique pointe vers un nœud qui n'existe plus.\n\nVous pouvez supprimer ce lien cassé.",
+    newNodeTitle: "Nouveau nœud"
+  },
+
+  // Tooltips
+  tooltips: {
+    shareNode: "Copier l'URL de ce nœud (préserve le contexte actuel)",
+    shareBranch: "Copier l'URL en mode branche isolée (vue focus)",
+    goToParent: "Remonter au parent",
+    goToRoot: "Retour à la racine",
+    exportBranch: "Exporter ce nœud et ses descendants",
+    importBranch: "Importer une branche comme enfants",
+    attachmentId: "ID de l'attachment",
+    copyMarkdown: "Copier la syntaxe markdown",
+    download: "Télécharger",
+    deleteFile: "Supprimer",
+    tagOccurrences: "{count} occurrence(s) - Cliquer pour rechercher"
+  },
+
+  // Keyboard shortcuts
+  keyboard: {
+    newNode: "Nouveau nœud",
+    search: "Recherche",
+    editMode: "Passer en édition",
+    navigateTree: "Naviguer arbre",
+    expandNode: "Déplier nœud",
+    collapseOrParent: "Replier / Parent",
+    activateNode: "Activer nœud",
+    goToParent: "Remonter au parent"
+  },
+
+  // Storage section
+  storage: {
+    files: "Fichiers",
+    maxSize: " / ~500 MB",
+    filesCount: "{count} fichier(s) attaché(s)",
+    storageError: "Erreur de stockage",
+    cleanOrphans: "🧹 Nettoyer les fichiers orphelins"
+  },
+
+  // Empty states
+  empty: {
+    icon: "🧩",
+    welcome: "Bienvenue dans DeepMemo",
+    subtitle: "Crée ton premier nœud pour commencer",
+    searchPlaceholder: "💭",
+    searchText: "Tape pour rechercher dans tes nœuds",
+    noResults: "Aucun résultat trouvé"
+  },
+
+  // Meta (PWA)
+  meta: {
+    title: "DeepMemo V0.9",
+    description: "Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs"
+  }
+};

@@ -269,35 +269,35 @@ DeepMemo/
 
 ---
 
-## 🌍 V0.9 - Internationalisation (i18n)
+## 🌍 V0.9 - Internationalisation (i18n) - ✅ 95% COMPLÉTÉ
 
 **Contexte stratégique** : DeepMemo est déployé en production sur deepmemo.org et déjà fonctionnel. La priorité est de le rendre accessible à une audience internationale avant d'implémenter des fonctionnalités avancées.
 
-### Système i18n (Fondations)
-- [ ] Module `i18n.js` lightweight (pas de dépendance externe)
-- [ ] Support FR/EN minimum (ES optionnel)
-- [ ] Dictionnaires de traduction structurés par module
-- [ ] Fonction `t(key)` pour traduction dynamique
-- [ ] Détection automatique de la langue du navigateur
-- [ ] Sélecteur manuel de langue dans l'interface
-- [ ] Persistence dans `localStorage.deepmemo_lang`
-- [ ] Précache des dictionnaires dans Service Worker (PWA offline)
+### Système i18n (Fondations) ✅ COMPLÉTÉ
+- [x] Module `i18n.js` lightweight (pas de dépendance externe) - ~240 lignes
+- [x] Support FR/EN minimum (ES optionnel)
+- [x] Dictionnaires de traduction structurés par module - fr.js et en.js (~270 lignes chacun)
+- [x] Fonction `t(key)` pour traduction dynamique avec interpolation
+- [x] Détection automatique de la langue du navigateur
+- [x] Sélecteur manuel de langue dans l'interface (Right panel → Préférences)
+- [x] Persistence dans `localStorage.deepmemo_language`
+- [x] Précache des dictionnaires dans Service Worker (PWA offline)
 
-### Traduction de l'interface
-- [ ] Labels HTML statiques (`index.html`)
-- [ ] Labels dynamiques générés en JavaScript
-- [ ] Boutons et actions (modales, toasts, confirmations)
-- [ ] Placeholders des champs de formulaire
-- [ ] Attributs `title` et `aria-label` (accessibilité)
-- [ ] Messages d'erreur et avertissements
-- [ ] Documentation intégrée (raccourcis clavier, tooltips)
+### Traduction de l'interface ✅ COMPLÉTÉ
+- [x] Labels HTML statiques (`index.html`) - Migration avec data-i18n-*
+- [x] Labels dynamiques générés en JavaScript - Migration complète avec t()
+- [x] Boutons et actions (modales, toasts, confirmations)
+- [x] Placeholders des champs de formulaire
+- [x] Attributs `title` et `aria-label` (accessibilité)
+- [x] Messages d'erreur et avertissements
+- [x] Documentation intégrée (raccourcis clavier, tooltips)
+- [x] **Corrections finales** : 15 strings oubliées identifiées et corrigées (28 déc 2025)
 
-### Contenu de démo multilingue
-- [ ] `default-data.js` adapté selon langue détectée
-- [ ] Version FR (existante)
-- [ ] Version EN (traduction complète des 26 nœuds)
-- [ ] Version ES (optionnel)
-- [ ] OU décision de garder EN uniquement (plus universel)
+### Contenu de démo multilingue ✅ COMPLÉTÉ
+- [x] `default-data.js` adapté selon langue détectée
+- [x] Version FR (existante) - 26 nœuds pédagogiques
+- [x] Version EN (traduction complète des 26 nœuds)
+- [x] Manifests PWA multilingues (manifest-fr.json, manifest-en.json)
 
 ### Tests et validation
 - [ ] Tests sur navigateurs multilingues (FR, EN, ES)

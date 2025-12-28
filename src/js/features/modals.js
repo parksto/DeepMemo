@@ -7,6 +7,7 @@ import { data, saveData, wouldCreateCycle, wouldCreateCycleWithMove, isDescendan
 import { showToast } from '../ui/toast.js';
 import { escapeHtml } from '../utils/helpers.js';
 import { isBranchMode, getBranchRootId, isNodeInBranch } from './tree.js';
+import { t } from '../utils/i18n.js';
 
 // Modal state
 let selectedAction = null; // 'move', 'link', or 'duplicate'
@@ -71,7 +72,7 @@ export function selectAction(action, currentNodeId) {
 
   if (action === 'delete') {
     // Delete doesn't need tree selector
-    descriptionEl.textContent = 'Attention : la suppression est définitive et supprimera aussi tous les enfants.';
+    descriptionEl.textContent = t('modals.actions.descriptions.delete');
     descriptionEl.style.display = 'block';
     selectorEl.style.display = 'none';
     selectorEl.innerHTML = '';
@@ -81,9 +82,9 @@ export function selectAction(action, currentNodeId) {
   } else {
     // Update description
     const descriptions = {
-      move: 'Déplace ce nœud vers un nouveau parent. Tous les enfants suivront.',
-      link: 'Crée un lien symbolique de ce nœud vers un autre parent. Le contenu est partagé.',
-      duplicate: 'Duplique ce nœud (et ses enfants) vers un nouveau parent.'
+      move: t('modals.actions.descriptions.move'),
+      link: t('modals.actions.descriptions.link'),
+      duplicate: t('modals.actions.descriptions.duplicate')
     };
 
     descriptionEl.textContent = descriptions[action];
@@ -142,23 +143,23 @@ function renderActionTreeNode(nodeId, currentNodeId, parentId, depth) {
 
   if (nodeId === currentNodeId) {
     isDisabled = true;
-    disabledReason = 'Nœud actuel';
+    disabledReason = t('modals.actions.disabledReasons.currentNode');
   } else if (selectedAction === 'move') {
     // Can't move into own descendants
     if (isDescendantOf(nodeId, currentNodeId)) {
       isDisabled = true;
-      disabledReason = 'Descendant';
+      disabledReason = t('modals.actions.disabledReasons.descendant');
     }
     // Check for cycle
     if (wouldCreateCycleWithMove(currentNodeId, nodeId)) {
       isDisabled = true;
-      disabledReason = 'Créerait un cycle';
+      disabledReason = t('modals.actions.disabledReasons.wouldCycle');
     }
   } else if (selectedAction === 'link') {
     // Can't create symlink if it would create a cycle
     if (wouldCreateCycle(currentNodeId, nodeId)) {
       isDisabled = true;
-      disabledReason = 'Créerait un cycle';
+      disabledReason = t('modals.actions.disabledReasons.wouldCycle');
     }
   }
 
@@ -190,7 +191,7 @@ function renderActionTreeNode(nodeId, currentNodeId, parentId, depth) {
             onclick="${isDisabled ? '' : `event.stopPropagation(); window.app.selectActionDestination('${nodeId}')`}">
         ${escapeHtml(node.title)}
         ${isDisabled ? `<span style="opacity: 0.5; font-size: 11px;"> (${disabledReason})</span>` : ''}
-        ${node.type === 'symlink' ? ' <span class="symlink-badge">lien</span>' : ''}
+        ${node.type === 'symlink' ? ` <span class="symlink-badge">${t('nodeTypes.badge.link')}</span>` : ''}
       </span>
     </div>
   `;
@@ -286,13 +287,13 @@ function moveNode(nodeId, newParentId, onSuccess) {
 
   // Protection: can't move into own descendants
   if (newParentId !== null && isDescendantOf(newParentId, nodeId)) {
-    showToast('Impossible de déplacer dans ses propres descendants', '⚠️');
+    showToast(t('toast.cannotMoveToDescendant'), '⚠️');
     return;
   }
 
   // Check for cycle
   if (wouldCreateCycleWithMove(nodeId, newParentId)) {
-    showToast('Cette action créerait un cycle', '⚠️');
+    showToast(t('toast.wouldCreateCycle'), '⚠️');
     return;
   }
 
@@ -315,7 +316,7 @@ function moveNode(nodeId, newParentId, onSuccess) {
   }
 
   saveData();
-  showToast('Nœud déplacé', '↗️');
+  showToast(t('toast.nodeMoved'), '↗️');
 
   if (onSuccess) onSuccess();
 }
@@ -332,13 +333,13 @@ function createSymlink(nodeId, parentId, onSuccess) {
 
   // Check if symlink already exists
   if (parentId === targetNode.parent) {
-    showToast('Le nœud existe déjà à cet emplacement', 'ℹ️');
+    showToast(t('toast.nodeAlreadyExists'), 'ℹ️');
     return;
   }
 
   // Check for cycle
   if (wouldCreateCycle(nodeId, parentId)) {
-    showToast('Cette action créerait un cycle', '⚠️');
+    showToast(t('toast.wouldCreateCycle'), '⚠️');
     return;
   }
 
@@ -365,7 +366,7 @@ function createSymlink(nodeId, parentId, onSuccess) {
   }
 
   saveData();
-  showToast('Lien symbolique créé', '🔗');
+  showToast(t('toast.symlinkCreated'), '🔗');
 
   if (onSuccess) onSuccess();
 }
@@ -423,7 +424,7 @@ function duplicateNode(nodeId, newParentId, onSuccess) {
   }
 
   saveData();
-  showToast('Nœud dupliqué', '📋');
+  showToast(t('toast.nodeDuplicated'), '📋');
 
   if (onSuccess) onSuccess();
 }
@@ -449,7 +450,7 @@ function deleteNode(nodeId, onSuccess) {
     }
 
     delete data.nodes[nodeId];
-    showToast('Lien symbolique supprimé', '🔗');
+    showToast(t('toast.symlinkDeleted'), '🔗');
   } else {
     // Recursive deletion for regular nodes
     const deleteRecursive = (id) => {
@@ -468,7 +469,7 @@ function deleteNode(nodeId, onSuccess) {
     }
 
     deleteRecursive(nodeId);
-    showToast('Nœud supprimé', '🗑️');
+    showToast(t('toast.nodeDeleted'), '🗑️');
   }
 
   saveData();

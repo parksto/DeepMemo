@@ -4,10 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0a">
-  <meta name="description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
-  <title>DeepMemo V0.8</title>
+  <meta name="description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
+  <title data-i18n="meta.title">DeepMemo V0.9</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" id="app-manifest" href="manifest-fr.json">
+  <script>
+    // Load correct manifest based on language preference
+    (function() {
+      const savedLang = localStorage.getItem('deepmemo_language');
+      const browserLang = navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+      const lang = savedLang || browserLang;
+      const manifestHref = lang === 'en' ? 'manifest-en.json' : 'manifest-fr.json';
+
+      document.getElementById('app-manifest').href = manifestHref;
+    })();
+  </script>
   <link rel="stylesheet" href="src/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -18,17 +29,17 @@
   <div class="app-container">
     <div class="sidebar">
       <div class="sidebar-header">
-        <h1>🌟 DeepMemo</h1>
-        <div class="tagline">Ton second cerveau</div>
+        <h1 data-i18n="app.title">🌟 DeepMemo</h1>
+        <div class="tagline" data-i18n="app.tagline">Ton second cerveau</div>
         <div class="node-counter" id="nodeCounter">0 nœuds</div>
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn" onclick="app.createRootNode()">➕ Nouveau nœud</button>
+        <button class="btn" data-i18n="actions.newNode" onclick="app.createRootNode()">➕ Nouveau nœud</button>
         <div class="import-export-zone">
           <input type="file" id="importFile" accept=".json,.zip" onchange="app.importData(event)">
-          <label for="importFile" class="btn-import">📂 Importer</label>
-          <button class="btn-import" onclick="app.exportData()">💾 Exporter</button>
+          <label for="importFile" class="btn-import" data-i18n="actions.import">📂 Importer</label>
+          <button class="btn-import" data-i18n="actions.export" onclick="app.exportData()">💾 Exporter</button>
         </div>
       </div>
 
@@ -38,9 +49,9 @@
 
     <div class="main-content">
       <div id="emptyState" class="empty-state">
-        <div class="empty-state-icon">🧩</div>
-        <h2>Bienvenue dans DeepMemo</h2>
-        <p>Crée ton premier nœud pour commencer</p>
+        <div class="empty-state-icon" data-i18n="empty.icon">🧩</div>
+        <h2 data-i18n="messages.welcome">Bienvenue dans DeepMemo</h2>
+        <p data-i18n="messages.welcomeSubtitle">Crée ton premier nœud pour commencer</p>
       </div>
 
       <div id="editorContainer" style="display: none; flex: 1; display: flex; flex-direction: column;">
@@ -49,13 +60,13 @@
         <div class="content-header">
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="text" class="content-title-input" id="nodeTitle"
-                   placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
-            <a href="#" id="shareLink" title="Copier l'URL de ce nœud (préserve le contexte actuel)"
+                   data-i18n-placeholder="placeholders.nodeTitle" placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
+            <a href="#" id="shareLink" data-i18n-title="tooltips.shareNode" title="Copier l'URL de ce nœud (préserve le contexte actuel)"
                style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
                onmouseover="this.style.opacity='1'"
                onmouseout="this.style.opacity='0.6'"
                onclick="app.shareNode(event)">🔗</a>
-            <a href="#" id="shareBranchLink" title="Copier l'URL en mode branche isolée (vue focus)"
+            <a href="#" id="shareBranchLink" data-i18n-title="tooltips.shareBranch" title="Copier l'URL en mode branche isolée (vue focus)"
                style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
                onmouseover="this.style.opacity='1'"
                onmouseout="this.style.opacity='0.6'"
@@ -67,7 +78,7 @@
             <!-- Tags générés dynamiquement -->
             <div style="position: relative;">
               <input type="text" class="tag-input" id="tagInput"
-                     placeholder="+ tag"
+                     data-i18n-placeholder="placeholders.tagInput" placeholder="+ tag"
                      onkeydown="app.handleTagInput(event)"
                      oninput="app.handleTagAutocomplete(event)"
                      onfocus="app.showTagAutocomplete()"
@@ -79,7 +90,7 @@
 
         <div class="content-body">
           <textarea class="content-editor" id="nodeContent"
-                    placeholder="Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)"
+                    data-i18n-placeholder="placeholders.nodeContent" placeholder="Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)"
                     onchange="app.saveCurrentNode()"
                     oninput="app.autoResizeTextarea(event.target)"></textarea>
 
@@ -87,27 +98,27 @@
 
           <!-- Attachments Section -->
           <div class="attachments-section" id="attachmentsSection" style="display: none;">
-            <div class="attachments-header">📎 Fichiers attachés (<span id="attachmentsCount">0</span>)</div>
+            <div class="attachments-header"><span data-i18n="labels.attachments">📎 Fichiers attachés</span> (<span id="attachmentsCount">0</span>)</div>
             <div class="attachments-list" id="attachmentsList"></div>
-            <button class="btn btn-secondary btn-small" id="addAttachmentBtn" onclick="app.triggerFileUpload()">
+            <button class="btn btn-secondary btn-small" id="addAttachmentBtn" data-i18n="actions.addAttachment" onclick="app.triggerFileUpload()">
               📎 Ajouter un fichier
             </button>
           </div>
 
           <div class="children-section" id="childrenSection" style="display: none;">
-            <div class="children-header">📂 Nœuds enfants (<span id="childrenCount">0</span>)</div>
+            <div class="children-header"><span data-i18n="labels.children">📂 Nœuds enfants</span> (<span id="childrenCount">0</span>)</div>
             <div class="children-grid" id="childrenGrid"></div>
           </div>
         </div>
 
         <div class="content-actions">
-          <button class="btn btn-secondary btn-small" id="toggleViewMode" onclick="app.toggleViewMode()">👁️ Afficher</button>
-          <button class="btn btn-secondary btn-small" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
-          <button class="btn btn-secondary btn-small" onclick="app.openActionModal()">⚙️ Actions...</button>
+          <button class="btn btn-secondary btn-small" id="toggleViewMode" data-i18n="actions.toggleView" onclick="app.toggleViewMode()">👁️ Afficher</button>
+          <button class="btn btn-secondary btn-small" data-i18n="actions.addChild" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
+          <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
           <div style="margin-left: auto; display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-small" onclick="app.exportBranch()" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
+            <button class="btn btn-secondary btn-small" data-i18n-title="tooltips.exportBranch" onclick="app.exportBranch()" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
             <input type="file" id="importBranchFile" accept=".json,.zip" onchange="app.importBranch(event)" style="display: none;">
-            <label for="importBranchFile" class="btn btn-secondary btn-small" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
+            <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
           </div>
         </div>
 
@@ -135,19 +146,19 @@
       <div class="search-input-wrapper">
         <div class="search-icon">🔍</div>
         <input type="text" class="search-input" id="searchInput"
-               placeholder="Rechercher dans tous les nœuds..." autocomplete="off">
+               data-i18n-placeholder="placeholders.search" placeholder="Rechercher dans tous les nœuds..." autocomplete="off">
         <span class="search-hint">Esc</span>
       </div>
       <div class="search-results" id="searchResults">
         <div class="search-empty">
           <div class="search-empty-icon">💭</div>
-          <div>Tape pour rechercher dans tes nœuds</div>
+          <div data-i18n="modals.search.emptyHint">Tape pour rechercher dans tes nœuds</div>
         </div>
       </div>
       <div class="search-footer">
-        <div class="search-footer-item"><kbd>↑</kbd><kbd>↓</kbd> Naviguer</div>
-        <div class="search-footer-item"><kbd>Entrée</kbd> Ouvrir</div>
-        <div class="search-footer-item"><kbd>Esc</kbd> Fermer</div>
+        <div class="search-footer-item" data-i18n="modals.search.navigate"><kbd>↑</kbd><kbd>↓</kbd> Naviguer</div>
+        <div class="search-footer-item" data-i18n="modals.search.open"><kbd>Entrée</kbd> Ouvrir</div>
+        <div class="search-footer-item" data-i18n="modals.search.close"><kbd>Esc</kbd> Fermer</div>
       </div>
     </div>
   </div>
@@ -155,16 +166,16 @@
   <!-- Modal Symlink -->
   <div class="modal-overlay" id="symlinkModal">
     <div class="modal">
-      <h2>🔗 Créer un lien symbolique</h2>
+      <h2 data-i18n="modals.symlink.title">🔗 Créer un lien symbolique</h2>
       <div class="modal-body">
-        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.symlink.subtitle">
           Choisis où afficher ce nœud comme lien symbolique :
         </p>
         <div class="node-selector" id="nodeSelector"></div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary btn-small" onclick="app.closeSymlinkModal()">Annuler</button>
-        <button class="btn btn-small" onclick="app.confirmSymlink()">🔗 Créer le lien</button>
+        <button class="btn btn-secondary btn-small" data-i18n="modals.symlink.cancel" onclick="app.closeSymlinkModal()">Annuler</button>
+        <button class="btn btn-small" data-i18n="modals.symlink.confirm" onclick="app.confirmSymlink()">🔗 Créer le lien</button>
       </div>
     </div>
   </div>
@@ -172,24 +183,24 @@
   <!-- Modal Actions (Déplacer/Lien/Dupliquer) -->
   <div class="modal-overlay" id="actionModal">
     <div class="modal">
-      <h2>⚙️ Actions sur le nœud</h2>
+      <h2 data-i18n="modals.actions.title">⚙️ Actions sur le nœud</h2>
       <div class="modal-body">
-        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.actions.subtitle">
           Que veux-tu faire avec ce nœud ?
         </p>
 
         <!-- Choix de l'action -->
         <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-          <button class="btn btn-secondary btn-small" id="actionMove" onclick="app.selectAction('move')" style="flex: 1; border-radius: 8px;">
+          <button class="btn btn-secondary btn-small" id="actionMove" data-i18n="modals.actions.move" onclick="app.selectAction('move')" style="flex: 1; border-radius: 8px;">
             ↗️ Déplacer
           </button>
-          <button class="btn btn-secondary btn-small" id="actionLink" onclick="app.selectAction('link')" style="flex: 1; border-radius: 8px;">
+          <button class="btn btn-secondary btn-small" id="actionLink" data-i18n="modals.actions.link" onclick="app.selectAction('link')" style="flex: 1; border-radius: 8px;">
             🔗 Lien
           </button>
-          <button class="btn btn-secondary btn-small" id="actionDuplicate" onclick="app.selectAction('duplicate')" style="flex: 1; border-radius: 8px;">
+          <button class="btn btn-secondary btn-small" id="actionDuplicate" data-i18n="modals.actions.duplicate" onclick="app.selectAction('duplicate')" style="flex: 1; border-radius: 8px;">
             📋 Dupliquer
           </button>
-          <button class="btn btn-secondary btn-small" id="actionDelete" onclick="app.selectAction('delete')" style="flex: 1; border-radius: 8px;">
+          <button class="btn btn-secondary btn-small" id="actionDelete" data-i18n="modals.actions.delete" onclick="app.selectAction('delete')" style="flex: 1; border-radius: 8px;">
             🗑️ Supprimer
           </button>
         </div>
@@ -200,8 +211,8 @@
         <div class="node-selector" id="actionNodeSelector" style="display: none;"></div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary btn-small" onclick="app.closeActionModal()">Annuler</button>
-        <button class="btn btn-small" id="confirmActionBtn" onclick="app.confirmAction()" disabled>✓ Confirmer</button>
+        <button class="btn btn-secondary btn-small" data-i18n="modals.actions.cancel" onclick="app.closeActionModal()">Annuler</button>
+        <button class="btn btn-small" id="confirmActionBtn" data-i18n="modals.actions.confirm" onclick="app.confirmAction()" disabled>✓ Confirmer</button>
       </div>
     </div>
   </div>

@@ -6,6 +6,7 @@
 import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
 import { updateRightPanel } from './editor.js';
+import { t } from '../utils/i18n.js';
 
 // Autocomplete state
 let tagAutocompleteSuggestions = [];
@@ -74,7 +75,7 @@ export function renderTags() {
   input.type = 'text';
   input.className = 'tag-input';
   input.id = 'tagInput';
-  input.placeholder = '+ tag';
+  input.placeholder = t('placeholders.tagInput');
   input.onkeydown = (e) => handleTagInput(e);
   input.oninput = (e) => handleTagAutocomplete(e);
   input.onfocus = () => showTagAutocomplete();
@@ -106,7 +107,7 @@ function addTag(tag) {
 
   // Don't add if already exists
   if (node.tags.includes(tag)) {
-    showToast('Tag déjà existant', '⚠️');
+    showToast(t('toast.tagAlreadyExists'), '⚠️');
     // Re-focus input anyway
     setTimeout(() => {
       const input = document.getElementById('tagInput');
@@ -127,7 +128,7 @@ function addTag(tag) {
     if (input) input.focus();
   }, 50);
 
-  showToast('Tag ajouté', '🏷️');
+  showToast(t('toast.tagAdded'), '🏷️');
 }
 
 /**
@@ -144,7 +145,7 @@ function removeTag(tag) {
   saveData();
   renderTags();
   updateRightPanel(currentNodeId); // Update tag cloud in right panel
-  showToast('Tag supprimé', '🗑️');
+  showToast(t('toast.tagRemoved'), '🗑️');
 }
 
 /**
