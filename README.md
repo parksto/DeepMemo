@@ -1,129 +1,170 @@
 # DeepMemo
 
-> **Ton second cerveau : notes, projets, idées interconnectés**
+> **Your digital second brain: interconnected notes, projects, and ideas**
 
-DeepMemo est un système de gestion de connaissances basé sur un **réseau hiérarchique** de nœuds. Chaque nœud peut contenir d'autres nœuds à l'infini, créant une structure arborescente enrichie de liens symboliques.
-
-**Projet Open Source** (Licence MIT) - Tes données t'appartiennent, stockées localement dans ton navigateur.
+*[Version française](README.fr.md) • [Documentation](docs/README.md) • [Live Demo](https://deepmemo.ydns.eu)*
 
 ---
 
-## 🎯 Pourquoi DeepMemo ?
+DeepMemo is a knowledge management system built on a **hierarchical network** of nodes. Each node can contain infinite child nodes, creating a tree-like structure enriched with symbolic links—mirroring how your brain naturally organizes information.
 
-- **Hiérarchie naturelle** : Organise tes pensées comme tu les penses (projets → tâches → sous-tâches)
-- **Liens symboliques** : Un nœud peut apparaître à plusieurs endroits (sans duplication)
-- **Mode branche** : Concentre-toi sur une sous-arborescence isolée
-- **Keyboard-first** : Navigation complète au clavier, raccourcis documentés
-- **100% local** : Aucun serveur, aucun tracking, données dans ton navigateur
+**Open Source Project** (MIT License) - Your data belongs to you, stored locally in your browser.
 
 ---
 
-## 🚀 Essayer DeepMemo
+## 🧠 Why Hierarchical Structures?
 
-### En ligne (démo instantanée)
+**Trees and networks aren't just a design choice—they're hardwired into how we think.**
 
-→ **[deepmemo.org](https://deepmemo.org)** - Prêt à l'emploi avec contenu de démo
+From the neurons in your brain to the syntax of language, from evolutionary trees to mind maps, **hierarchical and networked structures appear everywhere**. DeepMemo embraces this universal pattern to help you organize knowledge the way your mind already works.
 
-### Localement
+→ Read more: [Why hierarchical structures are universal](docs/HIERARCHICAL_STRUCTURES.md)
+
+---
+
+## 🎯 Why DeepMemo?
+
+- **Natural hierarchy**: Organize your thoughts like you think them (projects → tasks → subtasks)
+- **Symbolic links**: A node can appear in multiple places (without duplication)
+- **Branch mode**: Focus on an isolated subtree while preserving context
+- **Keyboard-first**: Full keyboard navigation, documented shortcuts
+- **100% local**: No server, no tracking, data stays in your browser
+- **Truly yours**: LocalStorage + IndexedDB, export anytime
+
+---
+
+## 🚀 Try DeepMemo
+
+### Online (instant demo)
+
+→ **[deepmemo.ydns.eu](https://deepmemo.ydns.eu)** - Ready to use with demo content
+
+### Locally
 
 ```bash
-# Clone le repo
+# Clone the repo
 git clone https://github.com/parksto/DeepMemo.git
 cd DeepMemo
 
-# Lance un serveur HTTP local (nécessaire pour ES6 modules)
+# Start a local HTTP server (required for ES6 modules)
 python -m http.server 8000
 
-# Ouvre http://localhost:8000
+# Open http://localhost:8000
 ```
 
-**Installable comme PWA** : Icône sur ton bureau, fonctionne offline.
+**Installable as PWA**: Desktop icon, works offline.
 
 ---
 
-## ✨ Features principales
+## ✨ Key Features
 
-**Organisation** :
-- 🌳 Hiérarchie infinie de nœuds récursifs
-- 🔗 Liens symboliques (renommables indépendamment)
-- 🏷️ Tags avec auto-complétion et tag cloud par branche
-- 📎 Fichiers attachés (images, PDFs, etc.) stockés localement
+**Organization**:
+- 🌳 Infinite hierarchy of recursive nodes
+- 🔗 Symbolic links (independently renameable)
+- 🏷️ Tags with auto-completion and per-branch tag cloud
+- 📎 File attachments (images, PDFs, etc.) stored locally
 
-**Navigation** :
-- 🔍 Recherche temps réel (titres, contenus, tags)
-- ⌨️ Raccourcis clavier pour tout
-- 🌲 Mode branche (isolation d'une sous-arborescence)
-- 🔖 URLs bookmarkables (`?branch=X#/node/Y`)
+**Navigation**:
+- 🔍 Real-time search (titles, content, tags)
+- ⌨️ Keyboard shortcuts for everything
+- 🌲 Branch mode (subtree isolation)
+- 🔖 Bookmarkable URLs (`?branch=X#/node/Y`)
 
-**Partage & Collaboration** :
-- 📤 Export/Import (global ou branche, format ZIP)
-- 🌐 URLs partageables (lecture seule, données locales)
-- 🔐 Souveraineté des données (LocalStorage + IndexedDB)
+**Sharing & Collaboration**:
+- 📤 Export/Import (global or branch, ZIP format)
+- 🌐 Shareable URLs (read-only, local data)
+- 🔐 Data sovereignty (LocalStorage + IndexedDB)
 
-**UX** :
-- 🎨 Drag & Drop complet (déplacer, dupliquer, lier)
+**UX**:
+- 🎨 Full Drag & Drop (move, duplicate, link)
 - 📱 Progressive Web App (installable, offline)
-- 📘 Contenu de démo pédagogique au premier lancement
-- 🎨 Interface épurée, mode lecture/édition
+- 📘 Educational demo content on first launch
+- 🌍 Bilingual interface (French/English)
+- 🎨 Clean interface, read/edit modes
 
 ---
 
 ## 🌍 Open Source
 
-**Licence MIT** - Utilise, modifie, distribue librement.
+**MIT License** - Use, modify, distribute freely.
 
-**Contributions bienvenues** :
-- Bugs et suggestions : [Issues GitHub](https://github.com/parksto/DeepMemo/issues)
-- Code : [Pull Requests](https://github.com/parksto/DeepMemo/pulls)
-- Documentation : Toujours améliorable !
+**Contributions welcome**:
+- Bugs and suggestions: [GitHub Issues](https://github.com/parksto/DeepMemo/issues)
+- Code: [Pull Requests](https://github.com/parksto/DeepMemo/pulls)
+- Documentation: Always improvable!
 
-**Vision long-terme** : Voir [ROADMAP.md](docs/ROADMAP.md) pour les directions explorées (nœuds actifs, automatisation, collaboration décentralisée).
+**Long-term vision**: See [ROADMAP.md](docs/ROADMAP.md) for explored directions (active nodes, automation, decentralized collaboration).
 
 ---
 
 ## 📚 Documentation
 
-**Pour utilisateurs** :
-- [Guide complet d'utilisation](docs/README.md)
-- [Installation PWA](docs/PWA.md)
+**For users**:
+- [Complete usage guide](docs/README.md)
+- [PWA installation](docs/PWA.md)
+- [Why hierarchical structures?](docs/HIERARCHICAL_STRUCTURES.md)
 
-**Pour développeurs** :
-- [Architecture technique](docs/ARCHITECTURE.md)
-- [Guide de développement](docs/CONTRIBUTING.md)
-- [Historique et roadmap](docs/ROADMAP.md)
-
----
-
-## 🔧 Stack technique
-
-**100% Vanilla** : HTML5, CSS3, JavaScript ES6+ (aucun framework)
-
-**Stockage** :
-- LocalStorage (données structurées)
-- IndexedDB (fichiers attachés)
-
-**Architecture** : Modules ES6, structure multifile
-
-**Compatible** : Chrome, Firefox, Safari, Edge (dernières versions)
+**For developers**:
+- [Technical architecture](docs/ARCHITECTURE.md)
+- [Development guide](docs/CONTRIBUTING.md)
+- [History and roadmap](docs/ROADMAP.md)
+- [Internationalization (i18n)](docs/I18N.md)
 
 ---
 
-## 📝 Version actuelle
+## 🔧 Tech Stack
 
-**V0.8** (Décembre 2025) - Stable et complète
+**100% Vanilla**: HTML5, CSS3, JavaScript ES6+ (no framework)
 
-Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import branche, attachments, PWA installable.
+**Storage**:
+- LocalStorage (structured data)
+- IndexedDB (file attachments)
 
-[→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
+**Architecture**: ES6 modules, multifile structure
 
----
-
-## 👤 Auteur
-
-Développé par **Fabien** ([parksto](https://github.com/parksto))
-
-*Conception mentale depuis 5 ans, développement actif depuis 2024*
+**Compatible**: Chrome, Firefox, Safari, Edge (latest versions)
 
 ---
 
-**DeepMemo** - Ton second cerveau, organisé et connecté 🧠
+## 📝 Current Version
+
+**V0.9** (December 2025) - Stable and feature-complete
+
+Latest additions: Full internationalization (FR/EN), bilingual demo content, improved mobile interface.
+
+Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, branch export/import, attachments, installable PWA.
+
+[→ See ROADMAP.md for complete history](docs/ROADMAP.md)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Whether it's:
+- 🐛 Bug reports
+- 💡 Feature suggestions
+- 🌍 Translations (new languages)
+- 📝 Documentation improvements
+- 💻 Code contributions
+
+Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+
+---
+
+## 👤 Author
+
+Developed by **Fabien** ([parksto](https://github.com/parksto))
+
+*Conceptualized for 5 years, active development since 2024*
+
+---
+
+## 🌟 Star History
+
+If you find DeepMemo useful, consider giving it a ⭐ on GitHub!
+
+---
+
+**DeepMemo** - Your second brain, organized and connected 🧠
+
+*Working with your mind, not against it.*
