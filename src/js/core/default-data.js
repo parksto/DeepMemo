@@ -184,7 +184,7 @@ DeepMemo embrasse cette réalité :
 
 ## 📚 Pour aller plus loin
 
-Voir le document complet : \`docs/HIERARCHICAL_STRUCTURES.md\` dans le dépôt GitHub.
+Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.fr.md)
 
 ---
 
@@ -1257,7 +1257,7 @@ DeepMemo est **Open Source (MIT)**. Ces directions sont des pistes de réflexion
 
 Si certaines te parlent, tu peux :
 - **Expérimenter** : Tester DeepMemo et voir ce qui manque
-- **Contribuer** : Proposer des idées, du code, de la doc
+- **Contribuer** : Proposer des idées, du code, de la doc sur [GitHub](https://github.com/parksto/DeepMemo)
 - **Partager** : Tes cas d'usage aident à comprendre les besoins réels
 
 ---
@@ -2092,7 +2092,7 @@ DeepMemo embraces this reality:
 
 ## 📚 To go further
 
-See the complete document: \`docs/HIERARCHICAL_STRUCTURES.md\` in the GitHub repository.
+See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.md)
 
 ---
 
@@ -3165,7 +3165,7 @@ DeepMemo is **Open Source (MIT)**. These directions are discussion points, not p
 
 If some resonate with you, you can:
 - **Experiment**: Test DeepMemo and see what's missing
-- **Contribute**: Propose ideas, code, documentation
+- **Contribute**: Propose ideas, code, documentation on [GitHub](https://github.com/parksto/DeepMemo)
 - **Share**: Your use cases help understand real needs
 
 ---
