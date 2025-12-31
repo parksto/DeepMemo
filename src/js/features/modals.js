@@ -112,8 +112,9 @@ function renderActionTreeSelector(currentNodeId) {
 
   let html = '<div class="node-selector-tree">';
 
-  // Render root nodes
-  data.rootNodes.forEach(rootId => {
+  // Render root nodes (branch mode: only branch root, normal mode: all roots)
+  const rootsToRender = isBranchMode() ? [getBranchRootId()] : data.rootNodes;
+  rootsToRender.forEach(rootId => {
     html += renderActionTreeNode(rootId, currentNodeId, null, 0);
   });
 

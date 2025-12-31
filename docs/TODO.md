@@ -99,6 +99,66 @@ DeepMemo V0.8 is **complete and deployed** with all the following features:
 
 ---
 
+## 🐛 V0.9.1 - Bug Fixes & Quality Improvements - ✅ COMPLETED
+
+**Date**: December 31, 2025
+**Context**: Post-launch fixes following public announcement (449 unique sessions on Reddit)
+
+### Critical Bug Fixes
+
+**Symlinks**:
+- [x] Fixed: Creating child from symlink now adds child to **target** instead of symlink itself
+- [x] Fixed: Symlink title display - shows **symlink's own title** (not target's) in center panel
+- [x] Added: Visual indicator in metadata showing link to original node (clickable)
+
+**Data Persistence**:
+- [x] Fixed: `Esc` (go to parent) now **saves current node** before navigation
+- [x] Fixed: `Alt+E` (toggle view mode) now **saves before switching** (displays changes immediately)
+- [x] Fixed: All navigation (tree clicks, arrows, breadcrumb) now **auto-saves** before switching nodes
+
+**UI/i18n**:
+- [x] Fixed: Empty content in children list showed `[labels.emptyContent]` → now displays translated text
+- [x] Fixed: Action modal tree in branch mode showed **global tree** → now shows **branch tree only**
+
+### New Features
+
+**Orphan Nodes Cleanup**:
+- [x] New function: `cleanOrphanNodes()` in `data.js`
+- [x] Detects nodes not referenced anywhere (not in rootNodes, not in children, not in symlink targets)
+- [x] UI button in right panel storage section
+- [x] Confirmation + toast feedback
+- [x] Full FR/EN translations
+
+**Cross-Tab Synchronization**:
+- [x] Implemented `storage` event listener
+- [x] Real-time sync between tabs when localStorage changes
+- [x] Smart reload: preserves current node if exists, goes to root if deleted
+- [x] Toast notifications: "Data reloaded" / "Data reloaded - node deleted"
+- [x] Perfect for workflow: branch in new tab → auto-sync to main tab
+
+**Mobile Warning Banner**:
+- [x] Mobile device detection (Android, iOS, iPad, etc.)
+- [x] Non-intrusive orange banner at top
+- [x] Professional message about work-in-progress mobile experience
+- [x] Dismissible (×) with localStorage persistence (shows once)
+- [x] Slide-down animation, responsive design
+- [x] Full FR/EN translations
+
+### Technical Improvements
+
+**Code Quality**:
+- [x] Service Worker version bumped to v1.4.0
+- [x] All new features fully i18n-compliant
+- [x] Consistent error handling and user feedback
+
+**User Experience**:
+- [x] No more lost edits on navigation
+- [x] Clear feedback for all operations
+- [x] Professional handling of mobile users
+- [x] Seamless multi-tab workflow
+
+---
+
 ## 🔮 V1.0 - Active Types and Advanced System
 
 ### Active Node Types (Foundations)

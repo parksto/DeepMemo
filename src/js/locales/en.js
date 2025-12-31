@@ -89,9 +89,14 @@ export default {
     orphansCleaned: "✅ {count} orphaned file(s) deleted",
     noOrphans: "✅ No orphaned files found",
     cleanOrphansError: "❌ Cleanup error",
+    orphanNodesCleaned: "✅ {count} orphaned node(s) deleted",
+    noOrphanNodes: "✅ No orphaned nodes found",
+    cleanOrphanNodesError: "❌ Node cleanup error",
     customFontEnabled: "Custom font enabled",
     systemFontEnabled: "System font enabled",
-    languageChanged: "Language changed"
+    languageChanged: "Language changed",
+    dataReloaded: "🔄 Data reloaded (modified in another tab)",
+    dataReloadedNodeDeleted: "🔄 Data reloaded - current node was deleted"
   },
 
   // Alert messages
@@ -113,7 +118,8 @@ export default {
     deleteSymlink: "Delete this symbolic link?",
     deleteNode: "Delete this node and all its children?",
     deleteFile: "Delete this file?",
-    cleanOrphans: "Clean orphaned files? This action is irreversible."
+    cleanOrphans: "Clean orphaned files? This action is irreversible.",
+    cleanOrphanNodes: "Clean orphaned nodes? This action is irreversible."
   },
 
   // Modals
@@ -186,7 +192,8 @@ export default {
     statistics: "Statistics",
     characters: "Characters",
     words: "Words",
-    informations: "Information"
+    informations: "Information",
+    symlinkTo: "Link to"
   },
 
   // Node types and badges
@@ -246,7 +253,8 @@ export default {
     maxSize: " / ~500 MB",
     filesCount: "{count} attached file(s)",
     storageError: "Storage error",
-    cleanOrphans: "🧹 Clean orphaned files"
+    cleanOrphans: "🧹 Clean orphaned files",
+    cleanOrphanNodes: "🗑️ Clean orphaned nodes"
   },
 
   // Empty states
@@ -259,9 +267,21 @@ export default {
     noResults: "No results found"
   },
 
+  // Mobile warning
+  mobileWarning: {
+    title: "Mobile version in development",
+    message: "The mobile experience is being improved. For optimal use, we recommend using a computer."
+  },
+
   // Meta (PWA)
   meta: {
-    title: "DeepMemo V0.9",
+    title: "DeepMemo V0.9.1",
     description: "Knowledge management system based on recursive, interconnected, and active nodes"
+  },
+
+  // Footer
+  footer: {
+    openSource: "Open Source Project",
+    githubLink: "https://github.com/parksto/DeepMemo"
   }
 };

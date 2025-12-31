@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
-  <title data-i18n="meta.title">DeepMemo V0.9</title>
+  <title data-i18n="meta.title">DeepMemo V0.9.1</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="manifest" id="app-manifest" href="manifest-fr.json">
   <script>
@@ -24,6 +24,18 @@
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
+  <!-- Mobile warning banner -->
+  <div id="mobileWarningBanner" class="mobile-warning-banner" style="display: none;">
+    <div class="mobile-warning-content">
+      <span class="mobile-warning-icon">📱</span>
+      <div class="mobile-warning-text">
+        <strong data-i18n="mobileWarning.title">Version mobile en développement</strong>
+        <p data-i18n="mobileWarning.message">L'expérience mobile est en cours d'amélioration. Pour une utilisation optimale, nous recommandons d'utiliser un ordinateur.</p>
+      </div>
+      <button class="mobile-warning-close" onclick="app.closeMobileWarning()" data-i18n-title="actions.close" title="Fermer">✕</button>
+    </div>
+  </div>
+
   <button class="right-panel-toggle-external" onclick="app.toggleRightPanel()">ℹ️</button>
 
   <div class="app-container">

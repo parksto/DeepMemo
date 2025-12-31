@@ -95,9 +95,14 @@ export default {
     orphansCleaned: "✅ {count} fichier(s) orphelin(s) supprimé(s)",
     noOrphans: "✅ Aucun fichier orphelin trouvé",
     cleanOrphansError: "❌ Erreur lors du nettoyage",
+    orphanNodesCleaned: "✅ {count} nœud(s) orphelin(s) supprimé(s)",
+    noOrphanNodes: "✅ Aucun nœud orphelin trouvé",
+    cleanOrphanNodesError: "❌ Erreur lors du nettoyage des nœuds",
     customFontEnabled: "Police personnalisée activée",
     systemFontEnabled: "Police système activée",
-    languageChanged: "Langue modifiée"
+    languageChanged: "Langue modifiée",
+    dataReloaded: "🔄 Données rechargées (modifiées dans un autre onglet)",
+    dataReloadedNodeDeleted: "🔄 Données rechargées - nœud actuel supprimé"
   },
 
   // Alert messages
@@ -119,7 +124,8 @@ export default {
     deleteSymlink: "Supprimer ce lien symbolique ?",
     deleteNode: "Supprimer ce nœud et tous ses enfants ?",
     deleteFile: "Supprimer ce fichier ?",
-    cleanOrphans: "Nettoyer les fichiers orphelins ? Cette action est irréversible."
+    cleanOrphans: "Nettoyer les fichiers orphelins ? Cette action est irréversible.",
+    cleanOrphanNodes: "Nettoyer les nœuds orphelins ? Cette action est irréversible."
   },
 
   // Modals
@@ -192,7 +198,8 @@ export default {
     statistics: "Statistiques",
     characters: "Caractères",
     words: "Mots",
-    informations: "Informations"
+    informations: "Informations",
+    symlinkTo: "Lien vers"
   },
 
   // Node types and badges
@@ -257,7 +264,8 @@ export default {
     maxSize: " / ~500 MB",
     filesCount: "{count} fichier(s) attaché(s)",
     storageError: "Erreur de stockage",
-    cleanOrphans: "🧹 Nettoyer les fichiers orphelins"
+    cleanOrphans: "🧹 Nettoyer les fichiers orphelins",
+    cleanOrphanNodes: "🗑️ Nettoyer les nœuds orphelins"
   },
 
   // Empty states
@@ -270,9 +278,21 @@ export default {
     noResults: "Aucun résultat trouvé"
   },
 
+  // Mobile warning
+  mobileWarning: {
+    title: "Version mobile en développement",
+    message: "L'expérience mobile est en cours d'amélioration. Pour une utilisation optimale, nous recommandons d'utiliser un ordinateur."
+  },
+
   // Meta (PWA)
   meta: {
-    title: "DeepMemo V0.9",
+    title: "DeepMemo V0.9.1",
     description: "Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs"
+  },
+
+  // Footer
+  footer: {
+    openSource: "Projet Open Source",
+    githubLink: "https://github.com/parksto/DeepMemo"
   }
 };

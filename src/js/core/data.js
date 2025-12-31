@@ -744,3 +744,48 @@ export async function importBranchZIP(event, parentId, onSuccess) {
 
   event.target.value = '';
 }
+
+/**
+ * Clean orphan nodes (nodes not referenced anywhere)
+ * Returns the number of orphan nodes deleted
+ * @returns {number} Number of orphan nodes deleted
+ */
+export function cleanOrphanNodes() {
+  // Collect all referenced node IDs
+  const referencedIds = new Set();
+
+  // Add all root nodes
+  data.rootNodes.forEach(id => referencedIds.add(id));
+
+  // Add all children and symlink targets
+  for (const node of Object.values(data.nodes)) {
+    // Add children
+    if (node.children) {
+      node.children.forEach(childId => referencedIds.add(childId));
+    }
+
+    // Add symlink targets
+    if (node.type === 'symlink' && node.targetId) {
+      referencedIds.add(node.targetId);
+    }
+  }
+
+  // Find orphan nodes (in data.nodes but not referenced)
+  const allNodeIds = Object.keys(data.nodes);
+  const orphanIds = allNodeIds.filter(id => !referencedIds.has(id));
+
+  if (orphanIds.length === 0) {
+    console.log('[Data] No orphan nodes found');
+    return 0;
+  }
+
+  // Delete orphan nodes
+  for (const id of orphanIds) {
+    delete data.nodes[id];
+  }
+
+  saveData();
+
+  console.log(`[Data] Cleaned ${orphanIds.length} orphan node(s)`);
+  return orphanIds.length;
+}

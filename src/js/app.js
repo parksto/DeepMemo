@@ -83,6 +83,15 @@ const app = {
       this.handleHashChange(parsed);
     });
 
+    // Setup cross-tab synchronization (detect changes from other tabs)
+    window.addEventListener('storage', (e) => {
+      // Only handle changes to deepmemo_data
+      if (e.key === 'deepmemo_data' && e.newValue) {
+        console.log('[App] Data changed in another tab, reloading...');
+        this.handleExternalDataChange();
+      }
+    });
+
     // Render tree
     this.render();
 
@@ -95,11 +104,46 @@ const app = {
       this.goToRoot();
     }
 
+    // Show mobile warning banner if needed
+    this.checkMobileWarning();
+
     // Test toast
     showToast(t('toast.appInit'), '🎉');
 
     // Update node counter
     this.updateNodeCounter();
+  },
+
+  /**
+   * Check if user is on mobile and show warning banner if needed
+   */
+  checkMobileWarning() {
+    // Check if already dismissed
+    const dismissed = localStorage.getItem('deepmemo_mobileWarningDismissed');
+    if (dismissed === 'true') return;
+
+    // Detect mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Show banner if mobile
+    if (isMobile) {
+      const banner = document.getElementById('mobileWarningBanner');
+      if (banner) {
+        banner.style.display = 'block';
+      }
+    }
+  },
+
+  /**
+   * Close mobile warning banner
+   */
+  closeMobileWarning() {
+    const banner = document.getElementById('mobileWarningBanner');
+    if (banner) {
+      banner.style.display = 'none';
+      // Remember dismissal
+      localStorage.setItem('deepmemo_mobileWarningDismissed', 'true');
+    }
   },
 
   /**
@@ -140,6 +184,32 @@ const app = {
   },
 
   /**
+   * Handle data changes from other tabs (cross-tab synchronization)
+   */
+  handleExternalDataChange() {
+    // Reload data from localStorage
+    DataModule.loadData();
+
+    // Render tree with updated data
+    this.render();
+
+    // Check if current node still exists
+    if (this.currentNodeId && DataModule.data.nodes[this.currentNodeId]) {
+      // Current node still exists: re-display it
+      EditorModule.displayNode(this.currentNodeId, () => this.render());
+      showToast(t('toast.dataReloaded'), '🔄');
+    } else {
+      // Current node was deleted in other tab: go to root
+      this.currentNodeId = null;
+      this.goToRoot();
+      showToast(t('toast.dataReloadedNodeDeleted'), '🔄');
+    }
+
+    // Update node counter
+    this.updateNodeCounter();
+  },
+
+  /**
    * Render the tree
    */
   render() {
@@ -153,6 +223,11 @@ const app = {
    * Select a node
    */
   selectNode(nodeId, instanceKey) {
+    // Save previous node before switching (to preserve unsaved changes)
+    if (this.currentNodeId) {
+      this.saveCurrentNode();
+    }
+
     this.currentNodeId = nodeId;
     TreeModule.setCurrentInstanceKey(instanceKey);
 
@@ -212,6 +287,10 @@ const app = {
    */
   goToParent() {
     if (!this.currentNodeId) return;
+
+    // Save current node before navigating
+    this.saveCurrentNode();
+
     const node = DataModule.data.nodes[this.currentNodeId];
     if (node && node.parent) {
       this.selectNodeById(node.parent);
@@ -304,6 +383,9 @@ const app = {
       showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
+
+    // Save current node before toggling (to preserve unsaved changes)
+    this.saveCurrentNode();
 
     // Toggle view mode
     EditorModule.toggleViewMode();
@@ -818,6 +900,31 @@ const app = {
     } catch (error) {
       console.error('[App] Failed to clean orphaned attachments:', error);
       showToast(t('toast.cleanOrphansError'), '⚠️');
+    }
+  },
+
+  /**
+   * Clean orphaned nodes (nodes not referenced anywhere)
+   */
+  cleanOrphanedNodes() {
+    if (!confirm(t('confirms.cleanOrphanNodes'))) return;
+
+    try {
+      const deletedCount = DataModule.cleanOrphanNodes();
+
+      if (deletedCount > 0) {
+        showToast(t('toast.orphanNodesCleaned', { count: deletedCount }), '🗑️');
+        // Refresh tree and UI
+        this.render();
+        if (this.currentNodeId) {
+          EditorModule.displayNode(this.currentNodeId, () => this.render());
+        }
+      } else {
+        showToast(t('toast.noOrphanNodes'), 'ℹ️');
+      }
+    } catch (error) {
+      console.error('[App] Failed to clean orphaned nodes:', error);
+      showToast(t('toast.cleanOrphanNodesError'), '⚠️');
     }
   },
 

@@ -120,7 +120,8 @@ export function displayNode(nodeId, renderCallback) {
   document.getElementById('editorContainer').style.display = 'flex';
 
   // Display title and content
-  document.getElementById('nodeTitle').value = displayNode.title;
+  // For symlinks: show symlink title (not target title)
+  document.getElementById('nodeTitle').value = node.title;
   const contentEditor = document.getElementById('nodeContent');
   contentEditor.value = displayNode.content || '';
 
@@ -128,8 +129,16 @@ export function displayNode(nodeId, renderCallback) {
   autoResizeTextarea(contentEditor);
 
   // Display metadata
-  document.getElementById('nodeMeta').textContent =
-    `${t('labels.created')}: ${new Date(displayNode.created).toLocaleDateString()}`;
+  const metaDiv = document.getElementById('nodeMeta');
+  let metaHtml = `${t('labels.created')}: ${new Date(displayNode.created).toLocaleDateString()}`;
+
+  // For symlinks: add indicator with link to original
+  if (node.type === 'symlink') {
+    const targetTitle = escapeHtml(displayNode.title);
+    metaHtml += ` | 🔗 <span style="opacity: 0.7;">${t('labels.symlinkTo')}: <a href="#" onclick="app.selectNodeById('${node.targetId}'); event.preventDefault();" style="color: var(--primary); text-decoration: underline;">${targetTitle}</a></span>`;
+  }
+
+  metaDiv.innerHTML = metaHtml;
 
   // Set current node for view mode
   setCurrentNodeId(nodeId);
@@ -324,7 +333,7 @@ function updateChildren(currentNodeId) {
     }
 
     const icon = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : (childDisplayNode.children.length > 0 ? '📂' : '📄');
-    const preview = childDisplayNode.content?.substring(0, 50) || t('labels.emptyContent');
+    const preview = childDisplayNode.content?.substring(0, 50) || t('messages.emptyContent');
 
     const card = document.createElement('div');
     card.className = isSymlink ? 'child-card symlink-card' : 'child-card';
@@ -595,6 +604,12 @@ export async function updateRightPanel(currentNodeId) {
                      onclick="window.app.cleanOrphanedAttachments()">
       ${t('storage.cleanOrphans')}
     </button>`;
+
+    html += `<button class="btn btn-secondary btn-small"
+                     style="width: 100%; margin-top: 8px;"
+                     onclick="window.app.cleanOrphanedNodes()">
+      ${t('storage.cleanOrphanNodes')}
+    </button>`;
   } catch (error) {
     console.error('[Editor] Failed to get storage info:', error);
     html += `<div class="info-item" style="opacity: 0.5;">${t('storage.storageError')}</div>`;
@@ -631,6 +646,18 @@ export async function updateRightPanel(currentNodeId) {
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="info-section" style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center;">
+      <a href="${t('footer.githubLink')}"
+         target="_blank"
+         rel="noopener noreferrer"
+         style="color: var(--text-secondary); text-decoration: none; font-size: 13px; opacity: 0.8; transition: opacity 0.2s;"
+         onmouseover="this.style.opacity='1'"
+         onmouseout="this.style.opacity='0.8'">
+        💻 ${t('footer.openSource')}
+      </a>
     </div>
   `;
 
@@ -683,8 +710,19 @@ export function createRootNode(onSuccess) {
  * @param {Function} onSuccess - Callback after creation (receives nodeId)
  */
 export function createChildNode(parentId, onSuccess) {
-  const parent = data.nodes[parentId];
+  let parent = data.nodes[parentId];
   if (!parent) return;
+
+  // Si le parent est un symlink, créer l'enfant pour la cible
+  let actualParentId = parentId;
+  if (parent.type === 'symlink') {
+    actualParentId = parent.targetId;
+    parent = data.nodes[actualParentId];
+    if (!parent) {
+      showToast(t('toast.brokenSymlink'), '⚠️');
+      return;
+    }
+  }
 
   const id = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
@@ -694,7 +732,7 @@ export function createChildNode(parentId, onSuccess) {
     title: 'Nouveau nœud',
     content: '',
     children: [],
-    parent: parentId,
+    parent: actualParentId,
     tags: [],
     links: [],
     backlinks: [],

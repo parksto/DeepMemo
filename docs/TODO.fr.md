@@ -99,6 +99,66 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 
 ---
 
+## 🐛 V0.9.1 - Corrections de bugs & Améliorations qualité - ✅ COMPLÉTÉ
+
+**Date** : 31 décembre 2025
+**Contexte** : Corrections post-lancement suite à l'annonce publique (449 sessions uniques sur Reddit)
+
+### Corrections de bugs critiques
+
+**Liens symboliques** :
+- [x] Corrigé : Créer un enfant depuis un symlink ajoute maintenant l'enfant à la **cible** au lieu du symlink lui-même
+- [x] Corrigé : Affichage du titre du symlink - montre le **titre propre du symlink** (pas celui de la cible) dans le panneau central
+- [x] Ajouté : Indicateur visuel dans les métadonnées montrant le lien vers le nœud original (cliquable)
+
+**Persistance des données** :
+- [x] Corrigé : `Esc` (remonter au parent) **sauvegarde le nœud actuel** avant la navigation
+- [x] Corrigé : `Alt+E` (basculer mode vue) **sauvegarde avant de basculer** (affiche les modifications immédiatement)
+- [x] Corrigé : Toute navigation (clics arbre, flèches, breadcrumb) **sauvegarde automatiquement** avant de changer de nœud
+
+**UI/i18n** :
+- [x] Corrigé : Contenu vide dans la liste des enfants affichait `[labels.emptyContent]` → affiche maintenant le texte traduit
+- [x] Corrigé : Arborescence du modal d'actions en mode branche affichait l'**arbre global** → affiche maintenant **seulement la branche**
+
+### Nouvelles fonctionnalités
+
+**Nettoyage des nœuds orphelins** :
+- [x] Nouvelle fonction : `cleanOrphanNodes()` dans `data.js`
+- [x] Détecte les nœuds non référencés (ni dans rootNodes, ni dans children, ni dans symlink targets)
+- [x] Bouton UI dans la section stockage du panneau droit
+- [x] Confirmation + retour toast
+- [x] Traductions complètes FR/EN
+
+**Synchronisation multi-onglets** :
+- [x] Implémentation du listener d'événement `storage`
+- [x] Synchronisation temps réel entre onglets quand localStorage change
+- [x] Rechargement intelligent : préserve le nœud actuel s'il existe, va à la racine s'il est supprimé
+- [x] Notifications toast : "Données rechargées" / "Données rechargées - nœud supprimé"
+- [x] Parfait pour le workflow : branche dans nouvel onglet → auto-sync vers onglet principal
+
+**Banner d'avertissement mobile** :
+- [x] Détection appareils mobiles (Android, iOS, iPad, etc.)
+- [x] Banner orange non-intrusif en haut
+- [x] Message professionnel sur l'expérience mobile en cours d'amélioration
+- [x] Fermeture (×) avec persistance localStorage (s'affiche une fois)
+- [x] Animation slide-down, design responsive
+- [x] Traductions complètes FR/EN
+
+### Améliorations techniques
+
+**Qualité du code** :
+- [x] Version Service Worker mise à jour v1.4.0
+- [x] Toutes les nouvelles fonctionnalités entièrement compatibles i18n
+- [x] Gestion d'erreurs cohérente et retours utilisateur
+
+**Expérience utilisateur** :
+- [x] Plus de modifications perdues lors de la navigation
+- [x] Retour clair pour toutes les opérations
+- [x] Gestion professionnelle des utilisateurs mobiles
+- [x] Workflow multi-onglets fluide
+
+---
+
 ## 🔮 V1.0 - Types actifs et système avancé
 
 ### Types de nœuds actifs (Fondations)
