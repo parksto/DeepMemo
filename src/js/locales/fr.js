@@ -6,7 +6,7 @@
 export default {
   // Meta tags
   meta: {
-    title: "DeepMemo V0.9.1",
+    title: "DeepMemo - Ton second cerveau, organisé et connecté",
     description: "DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs",
     ogTitle: "DeepMemo - Ton second cerveau",
     keywords: "gestion connaissances, prise de notes, PKM, second cerveau, Zettelkasten, notes hiérarchiques, symlinks, tags, offline-first, privacy-first, PWA"
