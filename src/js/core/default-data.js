@@ -314,6 +314,14 @@ C'est là que tu **lis et édites** tes nœuds.
 - Clic sur le bouton **[Éditer]**
 - Raccourci clavier : **Alt+E** (focus automatique dans l'éditeur)
 
+## ✍️ Le Markdown : optionnel et accessible
+
+**Tu n'es pas obligé d'utiliser Markdown** : écris simplement du texte brut si tu préfères !
+
+Le Markdown ajoute du **formatage** (titres, listes, liens, images) mais reste **100% lisible en mode texte**.
+
+**Besoin d'aide ?** Appuie sur **Alt+H** pour afficher le **guide Markdown** avec tous les exemples de syntaxe.
+
 ## 🧩 Sections
 
 ### En haut
@@ -322,7 +330,7 @@ C'est là que tu **lis et édites** tes nœuds.
 
 ### Au milieu
 - **Titre** du nœud
-- **Contenu** (Markdown)
+- **Contenu** (Markdown ou texte brut)
 - **Tags** du nœud
 
 ### En bas
@@ -2222,6 +2230,14 @@ This is where you **read and edit** your nodes.
 - Click the **[Edit]** button
 - Keyboard shortcut: **Alt+E** (auto-focus in the editor)
 
+## ✍️ Markdown: optional and accessible
+
+**You don't have to use Markdown**: just write plain text if you prefer!
+
+Markdown adds **formatting** (headings, lists, links, images) but remains **100% readable as plain text**.
+
+**Need help?** Press **Alt+H** to display the **Markdown guide** with all syntax examples.
+
 ## 🧩 Sections
 
 ### At the top
@@ -2230,7 +2246,7 @@ This is where you **read and edit** your nodes.
 
 ### In the middle
 - **Title** of the node
-- **Content** (Markdown)
+- **Content** (Markdown or plain text)
 - **Tags** of the node
 
 ### At the bottom

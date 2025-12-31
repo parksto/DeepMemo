@@ -65,6 +65,7 @@ const app = {
     setupKeyboardShortcuts({
       createNode: () => this.currentNodeId ? this.createChildNode() : this.createRootNode(),
       openSearch: () => SearchModule.openSearch(),
+      openMarkdownHelp: () => this.openMarkdownHelp(),
       goToParent: () => this.goToParent(),
       isSearchVisible: () => SearchModule.isSearchVisible(),
       onEditorFocus: () => this.focusEditor(),
@@ -731,6 +732,20 @@ const app = {
       this.render();
       this.updateNodeCounter();
     });
+  },
+
+  /**
+   * Open Markdown help modal
+   */
+  openMarkdownHelp() {
+    ModalsModule.openMarkdownHelp();
+  },
+
+  /**
+   * Close Markdown help modal
+   */
+  closeMarkdownHelp() {
+    ModalsModule.closeMarkdownHelp();
   },
 
   /**

@@ -166,6 +166,49 @@ export default {
       navigate: "↑↓ Naviguer",
       open: "Entrée Ouvrir",
       close: "Esc Fermer"
+    },
+    markdown: {
+      title: "Guide Markdown",
+      intro: "Markdown est une syntaxe simple pour formater du texte. Voici les principaux éléments que tu peux utiliser dans tes nœuds :",
+      tip: "Tu n'es pas obligé d'utiliser Markdown ! Écris simplement du texte brut si tu préfères. Le Markdown est là pour ajouter du formatage quand tu en as besoin.",
+      examples: {
+        headings: {
+          title: "📐 Titres",
+          syntax: "# Titre niveau 1\n## Titre niveau 2\n### Titre niveau 3"
+        },
+        formatting: {
+          title: "✏️ Formatage de texte",
+          syntax: "**gras**\n*italique*\n~~barré~~\n`code inline`"
+        },
+        lists: {
+          title: "📝 Listes",
+          syntax: "- Élément 1\n- Élément 2\n  - Sous-élément\n\n1. Premier\n2. Deuxième\n3. Troisième"
+        },
+        links: {
+          title: "🔗 Liens",
+          syntax: "[Texte du lien](https://example.com)\n[DeepMemo](https://deepmemo.org)"
+        },
+        images: {
+          title: "🖼️ Images",
+          syntax: "![Texte alternatif](url-de-l-image.jpg)\n\nPour les fichiers attachés :\n![](attachment:ID_DU_FICHIER)"
+        },
+        code: {
+          title: "💻 Blocs de code",
+          syntax: "```javascript\nfunction hello() {\n  console.log('Hello!');\n}\n```"
+        },
+        blockquotes: {
+          title: "💬 Citations",
+          syntax: "> Ceci est une citation\n> Sur plusieurs lignes"
+        },
+        hr: {
+          title: "➖ Séparateur horizontal",
+          syntax: "---"
+        },
+        tables: {
+          title: "📊 Tableaux",
+          syntax: "| Colonne 1 | Colonne 2 |\n|-----------|----------|\n| Cellule 1 | Cellule 2 |\n| Cellule 3 | Cellule 4 |"
+        }
+      }
     }
   },
 
@@ -252,6 +295,7 @@ export default {
   keyboard: {
     newNode: "Nouveau nœud",
     search: "Recherche",
+    markdownHelp: "Aide Markdown",
     editMode: "Passer en édition",
     navigateTree: "Naviguer arbre",
     expandNode: "Déplier nœud",
@@ -284,12 +328,6 @@ export default {
   mobileWarning: {
     title: "Version mobile en développement",
     message: "L'expérience mobile est en cours d'amélioration. Pour une utilisation optimale, nous recommandons d'utiliser un ordinateur."
-  },
-
-  // Meta (PWA)
-  meta: {
-    title: "DeepMemo V0.9.1",
-    description: "Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs"
   },
 
   // Footer

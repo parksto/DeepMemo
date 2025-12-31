@@ -560,6 +560,7 @@ export async function updateRightPanel(currentNodeId) {
       <div class="shortcuts-section">
         <div><kbd>Alt+N</kbd> ${t('keyboard.newNode')}</div>
         <div><kbd>Ctrl+K</kbd> ${t('keyboard.search')}</div>
+        <div><kbd>Alt+H</kbd> ${t('keyboard.markdownHelp')}</div>
         <div><kbd>Alt+E</kbd> ${t('keyboard.editMode')}</div>
       </div>
       <div class="shortcuts-section">

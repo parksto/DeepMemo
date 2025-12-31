@@ -2,7 +2,7 @@
 
 *[Version française](TODO.fr.md)*
 
-**Last update**: December 28, 2025 (V0.9 reorganization: i18n priority)
+**Last update**: December 31, 2025 (V0.9.2+ - Markdown help modal)
 
 ---
 
@@ -156,6 +156,58 @@ DeepMemo V0.8 is **complete and deployed** with all the following features:
 - [x] Clear feedback for all operations
 - [x] Professional handling of mobile users
 - [x] Seamless multi-tab workflow
+
+---
+
+## 📘 V0.9.2+ - Markdown Help Modal - ✅ COMPLETED
+
+**Date**: December 31, 2025
+**Context**: User experience improvement - make Markdown more accessible and clarify it's optional
+
+### Markdown Help Modal
+
+**New Feature**:
+- [x] Markdown cheatsheet modal accessible via **Alt+H** keyboard shortcut
+- [x] Complete guide with 9 sections: headings, formatting, lists, links, images, code, blockquotes, horizontal rules, tables
+- [x] Fully responsive modal with scroll support
+- [x] 100% translated (FR/EN) with i18n system
+- [x] Offline-compatible (Service Worker precache)
+
+**Demo Content Updated**:
+- [x] Added section "✍️ Markdown: optional and accessible" in "📝 The central panel" node (FR + EN)
+- [x] Clarifies that plain text is perfectly acceptable
+- [x] Mentions Alt+H shortcut for help
+
+**Keyboard Shortcuts**:
+- [x] **Alt+H**: Open Markdown help modal (avoids browser history conflict with Ctrl+H)
+- [x] Shortcut displayed in right panel keyboard shortcuts list
+- [x] Consistent with other Alt-based shortcuts (Alt+N, Alt+E)
+
+### Bug Fixes
+
+**i18n Issues**:
+- [x] Fixed: `result.replace is not a function` error in `generateMarkdownHelpContent()`
+  - Root cause: `t('modals.markdown.examples')` returned object, not string
+  - Solution: Call `t()` individually for each nested key
+- [x] Fixed: Duplicate `meta:` sections in fr.js and en.js dictionaries
+  - Root cause: Two `meta:` definitions, second overwrote first
+  - Solution: Removed duplicates, kept complete definitions with all keys (ogTitle, keywords)
+
+**Console Clean**:
+- [x] All i18n warning messages eliminated
+- [x] No more missing key errors
+- [x] Production-ready clean console
+
+### Technical Improvements
+
+**Service Worker**:
+- [x] Version bumped: v1.5.0 → v1.5.1
+- [x] All modified files already in precache list
+
+**Code Quality**:
+- [x] Proper i18n key structure for nested objects
+- [x] No dictionary duplicates
+- [x] Clean modal architecture with reusable pattern
 
 ---
 

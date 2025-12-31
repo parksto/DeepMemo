@@ -158,6 +158,49 @@ export default {
       navigate: "↑↓ Navigate",
       open: "Enter Open",
       close: "Esc Close"
+    },
+    markdown: {
+      title: "Markdown Guide",
+      intro: "Markdown is a simple syntax for formatting text. Here are the main elements you can use in your nodes:",
+      tip: "You don't have to use Markdown! Just write plain text if you prefer. Markdown is there to add formatting when you need it.",
+      examples: {
+        headings: {
+          title: "📐 Headings",
+          syntax: "# Heading level 1\n## Heading level 2\n### Heading level 3"
+        },
+        formatting: {
+          title: "✏️ Text formatting",
+          syntax: "**bold**\n*italic*\n~~strikethrough~~\n`inline code`"
+        },
+        lists: {
+          title: "📝 Lists",
+          syntax: "- Item 1\n- Item 2\n  - Sub-item\n\n1. First\n2. Second\n3. Third"
+        },
+        links: {
+          title: "🔗 Links",
+          syntax: "[Link text](https://example.com)\n[DeepMemo](https://deepmemo.org)"
+        },
+        images: {
+          title: "🖼️ Images",
+          syntax: "![Alt text](image-url.jpg)\n\nFor attached files:\n![](attachment:FILE_ID)"
+        },
+        code: {
+          title: "💻 Code blocks",
+          syntax: "```javascript\nfunction hello() {\n  console.log('Hello!');\n}\n```"
+        },
+        blockquotes: {
+          title: "💬 Blockquotes",
+          syntax: "> This is a quote\n> On multiple lines"
+        },
+        hr: {
+          title: "➖ Horizontal rule",
+          syntax: "---"
+        },
+        tables: {
+          title: "📊 Tables",
+          syntax: "| Column 1 | Column 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |\n| Cell 3   | Cell 4   |"
+        }
+      }
     }
   },
 
@@ -239,6 +282,7 @@ export default {
   keyboard: {
     newNode: "New node",
     search: "Search",
+    markdownHelp: "Markdown help",
     editMode: "Switch to edit mode",
     navigateTree: "Navigate tree",
     expandNode: "Expand node",

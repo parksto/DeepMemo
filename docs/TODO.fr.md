@@ -2,7 +2,7 @@
 
 *[English version](TODO.md)*
 
-**Dernière mise à jour** : 28 Décembre 2025 (V0.9 complétée : i18n + docs bilingues)
+**Dernière mise à jour** : 31 Décembre 2025 (V0.9.2+ - Modal aide Markdown)
 
 ---
 
@@ -156,6 +156,58 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 - [x] Retour clair pour toutes les opérations
 - [x] Gestion professionnelle des utilisateurs mobiles
 - [x] Workflow multi-onglets fluide
+
+---
+
+## 📘 V0.9.2+ - Modal aide Markdown - ✅ COMPLÉTÉ
+
+**Date** : 31 décembre 2025
+**Contexte** : Amélioration UX - rendre Markdown plus accessible et clarifier qu'il est optionnel
+
+### Modal aide Markdown
+
+**Nouvelle fonctionnalité** :
+- [x] Cheatsheet Markdown accessible via raccourci clavier **Alt+H**
+- [x] Guide complet avec 9 sections : titres, formatage, listes, liens, images, code, citations, séparateurs horizontaux, tableaux
+- [x] Modal responsive avec support du scroll
+- [x] 100% traduit (FR/EN) avec système i18n
+- [x] Compatible hors-ligne (Service Worker précache)
+
+**Contenu de démo mis à jour** :
+- [x] Ajout section "✍️ Le Markdown : optionnel et accessible" dans le nœud "📝 Le panneau central" (FR + EN)
+- [x] Précise que le texte brut est parfaitement acceptable
+- [x] Mentionne le raccourci Alt+H pour l'aide
+
+**Raccourcis clavier** :
+- [x] **Alt+H** : Ouvrir modal aide Markdown (évite conflit historique navigateur avec Ctrl+H)
+- [x] Raccourci affiché dans la liste des raccourcis du panneau droit
+- [x] Cohérent avec les autres raccourcis Alt (Alt+N, Alt+E)
+
+### Corrections de bugs
+
+**Problèmes i18n** :
+- [x] Corrigé : Erreur `result.replace is not a function` dans `generateMarkdownHelpContent()`
+  - Cause : `t('modals.markdown.examples')` retournait un objet, pas une string
+  - Solution : Appeler `t()` individuellement pour chaque clé imbriquée
+- [x] Corrigé : Sections `meta:` dupliquées dans fr.js et en.js
+  - Cause : Deux définitions `meta:`, la seconde écrasait la première
+  - Solution : Suppression des doublons, conservation des définitions complètes avec toutes les clés (ogTitle, keywords)
+
+**Console propre** :
+- [x] Tous les avertissements i18n éliminés
+- [x] Plus d'erreurs de clés manquantes
+- [x] Console propre prête pour la production
+
+### Améliorations techniques
+
+**Service Worker** :
+- [x] Version incrémentée : v1.5.0 → v1.5.1
+- [x] Tous les fichiers modifiés déjà dans la liste de précache
+
+**Qualité du code** :
+- [x] Structure correcte des clés i18n pour objets imbriqués
+- [x] Aucun doublon dans les dictionnaires
+- [x] Architecture modale propre et réutilisable
 
 ---
 

@@ -26,6 +26,12 @@ export function setupKeyboardShortcuts(handlers) {
       if (handlers.openSearch) handlers.openSearch();
     }
 
+    // Alt+H: Open Markdown help
+    if (e.altKey && e.key === 'h') {
+      e.preventDefault();
+      if (handlers.openMarkdownHelp) handlers.openMarkdownHelp();
+    }
+
     // Escape: Close search or go to parent
     if (e.key === 'Escape') {
       if (handlers.isSearchVisible && handlers.isSearchVisible()) {

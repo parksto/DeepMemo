@@ -505,3 +505,116 @@ export function closeSymlinkModal() {
 export function confirmSymlink(currentNodeId, onSuccess) {
   confirmAction(currentNodeId, onSuccess);
 }
+
+// ===== MARKDOWN HELP MODAL =====
+
+/**
+ * Open Markdown Help Modal
+ */
+export function openMarkdownHelp() {
+  // Generate content with i18n
+  const content = generateMarkdownHelpContent();
+  document.getElementById('markdownHelpContent').innerHTML = content;
+
+  // Show modal
+  document.getElementById('markdownHelpModal').classList.add('active');
+}
+
+/**
+ * Close Markdown Help Modal
+ */
+export function closeMarkdownHelp() {
+  document.getElementById('markdownHelpModal').classList.remove('active');
+}
+
+/**
+ * Generate Markdown help content with i18n
+ * @returns {string} HTML string
+ */
+function generateMarkdownHelpContent() {
+  return `
+    <div style="font-size: 14px; line-height: 1.6;">
+      <p style="color: var(--text-secondary); margin-bottom: 20px;">
+        ${t('modals.markdown.intro')}
+      </p>
+
+      <div style="display: grid; gap: 20px;">
+        <!-- Headings -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.headings.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.headings.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Text formatting -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.formatting.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.formatting.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Lists -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.lists.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.lists.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.links.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.links.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.images.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.images.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Code -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.code.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.code.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Blockquotes -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.blockquotes.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.blockquotes.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Horizontal rule -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.hr.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.hr.syntax')}</pre>
+          </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="markdown-example">
+          <h3 style="margin: 0 0 8px 0; color: var(--primary);">${t('modals.markdown.examples.tables.title')}</h3>
+          <div class="code-block">
+            <pre style="margin: 0; white-space: pre-wrap;">${t('modals.markdown.examples.tables.syntax')}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; color: var(--text-secondary); font-size: 13px;">
+        💡 ${t('modals.markdown.tip')}
+      </div>
+    </div>
+  `;
+}
