@@ -1,0 +1,21 @@
+# robots.txt for DeepMemo
+# https://deepmemo.org/
+
+# Allow all search engines to crawl
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://deepmemo.org/sitemap.xml
+
+# Disallow crawling of source files and data files
+# (users' data stays private, only allow indexing of public pages)
+Disallow: /src/
+Disallow: /*.json$
+Disallow: /manifest-*.json$
+
+# Allow documentation
+Allow: /docs/
+
+# Crawl-delay (optional, for politeness)
+Crawl-delay: 1

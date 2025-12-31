@@ -5,18 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
+  <meta name="keywords" data-i18n-content="meta.keywords" content="gestion connaissances, prise de notes, PKM, second cerveau, Zettelkasten, notes hiérarchiques, symlinks, tags, offline-first, privacy-first, PWA">
+  <meta name="author" content="DeepMemo Team">
   <title data-i18n="meta.title">DeepMemo V0.9.1</title>
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://deepmemo.org/">
+
+  <!-- PWA and Apple Meta Tags -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="manifest" id="app-manifest" href="manifest-fr.json">
+  <meta name="application-name" content="DeepMemo">
+  <meta name="apple-mobile-web-app-title" content="DeepMemo">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Open Graph (Facebook, LinkedIn) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://deepmemo.org/">
+  <meta property="og:title" data-i18n-content="meta.ogTitle" content="DeepMemo - Your second brain">
+  <meta property="og:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
+  <meta property="og:image" content="https://deepmemo.org/icons/og-image.png">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="fr_FR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://deepmemo.org/">
+  <meta name="twitter:title" data-i18n-content="meta.ogTitle" content="DeepMemo - Your second brain">
+  <meta name="twitter:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
+  <meta name="twitter:image" content="https://deepmemo.org/icons/twitter-card.png">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DeepMemo",
+    "url": "https://deepmemo.org/",
+    "description": "Privacy-first knowledge management system with hierarchical nodes, symlinks, tags, and branch isolation. Works fully offline.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Any (Web-based)",
+    "browserRequirements": "Requires JavaScript. Works with all modern browsers.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "DeepMemo Team"
+    },
+    "featureList": [
+      "Hierarchical knowledge network",
+      "Symlinks and tags",
+      "Branch isolation mode",
+      "File attachments (up to 50MB per file)",
+      "Full offline support (PWA)",
+      "Privacy-first (local storage only, no server)",
+      "Bilingual interface (French/English)",
+      "Export/Import (ZIP format)",
+      "Multi-tab synchronization",
+      "Keyboard shortcuts"
+    ],
+    "screenshot": "https://deepmemo.org/icons/screenshot.png",
+    "softwareVersion": "0.9.1",
+    "releaseNotes": "https://deepmemo.org/docs/ROADMAP.md",
+    "inLanguage": ["en", "fr"]
+  }
+  </script>
   <script>
-    // Load correct manifest based on language preference
+    // Load correct manifest and update lang attribute based on language preference
     (function() {
       const savedLang = localStorage.getItem('deepmemo_language');
       const browserLang = navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
       const lang = savedLang || browserLang;
       const manifestHref = lang === 'en' ? 'manifest-en.json' : 'manifest-fr.json';
 
+      // Update manifest
       document.getElementById('app-manifest').href = manifestHref;
+
+      // Update HTML lang attribute
+      document.documentElement.lang = lang;
     })();
   </script>
   <link rel="stylesheet" href="src/css/style.css">

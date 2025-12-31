@@ -1,11 +1,13 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.4.0'; // V0.9.1 - Bug fixes + features (symlinks, save, sync, mobile warning)
+const CACHE_VERSION = 'v1.5.0'; // V0.9.2 - SEO improvements (meta tags, robots.txt, sitemap.xml)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)
 const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/robots.txt',
+  '/sitemap.xml',
   '/src/css/style.css',
   '/src/css/base.css',
   '/src/css/layout.css',
@@ -33,6 +35,9 @@ const PRECACHE_URLS = [
   '/favicon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/og-image.png',
+  '/icons/twitter-card.png',
+  '/icons/screenshot.png',
   '/manifest-fr.json',
   '/manifest-en.json'
 ];

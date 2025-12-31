@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Homepage (bilingual) -->
+  <url>
+    <loc>https://deepmemo.org/</loc>
+    <lastmod>2025-12-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://deepmemo.org/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://deepmemo.org/?lang=fr"/>
+  </url>
+
+  <!-- Main README (English) -->
+  <url>
+    <loc>https://deepmemo.org/README.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Main README (French) -->
+  <url>
+    <loc>https://deepmemo.org/README.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Documentation - Features (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/README.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Documentation - Features (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/README.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- PWA Guide (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/PWA.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- PWA Guide (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/PWA.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Hierarchical Structures Concept (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/HIERARCHICAL_STRUCTURES.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Hierarchical Structures Concept (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/HIERARCHICAL_STRUCTURES.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Vision (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/VISION.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Vision (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/VISION.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Roadmap (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/ROADMAP.md</loc>
+    <lastmod>2025-12-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Roadmap (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/ROADMAP.fr.md</loc>
+    <lastmod>2025-12-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Architecture (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/ARCHITECTURE.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Architecture (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/ARCHITECTURE.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Contributing (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/CONTRIBUTING.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Contributing (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/CONTRIBUTING.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- I18n Documentation (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/I18N.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- I18n Documentation (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/I18N.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Attachments Spec (English) -->
+  <url>
+    <loc>https://deepmemo.org/docs/SPEC-ATTACHMENTS.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Attachments Spec (French) -->
+  <url>
+    <loc>https://deepmemo.org/docs/SPEC-ATTACHMENTS.fr.md</loc>
+    <lastmod>2025-12-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>

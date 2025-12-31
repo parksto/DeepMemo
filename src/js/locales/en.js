@@ -276,7 +276,9 @@ export default {
   // Meta (PWA)
   meta: {
     title: "DeepMemo V0.9.1",
-    description: "Knowledge management system based on recursive, interconnected, and active nodes"
+    description: "Knowledge management system based on recursive, interconnected, and active nodes",
+    ogTitle: "DeepMemo - Your second brain",
+    keywords: "knowledge management, note-taking, PKM, second brain, Zettelkasten, hierarchical notes, symlinks, tags, offline-first, privacy-first, PWA"
   },
 
   // Footer
