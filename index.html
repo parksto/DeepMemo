@@ -341,9 +341,9 @@
             </div>
           </button>
 
-          <button class="btn btn-secondary" onclick="app.confirmExportMermaid()" disabled style="justify-content: flex-start; padding: 16px; opacity: 0.5; cursor: not-allowed;">
+          <button class="btn btn-secondary" onclick="app.confirmExportMermaid()" style="justify-content: flex-start; padding: 16px;">
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-              <div style="font-size: 16px;">📊 <span data-i18n="modals.export.mermaid.title">Diagramme Mermaid</span> <small>(bientôt)</small></div>
+              <div style="font-size: 16px;">📊 <span data-i18n="modals.export.mermaid.title">Diagramme Mermaid</span></div>
               <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.mermaid.desc">
                 Diagramme visuel au format SVG
               </div>
@@ -356,6 +356,13 @@
       </div>
     </div>
   </div>
+
+  <!-- Mermaid.js for diagram export -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    window.mermaid = mermaid;
+  </script>
 
   <!-- Enregistrement du Service Worker pour PWA -->
   <script>

@@ -74,6 +74,8 @@ export default {
     branchExported: "Branch exported (ZIP)",
     freemindExported: "Mindmap exported (FreeMind)",
     freemindBranchExported: "Branch exported (FreeMind)",
+    mermaidExported: "Diagram exported (Mermaid SVG)",
+    mermaidBranchExported: "Branch exported (Mermaid SVG)",
     branchImported: "{count} node(s) imported",
     comingSoon: "Feature coming soon",
     importError: "Import error",
@@ -109,7 +111,9 @@ export default {
     nodeNotFound: "Node not found",
     dataJsonNotFound: "data.json file not found in ZIP",
     importError: "Import error: {message}",
-    exportError: "Export error: {message}"
+    exportError: "Export error: {message}",
+    mermaidNotAvailable: "Mermaid.js is not loaded. Cannot export to SVG.",
+    brokenSymlink: "⚠️ Broken symlink: target node no longer exists."
   },
 
   // Confirmation dialogs

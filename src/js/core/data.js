@@ -908,3 +908,131 @@ export function exportFreeMindMM(branchRootId = null) {
 
   console.log(`[Export] FreeMind .mm file exported: ${filename}`);
 }
+
+/**
+ * Escape special characters for Mermaid syntax
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ */
+function escapeMermaid(str) {
+  // Remove or replace characters that break Mermaid syntax
+  return str
+    .replace(/[()[\]{}]/g, ' ')  // Replace all brackets/parens with spaces
+    .replace(/"/g, "'")           // Replace double quotes with single quotes
+    .replace(/\n/g, ' ')          // Remove newlines
+    .replace(/\s+/g, ' ')         // Collapse multiple spaces into one
+    .trim();
+}
+
+/**
+ * Generate Mermaid mindmap syntax for a node and its children
+ * @param {string} nodeId - Node ID
+ * @param {Object} nodes - Nodes dictionary
+ * @param {number} indent - Indentation level
+ * @returns {string} Mermaid syntax
+ */
+function generateMermaidNode(nodeId, nodes, indent) {
+  const node = nodes[nodeId];
+  if (!node) return '';
+
+  const indentStr = '  '.repeat(indent);
+  const escapedTitle = escapeMermaid(node.title || 'Untitled');
+
+  let mermaid = '';
+
+  // Root node has special syntax with double parentheses
+  if (indent === 1) {
+    mermaid = `${indentStr}root((${escapedTitle}))\n`;
+  } else {
+    // Symlinks get a special indicator
+    const prefix = node.type === 'symlink' ? '🔗 ' : '';
+    mermaid = `${indentStr}${prefix}${escapedTitle}\n`;
+  }
+
+  // Recursively add children (but not for symlinks to avoid duplication)
+  if (node.type !== 'symlink' && node.children && node.children.length > 0) {
+    node.children.forEach(childId => {
+      mermaid += generateMermaidNode(childId, nodes, indent + 1);
+    });
+  }
+
+  return mermaid;
+}
+
+/**
+ * Generate complete Mermaid mindmap syntax
+ * @param {Array} rootIds - Root node IDs
+ * @param {Object} nodes - Nodes dictionary
+ * @returns {string} Complete Mermaid syntax
+ */
+function generateMermaidMindmap(rootIds, nodes) {
+  let mermaid = 'mindmap\n';
+
+  // If single root, use it directly
+  // If multiple roots, create a virtual root
+  if (rootIds.length === 1) {
+    mermaid += generateMermaidNode(rootIds[0], nodes, 1);
+  } else {
+    mermaid += '  root((DeepMemo))\n';
+    rootIds.forEach(rootId => {
+      mermaid += generateMermaidNode(rootId, nodes, 2);
+    });
+  }
+
+  return mermaid;
+}
+
+/**
+ * Export a branch (or full tree) as Mermaid SVG file
+ * @param {string|null} branchRootId - Root node ID to export, or null for full tree
+ */
+export async function exportMermaidSVG(branchRootId = null) {
+  // Check if Mermaid is available
+  if (typeof window.mermaid === 'undefined') {
+    i18nAlert('mermaidNotAvailable');
+    return;
+  }
+
+  // Collect nodes to export
+  const nodesToExport = branchRootId
+    ? collectBranchNodes(branchRootId)
+    : data.nodes;
+
+  const rootIds = branchRootId
+    ? [branchRootId]
+    : data.rootNodes;
+
+  if (rootIds.length === 0) {
+    i18nAlert('noData');
+    return;
+  }
+
+  try {
+    // Generate Mermaid syntax
+    const mermaidSyntax = generateMermaidMindmap(rootIds, nodesToExport);
+    console.log('[Export] Mermaid syntax generated:', mermaidSyntax);
+
+    // Generate SVG using Mermaid.js
+    const { svg } = await window.mermaid.render('mermaid-export', mermaidSyntax);
+
+    // Create filename
+    const timestamp = Date.now();
+    const filename = branchRootId && data.nodes[branchRootId]
+      ? `deepmemo-${data.nodes[branchRootId].title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}-${timestamp}.svg`
+      : `deepmemo-export-${timestamp}.svg`;
+
+    // Download file
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    console.log(`[Export] Mermaid SVG file exported: ${filename}`);
+  } catch (error) {
+    console.error('[Export] Mermaid export failed:', error);
+    throw error;
+  }
+}

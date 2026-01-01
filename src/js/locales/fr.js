@@ -82,6 +82,8 @@ export default {
     branchExported: "Branche exportée (ZIP)",
     freemindExported: "Mindmap exportée (FreeMind)",
     freemindBranchExported: "Branche exportée (FreeMind)",
+    mermaidExported: "Diagramme exporté (Mermaid SVG)",
+    mermaidBranchExported: "Branche exportée (Mermaid SVG)",
     branchImported: "{count} nœud(s) importés",
     comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",
@@ -117,7 +119,9 @@ export default {
     nodeNotFound: "Nœud introuvable",
     dataJsonNotFound: "Fichier data.json introuvable dans le ZIP",
     importError: "Erreur lors de l'import : {message}",
-    exportError: "Erreur lors de l'export : {message}"
+    exportError: "Erreur lors de l'export : {message}",
+    mermaidNotAvailable: "Mermaid.js n'est pas chargé. Impossible d'exporter en SVG.",
+    brokenSymlink: "⚠️ Lien symbolique cassé : le nœud cible n'existe plus."
   },
 
   // Confirmation dialogs

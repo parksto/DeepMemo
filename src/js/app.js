@@ -506,13 +506,15 @@ const app = {
    * Confirm ZIP export (global or branch)
    */
   async confirmExportZIP() {
+    // Save exportType before closing modal (which resets it to null)
+    const type = this.exportType;
     this.closeExportModal();
 
     try {
-      if (this.exportType === 'global') {
+      if (type === 'global') {
         await DataModule.exportDataZIP();
         showToast(t('toast.dataExported'), '💾');
-      } else if (this.exportType === 'branch') {
+      } else if (type === 'branch') {
         await DataModule.exportBranchZIP(this.currentNodeId);
         showToast(t('toast.branchExported'), '⬇️');
       }
@@ -526,13 +528,15 @@ const app = {
    * Confirm FreeMind export (global or branch)
    */
   confirmExportFreeMind() {
+    // Save exportType before closing modal (which resets it to null)
+    const type = this.exportType;
     this.closeExportModal();
 
     try {
-      if (this.exportType === 'global') {
+      if (type === 'global') {
         DataModule.exportFreeMindMM(null);
         showToast(t('toast.freemindExported'), '🧠');
-      } else if (this.exportType === 'branch') {
+      } else if (type === 'branch') {
         DataModule.exportFreeMindMM(this.currentNodeId);
         showToast(t('toast.freemindBranchExported'), '🧠');
       }
@@ -543,11 +547,25 @@ const app = {
   },
 
   /**
-   * Confirm Mermaid export (coming soon)
+   * Confirm Mermaid export (SVG diagram)
    */
-  confirmExportMermaid() {
+  async confirmExportMermaid() {
+    // Save exportType before closing modal (which resets it to null)
+    const type = this.exportType;
     this.closeExportModal();
-    showToast(t('toast.comingSoon'), 'ℹ️');
+
+    try {
+      if (type === 'global') {
+        await DataModule.exportMermaidSVG(null);
+        showToast(t('toast.mermaidExported'), '📊');
+      } else if (type === 'branch') {
+        await DataModule.exportMermaidSVG(this.currentNodeId);
+        showToast(t('toast.mermaidBranchExported'), '📊');
+      }
+    } catch (error) {
+      console.error('[App] Mermaid export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
   },
 
   /**
