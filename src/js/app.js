@@ -27,6 +27,7 @@ const app = {
   data: DataModule.data,
   currentNodeId: null,
   expandedNodes: DataModule.expandedNodes,
+  exportType: null, // 'global' or 'branch'
 
   /**
    * Initialize the application
@@ -477,6 +478,76 @@ const app = {
       console.error('[App] Branch export failed:', error);
       showToast(t('toast.exportError'), '⚠️');
     }
+  },
+
+  /**
+   * Open export modal
+   * @param {string} type - 'global' or 'branch'
+   */
+  openExportModal(type) {
+    if (type === 'branch' && !this.currentNodeId) {
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
+      return;
+    }
+
+    this.exportType = type;
+    document.getElementById('exportModal').style.display = 'flex';
+  },
+
+  /**
+   * Close export modal
+   */
+  closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+    this.exportType = null;
+  },
+
+  /**
+   * Confirm ZIP export (global or branch)
+   */
+  async confirmExportZIP() {
+    this.closeExportModal();
+
+    try {
+      if (this.exportType === 'global') {
+        await DataModule.exportDataZIP();
+        showToast(t('toast.dataExported'), '💾');
+      } else if (this.exportType === 'branch') {
+        await DataModule.exportBranchZIP(this.currentNodeId);
+        showToast(t('toast.branchExported'), '⬇️');
+      }
+    } catch (error) {
+      console.error('[App] ZIP export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
+   * Confirm FreeMind export (global or branch)
+   */
+  confirmExportFreeMind() {
+    this.closeExportModal();
+
+    try {
+      if (this.exportType === 'global') {
+        DataModule.exportFreeMindMM(null);
+        showToast(t('toast.freemindExported'), '🧠');
+      } else if (this.exportType === 'branch') {
+        DataModule.exportFreeMindMM(this.currentNodeId);
+        showToast(t('toast.freemindBranchExported'), '🧠');
+      }
+    } catch (error) {
+      console.error('[App] FreeMind export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
+   * Confirm Mermaid export (coming soon)
+   */
+  confirmExportMermaid() {
+    this.closeExportModal();
+    showToast(t('toast.comingSoon'), 'ℹ️');
   },
 
   /**

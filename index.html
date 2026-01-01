@@ -121,7 +121,7 @@
         <div class="import-export-zone">
           <input type="file" id="importFile" accept=".json,.zip" onchange="app.importData(event)">
           <label for="importFile" class="btn-import" data-i18n="actions.import">📂 Importer</label>
-          <button class="btn-import" data-i18n="actions.export" onclick="app.exportData()">💾 Exporter</button>
+          <button class="btn-import" data-i18n="actions.export" onclick="app.openExportModal('global')">💾 Exporter</button>
         </div>
       </div>
 
@@ -198,7 +198,7 @@
           <button class="btn btn-secondary btn-small" data-i18n="actions.addChild" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
           <div style="margin-left: auto; display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-small" data-i18n-title="tooltips.exportBranch" onclick="app.exportBranch()" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
+            <button class="btn btn-secondary btn-small" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
             <input type="file" id="importBranchFile" accept=".json,.zip" onchange="app.importBranch(event)" style="display: none;">
             <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
           </div>
@@ -308,6 +308,51 @@
       </div>
       <div class="modal-actions">
         <button class="btn btn-primary btn-small" data-i18n="actions.close" onclick="app.closeMarkdownHelp()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Export Choice -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal">
+      <h2>📤 <span data-i18n="modals.export.title">Export</span></h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.export.subtitle">
+          Choisir le format d'export :
+        </p>
+
+        <!-- Choix du format d'export -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="btn btn-secondary" onclick="app.confirmExportZIP()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📦 <span data-i18n="modals.export.zip.title">Archive ZIP</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.zip.desc">
+                Export complet avec toutes les données et fichiers attachés
+              </div>
+            </div>
+          </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportFreeMind()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">🧠 <span data-i18n="modals.export.freemind.title">Mindmap FreeMind</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.freemind.desc">
+                Fichier .mm éditable dans Freeplane/FreeMind/XMind
+              </div>
+            </div>
+          </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportMermaid()" disabled style="justify-content: flex-start; padding: 16px; opacity: 0.5; cursor: not-allowed;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📊 <span data-i18n="modals.export.mermaid.title">Diagramme Mermaid</span> <small>(bientôt)</small></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.mermaid.desc">
+                Diagramme visuel au format SVG
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" data-i18n="modals.export.cancel" onclick="app.closeExportModal()">Annuler</button>
       </div>
     </div>
   </div>

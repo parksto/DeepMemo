@@ -789,3 +789,122 @@ export function cleanOrphanNodes() {
   console.log(`[Data] Cleaned ${orphanIds.length} orphan node(s)`);
   return orphanIds.length;
 }
+
+/**
+ * Escape XML special characters
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ */
+function escapeXML(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/**
+ * Generate FreeMind XML for a node and its children
+ * @param {string} nodeId - Node ID
+ * @param {Object} nodes - Nodes dictionary
+ * @param {number} indent - Indentation level
+ * @returns {string} XML string
+ */
+function generateNodeXML(nodeId, nodes, indent) {
+  const node = nodes[nodeId];
+  if (!node) return '';
+
+  const indentStr = '  '.repeat(indent);
+  const escapedTitle = escapeXML(node.title || 'Untitled');
+
+  let xml = `${indentStr}<node TEXT="${escapedTitle}" ID="${nodeId}"`;
+
+  // Symlink styling: orange color and bubble style for visual distinction
+  if (node.type === 'symlink') {
+    xml += ' COLOR="#ff9900" STYLE="bubble"';
+  }
+
+  xml += '>\n';
+
+  // Add arrowlink for symlinks to show the connection to target
+  if (node.type === 'symlink' && node.targetId) {
+    xml += `${indentStr}  <arrowlink DESTINATION="${node.targetId}" COLOR="#ff9900" STARTARROW="None" ENDARROW="Default"/>\n`;
+  }
+
+  // Recursively add children
+  if (node.children && node.children.length > 0) {
+    node.children.forEach(childId => {
+      xml += generateNodeXML(childId, nodes, indent + 1);
+    });
+  }
+
+  xml += `${indentStr}</node>\n`;
+  return xml;
+}
+
+/**
+ * Generate complete FreeMind XML
+ * @param {Array} rootIds - Root node IDs
+ * @param {Object} nodes - Nodes dictionary
+ * @returns {string} Complete XML string
+ */
+function generateFreeMindXML(rootIds, nodes) {
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<map version="1.0.1">\n';
+
+  // If single root, use it directly
+  // If multiple roots, create a virtual root node
+  if (rootIds.length === 1) {
+    xml += generateNodeXML(rootIds[0], nodes, 1);
+  } else {
+    xml += '  <node TEXT="DeepMemo" ID="_virtual_root">\n';
+    rootIds.forEach(rootId => {
+      xml += generateNodeXML(rootId, nodes, 2);
+    });
+    xml += '  </node>\n';
+  }
+
+  xml += '</map>';
+  return xml;
+}
+
+/**
+ * Export a branch (or full tree) as FreeMind .mm file
+ * @param {string|null} branchRootId - Root node ID to export, or null for full tree
+ */
+export function exportFreeMindMM(branchRootId = null) {
+  // Collect nodes to export
+  const nodesToExport = branchRootId
+    ? collectBranchNodes(branchRootId)
+    : data.nodes;
+
+  const rootIds = branchRootId
+    ? [branchRootId]
+    : data.rootNodes;
+
+  if (rootIds.length === 0) {
+    i18nAlert('noData');
+    return;
+  }
+
+  // Generate XML
+  const xml = generateFreeMindXML(rootIds, nodesToExport);
+
+  // Create filename
+  const timestamp = Date.now();
+  const filename = branchRootId && data.nodes[branchRootId]
+    ? `deepmemo-${data.nodes[branchRootId].title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}-${timestamp}.mm`
+    : `deepmemo-export-${timestamp}.mm`;
+
+  // Download file
+  const blob = new Blob([xml], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  console.log(`[Export] FreeMind .mm file exported: ${filename}`);
+}

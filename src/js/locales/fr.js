@@ -80,7 +80,10 @@ export default {
     dataImportedZIP: "{count} nœud(s) importés (ZIP)",
     dataExported: "Données exportées (ZIP)",
     branchExported: "Branche exportée (ZIP)",
+    freemindExported: "Mindmap exportée (FreeMind)",
+    freemindBranchExported: "Branche exportée (FreeMind)",
     branchImported: "{count} nœud(s) importés",
+    comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",
     exportError: "Erreur lors de l'export",
     attachmentsNotAvailable: "⚠️ Attachments non disponibles (IndexedDB)",
@@ -208,6 +211,23 @@ export default {
           title: "📊 Tableaux",
           syntax: "| Colonne 1 | Colonne 2 |\n|-----------|----------|\n| Cellule 1 | Cellule 2 |\n| Cellule 3 | Cellule 4 |"
         }
+      }
+    },
+    export: {
+      title: "Export",
+      subtitle: "Choisir le format d'export :",
+      cancel: "Annuler",
+      zip: {
+        title: "Archive ZIP",
+        desc: "Export complet avec toutes les données et fichiers attachés"
+      },
+      freemind: {
+        title: "Mindmap FreeMind",
+        desc: "Fichier .mm éditable dans Freeplane/FreeMind/XMind"
+      },
+      mermaid: {
+        title: "Diagramme Mermaid",
+        desc: "Diagramme visuel au format SVG"
       }
     }
   },
