@@ -80,7 +80,12 @@ export default {
     dataImportedZIP: "{count} nœud(s) importés (ZIP)",
     dataExported: "Données exportées (ZIP)",
     branchExported: "Branche exportée (ZIP)",
+    freemindExported: "Mindmap exportée (FreeMind)",
+    freemindBranchExported: "Branche exportée (FreeMind)",
+    mermaidExported: "Diagramme exporté (Mermaid SVG)",
+    mermaidBranchExported: "Branche exportée (Mermaid SVG)",
     branchImported: "{count} nœud(s) importés",
+    comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",
     exportError: "Erreur lors de l'export",
     attachmentsNotAvailable: "⚠️ Attachments non disponibles (IndexedDB)",
@@ -114,7 +119,9 @@ export default {
     nodeNotFound: "Nœud introuvable",
     dataJsonNotFound: "Fichier data.json introuvable dans le ZIP",
     importError: "Erreur lors de l'import : {message}",
-    exportError: "Erreur lors de l'export : {message}"
+    exportError: "Erreur lors de l'export : {message}",
+    mermaidNotAvailable: "Mermaid.js n'est pas chargé. Impossible d'exporter en SVG.",
+    brokenSymlink: "⚠️ Lien symbolique cassé : le nœud cible n'existe plus."
   },
 
   // Confirmation dialogs
@@ -208,6 +215,23 @@ export default {
           title: "📊 Tableaux",
           syntax: "| Colonne 1 | Colonne 2 |\n|-----------|----------|\n| Cellule 1 | Cellule 2 |\n| Cellule 3 | Cellule 4 |"
         }
+      }
+    },
+    export: {
+      title: "Export",
+      subtitle: "Choisir le format d'export :",
+      cancel: "Annuler",
+      zip: {
+        title: "Archive ZIP",
+        desc: "Export complet avec toutes les données et fichiers attachés"
+      },
+      freemind: {
+        title: "Mindmap FreeMind",
+        desc: "Fichier .mm éditable dans Freeplane/FreeMind/XMind"
+      },
+      mermaid: {
+        title: "Diagramme Mermaid",
+        desc: "Diagramme visuel au format SVG"
       }
     }
   },

@@ -27,6 +27,7 @@ const app = {
   data: DataModule.data,
   currentNodeId: null,
   expandedNodes: DataModule.expandedNodes,
+  exportType: null, // 'global' or 'branch'
 
   /**
    * Initialize the application
@@ -475,6 +476,94 @@ const app = {
       showToast(t('toast.branchExported'), '⬇️');
     } catch (error) {
       console.error('[App] Branch export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
+   * Open export modal
+   * @param {string} type - 'global' or 'branch'
+   */
+  openExportModal(type) {
+    if (type === 'branch' && !this.currentNodeId) {
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
+      return;
+    }
+
+    this.exportType = type;
+    document.getElementById('exportModal').style.display = 'flex';
+  },
+
+  /**
+   * Close export modal
+   */
+  closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+    this.exportType = null;
+  },
+
+  /**
+   * Confirm ZIP export (global or branch)
+   */
+  async confirmExportZIP() {
+    // Save exportType before closing modal (which resets it to null)
+    const type = this.exportType;
+    this.closeExportModal();
+
+    try {
+      if (type === 'global') {
+        await DataModule.exportDataZIP();
+        showToast(t('toast.dataExported'), '💾');
+      } else if (type === 'branch') {
+        await DataModule.exportBranchZIP(this.currentNodeId);
+        showToast(t('toast.branchExported'), '⬇️');
+      }
+    } catch (error) {
+      console.error('[App] ZIP export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
+   * Confirm FreeMind export (global or branch)
+   */
+  confirmExportFreeMind() {
+    // Save exportType before closing modal (which resets it to null)
+    const type = this.exportType;
+    this.closeExportModal();
+
+    try {
+      if (type === 'global') {
+        DataModule.exportFreeMindMM(null);
+        showToast(t('toast.freemindExported'), '🧠');
+      } else if (type === 'branch') {
+        DataModule.exportFreeMindMM(this.currentNodeId);
+        showToast(t('toast.freemindBranchExported'), '🧠');
+      }
+    } catch (error) {
+      console.error('[App] FreeMind export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
+   * Confirm Mermaid export (SVG diagram)
+   */
+  async confirmExportMermaid() {
+    // Save exportType before closing modal (which resets it to null)
+    const type = this.exportType;
+    this.closeExportModal();
+
+    try {
+      if (type === 'global') {
+        await DataModule.exportMermaidSVG(null);
+        showToast(t('toast.mermaidExported'), '📊');
+      } else if (type === 'branch') {
+        await DataModule.exportMermaidSVG(this.currentNodeId);
+        showToast(t('toast.mermaidBranchExported'), '📊');
+      }
+    } catch (error) {
+      console.error('[App] Mermaid export failed:', error);
       showToast(t('toast.exportError'), '⚠️');
     }
   },
