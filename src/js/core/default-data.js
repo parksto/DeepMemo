@@ -207,7 +207,7 @@ Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https
         tags: ["concept", "cognition", "philosophie"],
         links: [],
         backlinks: [],
-        attachments: ["demo_mindmap_svg"],
+        attachments: [],
         created: now + 2,
         modified: now + 2
       },
@@ -1011,7 +1011,7 @@ En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta st
         tags: ["export", "import", "sauvegarde"],
         links: [],
         backlinks: [],
-        attachments: ["demo_freeplane_screenshot"],
+        attachments: [],
         created: now + 16,
         modified: now + 16
       },
@@ -2160,7 +2160,7 @@ See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://g
         tags: ["concept", "cognition", "philosophy"],
         links: [],
         backlinks: [],
-        attachments: ["demo_mindmap_svg"],
+        attachments: [],
         created: now + 2,
         modified: now + 2
       },
@@ -2964,7 +2964,7 @@ In addition to ZIP, you can export as a **mindmap** to visualize and edit your s
         tags: ["export", "import", "backup"],
         links: [],
         backlinks: [],
-        attachments: ["demo_freeplane_screenshot"],
+        attachments: [],
         created: now + 16,
         modified: now + 16
       },

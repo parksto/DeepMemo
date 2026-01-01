@@ -54,7 +54,10 @@ export function loadData() {
     saveData();
 
     // Load default demo attachments (async, non-blocking)
-    AttachmentsModule.loadDefaultAttachments().catch(error => {
+    AttachmentsModule.loadDefaultAttachments(data).then(() => {
+      // Save data again with attachment metadata
+      saveData();
+    }).catch(error => {
       console.error('[Data] Failed to load default attachments:', error);
     });
   }

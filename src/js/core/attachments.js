@@ -258,20 +258,38 @@ export function formatFileSize(bytes) {
 /**
  * Charge les fichiers de démonstration par défaut depuis assets/
  * Appelé uniquement au premier lancement avec données de démo
+ * @param {Object} data - L'objet data pour mettre à jour les nœuds
  * @returns {Promise<void>}
  */
-export async function loadDefaultAttachments() {
+export async function loadDefaultAttachments(data) {
   if (!db) await initDB();
 
-  // Mapping des IDs d'attachments vers les fichiers assets
+  // Mapping: {attachmentId: {path, nodeId}}
   const defaultFiles = {
-    'demo_mindmap_svg': 'assets/demo.svg',
-    'demo_freeplane_screenshot': 'assets/freeplane-demo.png'
+    'demo_mindmap_svg': {
+      path: 'assets/demo.svg',
+      name: 'demo-mindmap.svg',
+      // On trouvera le nodeId dynamiquement (whyHierarchy)
+    },
+    'demo_freeplane_screenshot': {
+      path: 'assets/freeplane-demo.png',
+      name: 'freeplane-demo.png',
+      // On trouvera le nodeId dynamiquement (export)
+    }
   };
 
   console.log('[Attachments] Loading default demo files...');
 
-  for (const [id, path] of Object.entries(defaultFiles)) {
+  // Trouver les nœuds concernés par leur titre
+  const whyHierarchyNode = Object.values(data.nodes).find(n =>
+    n.title === "🧠 Pourquoi une structure en arbre ?" ||
+    n.title === "🧠 Why a tree structure?"
+  );
+  const exportNode = Object.values(data.nodes).find(n =>
+    n.title === "⬇️ Export / Import"
+  );
+
+  for (const [id, config] of Object.entries(defaultFiles)) {
     try {
       // Vérifier si le fichier existe déjà
       const existing = await getAttachment(id);
@@ -281,9 +299,9 @@ export async function loadDefaultAttachments() {
       }
 
       // Fetch le fichier depuis assets/
-      const response = await fetch(path);
+      const response = await fetch(config.path);
       if (!response.ok) {
-        console.error(`[Attachments] Failed to fetch ${path}: ${response.status}`);
+        console.error(`[Attachments] Failed to fetch ${config.path}: ${response.status}`);
         continue;
       }
 
@@ -293,6 +311,21 @@ export async function loadDefaultAttachments() {
       // Sauvegarder dans IndexedDB
       await saveAttachment(id, blob);
       console.log(`[Attachments] Loaded demo file: ${id} (${formatFileSize(blob.size)})`);
+
+      // Ajouter les metadata au nœud approprié
+      const targetNode = id === 'demo_mindmap_svg' ? whyHierarchyNode : exportNode;
+      if (targetNode) {
+        if (!targetNode.attachments) {
+          targetNode.attachments = [];
+        }
+        targetNode.attachments.push({
+          id: id,
+          name: config.name,
+          type: blob.type,
+          size: blob.size
+        });
+        console.log(`[Attachments] Added metadata to node: ${targetNode.title}`);
+      }
 
     } catch (error) {
       console.error(`[Attachments] Error loading ${id}:`, error);
