@@ -2,7 +2,7 @@
 
 *[English version](TODO.md)*
 
-**Dernière mise à jour** : 31 Décembre 2025 (V0.9.2+ - Modal aide Markdown)
+**Dernière mise à jour** : 1er Janvier 2026 (V0.9.3 - Export mindmap)
 
 ---
 
@@ -208,6 +208,86 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 - [x] Structure correcte des clés i18n pour objets imbriqués
 - [x] Aucun doublon dans les dictionnaires
 - [x] Architecture modale propre et réutilisable
+
+---
+
+## 🗺️ V0.9.3 - Export Mindmap (FreeMind + Mermaid) - ✅ COMPLÉTÉ
+
+**Date** : 1er Janvier 2026
+**Contexte** : Permettre aux utilisateurs d'exporter et partager leur structure de connaissances visuellement
+
+### Modal d'export avec 3 formats
+
+**Nouvelle fonctionnalité** :
+- [x] Modal de choix d'export remplaçant les boutons d'export directs
+- [x] 3 formats d'export disponibles pour exports globaux et branches :
+  - **📦 Archive ZIP** : Export complet avec données et fichiers joints (existant)
+  - **🧠 Mindmap FreeMind** : Fichier .mm éditable dans Freeplane/FreeMind/XMind
+  - **📊 Diagramme Mermaid** : Export de diagramme SVG
+
+### Export FreeMind .mm
+
+**Implémentation** :
+- [x] `exportFreeMindMM(branchRootId)` dans data.js
+- [x] Génération XML FreeMind valide (version 1.0.1)
+- [x] Support des symlinks avec distinction visuelle :
+  - Couleur orange (`COLOR="#ff9900"`)
+  - Style bulle (`STYLE="bubble"`)
+  - Arrowlinks vers nœuds cibles (`<arrowlink DESTINATION="..."/>`)
+- [x] Échappement XML correct (quotes, caractères spéciaux)
+- [x] Fonctionne avec export global et export branche
+- [x] Compatible avec Freeplane, FreeMind et XMind
+
+### Export Mermaid SVG
+
+**Implémentation** :
+- [x] Mermaid.js v10 chargé via CDN (module ES)
+- [x] `exportMermaidSVG(branchRootId)` dans data.js
+- [x] Génération syntaxe mindmap depuis structure d'arbre
+- [x] Symlinks marqués avec emoji 🔗
+- [x] Échappement caractères pour parser Mermaid :
+  - Parenthèses, crochets, accolades supprimés/remplacés
+  - Espaces multiples réduits
+  - Sauts de ligne gérés
+- [x] Téléchargement SVG avec nom de fichier approprié
+- [x] Fonctionne hors ligne (Mermaid.js précaché par Service Worker)
+
+### Corrections de bugs
+
+**Modal d'export** :
+- [x] Corrigé : Bug de reset `exportType` - sauvegarde type avant fermeture modal
+  - Cause : `closeExportModal()` mettait `exportType = null` avant utilisation
+  - Solution : Stockage dans variable locale avant fermeture
+
+**Parser Mermaid** :
+- [x] Corrigé : Erreur de parsing avec titres contenant parenthèses
+  - Exemple : "Version (trop) optimiste" → erreur de parsing
+  - Solution : Supprimer/remplacer caractères spéciaux dans `escapeMermaid()`
+
+### Améliorations techniques
+
+**Service Worker** :
+- [x] URL CDN Mermaid.js ajoutée au précache (support hors ligne)
+- [x] Suivi de version pour invalidation cache
+
+**i18n** :
+- [x] Traductions complètes pour les 3 formats d'export (FR/EN)
+- [x] Notifications toast : `freemindExported`, `mermaidExported`, etc.
+- [x] Messages d'alerte : `mermaidNotAvailable` si échec CDN
+
+**Qualité du code** :
+- [x] Console propre (logs de debug supprimés)
+- [x] Gestion d'erreur appropriée pour tous types d'export
+- [x] Pattern modal réutilisable pour futures fonctionnalités
+
+### Expérience utilisateur
+
+**Bénéfices** :
+- ✅ Représentation visuelle de la structure de connaissances
+- ✅ Édition des mindmaps exportées dans outils dédiés (Freeplane)
+- ✅ Partage de diagrammes sous forme d'images (SVG)
+- ✅ UX cohérente avec choix modal
+- ✅ Fonctionne pour exports globaux ET branches
 
 ---
 
