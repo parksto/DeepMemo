@@ -182,6 +182,19 @@ DeepMemo embrasse cette réalité :
 - ✅ **Liens symboliques** pour les connexions croisées (comme ton esprit)
 - ✅ **Tags** pour les associations flexibles
 
+## 🗺️ Visualiser ta structure : les mindmaps
+
+DeepMemo te permet d'**exporter ta structure** en mindmap pour la visualiser et la partager :
+
+- **Format SVG** (Mermaid) : Diagramme visuel, idéal pour documentation
+- **Format .mm** (FreeMind) : Éditable dans Freeplane, XMind, FreeMind
+
+**Exemple** : Voici à quoi ressemble ce contenu de démo en mindmap SVG :
+
+![Mindmap de DeepMemo](assets/demo.svg)
+
+*(Cette image est intégrée au contenu Markdown—tu peux faire pareil avec tes propres images !)*
+
 ## 📚 Pour aller plus loin
 
 Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.fr.md)
@@ -924,7 +937,7 @@ Pour **vraiment partager les données** avec un ami :
         title: "⬇️ Export / Import",
         content: `# Export et Import : Sauvegarde et partage
 
-DeepMemo permet d'**exporter** et **importer** tes données en **format ZIP**.
+DeepMemo permet d'**exporter** tes données dans **3 formats différents** !
 
 ## 💾 Deux types d'export/import
 
@@ -966,6 +979,28 @@ DeepMemo permet d'**exporter** et **importer** tes données en **format ZIP**.
 - Les IDs sont régénérés automatiquement (nœuds + fichiers)
 - Pas de conflit avec les nœuds existants
 - La branche est **fusionnée** comme enfants du nœud actuel
+
+## 🗺️ Export mindmap (nouveau !)
+
+En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta structure :
+
+### **📊 Mermaid SVG** : Diagramme visuel
+
+- Export en image SVG vectorielle
+- Idéal pour documentation, présentations
+- Fonctionne hors ligne (Mermaid.js précaché)
+
+### **🧠 FreeMind .mm** : Éditable
+
+- Format XML standard des mindmaps
+- **Éditable** dans Freeplane, XMind, FreeMind
+- Les symlinks deviennent des flèches orange
+
+**Exemple** : Voici le contenu de démo ouvert dans Freeplane :
+
+![Export FreeMind dans Freeplane](assets/freeplane-demo.png)
+
+*(Capture d'écran intégrée—démonstration des fichiers joints !)*
 
 ---
 
@@ -2098,6 +2133,19 @@ DeepMemo embraces this reality:
 - ✅ **Symbolic links** for cross-connections (like your mind)
 - ✅ **Tags** for flexible associations
 
+## 🗺️ Visualize your structure: mindmaps
+
+DeepMemo lets you **export your structure** as a mindmap to visualize and share it:
+
+- **SVG format** (Mermaid): Visual diagram, perfect for documentation
+- **.mm format** (FreeMind): Editable in Freeplane, XMind, FreeMind
+
+**Example**: Here's what this demo content looks like as a mindmap SVG:
+
+![DeepMemo Mindmap](assets/demo.svg)
+
+*(This image is embedded in the Markdown content—you can do the same with your own images!)*
+
 ## 📚 To go further
 
 See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.md)
@@ -2840,7 +2888,7 @@ To **actually share data** with a friend:
         title: "⬇️ Export / Import",
         content: `# Export and Import: Save and share
 
-DeepMemo allows you to **export** and **import** your data in **ZIP format**.
+DeepMemo allows you to **export** your data in **3 different formats**!
 
 ## 💾 Two types of export/import
 
@@ -2882,6 +2930,28 @@ DeepMemo allows you to **export** and **import** your data in **ZIP format**.
 - IDs are regenerated automatically (nodes + files)
 - No conflict with existing nodes
 - The branch is **merged** as children of the current node
+
+## 🗺️ Mindmap export (new!)
+
+In addition to ZIP, you can export as a **mindmap** to visualize and edit your structure:
+
+### **📊 Mermaid SVG**: Visual diagram
+
+- Export as vector SVG image
+- Perfect for documentation, presentations
+- Works offline (Mermaid.js precached)
+
+### **🧠 FreeMind .mm**: Editable
+
+- Standard XML mindmap format
+- **Editable** in Freeplane, XMind, FreeMind
+- Symlinks become orange arrows
+
+**Example**: Here's the demo content opened in Freeplane:
+
+![FreeMind export in Freeplane](assets/freeplane-demo.png)
+
+*(Screenshot embedded—demonstration of attached files!)*
 
 ---
 
