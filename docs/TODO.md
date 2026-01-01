@@ -2,7 +2,7 @@
 
 *[Version française](TODO.fr.md)*
 
-**Last update**: December 31, 2025 (V0.9.2+ - Markdown help modal)
+**Last update**: January 1, 2026 (V0.9.3 - Mindmap export)
 
 ---
 
@@ -208,6 +208,86 @@ DeepMemo V0.8 is **complete and deployed** with all the following features:
 - [x] Proper i18n key structure for nested objects
 - [x] No dictionary duplicates
 - [x] Clean modal architecture with reusable pattern
+
+---
+
+## 🗺️ V0.9.3 - Mindmap Export (FreeMind + Mermaid) - ✅ COMPLETED
+
+**Date**: January 1, 2026
+**Context**: Enable users to export and share their knowledge structure visually
+
+### Export Modal with 3 Formats
+
+**New Feature**:
+- [x] Export choice modal replacing direct export buttons
+- [x] 3 export formats available for both global and branch exports:
+  - **📦 ZIP Archive**: Complete export with all data and attachments (existing)
+  - **🧠 FreeMind Mindmap**: Editable .mm file for Freeplane/FreeMind/XMind
+  - **📊 Mermaid SVG**: Visual diagram export
+
+### FreeMind .mm Export
+
+**Implementation**:
+- [x] `exportFreeMindMM(branchRootId)` in data.js
+- [x] Valid FreeMind XML generation (version 1.0.1)
+- [x] Symlink support with visual distinction:
+  - Orange color (`COLOR="#ff9900"`)
+  - Bubble style (`STYLE="bubble"`)
+  - Arrowlinks to target nodes (`<arrowlink DESTINATION="..."/>`)
+- [x] Proper XML escaping (quotes, special characters)
+- [x] Works with global export and branch export
+- [x] Compatible with Freeplane, FreeMind, and XMind
+
+### Mermaid SVG Export
+
+**Implementation**:
+- [x] Mermaid.js v10 loaded via CDN (ES module)
+- [x] `exportMermaidSVG(branchRootId)` in data.js
+- [x] Mindmap syntax generation from tree structure
+- [x] Symlinks marked with 🔗 emoji
+- [x] Character escaping for Mermaid parser:
+  - Parentheses, brackets, braces removed/replaced
+  - Multi-space collapsed
+  - Newlines handled
+- [x] SVG download with proper filename
+- [x] Works offline (Mermaid.js precached by Service Worker)
+
+### Bug Fixes
+
+**Export Modal**:
+- [x] Fixed: `exportType` reset bug - save type before closing modal
+  - Root cause: `closeExportModal()` set `exportType = null` before using it
+  - Solution: Store in local variable before closing
+
+**Mermaid Parser**:
+- [x] Fixed: Parse error with titles containing parentheses
+  - Example: "Version (trop) optimiste" → parse error
+  - Solution: Remove/replace special characters in `escapeMermaid()`
+
+### Technical Improvements
+
+**Service Worker**:
+- [x] Mermaid.js CDN URL added to precache (offline support)
+- [x] Version tracking for cache invalidation
+
+**i18n**:
+- [x] Complete translations for all 3 export formats (FR/EN)
+- [x] Toast notifications: `freemindExported`, `mermaidExported`, etc.
+- [x] Alert messages: `mermaidNotAvailable` if CDN fails
+
+**Code Quality**:
+- [x] Clean console output (debug logs removed)
+- [x] Proper error handling for all export types
+- [x] Reusable modal pattern for future features
+
+### User Experience
+
+**Benefits**:
+- ✅ Visual representation of knowledge structure
+- ✅ Edit exported mindmaps in dedicated tools (Freeplane)
+- ✅ Share diagrams as images (SVG)
+- ✅ Consistent UX with modal choice
+- ✅ Works for both global and branch exports
 
 ---
 
