@@ -208,4 +208,4 @@ You can use, modify, and distribute DeepMemo freely. Your data belongs to you, s
 
 ---
 
-**DeepMemo V0.9** - December 2025
+**DeepMemo V0.9.4** - January 2026

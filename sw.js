@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.5.1'; // V0.9.2+ - Markdown help modal (Alt+H) + updated demo content
+const CACHE_VERSION = 'v1.6.0'; // V0.9.4 - Polish, bug fixes & UI improvements (Jan 2026)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)

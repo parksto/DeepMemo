@@ -2,7 +2,7 @@
 
 *[Version française](TODO.fr.md)*
 
-**Last update**: January 1, 2026 (V0.9.3 - Mindmap export)
+**Last update**: January 1, 2026 (V0.9.4 - Polish & bug fixes)
 
 ---
 
@@ -291,6 +291,80 @@ DeepMemo V0.8 is **complete and deployed** with all the following features:
 
 ---
 
+## 🎨 V0.9.4 - Polish, Bug Fixes & UI Improvements - ✅ COMPLETED
+
+**Date**: January 1, 2026
+**Context**: Interface polish, bug fixes, and UX improvements after V0.9.3 mindmap export
+
+### UI Improvements
+
+**New Color Palette**:
+- [x] Updated accent color to dark blue (#0a376c)
+- [x] Hover state: #1155aa
+- [x] Accent text: #4a9eff
+- [x] More professional and consistent appearance
+
+**Default Font**:
+- [x] Changed default font from Sto to system font
+- [x] User can still toggle to Sto via font selector
+- [x] Better performance and native feel
+
+### Bug Fixes
+
+**Broken & External Symlinks**:
+- [x] Special display for broken symlinks (target deleted)
+  - Badge "(BROKEN LINK)" with warning icon ⚠️
+  - Explanatory message in editor
+  - Opacity 0.5, non-clickable in tree
+- [x] Special display for external symlinks (in branch mode, target outside branch)
+  - Badge "(EXTERNAL)" with icon 🔗🚫
+  - Explanatory message in editor
+  - Opacity 0.4, selectable for deletion
+  - Toast warning on selection
+- [x] Critical: Check broken BEFORE external (broken node is not external!)
+
+**Data Protection**:
+- [x] Fixed: `saveNode()` no longer saves when editor is disabled
+  - Prevents error messages from being saved into node data
+  - Critical bug: displaying broken/external link used to corrupt data!
+  - Editor disabled for broken and external symlinks
+
+**Branch Mode Export**:
+- [x] Fixed: "Global" export in branch mode now exports only the active branch
+- [x] More intuitive behavior matching user expectations
+
+**Node Deletion**:
+- [x] Improved post-deletion navigation
+  - Goes to parent if exists
+  - Goes to first sibling if no parent
+  - Smart fallback to root
+
+**Disabled Buttons**:
+- [x] "New node" button disabled in branch mode (clearer UX)
+- [x] "Confirm" button in modals disabled when no selection
+
+### FreeMind Export Improvements
+
+**Content Handling**:
+- [x] Node content moved to richcontent NOTE (proper FreeMind format)
+- [x] Emojis filtered from titles (compatibility with XMind/Freeplane)
+- [x] Better structure for editing in mindmap tools
+
+### Technical Improvements
+
+**Code Quality**:
+- [x] Consistent error handling across features
+- [x] Cleaner separation of concerns
+- [x] Better state management for edge cases
+
+**User Experience**:
+- [x] No more data corruption from special symlink types
+- [x] Clear visual feedback for all node states
+- [x] Professional color scheme
+- [x] Improved export workflow
+
+---
+
 ## 🔮 V1.0 - Active Types and Advanced System
 
 ### Active Node Types (Foundations)
@@ -323,15 +397,15 @@ See `docs/ROADMAP.md` section "V1.0 - Complete System" and `docs/VISION.md` for:
 
 ## 📊 Project Status
 
-**Current version**: V0.9 (December 2025)
+**Current version**: V0.9.4 (January 2026)
 **Status**: ✅ Stable, documented, deployed in production
 **Deployment**: ✅ **deepmemo.org** (IN PRODUCTION)
 **License**: MIT (Open Source)
 
 **Codebase**:
-- ~5500 lines JS (modular ES6 architecture)
-- ~1400 lines CSS (organized in 5 files)
-- 12 modules JS (core, features, ui, utils)
+- ~11000 lines JS (modular ES6 architecture)
+- ~1750 lines CSS (organized in 5 files)
+- 18 modules JS (core, features, ui, utils, locales)
 - 100% Vanilla JavaScript (no framework)
 
 **Data**:

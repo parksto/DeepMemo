@@ -2,7 +2,7 @@
 
 > 🌍 **Language versions**: [English](ROADMAP.md) | [Français](ROADMAP.fr.md)
 
-## 📍 Current state: V0.8 (December 2025)
+## 📍 Current state: V0.9.4 (January 2026)
 
 ### ✅ Implemented features
 
@@ -271,7 +271,7 @@ DeepMemo/
 
 ---
 
-## 🌍 V0.9 - Internationalization (i18n) - ✅ 95% COMPLETED
+## 🌍 V0.9 - Internationalization (i18n) - ✅ 100% COMPLETED
 
 **Strategic context**: DeepMemo is deployed in production on deepmemo.org and already functional. The priority is to make it accessible to an international audience before implementing advanced features.
 
@@ -301,19 +301,115 @@ DeepMemo/
 - [x] EN version (complete translation of 26 nodes)
 - [x] Multilingual PWA manifests (manifest-fr.json, manifest-en.json)
 
-### Testing and validation
-- [ ] Tests on multilingual browsers (FR, EN, ES)
-- [ ] Fallback verification (unsupported language → EN by default)
-- [ ] Persistence tests (language change → refresh)
-- [ ] User documentation (guide to change language)
-- [ ] PWA offline verification with precached dictionaries
+### Testing and validation ✅ COMPLETED
+- [x] Tests on multilingual browsers (FR, EN)
+- [x] Fallback verification (unsupported language → EN by default)
+- [x] Persistence tests (language change → refresh)
+- [x] User documentation (language selector in preferences)
+- [x] PWA offline verification with precached dictionaries
 
-### Optional improvements (after basic i18n)
+### Optional improvements (Backlog - after V0.9)
 - [ ] Quick tag creation via #hashtag in content
 - [ ] Global tag renaming
 - [ ] Tag merging
 - [ ] Markdown export (with preserved structure)
 - [ ] Import from Notion/Obsidian
+
+---
+
+## 🐛 V0.9.1 - Bug Fixes & Quality (December 31, 2025) - ✅ COMPLETED
+
+**Context**: Post-launch fixes following public announcement (449 unique sessions on Reddit)
+
+### Critical Bug Fixes ✅
+- [x] **Symlinks**: Creating child from symlink now adds to target (not symlink itself)
+- [x] **Symlink titles**: Display symlink's own title in center panel (not target's)
+- [x] **Visual indicator**: Metadata shows clickable link to original node
+- [x] **Auto-save on navigation**: Esc, Alt+E, all navigation now saves before switching
+- [x] **i18n fixes**: Empty content showed `[labels.emptyContent]` → now translated
+- [x] **Branch mode modals**: Action modal tree now shows branch tree only (not global)
+
+### New Features ✅
+- [x] **Orphan cleanup**: `cleanOrphanNodes()` function with UI button
+- [x] **Cross-tab sync**: Real-time synchronization between browser tabs
+- [x] **Mobile warning**: Dismissible banner for mobile users
+- [x] **Service Worker**: Version bumped to v1.4.0
+
+---
+
+## 📘 V0.9.2 - Markdown Help Modal (December 31, 2025) - ✅ COMPLETED
+
+**Context**: UX improvement - make Markdown more accessible
+
+### Markdown Help Modal ✅
+- [x] **Alt+H shortcut**: Opens complete Markdown cheatsheet
+- [x] **9 sections**: Headings, formatting, lists, links, images, code, quotes, tables, HR
+- [x] **Fully responsive**: Scroll support, works offline
+- [x] **100% i18n**: FR/EN translations
+
+### Bug Fixes ✅
+- [x] **i18n errors**: Fixed `result.replace is not a function` error
+- [x] **Duplicate keys**: Removed duplicate `meta:` sections in dictionaries
+- [x] **Clean console**: All i18n warnings eliminated
+
+### Demo Content Update ✅
+- [x] Added "Markdown: optional and accessible" section in demo
+- [x] Service Worker bumped to v1.5.1
+
+---
+
+## 🗺️ V0.9.3 - Mindmap Export (January 1, 2026) - ✅ COMPLETED
+
+**Context**: Enable visual export and sharing of knowledge structure
+
+### Export Modal ✅
+- [x] **3 export formats**: ZIP Archive, FreeMind .mm, Mermaid SVG
+- [x] **Modal choice**: Replaces direct export buttons
+- [x] **Works for both**: Global and branch exports
+
+### FreeMind .mm Export ✅
+- [x] **Valid XML**: FreeMind format version 1.0.1
+- [x] **Symlink support**: Orange color, bubble style, arrowlinks to targets
+- [x] **Proper escaping**: Quotes and special characters
+- [x] **Compatible**: Freeplane, FreeMind, XMind
+
+### Mermaid SVG Export ✅
+- [x] **Mermaid.js v10**: Loaded via CDN (ES module)
+- [x] **Mindmap syntax**: Generated from tree structure
+- [x] **Symlinks marked**: 🔗 emoji for symlinks
+- [x] **Character escaping**: Parentheses, brackets, special chars
+- [x] **Offline support**: Precached by Service Worker
+
+### Bug Fixes ✅
+- [x] **exportType reset**: Fixed modal close timing issue
+- [x] **Mermaid parser**: Fixed errors with parentheses in titles
+
+---
+
+## 🎨 V0.9.4 - Polish & Bug Fixes (January 1, 2026) - ✅ COMPLETED
+
+**Context**: Interface polish, bug fixes, and UX improvements
+
+### UI Improvements ✅
+- [x] **New color palette**: Dark blue accent (#0a376c, #1155aa, #4a9eff)
+- [x] **System font default**: Changed from Sto (user can still toggle)
+
+### Critical Bug Fixes ✅
+- [x] **Broken symlinks**: Special display with "(BROKEN LINK)" badge, ⚠️ icon, opacity 0.5
+- [x] **External symlinks**: Special display with "(EXTERNAL)" badge, 🔗🚫 icon, opacity 0.4
+- [x] **Data corruption fix**: `saveNode()` doesn't save when editor disabled
+- [x] **Branch mode export**: "Global" export in branch mode exports only active branch
+- [x] **Post-deletion navigation**: Smart navigation to parent/sibling/root
+- [x] **Disabled buttons**: New node disabled in branch mode, Confirm disabled without selection
+
+### FreeMind Export ✅
+- [x] **Content in richcontent NOTE**: Proper FreeMind format
+- [x] **Emoji filtering**: Removed from titles for compatibility
+
+### Technical ✅
+- [x] **Service Worker**: Version bumped to v1.6.0
+- [x] **Code quality**: Better state management, error handling
+- [x] **No data corruption**: Protection for special symlink types
 
 ---
 
@@ -434,10 +530,10 @@ DeepMemo/
 
 ---
 
-**Last update**: December 27, 2025 (V0.9 reorganization: i18n priority)
-**Current version**: V0.8 (✅ 100% COMPLETED)
+**Last update**: January 1, 2026 (V0.9.4 polish & bug fixes)
+**Current version**: V0.9.4 (✅ COMPLETED & DEPLOYED)
 **Deployment**: ✅ **deepmemo.org** (IN PRODUCTION)
-**Next milestone**: V0.9 (Internationalization)
+**Next milestone**: V1.0 (Active node types - foundations)
 
 ---
 

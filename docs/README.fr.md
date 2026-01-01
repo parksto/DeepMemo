@@ -208,4 +208,4 @@ Tu peux utiliser, modifier et distribuer DeepMemo librement. Tes données t'appa
 
 ---
 
-**DeepMemo V0.9** - Décembre 2025
+**DeepMemo V0.9.4** - Janvier 2026

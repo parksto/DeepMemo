@@ -128,9 +128,9 @@ python -m http.server 8000
 
 ## 📝 Current Version
 
-**V0.9** (December 2025) - Stable and feature-complete
+**V0.9.4** (January 2026) - Stable and feature-complete
 
-Latest additions: Full internationalization (FR/EN), bilingual demo content, improved mobile interface.
+Latest additions: UI polish with new color palette, special handling for broken/external symlinks, improved FreeMind export, data corruption protection.
 
 Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, branch export/import, attachments, installable PWA.
 

@@ -2,7 +2,7 @@
 
 *[English version](TODO.md)*
 
-**Dernière mise à jour** : 1er Janvier 2026 (V0.9.3 - Export mindmap)
+**Dernière mise à jour** : 1er Janvier 2026 (V0.9.4 - Polish et corrections)
 
 ---
 
@@ -291,6 +291,80 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 
 ---
 
+## 🎨 V0.9.4 - Polish, Corrections de bugs & Améliorations UI - ✅ COMPLÉTÉ
+
+**Date** : 1er Janvier 2026
+**Contexte** : Polissage interface, corrections de bugs et améliorations UX après V0.9.3 export mindmap
+
+### Améliorations UI
+
+**Nouvelle palette de couleurs** :
+- [x] Couleur accent mise à jour vers bleu foncé (#0a376c)
+- [x] État hover : #1155aa
+- [x] Texte accent : #4a9eff
+- [x] Apparence plus professionnelle et cohérente
+
+**Police par défaut** :
+- [x] Police par défaut changée de Sto vers police système
+- [x] L'utilisateur peut toujours basculer vers Sto via le sélecteur
+- [x] Meilleures performances et aspect natif
+
+### Corrections de bugs
+
+**Symlinks cassés et externes** :
+- [x] Affichage spécial pour symlinks cassés (cible supprimée)
+  - Badge "(LIEN CASSÉ)" avec icône d'avertissement ⚠️
+  - Message explicatif dans l'éditeur
+  - Opacité 0.5, non-cliquable dans l'arbre
+- [x] Affichage spécial pour symlinks externes (en mode branche, cible hors branche)
+  - Badge "(EXTERNE)" avec icône 🔗🚫
+  - Message explicatif dans l'éditeur
+  - Opacité 0.4, sélectionnable pour suppression
+  - Toast d'avertissement à la sélection
+- [x] Critique : Vérifier cassé AVANT externe (nœud cassé n'est pas externe !)
+
+**Protection des données** :
+- [x] Corrigé : `saveNode()` ne sauvegarde plus quand l'éditeur est désactivé
+  - Empêche les messages d'erreur d'être sauvegardés dans les données
+  - Bug critique : afficher un lien cassé/externe corrompait les données !
+  - Éditeur désactivé pour symlinks cassés et externes
+
+**Export en mode branche** :
+- [x] Corrigé : Export "global" en mode branche exporte maintenant seulement la branche active
+- [x] Comportement plus intuitif correspondant aux attentes utilisateur
+
+**Suppression de nœuds** :
+- [x] Navigation post-suppression améliorée
+  - Va au parent si existe
+  - Va au premier frère si pas de parent
+  - Fallback intelligent vers racine
+
+**Boutons désactivés** :
+- [x] Bouton "Nouveau nœud" désactivé en mode branche (UX plus claire)
+- [x] Bouton "Confirmer" dans les modales désactivé sans sélection
+
+### Améliorations export FreeMind
+
+**Gestion du contenu** :
+- [x] Contenu du nœud déplacé dans richcontent NOTE (format FreeMind correct)
+- [x] Emojis filtrés des titres (compatibilité XMind/Freeplane)
+- [x] Meilleure structure pour édition dans outils mindmap
+
+### Améliorations techniques
+
+**Qualité du code** :
+- [x] Gestion d'erreur cohérente à travers les features
+- [x] Séparation des responsabilités plus propre
+- [x] Meilleure gestion d'état pour les cas limites
+
+**Expérience utilisateur** :
+- [x] Plus de corruption de données avec les types spéciaux de symlinks
+- [x] Feedback visuel clair pour tous les états de nœuds
+- [x] Palette de couleurs professionnelle
+- [x] Workflow d'export amélioré
+
+---
+
 ## 🔮 V1.0 - Types actifs et système avancé
 
 ### Types de nœuds actifs (Fondations)
@@ -323,15 +397,15 @@ Voir `docs/ROADMAP.md` section "V1.0 - Système complet" et `docs/VISION.md` pou
 
 ## 📊 État du projet
 
-**Version actuelle** : V0.9 (Décembre 2025)
+**Version actuelle** : V0.9.4 (Janvier 2026)
 **Statut** : ✅ Stable, documentée, déployée en production
 **Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
 **Licence** : MIT (Open Source)
 
 **Codebase** :
-- ~5500 lignes JS (architecture modulaire ES6)
-- ~1400 lignes CSS (organisé en 5 fichiers)
-- 12 modules JS (core, features, ui, utils)
+- ~11000 lignes JS (architecture modulaire ES6)
+- ~1750 lignes CSS (organisé en 5 fichiers)
+- 18 modules JS (core, features, ui, utils, locales)
 - 100% Vanilla JavaScript (pas de framework)
 
 **Données** :

@@ -2,7 +2,7 @@
 
 > 🌍 **Versions linguistiques** : [English](ROADMAP.md) | [Français](ROADMAP.fr.md)
 
-## 📍 État actuel : V0.8 (Décembre 2025)
+## 📍 État actuel : V0.9.4 (Janvier 2026)
 
 ### ✅ Fonctionnalités implémentées
 
@@ -271,7 +271,7 @@ DeepMemo/
 
 ---
 
-## 🌍 V0.9 - Internationalisation (i18n) - ✅ 95% COMPLÉTÉ
+## 🌍 V0.9 - Internationalisation (i18n) - ✅ 100% COMPLÉTÉ
 
 **Contexte stratégique** : DeepMemo est déployé en production sur deepmemo.org et déjà fonctionnel. La priorité est de le rendre accessible à une audience internationale avant d'implémenter des fonctionnalités avancées.
 
@@ -301,19 +301,115 @@ DeepMemo/
 - [x] Version EN (traduction complète des 26 nœuds)
 - [x] Manifests PWA multilingues (manifest-fr.json, manifest-en.json)
 
-### Tests et validation
-- [ ] Tests sur navigateurs multilingues (FR, EN, ES)
-- [ ] Vérification du fallback (langue non supportée → EN par défaut)
-- [ ] Tests de persistance (changement langue → refresh)
-- [ ] Documentation utilisateur (guide pour changer de langue)
-- [ ] Vérification PWA offline avec dictionnaires précachés
+### Tests et validation ✅ COMPLÉTÉ
+- [x] Tests sur navigateurs multilingues (FR, EN)
+- [x] Vérification du fallback (langue non supportée → EN par défaut)
+- [x] Tests de persistance (changement langue → refresh)
+- [x] Documentation utilisateur (sélecteur de langue dans préférences)
+- [x] Vérification PWA offline avec dictionnaires précachés
 
-### Améliorations optionnelles (après i18n de base)
+### Améliorations optionnelles (Backlog - après V0.9)
 - [ ] Création rapide de tags par #hashtag dans le contenu
 - [ ] Renommage de tags globalement
 - [ ] Fusion de tags
 - [ ] Export en Markdown (avec structure préservée)
 - [ ] Import depuis Notion/Obsidian
+
+---
+
+## 🐛 V0.9.1 - Corrections de bugs & Qualité (31 décembre 2025) - ✅ COMPLÉTÉ
+
+**Contexte** : Corrections post-lancement suite à l'annonce publique (449 sessions uniques sur Reddit)
+
+### Corrections de bugs critiques ✅
+- [x] **Symlinks** : Créer un enfant depuis un symlink l'ajoute maintenant à la cible (pas au symlink)
+- [x] **Titres symlinks** : Affichage du titre propre du symlink dans le panneau central (pas celui de la cible)
+- [x] **Indicateur visuel** : Les métadonnées montrent un lien cliquable vers le nœud original
+- [x] **Sauvegarde auto navigation** : Esc, Alt+E, toute navigation sauvegarde avant de changer
+- [x] **Corrections i18n** : Contenu vide affichait `[labels.emptyContent]` → maintenant traduit
+- [x] **Modales mode branche** : Arbre des modales d'actions affiche maintenant seulement la branche (pas global)
+
+### Nouvelles fonctionnalités ✅
+- [x] **Nettoyage orphelins** : Fonction `cleanOrphanNodes()` avec bouton UI
+- [x] **Sync multi-onglets** : Synchronisation temps réel entre onglets navigateur
+- [x] **Avertissement mobile** : Banner dismissible pour utilisateurs mobiles
+- [x] **Service Worker** : Version mise à jour v1.4.0
+
+---
+
+## 📘 V0.9.2 - Modal aide Markdown (31 décembre 2025) - ✅ COMPLÉTÉ
+
+**Contexte** : Amélioration UX - rendre Markdown plus accessible
+
+### Modal aide Markdown ✅
+- [x] **Raccourci Alt+H** : Ouvre cheatsheet Markdown complet
+- [x] **9 sections** : Titres, formatage, listes, liens, images, code, citations, tableaux, séparateurs
+- [x] **Responsive** : Support scroll, fonctionne hors ligne
+- [x] **100% i18n** : Traductions FR/EN
+
+### Corrections de bugs ✅
+- [x] **Erreurs i18n** : Corrigé erreur `result.replace is not a function`
+- [x] **Clés dupliquées** : Suppression des sections `meta:` dupliquées dans les dictionnaires
+- [x] **Console propre** : Tous les avertissements i18n éliminés
+
+### Mise à jour contenu démo ✅
+- [x] Ajout section "Markdown : optionnel et accessible" dans la démo
+- [x] Service Worker mis à jour v1.5.1
+
+---
+
+## 🗺️ V0.9.3 - Export Mindmap (1er janvier 2026) - ✅ COMPLÉTÉ
+
+**Contexte** : Permettre l'export visuel et le partage de la structure de connaissances
+
+### Modal d'export ✅
+- [x] **3 formats d'export** : Archive ZIP, FreeMind .mm, Mermaid SVG
+- [x] **Choix modal** : Remplace les boutons d'export directs
+- [x] **Fonctionne pour les deux** : Exports globaux et branches
+
+### Export FreeMind .mm ✅
+- [x] **XML valide** : Format FreeMind version 1.0.1
+- [x] **Support symlinks** : Couleur orange, style bulle, arrowlinks vers cibles
+- [x] **Échappement correct** : Guillemets et caractères spéciaux
+- [x] **Compatible** : Freeplane, FreeMind, XMind
+
+### Export Mermaid SVG ✅
+- [x] **Mermaid.js v10** : Chargé via CDN (module ES)
+- [x] **Syntaxe mindmap** : Générée depuis la structure d'arbre
+- [x] **Symlinks marqués** : Emoji 🔗 pour les symlinks
+- [x] **Échappement caractères** : Parenthèses, crochets, caractères spéciaux
+- [x] **Support hors ligne** : Précaché par Service Worker
+
+### Corrections de bugs ✅
+- [x] **Reset exportType** : Corrigé timing de fermeture modal
+- [x] **Parser Mermaid** : Corrigé erreurs avec parenthèses dans les titres
+
+---
+
+## 🎨 V0.9.4 - Polish & Corrections (1er janvier 2026) - ✅ COMPLÉTÉ
+
+**Contexte** : Polissage interface, corrections de bugs et améliorations UX
+
+### Améliorations UI ✅
+- [x] **Nouvelle palette couleurs** : Accent bleu foncé (#0a376c, #1155aa, #4a9eff)
+- [x] **Police système par défaut** : Changé de Sto (l'utilisateur peut toujours basculer)
+
+### Corrections de bugs critiques ✅
+- [x] **Symlinks cassés** : Affichage spécial avec badge "(LIEN CASSÉ)", icône ⚠️, opacité 0.5
+- [x] **Symlinks externes** : Affichage spécial avec badge "(EXTERNE)", icône 🔗🚫, opacité 0.4
+- [x] **Correction corruption données** : `saveNode()` ne sauvegarde pas quand éditeur désactivé
+- [x] **Export mode branche** : Export "global" en mode branche exporte seulement la branche active
+- [x] **Navigation post-suppression** : Navigation intelligente vers parent/frère/racine
+- [x] **Boutons désactivés** : Nouveau nœud désactivé en mode branche, Confirmer désactivé sans sélection
+
+### Export FreeMind ✅
+- [x] **Contenu dans richcontent NOTE** : Format FreeMind correct
+- [x] **Filtrage emojis** : Supprimés des titres pour compatibilité
+
+### Technique ✅
+- [x] **Service Worker** : Version mise à jour v1.6.0
+- [x] **Qualité code** : Meilleure gestion état, gestion d'erreurs
+- [x] **Pas de corruption données** : Protection pour types spéciaux de symlinks
 
 ---
 
@@ -434,10 +530,10 @@ DeepMemo/
 
 ---
 
-**Dernière mise à jour** : 27 Décembre 2025 (Réorganisation V0.9 : i18n prioritaire)
-**Version actuelle** : V0.8 (✅ 100% COMPLÉTÉ)
+**Dernière mise à jour** : 1er Janvier 2026 (V0.9.4 polish & corrections)
+**Version actuelle** : V0.9.4 (✅ COMPLÉTÉ & DÉPLOYÉ)
 **Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
-**Prochaine milestone** : V0.9 (Internationalisation)
+**Prochaine milestone** : V1.0 (Types de nœuds actifs - fondations)
 
 ---
 
