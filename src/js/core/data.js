@@ -52,6 +52,11 @@ export function loadData() {
     data.nodes = defaultData.nodes;
     data.rootNodes = defaultData.rootNodes;
     saveData();
+
+    // Load default demo attachments (async, non-blocking)
+    AttachmentsModule.loadDefaultAttachments().catch(error => {
+      console.error('[Data] Failed to load default attachments:', error);
+    });
   }
 }
 

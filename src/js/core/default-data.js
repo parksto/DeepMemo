@@ -191,9 +191,9 @@ DeepMemo te permet d'**exporter ta structure** en mindmap pour la visualiser et 
 
 **Exemple** : Voici à quoi ressemble ce contenu de démo en mindmap SVG :
 
-![Mindmap de DeepMemo](assets/demo.svg)
+![Mindmap de DeepMemo](attachment:demo_mindmap_svg)
 
-*(Cette image est intégrée au contenu Markdown—tu peux faire pareil avec tes propres images !)*
+*(Cette image est un fichier joint—tu peux faire pareil avec tes propres images !)*
 
 ## 📚 Pour aller plus loin
 
@@ -207,6 +207,7 @@ Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https
         tags: ["concept", "cognition", "philosophie"],
         links: [],
         backlinks: [],
+        attachments: ["demo_mindmap_svg"],
         created: now + 2,
         modified: now + 2
       },
@@ -937,7 +938,7 @@ Pour **vraiment partager les données** avec un ami :
         title: "⬇️ Export / Import",
         content: `# Export et Import : Sauvegarde et partage
 
-DeepMemo permet d'**exporter** tes données dans **3 formats différents** !
+DeepMemo propose **deux types d'export/import** (global ou branche), chacun disponible dans **3 formats différents** !
 
 ## 💾 Deux types d'export/import
 
@@ -998,9 +999,9 @@ En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta st
 
 **Exemple** : Voici le contenu de démo ouvert dans Freeplane :
 
-![Export FreeMind dans Freeplane](assets/freeplane-demo.png)
+![Export FreeMind dans Freeplane](attachment:demo_freeplane_screenshot)
 
-*(Capture d'écran intégrée—démonstration des fichiers joints !)*
+*(Capture d'écran en fichier joint—démonstration concrète des attachments !)*
 
 ---
 
@@ -1010,6 +1011,7 @@ En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta st
         tags: ["export", "import", "sauvegarde"],
         links: [],
         backlinks: [],
+        attachments: ["demo_freeplane_screenshot"],
         created: now + 16,
         modified: now + 16
       },
@@ -2142,9 +2144,9 @@ DeepMemo lets you **export your structure** as a mindmap to visualize and share 
 
 **Example**: Here's what this demo content looks like as a mindmap SVG:
 
-![DeepMemo Mindmap](assets/demo.svg)
+![DeepMemo Mindmap](attachment:demo_mindmap_svg)
 
-*(This image is embedded in the Markdown content—you can do the same with your own images!)*
+*(This image is an attached file—you can do the same with your own images!)*
 
 ## 📚 To go further
 
@@ -2158,6 +2160,7 @@ See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://g
         tags: ["concept", "cognition", "philosophy"],
         links: [],
         backlinks: [],
+        attachments: ["demo_mindmap_svg"],
         created: now + 2,
         modified: now + 2
       },
@@ -2888,7 +2891,7 @@ To **actually share data** with a friend:
         title: "⬇️ Export / Import",
         content: `# Export and Import: Save and share
 
-DeepMemo allows you to **export** your data in **3 different formats**!
+DeepMemo offers **two types of export/import** (global or branch), each available in **3 different formats**!
 
 ## 💾 Two types of export/import
 
@@ -2949,9 +2952,9 @@ In addition to ZIP, you can export as a **mindmap** to visualize and edit your s
 
 **Example**: Here's the demo content opened in Freeplane:
 
-![FreeMind export in Freeplane](assets/freeplane-demo.png)
+![FreeMind export in Freeplane](attachment:demo_freeplane_screenshot)
 
-*(Screenshot embedded—demonstration of attached files!)*
+*(Screenshot as attached file—concrete demonstration of attachments!)*
 
 ---
 
@@ -2961,6 +2964,7 @@ In addition to ZIP, you can export as a **mindmap** to visualize and edit your s
         tags: ["export", "import", "backup"],
         links: [],
         backlinks: [],
+        attachments: ["demo_freeplane_screenshot"],
         created: now + 16,
         modified: now + 16
       },

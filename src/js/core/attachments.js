@@ -254,3 +254,50 @@ export function formatFileSize(bytes) {
 
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
+
+/**
+ * Charge les fichiers de démonstration par défaut depuis assets/
+ * Appelé uniquement au premier lancement avec données de démo
+ * @returns {Promise<void>}
+ */
+export async function loadDefaultAttachments() {
+  if (!db) await initDB();
+
+  // Mapping des IDs d'attachments vers les fichiers assets
+  const defaultFiles = {
+    'demo_mindmap_svg': 'assets/demo.svg',
+    'demo_freeplane_screenshot': 'assets/freeplane-demo.png'
+  };
+
+  console.log('[Attachments] Loading default demo files...');
+
+  for (const [id, path] of Object.entries(defaultFiles)) {
+    try {
+      // Vérifier si le fichier existe déjà
+      const existing = await getAttachment(id);
+      if (existing) {
+        console.log(`[Attachments] Demo file already exists: ${id}`);
+        continue;
+      }
+
+      // Fetch le fichier depuis assets/
+      const response = await fetch(path);
+      if (!response.ok) {
+        console.error(`[Attachments] Failed to fetch ${path}: ${response.status}`);
+        continue;
+      }
+
+      // Convertir en Blob
+      const blob = await response.blob();
+
+      // Sauvegarder dans IndexedDB
+      await saveAttachment(id, blob);
+      console.log(`[Attachments] Loaded demo file: ${id} (${formatFileSize(blob.size)})`);
+
+    } catch (error) {
+      console.error(`[Attachments] Error loading ${id}:`, error);
+    }
+  }
+
+  console.log('[Attachments] Default demo files loaded successfully');
+}
