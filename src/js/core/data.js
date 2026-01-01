@@ -805,6 +805,16 @@ function escapeXML(str) {
 }
 
 /**
+ * Remove emojis from string for better FreeMind compatibility
+ * @param {string} str - String to clean
+ * @returns {string} String without emojis
+ */
+function removeEmojis(str) {
+  // Remove emojis using Unicode ranges
+  return str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}\u{FE00}-\u{FE0F}\u{1F004}-\u{1F0CF}\u{1F170}-\u{1F251}]/gu, '').trim();
+}
+
+/**
  * Generate FreeMind XML for a node and its children
  * @param {string} nodeId - Node ID
  * @param {Object} nodes - Nodes dictionary
@@ -816,7 +826,9 @@ function generateNodeXML(nodeId, nodes, indent) {
   if (!node) return '';
 
   const indentStr = '  '.repeat(indent);
-  const escapedTitle = escapeXML(node.title || 'Untitled');
+  // Remove emojis for better FreeMind compatibility
+  const titleWithoutEmojis = removeEmojis(node.title || 'Untitled');
+  const escapedTitle = escapeXML(titleWithoutEmojis);
 
   let xml = `${indentStr}<node TEXT="${escapedTitle}" ID="${nodeId}"`;
 
@@ -826,6 +838,19 @@ function generateNodeXML(nodeId, nodes, indent) {
   }
 
   xml += '>\n';
+
+  // Add content as richcontent NOTE if present (for non-symlinks)
+  if (node.type !== 'symlink' && node.content && node.content.trim()) {
+    const escapedContent = escapeXML(node.content);
+    xml += `${indentStr}  <richcontent TYPE="NOTE">\n`;
+    xml += `${indentStr}    <html>\n`;
+    xml += `${indentStr}      <head></head>\n`;
+    xml += `${indentStr}      <body>\n`;
+    xml += `${indentStr}        <p style="white-space: pre-wrap;">${escapedContent}</p>\n`;
+    xml += `${indentStr}      </body>\n`;
+    xml += `${indentStr}    </html>\n`;
+    xml += `${indentStr}  </richcontent>\n`;
+  }
 
   // Add arrowlink for symlinks to show the connection to target
   if (node.type === 'symlink' && node.targetId) {

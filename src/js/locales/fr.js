@@ -70,6 +70,7 @@ export default {
     cannotMoveToDescendant: "Impossible de déplacer dans ses propres descendants",
     wouldCreateCycle: "Cette action créerait un cycle",
     nodeAlreadyExists: "Le nœud existe déjà à cet emplacement",
+    cannotDeleteBranchRoot: "Impossible de supprimer la racine de la branche",
     externalSymlink: "⚠️ Lien externe à la branche (non accessible)",
     brokenLink: "⚠️ Lien cassé",
     tagAlreadyExists: "Tag déjà existant",
@@ -220,17 +221,18 @@ export default {
     export: {
       title: "Export",
       subtitle: "Choisir le format d'export :",
+      subtitleBranch: "Export de la branche « {branch} » :",
       cancel: "Annuler",
       zip: {
-        title: "Archive ZIP",
+        title: "Archive complète",
         desc: "Export complet avec toutes les données et fichiers attachés"
       },
       freemind: {
-        title: "Mindmap FreeMind",
+        title: "Carte mentale",
         desc: "Fichier .mm éditable dans Freeplane/FreeMind/XMind"
       },
       mermaid: {
-        title: "Diagramme Mermaid",
+        title: "Diagramme visuel",
         desc: "Diagramme visuel au format SVG"
       }
     }
@@ -297,6 +299,7 @@ export default {
     emptyContent: "Aucun contenu",
     emptyPreview: "Vide",
     brokenSymlink: "⚠️ Ce lien symbolique pointe vers un nœud qui n'existe plus.\n\nVous pouvez supprimer ce lien cassé.",
+    externalSymlink: "⚠️ Ce lien symbolique pointe vers un nœud en dehors de la branche actuelle.\n\nEn mode branche, les liens externes ne sont pas accessibles. Vous pouvez supprimer ce lien ou quitter le mode branche pour accéder au nœud cible.",
     newNodeTitle: "Nouveau nœud"
   },
 

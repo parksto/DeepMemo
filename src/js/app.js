@@ -28,6 +28,7 @@ const app = {
   currentNodeId: null,
   expandedNodes: DataModule.expandedNodes,
   exportType: null, // 'global' or 'branch'
+  exportBranchId: null, // ID of branch to export (null for global)
 
   /**
    * Initialize the application
@@ -61,6 +62,9 @@ const app = {
 
     // Setup search input handler
     SearchModule.setupSearchInput();
+
+    // Setup modal close on click outside
+    this.setupModalCloseOnClickOutside();
 
     // Setup keyboard shortcuts
     setupKeyboardShortcuts({
@@ -149,6 +153,30 @@ const app = {
   },
 
   /**
+   * Setup modal close on click outside (on overlay)
+   */
+  setupModalCloseOnClickOutside() {
+    const modals = [
+      { id: 'exportModal', closeFunc: () => this.closeExportModal() },
+      { id: 'actionModal', closeFunc: () => this.closeActionModal() },
+      { id: 'symlinkModal', closeFunc: () => this.closeSymlinkModal() },
+      { id: 'markdownHelpModal', closeFunc: () => this.closeMarkdownHelp() }
+    ];
+
+    modals.forEach(({ id, closeFunc }) => {
+      const overlay = document.getElementById(id);
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          // Close only if clicking directly on overlay (not on modal content)
+          if (e.target === overlay) {
+            closeFunc();
+          }
+        });
+      }
+    });
+  },
+
+  /**
    * Handle URL hash change
    */
   handleHashChange(parsed) {
@@ -219,6 +247,12 @@ const app = {
       this.selectNode(nodeId, instanceKey);
     });
     TreeModule.updateTreeFocus();
+
+    // Disable "New Root Node" button in branch mode
+    const newRootNodeBtn = document.getElementById('newRootNodeBtn');
+    if (newRootNodeBtn) {
+      newRootNodeBtn.disabled = TreeModule.isBranchMode();
+    }
   },
 
   /**
@@ -490,7 +524,40 @@ const app = {
       return;
     }
 
-    this.exportType = type;
+    // In branch mode, "global" export should export the current branch
+    if (type === 'global' && TreeModule.isBranchMode()) {
+      const branchRootId = TreeModule.getBranchRootId();
+      this.exportType = 'branch';
+      this.exportBranchId = branchRootId;
+
+      // Update modal subtitle to indicate branch export
+      const branchNode = this.data.nodes[branchRootId];
+      const branchTitle = branchNode ? branchNode.title : '';
+      const subtitle = document.getElementById('exportModalSubtitle');
+      if (subtitle) {
+        subtitle.textContent = t('modals.export.subtitleBranch', { branch: branchTitle });
+      }
+    } else if (type === 'branch') {
+      this.exportType = 'branch';
+      this.exportBranchId = this.currentNodeId;
+
+      // Update modal subtitle for specific node export
+      const nodeTitle = this.data.nodes[this.currentNodeId]?.title || '';
+      const subtitle = document.getElementById('exportModalSubtitle');
+      if (subtitle) {
+        subtitle.textContent = t('modals.export.subtitleBranch', { branch: nodeTitle });
+      }
+    } else {
+      this.exportType = 'global';
+      this.exportBranchId = null;
+
+      // Reset to default subtitle for global export
+      const subtitle = document.getElementById('exportModalSubtitle');
+      if (subtitle) {
+        subtitle.textContent = t('modals.export.subtitle');
+      }
+    }
+
     document.getElementById('exportModal').style.display = 'flex';
   },
 
@@ -500,14 +567,16 @@ const app = {
   closeExportModal() {
     document.getElementById('exportModal').style.display = 'none';
     this.exportType = null;
+    this.exportBranchId = null;
   },
 
   /**
    * Confirm ZIP export (global or branch)
    */
   async confirmExportZIP() {
-    // Save exportType before closing modal (which resets it to null)
+    // Save export info before closing modal (which resets it to null)
     const type = this.exportType;
+    const branchId = this.exportBranchId;
     this.closeExportModal();
 
     try {
@@ -515,7 +584,7 @@ const app = {
         await DataModule.exportDataZIP();
         showToast(t('toast.dataExported'), '💾');
       } else if (type === 'branch') {
-        await DataModule.exportBranchZIP(this.currentNodeId);
+        await DataModule.exportBranchZIP(branchId);
         showToast(t('toast.branchExported'), '⬇️');
       }
     } catch (error) {
@@ -528,8 +597,9 @@ const app = {
    * Confirm FreeMind export (global or branch)
    */
   confirmExportFreeMind() {
-    // Save exportType before closing modal (which resets it to null)
+    // Save export info before closing modal (which resets it to null)
     const type = this.exportType;
+    const branchId = this.exportBranchId;
     this.closeExportModal();
 
     try {
@@ -537,7 +607,7 @@ const app = {
         DataModule.exportFreeMindMM(null);
         showToast(t('toast.freemindExported'), '🧠');
       } else if (type === 'branch') {
-        DataModule.exportFreeMindMM(this.currentNodeId);
+        DataModule.exportFreeMindMM(branchId);
         showToast(t('toast.freemindBranchExported'), '🧠');
       }
     } catch (error) {
@@ -550,8 +620,9 @@ const app = {
    * Confirm Mermaid export (SVG diagram)
    */
   async confirmExportMermaid() {
-    // Save exportType before closing modal (which resets it to null)
+    // Save export info before closing modal (which resets it to null)
     const type = this.exportType;
+    const branchId = this.exportBranchId;
     this.closeExportModal();
 
     try {
@@ -559,7 +630,7 @@ const app = {
         await DataModule.exportMermaidSVG(null);
         showToast(t('toast.mermaidExported'), '📊');
       } else if (type === 'branch') {
-        await DataModule.exportMermaidSVG(this.currentNodeId);
+        await DataModule.exportMermaidSVG(branchId);
         showToast(t('toast.mermaidBranchExported'), '📊');
       }
     } catch (error) {
@@ -686,7 +757,8 @@ const app = {
    */
   initFontPreference() {
     const preference = localStorage.getItem('deepmemo_fontPreference');
-    if (preference === 'system') {
+    // Default to system font, unless explicitly set to custom (Sto)
+    if (preference !== 'custom') {
       document.body.classList.add('system-font');
     }
   },
@@ -724,9 +796,23 @@ const app = {
       return;
     }
 
-    ModalsModule.openActionModal(this.currentNodeId, () => {
+    ModalsModule.openActionModal(this.currentNodeId, (nextNodeId) => {
       this.render();
       this.updateNodeCounter();
+
+      // Handle navigation after deletion
+      if (nextNodeId !== undefined) {
+        if (nextNodeId === null) {
+          // No roots left, create a new one
+          this.createRootNode();
+        } else {
+          // Select the next node (parent or first root)
+          const instanceKey = TreeModule.findInstanceKeyForNode(nextNodeId);
+          if (instanceKey) {
+            this.selectNode(nextNodeId, instanceKey);
+          }
+        }
+      }
     });
   },
 
@@ -762,9 +848,23 @@ const app = {
    * Confirm action
    */
   confirmAction() {
-    ModalsModule.confirmAction(this.currentNodeId, () => {
+    ModalsModule.confirmAction(this.currentNodeId, (nextNodeId) => {
       this.render();
       this.updateNodeCounter();
+
+      // Handle navigation after deletion
+      if (nextNodeId !== undefined) {
+        if (nextNodeId === null) {
+          // No roots left, create a new one
+          this.createRootNode();
+        } else {
+          // Select the next node (parent or first root)
+          const instanceKey = TreeModule.findInstanceKeyForNode(nextNodeId);
+          if (instanceKey) {
+            this.selectNode(nextNodeId, instanceKey);
+          }
+        }
+      }
     });
   },
 

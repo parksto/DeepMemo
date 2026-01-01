@@ -72,13 +72,23 @@ export function selectAction(action, currentNodeId) {
 
   if (action === 'delete') {
     // Delete doesn't need tree selector
-    descriptionEl.textContent = t('modals.actions.descriptions.delete');
-    descriptionEl.style.display = 'block';
     selectorEl.style.display = 'none';
     selectorEl.innerHTML = '';
 
-    // Enable confirm button immediately for delete
-    document.getElementById('confirmActionBtn').disabled = false;
+    // Check if trying to delete branch root node
+    const isBranchRoot = isBranchMode() && currentNodeId === getBranchRootId();
+
+    if (isBranchRoot) {
+      // Cannot delete branch root
+      descriptionEl.textContent = t('modals.actions.descriptions.delete') + '\n\n⚠️ ' + t('toast.cannotDeleteBranchRoot');
+      descriptionEl.style.display = 'block';
+      document.getElementById('confirmActionBtn').disabled = true;
+    } else {
+      descriptionEl.textContent = t('modals.actions.descriptions.delete');
+      descriptionEl.style.display = 'block';
+      // Enable confirm button immediately for delete
+      document.getElementById('confirmActionBtn').disabled = false;
+    }
   } else {
     // Update description
     const descriptions = {
@@ -433,12 +443,15 @@ function duplicateNode(nodeId, newParentId, onSuccess) {
 /**
  * Delete a node and all its descendants
  * @param {string} nodeId - Node ID to delete
- * @param {Function} onSuccess - Callback after deletion
+ * @param {Function} onSuccess - Callback after deletion (receives next node to select)
  */
 function deleteNode(nodeId, onSuccess) {
   const node = data.nodes[nodeId];
   if (!node) return;
 
+  // Save parent info before deletion
+  const parentId = node.parent;
+  const isRootNode = !parentId;
   const isSymlink = node.type === 'symlink';
 
   if (isSymlink) {
@@ -474,7 +487,22 @@ function deleteNode(nodeId, onSuccess) {
   }
 
   saveData();
-  if (onSuccess) onSuccess();
+
+  // Determine which node to select after deletion
+  let nextNodeId = null;
+
+  if (isRootNode) {
+    // If was a root node, select first available root
+    if (data.rootNodes.length > 0) {
+      nextNodeId = data.rootNodes[0];
+    }
+    // If no roots left, nextNodeId stays null (will trigger new node creation)
+  } else {
+    // If was a child node, select parent
+    nextNodeId = parentId;
+  }
+
+  if (onSuccess) onSuccess(nextNodeId);
 }
 
 // ===== SYMLINK MODAL (Legacy - simplified version) =====

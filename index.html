@@ -117,7 +117,7 @@
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn" data-i18n="actions.newNode" onclick="app.createRootNode()">➕ Nouveau nœud</button>
+        <button id="newRootNodeBtn" class="btn" data-i18n="actions.newNode" onclick="app.createRootNode()">➕ Nouveau nœud</button>
         <div class="import-export-zone">
           <input type="file" id="importFile" accept=".json,.zip" onchange="app.importData(event)">
           <label for="importFile" class="btn-import" data-i18n="actions.import">📂 Importer</label>
@@ -317,7 +317,7 @@
     <div class="modal">
       <h2>📤 <span data-i18n="modals.export.title">Export</span></h2>
       <div class="modal-body">
-        <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.export.subtitle">
+        <p id="exportModalSubtitle" style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.export.subtitle">
           Choisir le format d'export :
         </p>
 

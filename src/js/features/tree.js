@@ -195,17 +195,15 @@ export function renderTree(onNodeClick) {
     }
 
     // EXTERNAL SYMLINK check
-    // A symlink is external if its TARGET is outside the branch
+    // A symlink is external if its TARGET exists but is outside the branch
     let isExternalSymlink = false;
     if (isSymlink && node.targetId && branchMode) {
       const targetNode = data.nodes[node.targetId];
       if (targetNode) {
         // Check if target node is in the branch by walking up its parent chain
         isExternalSymlink = !isNodeInBranch(node.targetId);
-      } else {
-        // Broken symlink
-        isExternalSymlink = true;
       }
+      // Note: if targetNode doesn't exist, it's a broken symlink, NOT an external one
     }
 
     // Get display node (target for symlinks)
@@ -309,14 +307,14 @@ export function renderTree(onNodeClick) {
 
     // Click handler
     content.onclick = () => {
-      if (isExternalSymlink) {
-        showToast(t('toast.externalSymlink'), '🚫');
-        return;
-      }
-
       currentInstanceKey = instanceKey;
       focusedInstanceKey = instanceKey;
       if (onNodeClick) onNodeClick(nodeId, instanceKey);
+
+      // Show toast for external symlinks (but still allow selection for deletion)
+      if (isExternalSymlink) {
+        showToast(t('toast.externalSymlink'), '🚫');
+      }
     };
 
     // Drag & Drop (only if not an external symlink)
@@ -610,21 +608,28 @@ export function handleTreeNavigation(e, selectNodeCallback, renderCallback) {
 
     case 'Enter':
       e.preventDefault();
-      // Select the focused node (unless it's an external symlink in branch mode)
+      // Select the focused node (allow selection of external symlinks for deletion)
       const focusedNode = data.nodes[nodeId];
       if (focusedNode) {
         // Check if it's an external symlink
         const isSymlink = focusedNode.type === 'symlink';
         let isExternalSymlink = false;
         if (isSymlink && focusedNode.targetId && branchMode) {
-          isExternalSymlink = !isNodeInBranch(focusedNode.targetId);
+          const targetNode = data.nodes[focusedNode.targetId];
+          if (targetNode) {
+            isExternalSymlink = !isNodeInBranch(focusedNode.targetId);
+          }
+          // If targetNode doesn't exist, it's broken, not external
         }
 
-        if (isExternalSymlink) {
-          // Can't activate external symlinks
-          showToast(t('toast.externalSymlink'), '🚫');
-        } else if (selectNodeCallback) {
+        // Always allow selection (even for external symlinks)
+        if (selectNodeCallback) {
           selectNodeCallback(nodeId, focusedInstanceKey);
+        }
+
+        // Show toast for external symlinks
+        if (isExternalSymlink) {
+          showToast(t('toast.externalSymlink'), '🚫');
         }
       }
       break;

@@ -62,6 +62,7 @@ export default {
     cannotMoveToDescendant: "Cannot move into own descendants",
     wouldCreateCycle: "This action would create a cycle",
     nodeAlreadyExists: "Node already exists at this location",
+    cannotDeleteBranchRoot: "Cannot delete branch root node",
     externalSymlink: "⚠️ External link to branch (not accessible)",
     brokenLink: "⚠️ Broken link",
     tagAlreadyExists: "Tag already exists",
@@ -212,17 +213,18 @@ export default {
     export: {
       title: "Export",
       subtitle: "Choose export format:",
+      subtitleBranch: "Export branch \"{branch}\":",
       cancel: "Cancel",
       zip: {
-        title: "ZIP Archive",
+        title: "Complete archive",
         desc: "Complete export with all data and attached files"
       },
       freemind: {
-        title: "FreeMind Mindmap",
+        title: "Mind map",
         desc: ".mm file editable in Freeplane/FreeMind/XMind"
       },
       mermaid: {
-        title: "Mermaid Diagram",
+        title: "Visual diagram",
         desc: "Visual diagram as SVG format"
       }
     }
@@ -284,6 +286,7 @@ export default {
     emptyContent: "No content",
     emptyPreview: "Empty",
     brokenSymlink: "⚠️ This symbolic link points to a node that no longer exists.\n\nYou can delete this broken link.",
+    externalSymlink: "⚠️ This symbolic link points to a node outside the current branch.\n\nIn branch mode, external links are not accessible. You can delete this link or exit branch mode to access the target node.",
     newNodeTitle: "New node"
   },
 

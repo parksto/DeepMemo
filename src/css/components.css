@@ -25,6 +25,17 @@
   transform: translateY(-1px);
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:disabled:hover {
+  background: var(--accent);
+  transform: none;
+}
+
 .btn-secondary {
   background: var(--bg-tertiary);
   color: var(--text-primary);
@@ -68,8 +79,8 @@
 
 .btn-import:hover {
   background: var(--bg-secondary);
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--accent-text);
+  color: var(--accent-text);
 }
 
 .import-export-zone {
@@ -255,6 +266,8 @@
   gap: 8px;
   cursor: grab;
   position: relative;
+  width: fit-content;
+  min-width: 100%;
 }
 
 .tree-node-content:active {
@@ -278,6 +291,10 @@
 .tree-node-content.active {
   background: var(--accent);
   color: white;
+}
+
+.tree-node-content.active:hover {
+  background: var(--accent-hover);
 }
 
 .tree-node-content.focused {
@@ -364,7 +381,7 @@
 }
 
 .breadcrumb-item:hover {
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--bg-secondary);
 }
 
@@ -836,7 +853,7 @@
 
 /* LINKS */
 .node-link {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: none;
   cursor: pointer;
   padding: 2px 4px;
@@ -1259,7 +1276,7 @@
   border-radius: 3px;
   font-family: 'Sto Fixed', 'Courier New', monospace;
   font-size: 0.9em;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .markdown-content pre {
@@ -1286,13 +1303,13 @@
 }
 
 .markdown-content a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .markdown-content a:hover {
-  color: var(--accent-hover);
+  color: #6bb0ff;
   text-decoration: underline;
 }
 

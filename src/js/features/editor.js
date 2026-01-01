@@ -99,17 +99,71 @@ export function displayNode(nodeId, renderCallback) {
   // Get display node (target for symlinks)
   const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
 
+  // Check for broken symlink FIRST (target doesn't exist)
   if (!displayNode) {
     // Broken symlink
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('editorContainer').style.display = 'flex';
 
-    document.getElementById('nodeTitle').value = node.title + ' (' + t('labels.badges.broken').toUpperCase() + ')';
+    document.getElementById('nodeTitle').value = node.title + ' (' + t('nodeTypes.badge.broken').toUpperCase() + ')';
     const contentEditor = document.getElementById('nodeContent');
-    contentEditor.value = t('alerts.brokenSymlink');
+    contentEditor.value = t('messages.brokenSymlink');
     contentEditor.disabled = true;
 
-    showToast(t('labels.brokenSymlink'), '⚠️');
+    // Display metadata for broken symlink
+    const metaDiv = document.getElementById('nodeMeta');
+    metaDiv.innerHTML = `⚠️ ${t('toast.brokenLink')}`;
+
+    // Clear other sections
+    document.getElementById('childrenSection').style.display = 'none';
+    document.getElementById('attachmentsSection').style.display = 'none';
+
+    // Set current node for UI
+    setCurrentNodeId(nodeId);
+    TagsModule.setCurrentNodeId(nodeId);
+
+    // Update UI components
+    updateBreadcrumb(nodeId);
+    updateRightPanel(nodeId);
+    updateShareLinks(nodeId);
+    updateViewMode();
+    TagsModule.renderTags();
+
+    showToast(t('toast.brokenLink'), '⚠️');
+    return;
+  }
+
+  // Check for external symlink (ONLY in branch mode, target exists but is outside branch)
+  if (node.type === 'symlink' && node.targetId && isBranchMode() && !isNodeInBranch(node.targetId)) {
+    // External symlink (only possible in branch mode)
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('editorContainer').style.display = 'flex';
+
+    document.getElementById('nodeTitle').value = node.title + ' (' + t('nodeTypes.badge.external').toUpperCase() + ')';
+    const contentEditor = document.getElementById('nodeContent');
+    contentEditor.value = t('messages.externalSymlink');
+    contentEditor.disabled = true;
+
+    // Display metadata for external symlink
+    const metaDiv = document.getElementById('nodeMeta');
+    metaDiv.innerHTML = `⚠️ ${t('toast.externalSymlink')}`;
+
+    // Clear other sections
+    document.getElementById('childrenSection').style.display = 'none';
+    document.getElementById('attachmentsSection').style.display = 'none';
+
+    // Set current node for UI
+    setCurrentNodeId(nodeId);
+    TagsModule.setCurrentNodeId(nodeId);
+
+    // Update UI components
+    updateBreadcrumb(nodeId);
+    updateRightPanel(nodeId);
+    updateShareLinks(nodeId);
+    updateViewMode();
+    TagsModule.renderTags();
+
+    showToast(t('toast.externalSymlink'), '🚫');
     return;
   }
 
@@ -171,6 +225,12 @@ export function displayNode(nodeId, renderCallback) {
 export function saveNode(nodeId) {
   const node = data.nodes[nodeId];
   if (!node) return;
+
+  // Don't save if editor is disabled (broken/external symlinks display error messages)
+  const contentEditor = document.getElementById('nodeContent');
+  if (contentEditor && contentEditor.disabled) {
+    return;
+  }
 
   // For symlinks: save title to symlink, content to target
   if (node.type === 'symlink') {
