@@ -28,6 +28,10 @@ Thumbs.db
 # Claude Code
 .claude/
 CLAUDE.md
+docs/CONTEXT-CLAUDE-PROJECTS.md
 
 # Stats serveur
 stats.html
+
+# gitignore global
+.gitignore
