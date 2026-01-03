@@ -41,9 +41,10 @@ function cleanupBlobUrls() {
  * Process attachment: URLs in rendered HTML
  * Replaces attachment:ID with blob URLs from IndexedDB
  * @param {string} html - Rendered HTML content
+ * @param {Object} node - Current node (to get attachment metadata)
  * @returns {Promise<string>} - HTML with blob URLs
  */
-async function processAttachmentUrls(html) {
+async function processAttachmentUrls(html, node) {
   // Find all attachment:ID references in href and src attributes
   const attachmentPattern = /attachment:([a-zA-Z0-9_]+)/g;
   const matches = [...html.matchAll(attachmentPattern)];
@@ -64,8 +65,26 @@ async function processAttachmentUrls(html) {
       const blob = await AttachmentsModule.getAttachment(attachmentId);
 
       if (blob) {
+        // Get MIME type from attachment metadata
+        let mimeType = blob.type || 'application/octet-stream';
+
+        if (node?.attachments) {
+          const attachmentMeta = node.attachments.find(a => a.id === attachmentId);
+          if (attachmentMeta?.type) {
+            mimeType = attachmentMeta.type;
+          }
+        }
+
+        // Recreate blob with correct MIME type if needed
+        // This is crucial for SVG files which need 'image/svg+xml' to render
+        let typedBlob = blob;
+        if (blob.type !== mimeType) {
+          typedBlob = new Blob([blob], { type: mimeType });
+          console.log(`[Editor] Fixed MIME type for ${attachmentId}: ${blob.type} -> ${mimeType}`);
+        }
+
         // Create blob URL
-        const blobUrl = URL.createObjectURL(blob);
+        const blobUrl = URL.createObjectURL(typedBlob);
         activeBlobUrls.push(blobUrl);
 
         // Replace attachment:ID with blob URL
@@ -842,8 +861,8 @@ export async function updateViewMode() {
         // Use marked.js for markdown rendering (loaded from CDN in index.html)
         let renderedContent = window.marked ? window.marked.parse(displayNode.content) : displayNode.content;
 
-        // Process attachment: URLs to blob URLs
-        renderedContent = await processAttachmentUrls(renderedContent);
+        // Process attachment: URLs to blob URLs (pass node for metadata)
+        renderedContent = await processAttachmentUrls(renderedContent, displayNode);
 
         contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
       } else {
