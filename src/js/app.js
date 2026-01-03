@@ -39,21 +39,19 @@ const app = {
     // Initialize i18n system
     await initI18n();
 
-    // Initialize IndexedDB for attachments
+    // Load data from IndexedDB (with automatic migration from localStorage)
     if (AttachmentsModule.isIndexedDBAvailable()) {
       try {
-        await AttachmentsModule.initDB();
-        console.log('[App] IndexedDB initialized for attachments');
+        await DataModule.loadData();
+        console.log('[App] Data loaded from IndexedDB');
       } catch (error) {
-        console.error('[App] IndexedDB failed to initialize:', error);
-        showToast(t('toast.attachmentsNotAvailable'), '⚠️');
+        console.error('[App] Failed to load data:', error);
+        showToast(t('toast.dataLoadError') || 'Failed to load data', 'error');
       }
     } else {
-      console.warn('[App] IndexedDB not available (private mode?)');
+      console.warn('[App] IndexedDB not available (private mode?), using localStorage fallback');
+      await DataModule.loadData(); // Will fallback to localStorage
     }
-
-    // Load data from localStorage
-    DataModule.loadData();
 
     // Initialize panels and view mode
     PanelsModule.initPanels();

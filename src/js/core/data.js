@@ -1,11 +1,14 @@
 /**
  * DeepMemo - Data Management Module
  * Handles data storage, persistence, import/export
+ * V0.10: Migrated from localStorage to IndexedDB
  */
 
 import { generateId } from '../utils/helpers.js';
 import { getDefaultData } from './default-data.js';
 import * as AttachmentsModule from './attachments.js';
+import * as Storage from './storage.js';
+import * as Migration from './migration.js';
 import { t } from '../utils/i18n.js';
 
 /**
@@ -20,7 +23,7 @@ function i18nConfirm(key, params = {}) {
 }
 
 /**
- * Data state
+ * Data state (kept in memory for fast synchronous access)
  */
 export const data = {
   nodes: {},
@@ -28,38 +31,83 @@ export const data = {
 };
 
 /**
- * Save data to localStorage
+ * Save data to IndexedDB
+ * Now async - called automatically after each modification
  */
-export function saveData() {
-  localStorage.setItem('deepmemo_data', JSON.stringify(data));
+export async function saveData() {
+  try {
+    await Storage.saveNodes(data.nodes);
+    await Storage.saveSetting('rootNodes', data.rootNodes);
+    // console.log('[Data] Saved to IndexedDB');
+  } catch (error) {
+    console.error('[Data] Failed to save to IndexedDB:', error);
+    // Fallback to localStorage in case of error
+    localStorage.setItem('deepmemo_data', JSON.stringify(data));
+  }
 }
 
 /**
- * Load data from localStorage
+ * Load data from IndexedDB
+ * Handles migration from localStorage automatically
  * If no data exists, load default demo content
  */
-export function loadData() {
-  const stored = localStorage.getItem('deepmemo_data');
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    data.nodes = parsed.nodes || {};
-    data.rootNodes = parsed.rootNodes || [];
-    migrateSymlinks();
-  } else {
-    // First-time user: load default demo content
-    console.log('📘 Bienvenue dans DeepMemo ! Chargement du contenu de démonstration...');
-    const defaultData = getDefaultData();
-    data.nodes = defaultData.nodes;
-    data.rootNodes = defaultData.rootNodes;
-    saveData();
+export async function loadData() {
+  try {
+    // Run migration if needed (this also initializes storage)
+    const migrationResult = await Migration.completeMigration();
 
-    // Load default demo attachments (async, non-blocking)
-    AttachmentsModule.loadDefaultAttachments(data).then(() => {
-      // Save data again with attachment metadata
-      saveData();
-    }).catch(error => {
-      console.error('[Data] Failed to load default attachments:', error);
-    });
+    if (migrationResult.dataMigrated) {
+      console.log('[Data] ✅ Data migrated from localStorage to IndexedDB');
+    }
+
+    if (migrationResult.attachmentsMigrated) {
+      console.log('[Data] ✅ Attachments migrated to new database structure');
+    }
+
+    // Load nodes from IndexedDB
+    const nodes = await Storage.loadNodes();
+
+    // Load rootNodes from settings
+    const rootNodes = await Storage.loadSetting('rootNodes', []);
+
+    // Check if we have data
+    if (Object.keys(nodes).length > 0) {
+      data.nodes = nodes;
+      data.rootNodes = rootNodes;
+      console.log(`[Data] Loaded ${Object.keys(nodes).length} nodes from IndexedDB`);
+      migrateSymlinks();
+    } else {
+      // First-time user: load default demo content
+      console.log('📘 Bienvenue dans DeepMemo ! Chargement du contenu de démonstration...');
+      const defaultData = getDefaultData();
+      data.nodes = defaultData.nodes;
+      data.rootNodes = defaultData.rootNodes;
+      await saveData();
+
+      // Load default demo attachments (async, non-blocking)
+      AttachmentsModule.loadDefaultAttachments(data).then(async () => {
+        // Save data again with attachment metadata
+        await saveData();
+      }).catch(error => {
+        console.error('[Data] Failed to load default attachments:', error);
+      });
+    }
+  } catch (error) {
+    console.error('[Data] Failed to load from IndexedDB, falling back to localStorage:', error);
+
+    // Fallback to localStorage if IndexedDB fails
+    const stored = localStorage.getItem('deepmemo_data');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      data.nodes = parsed.nodes || {};
+      data.rootNodes = parsed.rootNodes || [];
+      migrateSymlinks();
+    } else {
+      // Load default data as last resort
+      const defaultData = getDefaultData();
+      data.nodes = defaultData.nodes;
+      data.rootNodes = defaultData.rootNodes;
+    }
   }
 }
 
@@ -115,7 +163,7 @@ function migrateSymlinks() {
 
   if (migrated) {
     console.log('✅ Migration des symlinks effectuée');
-    saveData();
+    saveData(); // Fire-and-forget async save
   }
 }
 

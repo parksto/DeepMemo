@@ -2,46 +2,20 @@
  * attachments.js
  *
  * Gestion des fichiers attachés aux nœuds via IndexedDB.
- * Stockage des fichiers binaires (Blob) séparés de la structure de données principale.
+ * V0.10: Migrated to use unified Dexie storage layer
  */
 
-const DB_NAME = 'deepmemo-files';
-const DB_VERSION = 1;
-const STORE_NAME = 'attachments';
-
-let db = null;
+import * as Storage from './storage.js';
 
 /**
- * Initialise la connexion IndexedDB
- * @returns {Promise<IDBDatabase>}
+ * Initialize DB (delegated to storage.js)
+ * Kept for backward compatibility
+ * @returns {Promise<void>}
  */
 export async function initDB() {
-  if (db) return db;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => {
-      console.error('[Attachments] Failed to open IndexedDB:', request.error);
-      reject(new Error('IndexedDB non disponible'));
-    };
-
-    request.onsuccess = () => {
-      db = request.result;
-      console.log('[Attachments] IndexedDB initialized');
-      resolve(db);
-    };
-
-    request.onupgradeneeded = (event) => {
-      const database = event.target.result;
-
-      // Créer l'object store si nécessaire
-      if (!database.objectStoreNames.contains(STORE_NAME)) {
-        database.createObjectStore(STORE_NAME);
-        console.log('[Attachments] Object store created');
-      }
-    };
-  });
+  // Storage is initialized automatically in data.js loadData()
+  // This function is kept for backward compatibility
+  return Promise.resolve();
 }
 
 /**
@@ -51,23 +25,8 @@ export async function initDB() {
  * @returns {Promise<void>}
  */
 export async function saveAttachment(id, blob) {
-  if (!db) await initDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.put(blob, id);
-
-    request.onsuccess = () => {
-      console.log(`[Attachments] Saved: ${id} (${blob.size} bytes)`);
-      resolve();
-    };
-
-    request.onerror = () => {
-      console.error(`[Attachments] Failed to save ${id}:`, request.error);
-      reject(request.error);
-    };
-  });
+  await Storage.saveAttachment(id, blob);
+  console.log(`[Attachments] Saved: ${id} (${blob.size} bytes)`);
 }
 
 /**
@@ -76,28 +35,14 @@ export async function saveAttachment(id, blob) {
  * @returns {Promise<Blob|null>} - Le blob ou null si non trouvé
  */
 export async function getAttachment(id) {
-  if (!db) await initDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.get(id);
-
-    request.onsuccess = () => {
-      if (request.result) {
-        console.log(`[Attachments] Retrieved: ${id}`);
-        resolve(request.result);
-      } else {
-        console.warn(`[Attachments] Not found: ${id}`);
-        resolve(null);
-      }
-    };
-
-    request.onerror = () => {
-      console.error(`[Attachments] Failed to get ${id}:`, request.error);
-      reject(request.error);
-    };
-  });
+  const blob = await Storage.loadAttachment(id);
+  if (blob) {
+    console.log(`[Attachments] Retrieved: ${id}`);
+    return blob;
+  } else {
+    console.warn(`[Attachments] Not found: ${id}`);
+    return null;
+  }
 }
 
 /**
@@ -106,23 +51,8 @@ export async function getAttachment(id) {
  * @returns {Promise<void>}
  */
 export async function deleteAttachment(id) {
-  if (!db) await initDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.delete(id);
-
-    request.onsuccess = () => {
-      console.log(`[Attachments] Deleted: ${id}`);
-      resolve();
-    };
-
-    request.onerror = () => {
-      console.error(`[Attachments] Failed to delete ${id}:`, request.error);
-      reject(request.error);
-    };
-  });
+  await Storage.deleteAttachment(id);
+  console.log(`[Attachments] Deleted: ${id}`);
 }
 
 /**
@@ -130,23 +60,9 @@ export async function deleteAttachment(id) {
  * @returns {Promise<string[]>} - Array des IDs
  */
 export async function listAttachments() {
-  if (!db) await initDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAllKeys();
-
-    request.onsuccess = () => {
-      console.log(`[Attachments] Listed: ${request.result.length} files`);
-      resolve(request.result);
-    };
-
-    request.onerror = () => {
-      console.error('[Attachments] Failed to list:', request.error);
-      reject(request.error);
-    };
-  });
+  const ids = await Storage.listAttachments();
+  console.log(`[Attachments] Listed: ${ids.length} files`);
+  return ids;
 }
 
 /**
@@ -154,25 +70,9 @@ export async function listAttachments() {
  * @returns {Promise<number>} - Taille en octets
  */
 export async function getTotalSize() {
-  if (!db) await initDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
-
-    request.onsuccess = () => {
-      const blobs = request.result;
-      const totalSize = blobs.reduce((sum, blob) => sum + (blob.size || 0), 0);
-      console.log(`[Attachments] Total size: ${totalSize} bytes`);
-      resolve(totalSize);
-    };
-
-    request.onerror = () => {
-      console.error('[Attachments] Failed to get total size:', request.error);
-      reject(request.error);
-    };
-  });
+  const totalSize = await Storage.getTotalAttachmentsSize();
+  console.log(`[Attachments] Total size: ${totalSize} bytes`);
+  return totalSize;
 }
 
 /**
@@ -181,7 +81,7 @@ export async function getTotalSize() {
  */
 export function generateAttachmentId() {
   const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  const random = Math.random().toString(36).substring(2, 11);
   return `attach_${timestamp}_${random}`;
 }
 
@@ -191,8 +91,6 @@ export function generateAttachmentId() {
  * @returns {Promise<{deleted: number, freed: number}>} - Stats du nettoyage
  */
 export async function cleanOrphans(data) {
-  if (!db) await initDB();
-
   // Collecter tous les IDs référencés dans les nœuds
   const referencedIds = new Set();
   for (const node of Object.values(data.nodes)) {
@@ -234,7 +132,7 @@ export async function cleanOrphans(data) {
  */
 export function isIndexedDBAvailable() {
   try {
-    return 'indexedDB' in window && window.indexedDB !== null;
+    return 'indexedDB' in window && window.indexedDB !== null && typeof Dexie !== 'undefined';
   } catch (e) {
     return false;
   }
@@ -262,19 +160,15 @@ export function formatFileSize(bytes) {
  * @returns {Promise<void>}
  */
 export async function loadDefaultAttachments(data) {
-  if (!db) await initDB();
-
-  // Mapping: {attachmentId: {path, nodeId}}
+  // Mapping: {attachmentId: {path, name}}
   const defaultFiles = {
     'demo_mindmap_svg': {
       path: 'assets/demo.svg',
       name: 'demo-mindmap.svg',
-      // On trouvera le nodeId dynamiquement (whyHierarchy)
     },
     'demo_freeplane_screenshot': {
       path: 'assets/freeplane-demo.png',
       name: 'freeplane-demo.png',
-      // On trouvera le nodeId dynamiquement (export)
     }
   };
 
