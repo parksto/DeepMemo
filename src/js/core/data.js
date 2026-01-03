@@ -803,12 +803,21 @@ export async function importBranchZIP(event, parentId, onSuccess) {
         newNode.targetId = oldToNewId[newNode.targetId] || newNode.targetId;
       }
 
-      // Update attachment IDs
+      // Update attachment IDs in metadata
       if (newNode.attachments) {
         newNode.attachments = newNode.attachments.map(att => ({
           ...att,
           id: oldToNewAttachId[att.id] || att.id
         }));
+      }
+
+      // Update attachment references in content (attachment:OLD_ID -> attachment:NEW_ID)
+      if (newNode.content) {
+        for (const [oldAttachId, newAttachId] of Object.entries(oldToNewAttachId)) {
+          const oldRef = `attachment:${oldAttachId}`;
+          const newRef = `attachment:${newAttachId}`;
+          newNode.content = newNode.content.replaceAll(oldRef, newRef);
+        }
       }
 
       data.nodes[newId] = newNode;
