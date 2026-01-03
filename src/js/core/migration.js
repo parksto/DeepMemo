@@ -86,50 +86,76 @@ export async function migrateAttachmentsDB() {
       }
 
       try {
-        // Read all attachments from old database
+        // Read all attachments from old database using cursor
+        // Old structure: key=id (string), value=blob (Blob directly)
         const transaction = oldDB.transaction(['attachments'], 'readonly');
         const store = transaction.objectStore('attachments');
-        const getAllRequest = store.getAll();
 
-        getAllRequest.onsuccess = async () => {
-          const oldAttachments = getAllRequest.result;
+        // First, count how many attachments we have
+        const countRequest = store.count();
 
-          if (!oldAttachments || oldAttachments.length === 0) {
+        countRequest.onsuccess = async () => {
+          const count = countRequest.result;
+
+          if (count === 0) {
             console.log('[Migration] No attachments found in old database');
             oldDB.close();
             resolve(false);
             return;
           }
 
-          console.log(`[Migration] Found ${oldAttachments.length} attachments in old database`);
+          console.log(`[Migration] Found ${count} attachments in old database`);
 
-          // Migrate each attachment to new structure
-          for (const oldAttachment of oldAttachments) {
-            // Old structure: {id, nodeId, name, type, size, blob}
-            // New structure: same, but in Dexie schema
-            await Storage.saveAttachment({
-              id: oldAttachment.id,
-              nodeId: oldAttachment.nodeId,
-              name: oldAttachment.name,
-              type: oldAttachment.type,
-              size: oldAttachment.size,
-              blob: oldAttachment.blob
-            });
-          }
+          // Use cursor to iterate through attachments (key + value)
+          const cursorRequest = store.openCursor();
+          const attachments = [];
 
-          console.log('[Migration] ✅ Attachments migrated to new database structure');
-          oldDB.close();
+          cursorRequest.onsuccess = async (event) => {
+            const cursor = event.target.result;
 
-          // Mark as migrated
-          localStorage.setItem('deepmemo_attachments_migrated', 'true');
+            if (cursor) {
+              // Collect attachment: key=id, value=blob
+              attachments.push({
+                id: cursor.key,
+                blob: cursor.value
+              });
+              cursor.continue();
+            } else {
+              // All attachments collected, now migrate them
+              try {
+                for (const attachment of attachments) {
+                  // Save to new Dexie database
+                  // Storage.saveAttachment expects (id, blob)
+                  await Storage.saveAttachment(attachment.id, attachment.blob);
+                  console.log(`[Migration] Migrated attachment: ${attachment.id} (${attachment.blob.size} bytes)`);
+                }
 
-          resolve(true);
+                console.log('[Migration] ✅ Attachments migrated to new database structure');
+                oldDB.close();
+
+                // Mark as migrated
+                localStorage.setItem('deepmemo_attachments_migrated', 'true');
+
+                resolve(true);
+              } catch (error) {
+                console.error('[Migration] Error saving attachments:', error);
+                oldDB.close();
+                reject(error);
+              }
+            }
+          };
+
+          cursorRequest.onerror = () => {
+            console.error('[Migration] Failed to read old attachments');
+            oldDB.close();
+            reject(new Error('Failed to read old attachments'));
+          };
         };
 
-        getAllRequest.onerror = () => {
-          console.error('[Migration] Failed to read old attachments');
+        countRequest.onerror = () => {
+          console.error('[Migration] Failed to count attachments');
           oldDB.close();
-          reject(new Error('Failed to read old attachments'));
+          reject(new Error('Failed to count attachments'));
         };
       } catch (error) {
         console.error('[Migration] Error during attachments migration:', error);
