@@ -630,12 +630,38 @@ export async function importDataZIP(event, onSuccess) {
         return;
       }
 
+      // Build list of attachment IDs from imported nodes
+      const attachmentIds = new Set();
+      Object.values(imported.nodes).forEach(node => {
+        if (node.attachments) {
+          node.attachments.forEach(att => {
+            attachmentIds.add(att.id);
+          });
+        }
+      });
+
       // Restore attachments to IndexedDB
       for (const { path, file } of attachmentFiles) {
         const blob = await file.async('blob');
-        // Extract attachment ID from filename (format: {id}_{name})
-        const attachId = path.split('_')[0];
-        await AttachmentsModule.saveAttachment(attachId, blob);
+
+        // Find which attachment ID this file corresponds to
+        // Filename format: {attachmentId}_{originalName}
+        // Problem: attachment IDs contain underscores (e.g., "demo_mindmap_svg")
+        // Solution: check which ID matches the start of the path
+        let attachId = null;
+        for (const id of attachmentIds) {
+          if (path.startsWith(id + '_')) {
+            attachId = id;
+            break;
+          }
+        }
+
+        if (attachId) {
+          await AttachmentsModule.saveAttachment(attachId, blob);
+          console.log(`[Import] Restored attachment: ${attachId} (${blob.size} bytes)`);
+        } else {
+          console.warn(`[Import] Could not find attachment ID for file: ${path}`);
+        }
       }
     } else {
       if (!i18nConfirm('importData', { count: nodeCount })) {
@@ -735,11 +761,25 @@ export async function importBranchZIP(event, parentId, onSuccess) {
     // Restore attachments to IndexedDB with new IDs
     for (const { path, file } of attachmentFiles) {
       const blob = await file.async('blob');
-      // Extract old attachment ID from filename (format: {id}_{name})
-      const oldAttachId = path.split('_')[0];
-      const newAttachId = oldToNewAttachId[oldAttachId];
-      if (newAttachId) {
+
+      // Find which old attachment ID this file corresponds to
+      // Filename format: {attachmentId}_{originalName}
+      // Problem: attachment IDs contain underscores (e.g., "demo_mindmap_svg")
+      // Solution: check which ID from oldToNewAttachId matches the start of the path
+      let oldAttachId = null;
+      for (const id of Object.keys(oldToNewAttachId)) {
+        if (path.startsWith(id + '_')) {
+          oldAttachId = id;
+          break;
+        }
+      }
+
+      if (oldAttachId) {
+        const newAttachId = oldToNewAttachId[oldAttachId];
         await AttachmentsModule.saveAttachment(newAttachId, blob);
+        console.log(`[Import] Restored attachment: ${oldAttachId} -> ${newAttachId} (${blob.size} bytes)`);
+      } else {
+        console.warn(`[Import] Could not find attachment ID for file: ${path}`);
       }
     }
 
