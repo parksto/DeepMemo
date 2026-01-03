@@ -7,6 +7,7 @@ import { generateId, escapeHtml } from './utils/helpers.js';
 import { setupKeyboardShortcuts } from './utils/keyboard.js';
 import * as RoutingModule from './utils/routing.js';
 import * as DataModule from './core/data.js';
+import * as Storage from './core/storage.js';
 import { showToast } from './ui/toast.js';
 import * as PanelsModule from './ui/panels.js';
 import * as TreeModule from './features/tree.js';
@@ -1165,6 +1166,9 @@ const app = {
 
 // Expose app globally for onclick handlers
 window.app = app;
+
+// Expose Storage for debugging in console
+window.Storage = Storage;
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
