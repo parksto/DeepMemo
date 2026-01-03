@@ -59,15 +59,15 @@ export async function runMigrationIfNeeded() {
 
 /**
  * Migrate attachments from old IndexedDB structure to new Dexie schema
- * The old structure used a separate database 'deepmemo-attachments' with store 'deepmemo-files'
+ * The old structure used a separate database 'deepmemo-files' with store 'attachments'
  * @returns {Promise<boolean>} True if migration was performed
  */
 export async function migrateAttachmentsDB() {
   console.log('[Migration] Checking for old attachments database...');
 
   return new Promise((resolve, reject) => {
-    // Try to open the old database
-    const request = indexedDB.open('deepmemo-attachments', 1);
+    // Try to open the old database (correct name: deepmemo-files)
+    const request = indexedDB.open('deepmemo-files', 1);
 
     request.onerror = () => {
       console.log('[Migration] No old attachments database found');
@@ -77,9 +77,9 @@ export async function migrateAttachmentsDB() {
     request.onsuccess = async (event) => {
       const oldDB = event.target.result;
 
-      // Check if the old store exists
-      if (!oldDB.objectStoreNames.contains('deepmemo-files')) {
-        console.log('[Migration] Old database exists but no files store found');
+      // Check if the old store exists (correct name: attachments)
+      if (!oldDB.objectStoreNames.contains('attachments')) {
+        console.log('[Migration] Old database exists but no attachments store found');
         oldDB.close();
         resolve(false);
         return;
@@ -87,8 +87,8 @@ export async function migrateAttachmentsDB() {
 
       try {
         // Read all attachments from old database
-        const transaction = oldDB.transaction(['deepmemo-files'], 'readonly');
-        const store = transaction.objectStore('deepmemo-files');
+        const transaction = oldDB.transaction(['attachments'], 'readonly');
+        const store = transaction.objectStore('attachments');
         const getAllRequest = store.getAll();
 
         getAllRequest.onsuccess = async () => {
