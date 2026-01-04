@@ -112,6 +112,17 @@ Chaque nœud possède :
 - **Types supportés** : Images, PDFs, vidéos, audio, documents (50 MB max par fichier)
 - **Documentation** : Spec complète dans `docs/SPEC-ATTACHMENTS.md`
 
+### 💾 Stockage IndexedDB & Sync Multi-Onglets (V0.10)
+- **Migration du stockage** : Migration automatique de localStorage vers IndexedDB avec Dexie.js
+- **Capacité augmentée** : 500 Mo - 1 Go (vs 5-10 Mo avec localStorage)
+- **Stockage structuré** : 3 object stores (nodes, settings, attachments) avec indexes
+- **Sécurité de la migration** : localStorage préservé comme backup, transparent pour l'utilisateur
+- **Sync temps réel multi-onglets** : API BroadcastChannel pour synchronisation instantanée
+- **Mises à jour automatiques** : Les changements dans un onglet apparaissent instantanément dans tous les autres
+- **Rechargement intelligent** : Préserve le nœud actuel s'il n'est pas supprimé
+- **Performance** : Async/await pour opérations de stockage non-bloquantes
+- **Documentation** : Spec complète du stockage dans `docs/STORAGE.md`
+
 ### ⌨️ Raccourcis clavier
 - `Alt+N` : Nouveau nœud (enfant si un nœud est sélectionné, racine sinon)
 - `Alt+E` : Passer en mode édition (avec focus automatique)
@@ -119,20 +130,21 @@ Chaque nœud possède :
 - `Escape` : Remonter au parent
 - `↑↓←→` : Navigation dans l'arbre
 
-## 🏗️ Architecture actuelle (V0.8 - Modulaire ES6)
+## 🏗️ Architecture actuelle (V0.10 - IndexedDB + Sync Multi-Onglets)
 
 ### Format
 - **Multifile modulaire** : HTML + CSS + JS ES6 modules
 - `index.html` : Structure HTML minimale
 - `src/css/` : Styles organisés (base, layout, components, utilities)
 - `src/js/app.js` : Point d'entrée principal
-- `src/js/core/` : Gestion données (data, attachments, default-data)
+- `src/js/core/` : Gestion données (data, storage, migration, attachments, default-data)
 - `src/js/features/` : Modules fonctionnels (tree, editor, search, tags, drag-drop, modals)
-- `src/js/ui/` : Composants UI (toast, panels)
-- `src/js/utils/` : Utilitaires (routing, keyboard, helpers, i18n)
+- `src/js/ui/` : Composants UI (toast, panels, mobile-tabs)
+- `src/js/utils/` : Utilitaires (routing, keyboard, helpers, i18n, sync)
+- `src/js/locales/` : Dictionnaires i18n (fr.js, en.js)
 - **100% Vanilla** JavaScript ES6+ (pas de framework)
 - CSS Variables pour le theming
-- LocalStorage + IndexedDB pour la persistence
+- IndexedDB avec Dexie.js pour la persistence (stockage principal depuis V0.10)
 
 ### Structure des données
 ```javascript

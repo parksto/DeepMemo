@@ -541,17 +541,61 @@ enableBranchMode(nodeId);
 
 ## 💾 Persistence
 
-### LocalStorage
+### IndexedDB (V0.10+)
+
+Depuis la V0.10, DeepMemo utilise **IndexedDB avec Dexie.js** pour tout le stockage de données, remplaçant le système précédent basé sur localStorage.
+
+**Base de données :** `deepmemo` avec trois object stores :
 
 ```javascript
-// Clés utilisées
-'deepmemo_data'           // { nodes: {}, rootNodes: [] }
-'deepmemo_viewMode'       // 'view' ou 'edit'
-'deepmemo_language'       // 'fr' ou 'en'
-'deepmemo_fontPreference' // 'sto' ou 'system'
+db.version(1).stores({
+  // Table nodes avec indexes
+  nodes: 'id, parent, *tags, created, modified',
+
+  // Table settings (paires clé-valeur)
+  settings: 'key',
+
+  // Table attachments (fichiers comme blobs)
+  attachments: 'id'
+});
 ```
 
+**Capacité de stockage :**
+- Avant (V0.9) : 5-10 Mo (localStorage)
+- Après (V0.10) : 500 Mo - 1 Go (IndexedDB)
+
+**Fonctionnalités clés :**
+- Migration automatique depuis localStorage au premier chargement
+- Tables structurées avec indexes pour des requêtes rapides
+- localStorage préservé comme backup après migration
+- Flag de migration : `deepmemo_migrated_to_indexeddb`
+
+**Paramètres stockés :**
+- `rootNodes` : Tableau des IDs des nœuds racines
+- `viewMode` : 'view' ou 'edit'
+- `language` : 'fr' ou 'en'
+- `fontPreference` : 'sto' ou 'system'
+
 **Note** : `expandedNodes` n'est PAS sauvegardé (recalculé dynamiquement via auto-collapse).
+
+**Synchronisation multi-onglets (V0.10) :**
+
+Utilise l'API BroadcastChannel pour la synchro temps réel entre onglets :
+
+```javascript
+const channel = new BroadcastChannel('deepmemo-sync');
+
+// Après chaque saveData()
+channel.postMessage({ type: 'data-changed' });
+
+// Les autres onglets rechargent automatiquement
+channel.onmessage = async () => {
+  await loadData();
+  render();
+};
+```
+
+**Voir aussi :** `docs/STORAGE.md` pour la documentation complète.
 
 ### Export/Import JSON
 
@@ -630,12 +674,18 @@ enableBranchMode(nodeId);
 - Modules ES6 (tree-shaking possible)
 - Rendu ciblé (pas de re-render complet)
 - Délégation d'événements
-- LocalStorage rapide
+- IndexedDB avec indexes pour requêtes rapides (V0.10+)
+- Async/await pour opérations de stockage non-bloquantes
 
 ### Limitations actuelles
-- Pas de virtual scrolling (limite ~500 nœuds)
+- Pas de virtual scrolling (limite ~1000 nœuds)
 - Pas de lazy loading
 - Pas de Web Workers
+
+### Métriques de performance (V0.10)
+- Sauvegarde d'un nœud : <50ms (async, non-bloquant)
+- Chargement des données : <500ms (100 nœuds + settings)
+- Migration : ~1s (100 nœuds + attachments)
 
 ---
 
@@ -662,10 +712,10 @@ enableBranchMode(nodeId);
 
 ### Optimisations
 - Virtual scrolling pour grandes arborescences
-- IndexedDB pour grandes données
 - Web Workers pour recherche asynchrone
+- Optimisation avancée des requêtes avec indexes IndexedDB
 
 ---
 
-**Document technique V0.9**
-Dernière mise à jour : 28 Décembre 2025
+**Document technique V0.10**
+Dernière mise à jour : 4 janvier 2026

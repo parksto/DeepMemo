@@ -70,7 +70,7 @@
 - [x] Documentation complète dans panneau droit
 
 #### Persistance
-- [x] LocalStorage pour les données
+- [x] ~~LocalStorage pour les données~~ → **IndexedDB avec Dexie.js** (migré en V0.10)
 - [x] Export JSON global
 - [x] Import JSON global
 - [x] Export de branche (nœud + descendants)
@@ -550,7 +550,7 @@ DeepMemo/
 
 ### Décisions techniques validées
 - ✅ Vanilla JS : pas de overhead, contrôle total
-- ✅ LocalStorage : assez pour MVP, migration backend prévue
+- ✅ ~~LocalStorage~~ → **IndexedDB avec Dexie.js** : capacité 500 Mo-1 Go, stockage structuré (V0.10)
 - ✅ Dark theme par défaut : préférence utilisateur
 - ✅ Keyboard-first : efficacité maximale
 

@@ -1086,19 +1086,23 @@ applyMigrations(node) {
 
 ## 🚀 Implémentation progressive
 
-### Phase 1 : Fondations (V0.8) ✅
+### Phase 1 : Fondations (V0.10) ✅
 - [x] Nœuds de base (hiérarchie infinie, symlinks, tags)
 - [x] Arborescence intelligente et navigation
 - [x] Export/Import de branches
 - [x] PWA installable et mode offline
 - [x] Fichiers joints (IndexedDB)
+- [x] **Migration stockage IndexedDB** (capacité 500 Mo-1 Go avec Dexie.js)
+- [x] **Synchronisation multi-onglets** (API BroadcastChannel pour sync temps réel)
+- [x] **Stockage structuré** (3 stores : nodes, settings, attachments)
+- [x] **Migration automatique** depuis localStorage avec préservation backup
 
-### Phase 2 : Types actifs - Fondations (V0.9)
+### Phase 2 : Types actifs - Fondations (V1.0)
 - [ ] Système d'implements basique
 - [ ] Scripts simples (onSave, onRender)
 - [ ] Sandbox JavaScript
 
-### Phase 3 : Dépendances (V0.9-V1.0)
+### Phase 3 : Dépendances (V1.0-V1.5)
 - [ ] Résolution de dépendances
 - [ ] Registry de types
 - [ ] Héritage simple
@@ -1142,7 +1146,7 @@ C'est une **plateforme** où :
 
 ---
 
-**Document Vision - Décembre 2025**
-*Ces concepts seront implémentés progressivement, en commençant par les fondations (V0.9+).*
+**Document Vision - Janvier 2026**
+*Ces concepts seront implémentés progressivement, en commençant par les fondations (V1.0+).*
 
-**État actuel** : V0.8 complète - Voir le contenu de démo dans l'application pour une introduction accessible à ces concepts (section "🔮 Directions explorées").
+**État actuel** : V0.10 complète (Migration IndexedDB + Sync multi-onglets) - Voir le contenu de démo dans l'application pour une introduction accessible à ces concepts (section "🔮 Directions explorées").
