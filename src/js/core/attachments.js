@@ -38,11 +38,8 @@ export async function getAttachment(id) {
   const blob = await Storage.loadAttachment(id);
   if (blob) {
     console.log(`[Attachments] Retrieved: ${id}`);
-    return blob;
-  } else {
-    console.warn(`[Attachments] Not found: ${id}`);
-    return null;
   }
+  return blob;
 }
 
 /**
