@@ -32,7 +32,9 @@ src/js/
 ├── app.js                      # Entry point (~830 lines)
 │
 ├── core/
-│   ├── data.js                 # Data + localStorage + export/import
+│   ├── data.js                 # Data + IndexedDB + export/import
+│   ├── storage.js              # IndexedDB layer (Dexie.js) - V0.10
+│   ├── migration.js            # localStorage → IndexedDB migration - V0.10
 │   ├── attachments.js          # File attachments (IndexedDB)
 │   └── default-data.js         # Default demo content
 │
@@ -53,7 +55,8 @@ src/js/
 │   ├── routing.js              # URL navigation
 │   ├── keyboard.js             # Keyboard shortcuts
 │   ├── helpers.js              # Utility functions
-│   └── i18n.js                 # Internationalization system
+│   ├── i18n.js                 # Internationalization system
+│   └── sync.js                 # Multi-tab sync (BroadcastChannel) - V0.10
 │
 └── locales/
     ├── fr.js                   # French dictionary
