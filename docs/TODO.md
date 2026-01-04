@@ -2,7 +2,7 @@
 
 *[Version française](TODO.fr.md)*
 
-**Last update**: January 1, 2026 (V0.9.4 - Polish & bug fixes)
+**Last update**: January 4, 2026 (V0.10.0 - IndexedDB Migration)
 
 ---
 
@@ -362,6 +362,106 @@ DeepMemo V0.8 is **complete and deployed** with all the following features:
 - [x] Clear visual feedback for all node states
 - [x] Professional color scheme
 - [x] Improved export workflow
+
+---
+
+## 💾 V0.10.0 - IndexedDB Migration & Multi-Tab Sync - ✅ COMPLETED
+
+**Date**: January 4, 2026
+**Context**: Major storage upgrade from localStorage to IndexedDB for scalability and future features
+
+### Storage Migration
+
+**Implementation**:
+- [x] New `storage.js` module with Dexie.js wrapper (285 lines)
+- [x] `migration.js` for automatic localStorage → IndexedDB migration (185 lines)
+- [x] IndexedDB database `deepmemo` with 3 stores:
+  - `nodes`: All node objects (indexed by id, parent, tags, dates)
+  - `settings`: App settings (rootNodes, viewMode, fontPreference, language)
+  - `attachments`: File blobs (simple id-value pairs)
+- [x] Automatic migration on first load (transparent to users)
+- [x] localStorage backup preserved for safety
+- [x] Fallback to localStorage if IndexedDB unavailable
+
+**Benefits**:
+- ✅ Storage capacity: 500MB-1GB (vs 5-10MB with localStorage)
+- ✅ Structured data with indexes for fast queries
+- ✅ Better performance for large datasets
+- ✅ Foundation for future sync features
+
+### Multi-Tab Synchronization
+
+**Implementation**:
+- [x] New `sync.js` module with BroadcastChannel API (80 lines)
+- [x] Real-time cross-tab synchronization
+- [x] `notifyDataChanged()` called after each save
+- [x] `setupSyncListener()` for receiving updates
+- [x] Toast notifications when data reloads from other tabs
+- [x] Smart reload: preserves current node or navigates to root
+
+**Benefits**:
+- ✅ Changes in one tab immediately visible in others
+- ✅ No manual refresh needed
+- ✅ Better UX for users with multiple tabs open
+
+### Bug Fixes (from migration session)
+
+**Critical fixes**:
+- [x] Migration attachments: Correct database name (`deepmemo-files` vs `deepmemo-attachments`)
+- [x] DB structure: Use `.openCursor()` instead of `.getAll()` for key-value retrieval
+- [x] ZIP import: Fix ID extraction bug (`.split('_')[0]` → `startsWith()`)
+- [x] Markdown references: Update `attachment:ID` in node content during import
+- [x] SVG MIME type: Preserve correct type for proper rendering
+
+**i18n fixes**:
+- [x] Add translations for Export/Import branch buttons
+- [x] Fix new node title using hardcoded text instead of i18n
+- [x] Fix 3 toast messages with hardcoded French text
+
+### Documentation
+
+**New files**:
+- [x] `docs/STORAGE.md` - Complete IndexedDB documentation (EN)
+- [x] `docs/STORAGE.fr.md` - French version
+- [x] Developer console commands for debugging
+- [x] Performance metrics and troubleshooting
+
+**Updated files**:
+- [x] `CLAUDE.md` - Full V0.10 context
+- [x] `README.md` and `README.fr.md` - Version info
+- [x] Service Worker v1.7.0 with new files precached
+
+**Removed files**:
+- [x] `MIGRATION-SUMMARY.md` (info integrated into STORAGE.md)
+- [x] `docs/MIGRATION-TESTING.md` (archived)
+
+### Technical Improvements
+
+**Service Worker**:
+- [x] Version bumped: v1.6.0 → v1.7.0
+- [x] New files added to precache:
+  - `/src/js/core/storage.js`
+  - `/src/js/core/migration.js`
+  - `/src/js/utils/sync.js`
+
+**Code Quality**:
+- [x] Async/await pattern for all storage operations
+- [x] Proper error handling with fallback
+- [x] Clean separation of concerns (storage layer)
+- [x] Comprehensive debug commands
+
+### User Experience
+
+**Migration**:
+- ✅ Completely transparent to users
+- ✅ Automatic on first load
+- ✅ Data preserved with backup
+- ✅ ~1 second migration time for 100 nodes
+
+**Multi-tab**:
+- ✅ Seamless synchronization
+- ✅ Visual feedback (toast notifications)
+- ✅ Works in all modern browsers
 
 ---
 

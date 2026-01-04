@@ -127,11 +127,11 @@ python -m http.server 8000
 
 ## 📝 Version actuelle
 
-**V0.9.4** (Janvier 2026) - Stable et complète
+**V0.10.0** (Janvier 2026) - Mise à niveau majeure du stockage
 
-Derniers ajouts : Polissage UI avec nouvelle palette de couleurs, gestion spéciale des symlinks cassés/externes, amélioration export FreeMind, protection contre corruption des données.
+Derniers ajouts : **Migration IndexedDB** (capacité 500MB-1GB, contre 5-10MB avant), **synchronisation multi-onglets en temps réel** avec BroadcastChannel API, migration automatique des données, couverture i18n complète.
 
-Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import branche, attachments, PWA installable.
+Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import branche, attachments, PWA installable, **stockage IndexedDB scalable**, **sync multi-onglets**.
 
 [→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
 
