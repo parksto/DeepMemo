@@ -24,6 +24,8 @@ export default {
     newNode: "Nouveau nœud",
     import: "Importer",
     export: "Exporter",
+    exportBranch: "⬇️ Export branche",
+    importBranch: "⬆️ Import branche",
     save: "Enregistrer",
     cancel: "Annuler",
     delete: "Supprimer",

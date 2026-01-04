@@ -199,9 +199,9 @@
           <button class="btn btn-secondary btn-small" data-i18n="actions.addChild" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
           <div style="margin-left: auto; display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-small" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
+            <button class="btn btn-secondary btn-small" data-i18n="actions.exportBranch" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
             <input type="file" id="importBranchFile" accept=".json,.zip" onchange="app.importBranch(event)" style="display: none;">
-            <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
+            <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n="actions.importBranch" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
           </div>
         </div>
 

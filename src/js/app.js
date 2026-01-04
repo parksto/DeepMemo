@@ -18,6 +18,7 @@ import * as ModalsModule from './features/modals.js';
 import * as DragDropModule from './features/drag-drop.js';
 import * as AttachmentsModule from './core/attachments.js';
 import { initI18n, t, setLanguage, getCurrentLanguage } from './utils/i18n.js';
+import * as SyncModule from './utils/sync.js';
 
 /**
  * Main Application Object
@@ -88,13 +89,10 @@ const app = {
       this.handleHashChange(parsed);
     });
 
-    // Setup cross-tab synchronization (detect changes from other tabs)
-    window.addEventListener('storage', (e) => {
-      // Only handle changes to deepmemo_data
-      if (e.key === 'deepmemo_data' && e.newValue) {
-        console.log('[App] Data changed in another tab, reloading...');
-        this.handleExternalDataChange();
-      }
+    // Setup cross-tab synchronization with BroadcastChannel
+    SyncModule.initSync();
+    SyncModule.setupSyncListener(() => {
+      this.handleExternalDataChange();
     });
 
     // Render tree
@@ -215,9 +213,9 @@ const app = {
   /**
    * Handle data changes from other tabs (cross-tab synchronization)
    */
-  handleExternalDataChange() {
-    // Reload data from localStorage
-    DataModule.loadData();
+  async handleExternalDataChange() {
+    // Reload data from IndexedDB (async!)
+    await DataModule.loadData();
 
     // Render tree with updated data
     this.render();

@@ -765,7 +765,7 @@ export function createRootNode(onSuccess) {
   data.nodes[id] = {
     id,
     type: 'node',
-    title: 'Nouveau nœud',
+    title: t('messages.newNodeTitle'),
     content: '',
     children: [],
     parent: null,
@@ -781,7 +781,7 @@ export function createRootNode(onSuccess) {
 
   if (onSuccess) onSuccess(id);
 
-  showToast('Nœud racine créé', '➕');
+  showToast(t('toast.rootNodeCreated'), '➕');
 }
 
 /**
@@ -809,7 +809,7 @@ export function createChildNode(parentId, onSuccess) {
   data.nodes[id] = {
     id,
     type: 'node',
-    title: 'Nouveau nœud',
+    title: t('messages.newNodeTitle'),
     content: '',
     children: [],
     parent: actualParentId,
@@ -825,7 +825,7 @@ export function createChildNode(parentId, onSuccess) {
 
   if (onSuccess) onSuccess(id);
 
-  showToast('Nœud enfant créé', '➕');
+  showToast(t('toast.childNodeCreated'), '➕');
 }
 
 /**
@@ -957,7 +957,7 @@ export function deleteNode(nodeId, onSuccess) {
     }
 
     deleteRecursive(nodeId);
-    showToast('Nœud supprimé', '🗑️');
+    showToast(t('toast.nodeDeleted'), '🗑️');
   }
 
   saveData();

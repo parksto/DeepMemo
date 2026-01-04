@@ -10,6 +10,7 @@ import * as AttachmentsModule from './attachments.js';
 import * as Storage from './storage.js';
 import * as Migration from './migration.js';
 import { t } from '../utils/i18n.js';
+import { notifyDataChanged } from '../utils/sync.js';
 
 /**
  * i18n wrappers for alerts and confirms
@@ -39,6 +40,9 @@ export async function saveData() {
     await Storage.saveNodes(data.nodes);
     await Storage.saveSetting('rootNodes', data.rootNodes);
     // console.log('[Data] Saved to IndexedDB');
+
+    // Notify other tabs about the change
+    notifyDataChanged();
   } catch (error) {
     console.error('[Data] Failed to save to IndexedDB:', error);
     // Fallback to localStorage in case of error

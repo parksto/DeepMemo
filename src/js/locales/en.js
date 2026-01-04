@@ -16,6 +16,8 @@ export default {
     newNode: "New node",
     import: "Import",
     export: "Export",
+    exportBranch: "⬇️ Export branch",
+    importBranch: "⬆️ Import branch",
     save: "Save",
     cancel: "Cancel",
     delete: "Delete",
