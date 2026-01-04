@@ -404,7 +404,7 @@ function updateChildren(currentNodeId) {
       card.style.opacity = '0.5';
       card.innerHTML = `
         <div class="child-card-icon">⚠️</div>
-        <div class="child-card-title">${escapeHtml(child.title)} (${t('labels.badges.broken')})</div>
+        <div class="child-card-title">${escapeHtml(child.title)} (${t('nodeTypes.badge.broken')})</div>
         <div class="child-card-preview">${t('labels.brokenSymlink')}</div>
       `;
       grid.appendChild(card);
