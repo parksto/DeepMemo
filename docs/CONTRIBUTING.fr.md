@@ -403,6 +403,7 @@ await window.Storage.clearLocalStorageBackup();
 **Exemple** :
 ```javascript
 import { data, saveData } from '../core/data.js';
+import { t } from '../utils/i18n.js';
 
 // État local (non exporté)
 let expandedNodes = new Set();

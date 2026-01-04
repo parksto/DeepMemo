@@ -29,6 +29,7 @@ Des neurones de ton cerveau à la syntaxe du langage, des arbres évolutifs aux 
 - **Mode branche** : Concentre-toi sur une sous-arborescence isolée
 - **Keyboard-first** : Navigation complète au clavier, raccourcis documentés
 - **100% local** : Aucun serveur, aucun tracking, données dans ton navigateur
+- **Vraiment à toi** : LocalStorage + IndexedDB, export à tout moment
 
 ---
 
@@ -134,6 +135,19 @@ Derniers ajouts : **Migration IndexedDB** (capacité 500MB-1GB, contre 5-10MB av
 Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import branche, attachments, PWA installable, **stockage IndexedDB scalable**, **sync multi-onglets**.
 
 [→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
+
+---
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! Que ce soit :
+- 🐛 Rapports de bugs
+- 💡 Suggestions de fonctionnalités
+- 🌍 Traductions (nouvelles langues)
+- 📝 Améliorations de documentation
+- 💻 Contributions de code
+
+Merci de lire [CONTRIBUTING.md](docs/CONTRIBUTING.md) pour les guidelines.
 
 ---
 
