@@ -1,9 +1,9 @@
-# 🚀 Guide de développement DeepMemo V0.10
+# 🚀 Guide de développement DeepMemo V0.9
 
 > **[English version](CONTRIBUTING.md)** 🇬🇧
 
-**Dernière mise à jour** : 4 janvier 2026
-**Version** : 0.10 (Migration IndexedDB + Sync multi-onglets)
+**Dernière mise à jour** : 28 Décembre 2025
+**Version** : 0.9 (Architecture modulaire ES6 + i18n)
 
 ---
 
@@ -25,11 +25,10 @@ DeepMemo/
 │   │
 │   └── js/
 │       ├── app.js                 # Point d'entrée (~830 lignes)
+│       ├── app-legacy-backup.js   # Ancien monolithique (référence)
 │       │
 │       ├── core/
-│       │   ├── data.js            # Gestion données + export/import
-│       │   ├── storage.js         # Couche IndexedDB (Dexie.js) - V0.10
-│       │   ├── migration.js       # Migration localStorage → IndexedDB - V0.10
+│       │   ├── data.js            # Gestion données + localStorage + export/import ZIP
 │       │   ├── attachments.js     # Gestion fichiers joints (IndexedDB)
 │       │   └── default-data.js    # Contenu de démo par défaut
 │       │
@@ -50,8 +49,7 @@ DeepMemo/
 │           ├── routing.js         # Navigation URL
 │           ├── keyboard.js        # Raccourcis clavier
 │           ├── helpers.js         # Fonctions utilitaires
-│           ├── i18n.js            # Internationalisation
-│           └── sync.js            # Sync multi-onglets (BroadcastChannel) - V0.10
+│           └── i18n.js            # Internationalisation
 │
 │       └── locales/
 │           ├── fr.js              # Dictionnaire français
@@ -186,21 +184,7 @@ app.js (point d'entrée)
 
 ## 🧪 Tester l'application
 
-### Fonctionnalités V0.10 à tester
-
-#### ✅ Stockage & Persistence
-- [ ] Migration automatique de localStorage vers IndexedDB (premier chargement après upgrade)
-- [ ] Données persistantes après redémarrage du navigateur
-- [ ] Inspecter les stores IndexedDB (nodes, settings, attachments)
-- [ ] Capacité de stockage augmentée (500 Mo-1 Go)
-- [ ] localStorage préservé comme backup
-
-#### ✅ Synchronisation multi-onglets
-- [ ] Ouvrir l'app dans deux onglets
-- [ ] Créer/éditer un nœud dans onglet 1 → apparaît instantanément dans onglet 2
-- [ ] Supprimer un nœud dans onglet 2 → disparaît dans onglet 1
-- [ ] Sync temps réel sans refresh manuel
-- [ ] Nœud actuel préservé s'il n'est pas supprimé
+### Fonctionnalités V0.9 à tester
 
 #### ✅ Gestion des nœuds
 - [ ] Créer un nœud racine (`Alt+N`)
@@ -307,51 +291,25 @@ app.js (point d'entrée)
 
 Ouvre les DevTools (`F12`) pour :
 - Voir les erreurs JavaScript
-- Inspecter IndexedDB (stockage principal depuis V0.10)
-- Inspecter LocalStorage (backup de migration uniquement)
+- Inspecter le LocalStorage
 - Debugger le code (sources ES6 modules)
 
-### IndexedDB (V0.10+)
-
-**Stockage principal** dans DevTools → Application → IndexedDB → `deepmemo` :
-- **nodes** store : Tous les objets nœuds
-- **settings** store : rootNodes, viewMode, language, fontPreference
-- **attachments** store : Blobs de fichiers
-
-**Commandes console** :
-```javascript
-// Obtenir les statistiques de stockage
-const stats = await window.Storage.getStats();
-console.table(stats);
-
-// Lister tous les nœuds
-const nodes = await window.Storage.loadNodes();
-console.log(Object.keys(nodes).length, 'nœuds');
-
-// Obtenir la taille totale des attachments
-const size = await window.Storage.getTotalAttachmentsSize();
-console.log((size / 1024 / 1024).toFixed(2), 'Mo');
-
-// Tout effacer (⚠️ DANGER - irréversible !)
-await window.Storage.clearAllData();
-```
-
-### LocalStorage (Backup uniquement)
-
-Depuis la V0.10, localStorage n'est utilisé que comme backup de migration :
+### LocalStorage
 
 ```javascript
-// Flag de migration
-localStorage.getItem('deepmemo_migrated_to_indexeddb')  // "true" après migration
-
-// Anciennes données (préservées comme backup)
-localStorage.getItem('deepmemo_data')  // Backup JSON de V0.9
-
-// Effacer le backup localStorage après confirmation que la migration a fonctionné
-await window.Storage.clearLocalStorageBackup();
+// Dans la console :
+localStorage.getItem('deepmemo_data')          // Voir les données
+localStorage.getItem('deepmemo_viewMode')      // Voir le mode (view/edit)
+localStorage.getItem('deepmemo_language')      // Voir la langue actuelle
+localStorage.getItem('deepmemo_fontPreference') // Voir le choix de police
+localStorage.clear()                            // Reset complet
 ```
 
 **Note** : `expandedNodes` n'est PAS sauvegardé (recalculé dynamiquement via auto-collapse).
+
+### IndexedDB (fichiers joints)
+
+Dans DevTools → Application → IndexedDB → `deepmemo-attachments`
 
 ### Fichiers à vérifier en cas de bug
 
@@ -361,12 +319,9 @@ await window.Storage.clearLocalStorageBackup();
 2. **features/tree.js** - Navigation et arborescence
 3. **features/editor.js** - Affichage et sauvegarde
 4. **features/drag-drop.js** - Interactions drag & drop
-5. **core/data.js** - Opérations sur les données et export/import
-6. **core/storage.js** - Couche IndexedDB (V0.10)
-7. **core/migration.js** - Logique de migration (V0.10)
-8. **utils/sync.js** - Synchronisation multi-onglets (V0.10)
-9. **utils/routing.js** - URLs et hash routing
-10. **utils/i18n.js** - Internationalisation
+5. **core/data.js** - Données et persistence
+6. **utils/routing.js** - URLs et hash routing
+7. **utils/i18n.js** - Internationalisation
 
 ### Erreurs courantes
 
@@ -375,17 +330,10 @@ await window.Storage.clearLocalStorageBackup();
 - Vérifier les imports (chemins relatifs corrects)
 - Hard refresh (`Ctrl + Shift + R`)
 
-**Erreurs IndexedDB (V0.10+)** :
-- Vérifier le support navigateur (tous les navigateurs modernes)
-- Vérifier que la base `deepmemo` existe dans DevTools
-- Exporter les données avant diagnostic
-- Utiliser `window.Storage.clearAllData()` en dernier recours
-
-**Problèmes de migration** :
-- Vérifier `localStorage.getItem('deepmemo_migrated_to_indexeddb')`
-- Vérifier que les anciennes données existent dans le backup localStorage
-- Vérifier les erreurs de migration dans la console
-- Migration manuelle : utiliser Export depuis V0.9 → Import dans V0.10
+**LocalStorage plein** :
+- Limite ~5-10 MB selon navigateur
+- Exporter les données avant de nettoyer
+- `localStorage.clear()` en dernier recours
 
 ---
 
@@ -403,7 +351,6 @@ await window.Storage.clearLocalStorageBackup();
 **Exemple** :
 ```javascript
 import { data, saveData } from '../core/data.js';
-import { t } from '../utils/i18n.js';
 
 // État local (non exporté)
 let expandedNodes = new Set();
@@ -544,8 +491,8 @@ Voir **[I18N.md](I18N.md)** pour le guide complet d'internationalisation.
 ### APIs natives
 
 - **ES6 Modules** - Import/export
-- **IndexedDB API** - Stockage principal des données (V0.10+)
-- **BroadcastChannel API** - Synchronisation multi-onglets (V0.10+)
+- **LocalStorage API** - Persistence
+- **IndexedDB API** - Fichiers joints
 - **Drag & Drop API** - Interactions
 - **FileReader API** - Import/Export
 - **History API** - URL routing (pushState/replaceState)
@@ -553,7 +500,6 @@ Voir **[I18N.md](I18N.md)** pour le guide complet d'internationalisation.
 
 ### Bibliothèques externes
 
-- **Dexie.js** - Wrapper IndexedDB (CDN, V0.10+)
 - **marked.js** - Rendu Markdown (CDN)
 
 ### Pas d'autres dépendances
@@ -586,9 +532,8 @@ Voir **[I18N.md](I18N.md)** pour le guide complet d'internationalisation.
 
 - **Délégation d'événements** - Éviter les listeners multiples
 - **Rendu ciblé** - Pas de re-render complet
-- **IndexedDB avec indexes** - Requêtes rapides, capacité 500 Mo-1 Go (V0.10+)
-- **Async/await** - Opérations de stockage non-bloquantes
-- **BroadcastChannel** - Sync multi-onglets efficace
+- **LocalStorage rapide** - Mais limité en taille (~5-10 MB)
+- **IndexedDB pour fichiers** - Limites plus hautes (~500MB+)
 
 ### Éviter les anti-patterns
 
@@ -624,16 +569,14 @@ element.textContent = userContent;  // ✅
 
 - [MDN Web Docs](https://developer.mozilla.org/)
 - [ES6 Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
+- [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 - [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
-- [BroadcastChannel](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel)
 - [Drag & Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
 - [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API)
-- [Dexie.js](https://dexie.org/) - Wrapper IndexedDB
 
 ### Documentation interne
 
 - **ARCHITECTURE.md** - Détails techniques complets
-- **STORAGE.md** - Système de stockage IndexedDB (V0.10)
 - **I18N.md** - Système d'internationalisation
 - **CLAUDE.md** - Guide contexte pour Claude (ignoré Git)
 - **V0.8-COMPLETE.md** - Récapitulatif de la V0.8
@@ -641,7 +584,7 @@ element.textContent = userContent;  // ✅
 ### Projet
 
 - **Repo GitHub** : `https://github.com/parksto/DeepMemo`
-- **Version actuelle** : V0.10 (Migration IndexedDB + Sync multi-onglets)
+- **Version actuelle** : V0.9 (Architecture modulaire ES6 + i18n)
 - **Statut** : ✅ Stable et en production
 - **Prochaine version** : V1.0 (Types actifs)
 
@@ -672,4 +615,4 @@ Consulte **TODO.md** pour la liste complète et les priorités.
 
 *N'hésite pas à poser des questions ou proposer des améliorations.*
 
-**Dernière mise à jour** : 4 janvier 2026
+**Dernière mise à jour** : 28 Décembre 2025

@@ -128,11 +128,11 @@ python -m http.server 8000
 
 ## 📝 Current Version
 
-**V0.10.0** (January 2026) - Major storage upgrade
+**V0.9.4** (January 2026) - Stable and feature-complete
 
-Latest additions: **IndexedDB migration** (500MB-1GB capacity, up from 5-10MB), **real-time multi-tab synchronization** with BroadcastChannel API, automatic data migration, complete i18n coverage.
+Latest additions: UI polish with new color palette, special handling for broken/external symlinks, improved FreeMind export, data corruption protection.
 
-Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, branch export/import, attachments, installable PWA, **scalable IndexedDB storage**, **multi-tab sync**.
+Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, branch export/import, attachments, installable PWA.
 
 [→ See ROADMAP.md for complete history](docs/ROADMAP.md)
 

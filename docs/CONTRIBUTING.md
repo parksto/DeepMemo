@@ -1,9 +1,9 @@
-# 🚀 DeepMemo Development Guide V0.10
+# 🚀 DeepMemo Development Guide V0.9
 
 > **[Version française](CONTRIBUTING.fr.md)** 🇫🇷
 
-**Last updated**: January 4, 2026
-**Version**: 0.10 (IndexedDB migration + Multi-tab sync)
+**Last updated**: December 28, 2025
+**Version**: 0.9 (ES6 modular architecture + i18n)
 
 ---
 
@@ -25,11 +25,10 @@ DeepMemo/
 │   │
 │   └── js/
 │       ├── app.js                 # Main entry point (~830 lines)
+│       ├── app-legacy-backup.js   # Old monolithic (reference)
 │       │
 │       ├── core/
-│       │   ├── data.js            # Data management + export/import
-│       │   ├── storage.js         # IndexedDB layer (Dexie.js) - V0.10
-│       │   ├── migration.js       # localStorage → IndexedDB migration - V0.10
+│       │   ├── data.js            # Data management + localStorage + ZIP export/import
 │       │   ├── attachments.js     # File attachments (IndexedDB)
 │       │   └── default-data.js    # Default demo content
 │       │
@@ -50,8 +49,7 @@ DeepMemo/
 │           ├── routing.js         # URL navigation
 │           ├── keyboard.js        # Keyboard shortcuts
 │           ├── helpers.js         # Utility functions
-│           ├── i18n.js            # Internationalization
-│           └── sync.js            # Multi-tab sync (BroadcastChannel) - V0.10
+│           └── i18n.js            # Internationalization
 │
 │       └── locales/
 │           ├── fr.js              # French dictionary
@@ -186,21 +184,7 @@ app.js (entry point)
 
 ## 🧪 Testing the application
 
-### V0.10 features to test
-
-#### ✅ Storage & Persistence
-- [ ] Automatic migration from localStorage to IndexedDB (first load after upgrade)
-- [ ] Data persists across browser restarts
-- [ ] Inspect IndexedDB stores (nodes, settings, attachments)
-- [ ] Storage capacity increased (500MB-1GB)
-- [ ] localStorage preserved as backup
-
-#### ✅ Multi-Tab Synchronization
-- [ ] Open app in two tabs
-- [ ] Create/edit node in tab 1 → appears instantly in tab 2
-- [ ] Delete node in tab 2 → disappears in tab 1
-- [ ] Real-time sync without manual refresh
-- [ ] Current node preserved if not deleted
+### V0.9 features to test
 
 #### ✅ Node management
 - [ ] Create a root node (`Alt+N`)
@@ -307,51 +291,25 @@ app.js (entry point)
 
 Open DevTools (`F12`) to:
 - See JavaScript errors
-- Inspect IndexedDB (primary storage since V0.10)
-- Inspect LocalStorage (migration backup only)
+- Inspect LocalStorage
 - Debug code (ES6 module sources)
 
-### IndexedDB (V0.10+)
-
-**Primary storage** in DevTools → Application → IndexedDB → `deepmemo`:
-- **nodes** store: All node objects
-- **settings** store: rootNodes, viewMode, language, fontPreference
-- **attachments** store: File blobs
-
-**Console commands**:
-```javascript
-// Get storage statistics
-const stats = await window.Storage.getStats();
-console.table(stats);
-
-// List all nodes
-const nodes = await window.Storage.loadNodes();
-console.log(Object.keys(nodes).length, 'nodes');
-
-// Get total attachments size
-const size = await window.Storage.getTotalAttachmentsSize();
-console.log((size / 1024 / 1024).toFixed(2), 'MB');
-
-// Clear all data (⚠️ DANGER - irreversible!)
-await window.Storage.clearAllData();
-```
-
-### LocalStorage (Backup only)
-
-Since V0.10, localStorage is only used for migration backup:
+### LocalStorage
 
 ```javascript
-// Migration flag
-localStorage.getItem('deepmemo_migrated_to_indexeddb')  // "true" after migration
-
-// Old data (preserved as backup)
-localStorage.getItem('deepmemo_data')  // JSON backup from V0.9
-
-// Clear localStorage backup after confirming migration worked
-await window.Storage.clearLocalStorageBackup();
+// In the console:
+localStorage.getItem('deepmemo_data')          // View data
+localStorage.getItem('deepmemo_viewMode')      // View mode (view/edit)
+localStorage.getItem('deepmemo_language')      // Current language
+localStorage.getItem('deepmemo_fontPreference') // Font choice
+localStorage.clear()                            // Complete reset
 ```
 
 **Note**: `expandedNodes` is NOT saved (recalculated dynamically via auto-collapse).
+
+### IndexedDB (attachments)
+
+In DevTools → Application → IndexedDB → `deepmemo-attachments`
 
 ### Files to check in case of bugs
 
@@ -361,12 +319,9 @@ await window.Storage.clearLocalStorageBackup();
 2. **features/tree.js** - Navigation and tree structure
 3. **features/editor.js** - Display and saving
 4. **features/drag-drop.js** - Drag & drop interactions
-5. **core/data.js** - Data operations and export/import
-6. **core/storage.js** - IndexedDB layer (V0.10)
-7. **core/migration.js** - Data migration logic (V0.10)
-8. **utils/sync.js** - Multi-tab synchronization (V0.10)
-9. **utils/routing.js** - URLs and hash routing
-10. **utils/i18n.js** - Internationalization
+5. **core/data.js** - Data and persistence
+6. **utils/routing.js** - URLs and hash routing
+7. **utils/i18n.js** - Internationalization
 
 ### Common errors
 
@@ -375,17 +330,10 @@ await window.Storage.clearLocalStorageBackup();
 - Check imports (correct relative paths)
 - Hard refresh (`Ctrl + Shift + R`)
 
-**IndexedDB errors (V0.10+)**:
-- Check browser support (all modern browsers)
-- Verify database `deepmemo` exists in DevTools
-- Export data before troubleshooting
-- Use `window.Storage.clearAllData()` as last resort
-
-**Migration issues**:
-- Check `localStorage.getItem('deepmemo_migrated_to_indexeddb')`
-- Verify old data exists in localStorage backup
-- Check console for migration errors
-- Manual migration: use Export from V0.9 → Import in V0.10
+**LocalStorage full**:
+- Limit ~5-10 MB depending on browser
+- Export data before cleaning
+- `localStorage.clear()` as last resort
 
 ---
 
@@ -544,8 +492,8 @@ See **[I18N.md](I18N.md)** for complete internationalization guide.
 ### Native APIs
 
 - **ES6 Modules** - Import/export
-- **IndexedDB API** - Primary data storage (V0.10+)
-- **BroadcastChannel API** - Multi-tab synchronization (V0.10+)
+- **LocalStorage API** - Persistence
+- **IndexedDB API** - File attachments
 - **Drag & Drop API** - Interactions
 - **FileReader API** - Import/Export
 - **History API** - URL routing (pushState/replaceState)
@@ -553,7 +501,6 @@ See **[I18N.md](I18N.md)** for complete internationalization guide.
 
 ### External libraries
 
-- **Dexie.js** - IndexedDB wrapper (CDN, V0.10+)
 - **marked.js** - Markdown rendering (CDN)
 
 ### No other dependencies
@@ -586,9 +533,8 @@ See **[I18N.md](I18N.md)** for complete internationalization guide.
 
 - **Event delegation** - Avoid multiple listeners
 - **Targeted rendering** - No complete re-render
-- **IndexedDB with indexes** - Fast queries, 500MB-1GB capacity (V0.10+)
-- **Async/await** - Non-blocking storage operations
-- **BroadcastChannel** - Efficient multi-tab sync
+- **LocalStorage is fast** - But limited in size (~5-10 MB)
+- **IndexedDB for files** - Higher limits (~500MB+)
 
 ### Avoid anti-patterns
 
@@ -624,16 +570,14 @@ element.textContent = userContent;  // ✅
 
 - [MDN Web Docs](https://developer.mozilla.org/)
 - [ES6 Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
+- [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 - [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
-- [BroadcastChannel](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel)
 - [Drag & Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
 - [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API)
-- [Dexie.js](https://dexie.org/) - IndexedDB wrapper
 
 ### Internal documentation
 
 - **ARCHITECTURE.md** - Complete technical details
-- **STORAGE.md** - IndexedDB storage system (V0.10)
 - **I18N.md** - Internationalization system
 - **CLAUDE.md** - Context guide for Claude (Git ignored)
 - **V0.8-COMPLETE.md** - V0.8 recap
@@ -641,7 +585,7 @@ element.textContent = userContent;  // ✅
 ### Project
 
 - **GitHub Repo**: `https://github.com/parksto/DeepMemo`
-- **Current version**: V0.10 (IndexedDB migration + Multi-tab sync)
+- **Current version**: V0.9 (ES6 modular architecture + i18n)
 - **Status**: ✅ Stable and in production
 - **Next version**: V1.0 (Active types)
 
@@ -672,4 +616,4 @@ See **TODO.md** for the complete list and priorities.
 
 *Feel free to ask questions or propose improvements.*
 
-**Last updated**: January 4, 2026
+**Last updated**: December 28, 2025

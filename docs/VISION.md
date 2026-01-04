@@ -1086,23 +1086,19 @@ applyMigrations(node) {
 
 ## 🚀 Progressive Implementation
 
-### Phase 1: Foundations (V0.10) ✅
+### Phase 1: Foundations (V0.8) ✅
 - [x] Base nodes (infinite hierarchy, symlinks, tags)
 - [x] Smart tree and navigation
 - [x] Branch export/import
 - [x] Installable PWA and offline mode
 - [x] File attachments (IndexedDB)
-- [x] **IndexedDB storage migration** (500MB-1GB capacity with Dexie.js)
-- [x] **Multi-tab synchronization** (BroadcastChannel API for real-time sync)
-- [x] **Structured storage** (3 stores: nodes, settings, attachments)
-- [x] **Automatic migration** from localStorage with backup preservation
 
-### Phase 2: Active Types - Foundations (V1.0)
+### Phase 2: Active Types - Foundations (V0.9)
 - [ ] Basic implements system
 - [ ] Simple scripts (onSave, onRender)
 - [ ] JavaScript sandbox
 
-### Phase 3: Dependencies (V1.0-V1.5)
+### Phase 3: Dependencies (V0.9-V1.0)
 - [ ] Dependency resolution
 - [ ] Type registry
 - [ ] Simple inheritance
@@ -1146,7 +1142,7 @@ It's a **platform** where:
 
 ---
 
-**Vision Document - January 2026**
-*These concepts will be implemented progressively, starting with the foundations (V1.0+).*
+**Vision Document - December 2025**
+*These concepts will be implemented progressively, starting with the foundations (V0.9+).*
 
-**Current state**: V0.10 complete (IndexedDB migration + Multi-tab sync) - See the demo content in the application for an accessible introduction to these concepts (section "🔮 Future Directions").
+**Current state**: V0.8 complete - See the demo content in the application for an accessible introduction to these concepts (section "🔮 Future Directions").

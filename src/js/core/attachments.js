@@ -38,11 +38,8 @@ export async function getAttachment(id) {
   const blob = await Storage.loadAttachment(id);
   if (blob) {
     console.log(`[Attachments] Retrieved: ${id}`);
-    return blob;
-  } else {
-    console.warn(`[Attachments] Not found: ${id}`);
-    return null;
   }
+  return blob;
 }
 
 /**
@@ -124,6 +121,44 @@ export async function cleanOrphans(data) {
 
   console.log(`[Attachments] Cleaned ${orphanIds.length} orphans, freed ${freedSize} bytes`);
   return { deleted: orphanIds.length, freed: freedSize };
+}
+
+/**
+ * Nettoie les références orphelines dans les nœuds
+ * (nœuds qui référencent des attachments inexistants dans IndexedDB)
+ * @param {Object} data - L'objet data complet
+ * @returns {Promise<{cleaned: number, nodes: string[]}>} - Stats du nettoyage
+ */
+export async function cleanOrphanedReferences(data) {
+  const existingIds = new Set(await listAttachments());
+  let cleanedCount = 0;
+  const affectedNodes = [];
+
+  for (const node of Object.values(data.nodes)) {
+    if (!node.attachments || node.attachments.length === 0) continue;
+
+    const before = node.attachments.length;
+    node.attachments = node.attachments.filter(att => {
+      const exists = existingIds.has(att.id);
+      if (!exists) {
+        console.warn(`[Attachments] Removed orphaned reference: ${att.id} from node ${node.id}`);
+      }
+      return exists;
+    });
+
+    if (node.attachments.length < before) {
+      cleanedCount += (before - node.attachments.length);
+      affectedNodes.push(node.id);
+    }
+  }
+
+  if (cleanedCount > 0) {
+    console.log(`[Attachments] Cleaned ${cleanedCount} orphaned references from ${affectedNodes.length} nodes`);
+  } else {
+    console.log('[Attachments] No orphaned references found');
+  }
+
+  return { cleaned: cleanedCount, nodes: affectedNodes };
 }
 
 /**

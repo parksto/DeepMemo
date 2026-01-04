@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.7.0'; // V0.10.0 - IndexedDB migration & multi-tab sync (Jan 2026)
+const CACHE_VERSION = 'v1.7.0'; // V0.10.0 - IndexedDB migration & Multi-tab sync (Jan 2026)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)
@@ -12,13 +12,13 @@ const PRECACHE_URLS = [
   '/src/css/base.css',
   '/src/css/layout.css',
   '/src/css/components.css',
-  '/src/css/mobile.css',
+  '/src/css/utilities.css',
   '/src/js/app.js',
   '/src/js/core/data.js',
-  '/src/js/core/storage.js',
-  '/src/js/core/migration.js',
   '/src/js/core/attachments.js',
   '/src/js/core/default-data.js',
+  '/src/js/core/storage.js',
+  '/src/js/core/migration.js',
   '/src/js/features/tree.js',
   '/src/js/features/editor.js',
   '/src/js/features/search.js',
@@ -27,7 +27,6 @@ const PRECACHE_URLS = [
   '/src/js/features/drag-drop.js',
   '/src/js/ui/toast.js',
   '/src/js/ui/panels.js',
-  '/src/js/ui/mobile-tabs.js',
   '/src/js/utils/routing.js',
   '/src/js/utils/keyboard.js',
   '/src/js/utils/helpers.js',

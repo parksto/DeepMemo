@@ -679,6 +679,12 @@ export async function importDataZIP(event, onSuccess) {
     data.rootNodes = imported.rootNodes;
     saveData();
 
+    // Clean orphaned attachment references (nodes referencing non-existent files)
+    const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
+    if (cleanupStats.cleaned > 0) {
+      saveData(); // Save again after cleanup
+    }
+
     console.log(`[Import] Imported ${nodeCount} nodes and ${attachmentCount} attachments`);
 
     if (onSuccess) {
@@ -840,6 +846,12 @@ export async function importBranchZIP(event, parentId, onSuccess) {
     }
 
     saveData();
+
+    // Clean orphaned attachment references (nodes referencing non-existent files)
+    const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
+    if (cleanupStats.cleaned > 0) {
+      saveData(); // Save again after cleanup
+    }
 
     console.log(`[Import] Imported branch with ${nodeCount} nodes and ${attachmentCount} attachments`);
 

@@ -112,17 +112,6 @@ Each node has:
 - **Supported types**: Images, PDFs, videos, audio, documents (50 MB max per file)
 - **Documentation**: Complete spec in `docs/SPEC-ATTACHMENTS.md`
 
-### 💾 IndexedDB Storage & Multi-Tab Sync (V0.10)
-- **Storage migration**: Automatic migration from localStorage to IndexedDB with Dexie.js
-- **Increased capacity**: 500 MB - 1 GB (vs 5-10 MB with localStorage)
-- **Structured storage**: 3 object stores (nodes, settings, attachments) with indexes
-- **Migration safety**: localStorage preserved as backup, transparent for users
-- **Real-time multi-tab sync**: BroadcastChannel API for instant synchronization
-- **Automatic updates**: Changes in one tab appear instantly in all other tabs
-- **Smart reload**: Preserves current node if not deleted
-- **Performance**: Async/await for non-blocking storage operations
-- **Documentation**: Complete storage spec in `docs/STORAGE.md`
-
 ### ⌨️ Keyboard Shortcuts
 - `Alt+N`: New node (child if a node is selected, root otherwise)
 - `Alt+E`: Switch to edit mode (with automatic focus)
@@ -130,21 +119,20 @@ Each node has:
 - `Escape`: Go up to parent
 - `↑↓←→`: Navigation in the tree
 
-## 🏗️ Current Architecture (V0.10 - IndexedDB + Multi-Tab Sync)
+## 🏗️ Current Architecture (V0.8 - Modular ES6)
 
 ### Format
 - **Modular multifile**: HTML + CSS + ES6 modules JS
 - `index.html`: Minimal HTML structure
 - `src/css/`: Organized styles (base, layout, components, utilities)
 - `src/js/app.js`: Main entry point
-- `src/js/core/`: Data management (data, storage, migration, attachments, default-data)
+- `src/js/core/`: Data management (data, attachments, default-data)
 - `src/js/features/`: Functional modules (tree, editor, search, tags, drag-drop, modals)
-- `src/js/ui/`: UI components (toast, panels, mobile-tabs)
-- `src/js/utils/`: Utilities (routing, keyboard, helpers, i18n, sync)
-- `src/js/locales/`: i18n dictionaries (fr.js, en.js)
+- `src/js/ui/`: UI components (toast, panels)
+- `src/js/utils/`: Utilities (routing, keyboard, helpers, i18n)
 - **100% Vanilla** JavaScript ES6+ (no framework)
 - CSS Variables for theming
-- IndexedDB with Dexie.js for persistence (primary storage since V0.10)
+- LocalStorage + IndexedDB for persistence
 
 ### Data Structure
 ```javascript
@@ -220,4 +208,4 @@ You can use, modify, and distribute DeepMemo freely. Your data belongs to you, s
 
 ---
 
-**DeepMemo V0.10.0** - January 2026
+**DeepMemo V0.9.4** - January 2026

@@ -404,7 +404,7 @@ function updateChildren(currentNodeId) {
       card.style.opacity = '0.5';
       card.innerHTML = `
         <div class="child-card-icon">⚠️</div>
-        <div class="child-card-title">${escapeHtml(child.title)} (${t('labels.badges.broken')})</div>
+        <div class="child-card-title">${escapeHtml(child.title)} (${t('nodeTypes.badge.broken')})</div>
         <div class="child-card-preview">${t('labels.brokenSymlink')}</div>
       `;
       grid.appendChild(card);
@@ -443,7 +443,7 @@ function updateChildren(currentNodeId) {
     }
 
     const titleStyle = isSymlink ? 'font-style: italic;' : '';
-    const badge = isSymlink ? ` <span class="symlink-badge" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${isExternalSymlink ? t('labels.badges.external') : t('labels.badges.link')}</span>` : '';
+    const badge = isSymlink ? ` <span class="symlink-badge" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${isExternalSymlink ? t('nodeTypes.badge.external') : t('nodeTypes.badge.link')}</span>` : '';
 
     card.innerHTML = `
       <div class="child-card-icon">${icon}</div>

@@ -2,7 +2,7 @@
 
 > 🌍 **Versions linguistiques** : [English](ROADMAP.md) | [Français](ROADMAP.fr.md)
 
-## 📍 État actuel : V0.10.0 (Janvier 2026)
+## 📍 État actuel : V0.9.4 (Janvier 2026)
 
 ### ✅ Fonctionnalités implémentées
 
@@ -70,7 +70,7 @@
 - [x] Documentation complète dans panneau droit
 
 #### Persistance
-- [x] ~~LocalStorage pour les données~~ → **IndexedDB avec Dexie.js** (migré en V0.10)
+- [x] LocalStorage pour les données
 - [x] Export JSON global
 - [x] Import JSON global
 - [x] Export de branche (nœud + descendants)
@@ -413,32 +413,6 @@ DeepMemo/
 
 ---
 
-## 💾 V0.10.0 - Migration IndexedDB & Sync Multi-Onglets (4 janvier 2026) - ✅ COMPLÉTÉ
-
-**Mise à niveau majeure du stockage** de localStorage vers IndexedDB avec Dexie.js
-
-### Migration du Stockage
-- [x] **IndexedDB avec Dexie.js** : Capacité 500MB-1GB (vs 5-10MB localStorage)
-- [x] **3 stores** : nodes, settings, attachments
-- [x] **Migration automatique** : Transparente pour utilisateurs, backup localStorage préservé
-- [x] **Nouveaux modules** : storage.js (285 lignes), migration.js (185 lignes)
-
-### Synchronisation Multi-Onglets
-- [x] **BroadcastChannel API** : Sync cross-tab en temps réel
-- [x] **Module sync.js** : 80 lignes, séparation propre
-- [x] **Notifications toast** : Feedback visuel lors rechargement données
-
-### Corrections de Bugs
-- [x] **5 corrections critiques** : Noms DB, usage cursor, extraction ID, refs Markdown, MIME SVG
-- [x] **Corrections i18n** : Boutons Export/Import, titre nouveau nœud, 3 messages toast
-
-### Documentation
-- [x] **Nouvelles docs** : STORAGE.md (EN/FR) avec commandes debug
-- [x] **Mis à jour** : README, TODO, CLAUDE.md, Service Worker v1.7.0
-- [x] **Nettoyé** : Fichiers temporaires migration supprimés
-
----
-
 ## 🌟 V1.0 - Types actifs et système complet
 
 ### Types de nœuds actifs (Fondations)
@@ -550,14 +524,14 @@ DeepMemo/
 
 ### Décisions techniques validées
 - ✅ Vanilla JS : pas de overhead, contrôle total
-- ✅ ~~LocalStorage~~ → **IndexedDB avec Dexie.js** : capacité 500 Mo-1 Go, stockage structuré (V0.10)
+- ✅ LocalStorage : assez pour MVP, migration backend prévue
 - ✅ Dark theme par défaut : préférence utilisateur
 - ✅ Keyboard-first : efficacité maximale
 
 ---
 
-**Dernière mise à jour** : 4 janvier 2026 (V0.10.0 migration IndexedDB)
-**Version actuelle** : V0.10.0 (✅ COMPLÉTÉ & PRÊT POUR DÉPLOIEMENT)
+**Dernière mise à jour** : 1er Janvier 2026 (V0.9.4 polish & corrections)
+**Version actuelle** : V0.9.4 (✅ COMPLÉTÉ & DÉPLOYÉ)
 **Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
 **Prochaine milestone** : V1.0 (Types de nœuds actifs - fondations)
 

@@ -32,9 +32,7 @@ src/js/
 ├── app.js                      # Entry point (~830 lines)
 │
 ├── core/
-│   ├── data.js                 # Data + IndexedDB + export/import
-│   ├── storage.js              # IndexedDB layer (Dexie.js) - V0.10
-│   ├── migration.js            # localStorage → IndexedDB migration - V0.10
+│   ├── data.js                 # Data + localStorage + export/import
 │   ├── attachments.js          # File attachments (IndexedDB)
 │   └── default-data.js         # Default demo content
 │
@@ -55,8 +53,7 @@ src/js/
 │   ├── routing.js              # URL navigation
 │   ├── keyboard.js             # Keyboard shortcuts
 │   ├── helpers.js              # Utility functions
-│   ├── i18n.js                 # Internationalization system
-│   └── sync.js                 # Multi-tab sync (BroadcastChannel) - V0.10
+│   └── i18n.js                 # Internationalization system
 │
 └── locales/
     ├── fr.js                   # French dictionary
@@ -541,61 +538,17 @@ enableBranchMode(nodeId);
 
 ## 💾 Persistence
 
-### IndexedDB (V0.10+)
-
-Since V0.10, DeepMemo uses **IndexedDB with Dexie.js** for all data storage, replacing the previous localStorage-based system.
-
-**Database:** `deepmemo` with three object stores:
+### LocalStorage
 
 ```javascript
-db.version(1).stores({
-  // Nodes table with indexes
-  nodes: 'id, parent, *tags, created, modified',
-
-  // Settings table (key-value pairs)
-  settings: 'key',
-
-  // Attachments table (files as blobs)
-  attachments: 'id'
-});
+// Used keys
+'deepmemo_data'           // { nodes: {}, rootNodes: [] }
+'deepmemo_viewMode'       // 'view' or 'edit'
+'deepmemo_language'       // 'fr' or 'en'
+'deepmemo_fontPreference' // 'sto' or 'system'
 ```
-
-**Storage Capacity:**
-- Before (V0.9): 5-10 MB (localStorage)
-- After (V0.10): 500 MB - 1 GB (IndexedDB)
-
-**Key Features:**
-- Automatic migration from localStorage on first load
-- Structured tables with indexes for fast queries
-- localStorage preserved as backup after migration
-- Migration flag: `deepmemo_migrated_to_indexeddb`
-
-**Settings stored:**
-- `rootNodes`: Array of root node IDs
-- `viewMode`: 'view' or 'edit'
-- `language`: 'fr' or 'en'
-- `fontPreference`: 'sto' or 'system'
 
 **Note**: `expandedNodes` is NOT saved (dynamically recalculated via auto-collapse).
-
-**Multi-Tab Synchronization (V0.10):**
-
-Uses BroadcastChannel API for real-time sync across tabs:
-
-```javascript
-const channel = new BroadcastChannel('deepmemo-sync');
-
-// After each saveData()
-channel.postMessage({ type: 'data-changed' });
-
-// Other tabs reload data automatically
-channel.onmessage = async () => {
-  await loadData();
-  render();
-};
-```
-
-**See also:** `docs/STORAGE.md` for complete documentation.
 
 ### Export/Import JSON
 
@@ -674,18 +627,12 @@ channel.onmessage = async () => {
 - ES6 modules (tree-shaking possible)
 - Targeted rendering (no full re-render)
 - Event delegation
-- IndexedDB with indexes for fast queries (V0.10+)
-- Async/await for non-blocking storage operations
+- Fast localStorage
 
 ### Current Limitations
-- No virtual scrolling (limit ~1000 nodes)
+- No virtual scrolling (limit ~500 nodes)
 - No lazy loading
 - No Web Workers
-
-### Performance Metrics (V0.10)
-- Save single node: <50ms (async, non-blocking)
-- Load all data: <500ms (100 nodes + settings)
-- Migration: ~1s (100 nodes + attachments)
 
 ---
 
@@ -712,10 +659,10 @@ channel.onmessage = async () => {
 
 ### Optimizations
 - Virtual scrolling for large trees
+- IndexedDB for large datasets
 - Web Workers for async search
-- Advanced query optimization with IndexedDB indexes
 
 ---
 
-**Technical Document V0.10**
-Last updated: January 4, 2026
+**Technical Document V0.9**
+Last updated: December 28, 2025

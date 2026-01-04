@@ -2,7 +2,7 @@
 
 > 🌍 **Language versions**: [English](ROADMAP.md) | [Français](ROADMAP.fr.md)
 
-## 📍 Current state: V0.10.0 (January 2026)
+## 📍 Current state: V0.9.4 (January 2026)
 
 ### ✅ Implemented features
 
@@ -70,7 +70,7 @@
 - [x] Complete documentation in right panel
 
 #### Persistence
-- [x] ~~LocalStorage for data~~ → **IndexedDB with Dexie.js** (migrated in V0.10)
+- [x] LocalStorage for data
 - [x] Global JSON export
 - [x] Global JSON import
 - [x] Branch export (node + descendants)
@@ -413,32 +413,6 @@ DeepMemo/
 
 ---
 
-## 💾 V0.10.0 - IndexedDB Migration & Multi-Tab Sync (January 4, 2026) - ✅ COMPLETED
-
-**Major storage upgrade** from localStorage to IndexedDB with Dexie.js
-
-### Storage Migration
-- [x] **IndexedDB with Dexie.js**: 500MB-1GB capacity (vs 5-10MB localStorage)
-- [x] **3 stores**: nodes, settings, attachments
-- [x] **Automatic migration**: Transparent for users, localStorage backup preserved
-- [x] **New modules**: storage.js (285 lines), migration.js (185 lines)
-
-### Multi-Tab Synchronization
-- [x] **BroadcastChannel API**: Real-time cross-tab sync
-- [x] **sync.js module**: 80 lines, clean separation
-- [x] **Toast notifications**: Visual feedback on data reload
-
-### Bug Fixes
-- [x] **5 critical fixes**: DB names, cursor usage, ID extraction, Markdown refs, SVG MIME
-- [x] **i18n fixes**: Export/Import buttons, new node title, 3 toast messages
-
-### Documentation
-- [x] **New docs**: STORAGE.md (EN/FR) with debug commands
-- [x] **Updated**: README, TODO, CLAUDE.md, Service Worker v1.7.0
-- [x] **Cleaned**: Removed temporary migration files
-
----
-
 ## 🌟 V1.0 - Active types and complete system
 
 ### Active node types (Foundations)
@@ -550,14 +524,14 @@ DeepMemo/
 
 ### Validated technical decisions
 - ✅ Vanilla JS: no overhead, full control
-- ✅ ~~LocalStorage~~ → **IndexedDB with Dexie.js**: 500MB-1GB capacity, structured storage (V0.10)
+- ✅ LocalStorage: enough for MVP, backend migration planned
 - ✅ Dark theme by default: user preference
 - ✅ Keyboard-first: maximum efficiency
 
 ---
 
-**Last update**: January 4, 2026 (V0.10.0 IndexedDB migration)
-**Current version**: V0.10.0 (✅ COMPLETED & READY FOR DEPLOYMENT)
+**Last update**: January 1, 2026 (V0.9.4 polish & bug fixes)
+**Current version**: V0.9.4 (✅ COMPLETED & DEPLOYED)
 **Deployment**: ✅ **deepmemo.org** (IN PRODUCTION)
 **Next milestone**: V1.0 (Active node types - foundations)
 
