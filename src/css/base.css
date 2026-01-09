@@ -62,3 +62,7 @@ body.system-font .markdown-rendered pre,
 body.system-font .markdown-rendered code {
   font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
 }
+
+body.system-font .content-editor {
+  font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
+}

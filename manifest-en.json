@@ -1,7 +1,7 @@
 {
   "name": "DeepMemo - Your second brain",
   "short_name": "DeepMemo",
-  "description": "Knowledge management system based on recursive, interconnected, and active nodes",
+  "description": "Knowledge management system based on recursive and interconnected nodes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
