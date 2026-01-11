@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.7.0'; // V0.10.0 - IndexedDB migration & Multi-tab sync (Jan 2026)
+const CACHE_VERSION = 'v1.8.0'; // V0.10.1 - Automatic emoji icons in tree view (Jan 2026)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)

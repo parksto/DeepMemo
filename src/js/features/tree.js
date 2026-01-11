@@ -21,6 +21,45 @@ let expandedNodes = new Set();
 let renderCallback = null;
 
 /**
+ * Extract emoji from the start of a title
+ * Returns {emoji: string, titleWithoutEmoji: string} or null if no emoji found
+ */
+function extractEmojiFromTitle(title) {
+  if (!title) return null;
+
+  // Comprehensive emoji regex covering all Unicode emoji ranges:
+  // - 1F300-1F5FF: Misc Symbols and Pictographs
+  // - 1F600-1F64F: Emoticons (faces)
+  // - 1F680-1F6FF: Transport and Map
+  // - 1F700-1F77F: Alchemical Symbols
+  // - 1F780-1F7FF: Geometric Shapes Extended
+  // - 1F800-1F8FF: Supplemental Arrows-C
+  // - 1F900-1F9FF: Supplemental Symbols and Pictographs
+  // - 1FA00-1FA6F: Chess + Extended-A
+  // - 1FA70-1FAFF: Symbols and Pictographs Extended-A (includes 🪢)
+  // - 1F1E0-1F1FF: Regional Indicators (flags)
+  // - 2600-26FF: Miscellaneous Symbols
+  // - 2700-27BF: Dingbats
+  // - 2300-23FF: Miscellaneous Technical
+  // - 2B00-2BFF: Miscellaneous Symbols and Arrows
+  // - FE00-FE0F: Variation Selectors
+  // - 1F3FB-1F3FF: Skin tone modifiers
+  // - 200D: Zero Width Joiner (for composite emojis like 👨‍👩‍👧‍👦)
+  // Using + to capture complete composite emojis, followed by optional whitespace
+  const emojiRegex = /^([\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}\u{2B00}-\u{2BFF}\uFE00-\uFE0F\u{1F3FB}-\u{1F3FF}\u200D]+)\s*/u;
+
+  const match = title.match(emojiRegex);
+  if (match) {
+    return {
+      emoji: match[1],
+      titleWithoutEmoji: title.slice(match[0].length)
+    };
+  }
+
+  return null;
+}
+
+/**
  * Get instance key for a node in the tree
  */
 export function getInstanceKey(nodeId, parentContext) {
@@ -276,16 +315,27 @@ export function renderTree(onNodeClick) {
       content.appendChild(spacer);
     }
 
+    // Extract emoji from title for non-symlink nodes
+    let nodeEmoji = null;
+    let displayTitle = node.title;
+    if (!isSymlink) {
+      const extracted = extractEmojiFromTitle(node.title);
+      if (extracted) {
+        nodeEmoji = extracted.emoji;
+        displayTitle = extracted.titleWithoutEmoji;
+      }
+    }
+
     // Icon
     const icon = document.createElement('span');
     icon.className = 'tree-node-icon';
-    icon.textContent = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : '📄';
+    icon.textContent = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : (nodeEmoji || '📄');
     content.appendChild(icon);
 
     // Title
     const title = document.createElement('span');
     title.className = 'tree-node-title';
-    title.textContent = node.title;
+    title.textContent = displayTitle;
 
     if (isExternalSymlink) {
       title.style.opacity = '0.4';

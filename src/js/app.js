@@ -1,5 +1,5 @@
 /**
- * DeepMemo V0.8 - Main Application Entry Point
+ * DeepMemo V0.10.1 - Main Application Entry Point
  * Modular ES6 version
  */
 
@@ -36,7 +36,7 @@ const app = {
    * Initialize the application
    */
   async init() {
-    console.log('🚀 DeepMemo V0.9 - Initialisation...');
+    console.log('🚀 DeepMemo V0.10.1 - Initialisation...');
 
     // Initialize i18n system
     await initI18n();
