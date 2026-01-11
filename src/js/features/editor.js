@@ -7,7 +7,7 @@ import { data, saveData } from '../core/data.js';
 import { showToast } from '../ui/toast.js';
 import { escapeHtml } from '../utils/helpers.js';
 import * as TagsModule from './tags.js';
-import { isBranchMode, isNodeInBranch, getBranchRootId } from './tree.js';
+import { isBranchMode, isNodeInBranch, getBranchRootId, updatePageTitle } from './tree.js';
 import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
 import * as AttachmentsModule from '../core/attachments.js';
@@ -272,6 +272,11 @@ export function saveNode(nodeId) {
 
   saveData();
   showToast(t('toast.saved'), '💾');
+
+  // Update page title if this is the branch root node
+  if (nodeId === getBranchRootId()) {
+    updatePageTitle();
+  }
 }
 
 /**

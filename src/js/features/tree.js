@@ -144,6 +144,9 @@ export function enableBranchMode(nodeId) {
   const instanceKey = getInstanceKey(nodeId, null);
   expandedNodes.add(instanceKey);
 
+  // Update page title for branch mode
+  updatePageTitle();
+
   return true;
 }
 
@@ -153,6 +156,9 @@ export function enableBranchMode(nodeId) {
 export function disableBranchMode() {
   branchMode = false;
   branchRootId = null;
+
+  // Restore default page title
+  updatePageTitle();
 }
 
 /**
@@ -185,6 +191,26 @@ export function isNodeInBranch(nodeId) {
   }
 
   return false;
+}
+
+/**
+ * Update page title based on branch mode
+ * In normal mode: "DeepMemo - Your second brain..."
+ * In branch mode: "DeepMemo - [branch root node title]"
+ */
+export function updatePageTitle() {
+  if (branchMode && branchRootId) {
+    const node = data.nodes[branchRootId];
+    if (node) {
+      // Clean the title: remove newlines and control characters to avoid injection
+      const cleanTitle = node.title.replace(/[\r\n\t]/g, ' ').trim();
+      document.title = `DeepMemo - ${cleanTitle}`;
+      return;
+    }
+  }
+
+  // Default title (uses i18n)
+  document.title = t('meta.title');
 }
 
 /**
