@@ -59,6 +59,7 @@ export default {
     nodeDuplicatedInserted: "Nœud dupliqué et inséré",
     orderModified: "Ordre modifié",
     branchModeEnabled: "Mode branche activé",
+    branchModeDisabled: "Mode branche désactivé",
     branchRootNotFound: "Nœud racine de branche introuvable",
     nodeNotFound: "Nœud introuvable",
     alreadyAtRoot: "Déjà à la racine",
@@ -250,6 +251,7 @@ export default {
 
   // Labels and metadata
   labels: {
+    branchMode: "🌿 mode branche",
     created: "Créé",
     modified: "Modifié",
     children: "📂 Nœuds enfants",

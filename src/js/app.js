@@ -1,5 +1,5 @@
 /**
- * DeepMemo V0.10.2 - Main Application Entry Point
+ * DeepMemo V0.10.3 - Main Application Entry Point
  * Modular ES6 version
  */
 
@@ -36,7 +36,7 @@ const app = {
    * Initialize the application
    */
   async init() {
-    console.log('🚀 DeepMemo V0.10.2 - Initialisation...');
+    console.log('🚀 DeepMemo V0.10.3 - Initialisation...');
 
     // Initialize i18n system
     await initI18n();
@@ -245,6 +245,9 @@ const app = {
     });
     TreeModule.updateTreeFocus();
 
+    // Update branch mode indicator
+    this.updateBranchModeIndicator();
+
     // Disable "New Root Node" button in branch mode
     const newRootNodeBtn = document.getElementById('newRootNodeBtn');
     if (newRootNodeBtn) {
@@ -331,6 +334,25 @@ const app = {
     } else {
       showToast(t('toast.alreadyAtRoot'), '🏠');
     }
+  },
+
+  /**
+   * Exit branch mode and return to global view
+   */
+  exitBranchMode() {
+    TreeModule.disableBranchMode();
+    this.updateBranchModeIndicator();
+    RoutingModule.updateHash(this.currentNodeId);
+    this.render();
+    showToast(t('toast.branchModeDisabled') || 'Mode branche désactivé', '🌐');
+  },
+
+  /**
+   * Update branch mode indicator visibility
+   */
+  updateBranchModeIndicator() {
+    const indicator = document.getElementById('branchModeIndicator');
+    indicator.style.display = TreeModule.isBranchMode() ? 'flex' : 'none';
   },
 
   /**

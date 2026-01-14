@@ -51,6 +51,7 @@ export default {
     nodeDuplicatedInserted: "Node duplicated and inserted",
     orderModified: "Order modified",
     branchModeEnabled: "Branch mode enabled",
+    branchModeDisabled: "Branch mode disabled",
     branchRootNotFound: "Branch root node not found",
     nodeNotFound: "Node not found",
     alreadyAtRoot: "Already at root",
@@ -242,6 +243,7 @@ export default {
 
   // Labels and metadata
   labels: {
+    branchMode: "🌿 branch mode",
     created: "Created",
     modified: "Modified",
     children: "📂 Child nodes",

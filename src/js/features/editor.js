@@ -112,6 +112,10 @@ export function displayNode(nodeId, renderCallback) {
   // Clean up blob URLs from previous node
   cleanupBlobUrls();
 
+  // Force view mode when switching nodes (no longer persistent)
+  viewMode = 'view';
+  localStorage.setItem('deepmemo_viewMode', viewMode);
+
   const node = data.nodes[nodeId];
   if (!node) return;
 

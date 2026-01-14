@@ -6,6 +6,7 @@
 import { data } from '../core/data.js';
 import { highlightText } from '../utils/helpers.js';
 import { t } from '../utils/i18n.js';
+import { isBranchMode, isNodeInBranch } from './tree.js';
 
 // Search state
 let searchVisible = false;
@@ -67,6 +68,11 @@ function performSearch(query) {
   const queryLower = query.toLowerCase();
 
   Object.values(data.nodes).forEach(node => {
+    // Skip nodes outside branch scope
+    if (!isNodeInBranch(node.id)) {
+      return;
+    }
+
     const titleMatch = node.title.toLowerCase().includes(queryLower);
     const contentMatch = node.content?.toLowerCase().includes(queryLower);
     const tagsMatch = node.tags && node.tags.some(tag => tag.toLowerCase().includes(queryLower));
