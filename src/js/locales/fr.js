@@ -66,6 +66,7 @@ export default {
     movedToParent: "Remonté au parent",
     linkCopied: "Lien copié dans le presse-papier",
     branchLinkCopied: "Lien de branche copié dans le presse-papier",
+    markdownLinkCopied: "Lien Markdown copié dans le presse-papier",
     copyError: "Erreur lors de la copie",
     selectNodeFirst: "Sélectionne d'abord un nœud",
     selectParentFirst: "Sélectionne d'abord un nœud parent",

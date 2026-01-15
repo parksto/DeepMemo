@@ -341,21 +341,29 @@ export function renderTree(onNodeClick) {
       content.appendChild(spacer);
     }
 
-    // Extract emoji from title for non-symlink nodes
+    // Extract emoji from title (for all nodes, including symlinks)
     let nodeEmoji = null;
     let displayTitle = node.title;
-    if (!isSymlink) {
-      const extracted = extractEmojiFromTitle(node.title);
-      if (extracted) {
-        nodeEmoji = extracted.emoji;
-        displayTitle = extracted.titleWithoutEmoji;
-      }
+    const extracted = extractEmojiFromTitle(node.title);
+    if (extracted) {
+      nodeEmoji = extracted.emoji;
+      displayTitle = extracted.titleWithoutEmoji;
     }
 
     // Icon
     const icon = document.createElement('span');
     icon.className = 'tree-node-icon';
-    icon.textContent = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : (nodeEmoji || '📄');
+    if (isSymlink) {
+      // Symlinks: use custom emoji if present, otherwise default 🔗 or 🔗🚫
+      if (nodeEmoji) {
+        icon.textContent = nodeEmoji;
+      } else {
+        icon.textContent = isExternalSymlink ? '🔗🚫' : '🔗';
+      }
+    } else {
+      // Regular nodes: use custom emoji or default 📄
+      icon.textContent = nodeEmoji || '📄';
+    }
     content.appendChild(icon);
 
     // Title

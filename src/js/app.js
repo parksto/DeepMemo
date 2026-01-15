@@ -352,7 +352,17 @@ const app = {
    */
   updateBranchModeIndicator() {
     const indicator = document.getElementById('branchModeIndicator');
-    indicator.style.display = TreeModule.isBranchMode() ? 'flex' : 'none';
+    const isBranchMode = TreeModule.isBranchMode();
+    indicator.style.display = isBranchMode ? 'flex' : 'none';
+
+    // Update exit link to return to branch root node in global mode
+    if (isBranchMode) {
+      const branchRootId = TreeModule.getBranchRootId();
+      const exitLink = indicator.querySelector('.branch-mode-exit');
+      if (exitLink && branchRootId) {
+        exitLink.href = `./#/node/${branchRootId}`;
+      }
+    }
   },
 
   /**
@@ -735,13 +745,26 @@ const app = {
     // Allow middle-click (button 1) and right-click (button 2) to work normally
     if (event && event.button === 0) {
       event.preventDefault();
-      const branchRootId = TreeModule.isBranchMode() ? TreeModule.getBranchRootId() : null;
-      const url = RoutingModule.getShareableUrl(this.currentNodeId, branchRootId);
-      navigator.clipboard.writeText(url).then(() => {
-        showToast(t('toast.linkCopied'), '🔗');
-      }).catch(() => {
-        showToast(t('toast.copyError'), '⚠️');
-      });
+      // URL to copy: always without branch (global mode)
+      const urlToCopy = RoutingModule.getShareableUrl(this.currentNodeId, null);
+
+      // Ctrl+Click or Cmd+Click: copy markdown format [Title](URL)
+      if (event.ctrlKey || event.metaKey) {
+        const title = this.data.nodes[this.currentNodeId].title;
+        const markdown = `[${title}](${urlToCopy})`;
+        navigator.clipboard.writeText(markdown).then(() => {
+          showToast(t('toast.markdownLinkCopied'), '🔗');
+        }).catch(() => {
+          showToast(t('toast.copyError'), '⚠️');
+        });
+      } else {
+        // Normal click: copy URL only (global mode, no branch param)
+        navigator.clipboard.writeText(urlToCopy).then(() => {
+          showToast(t('toast.linkCopied'), '🔗');
+        }).catch(() => {
+          showToast(t('toast.copyError'), '⚠️');
+        });
+      }
     }
   },
 

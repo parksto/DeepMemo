@@ -58,6 +58,7 @@ export default {
     movedToParent: "Moved to parent",
     linkCopied: "Link copied to clipboard",
     branchLinkCopied: "Branch link copied to clipboard",
+    markdownLinkCopied: "Markdown link copied to clipboard",
     copyError: "Copy error",
     selectNodeFirst: "Select a node first",
     selectParentFirst: "Select a parent node first",

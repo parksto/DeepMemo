@@ -13,6 +13,11 @@ import { t } from '../utils/i18n.js';
 import { notifyDataChanged } from '../utils/sync.js';
 
 /**
+ * Documentation URL for export format
+ */
+const EXPORT_FORMAT_DOC_URL = 'https://raw.githubusercontent.com/parksto/DeepMemo/refs/heads/main/docs/file-formats/JSON-STRUCTURE.md';
+
+/**
  * i18n wrappers for alerts and confirms
  */
 function i18nAlert(key, params = {}) {
@@ -262,6 +267,7 @@ export function exportBranch(nodeId) {
   const branchData = {
     type: 'deepmemo-branch',
     version: '1.0',
+    _documentation: EXPORT_FORMAT_DOC_URL,
     branchRootId: nodeId,
     exported: Date.now(),
     nodeCount: nodeCount,
@@ -530,6 +536,7 @@ export async function exportBranchZIP(nodeId) {
     const branchData = {
       type: 'deepmemo-branch',
       version: '1.0',
+      _documentation: EXPORT_FORMAT_DOC_URL,
       branchRootId: nodeId,
       exported: Date.now(),
       nodeCount: nodeCount,

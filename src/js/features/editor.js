@@ -331,36 +331,41 @@ function updateBreadcrumb(currentNodeId) {
     return;
   }
 
-  if (path.length === 1) {
-    // Root level node - no parent path needed
-    html += '<span class="breadcrumb-separator">›</span>';
-    html += `<span class="breadcrumb-item breadcrumb-current">${escapeHtml(path[0].title)}</span>`;
-  } else {
-    // Has parents - show intelligent breadcrumb
-    const currentNode = path[path.length - 1];
-    const parentNode = path[path.length - 2];
+  // Always show separator after home
+  html += '<span class="breadcrumb-separator">›</span>';
 
+  // Show up to 3 ancestors before current node
+  const currentNode = path[path.length - 1];
+  const ancestorsToShow = path.slice(0, -1); // All ancestors
+
+  if (ancestorsToShow.length > 3) {
+    // Show ellipsis for deep paths (more than 3 ancestors)
+    html += '<span class="breadcrumb-ellipsis" title="' +
+      path.slice(0, -4).map(p => escapeHtml(p.title)).join(' › ') +
+      '">...</span>';
     html += '<span class="breadcrumb-separator">›</span>';
 
-    // Add ellipsis if depth > 2
-    if (path.length > 2) {
-      html += '<span class="breadcrumb-ellipsis" title="' +
-        path.slice(0, -2).map(p => escapeHtml(p.title)).join(' › ') +
-        '">...</span>';
+    // Show last 3 ancestors
+    ancestorsToShow.slice(-3).forEach(ancestor => {
+      html += `<span class="breadcrumb-item breadcrumb-parent"
+               onclick="app.selectNodeById('${ancestor.id}')"
+               title="${escapeHtml(ancestor.title)}">
+               ${escapeHtml(ancestor.title)}</span>`;
       html += '<span class="breadcrumb-separator">›</span>';
-    }
-
-    // Parent node (smaller, clickable)
-    html += `<span class="breadcrumb-item breadcrumb-parent"
-             onclick="app.selectNodeById('${parentNode.id}')"
-             title="${t('tooltips.goToParent')}">
-             ${escapeHtml(parentNode.title)}</span>`;
-
-    html += '<span class="breadcrumb-separator">›</span>';
-
-    // Current node (normal size, not clickable)
-    html += `<span class="breadcrumb-item breadcrumb-current">${escapeHtml(currentNode.title)}</span>`;
+    });
+  } else {
+    // Show all ancestors (0-3)
+    ancestorsToShow.forEach(ancestor => {
+      html += `<span class="breadcrumb-item breadcrumb-parent"
+               onclick="app.selectNodeById('${ancestor.id}')"
+               title="${escapeHtml(ancestor.title)}">
+               ${escapeHtml(ancestor.title)}</span>`;
+      html += '<span class="breadcrumb-separator">›</span>';
+    });
   }
+
+  // Current node (normal size, not clickable)
+  html += `<span class="breadcrumb-item breadcrumb-current">${escapeHtml(currentNode.title)}</span>`;
 
   breadcrumb.innerHTML = html;
 }
@@ -874,6 +879,33 @@ export async function updateViewMode() {
         renderedContent = await processAttachmentUrls(renderedContent, displayNode);
 
         contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
+
+        // Update internal links to preserve branch mode
+        if (isBranchMode()) {
+          const branchRootId = getBranchRootId();
+          const links = contentPreview.querySelectorAll('a');
+          links.forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            // Extract node ID from href (supports both relative #/node/123 and full URLs)
+            const match = href.match(/#\/node\/([^?#]+)/);
+            if (match) {
+              const targetNodeId = match[1];
+              // Only add branch param if target node is in current branch
+              if (isNodeInBranch(targetNodeId)) {
+                // Check if it's a full URL or just a hash
+                if (href.startsWith('http://') || href.startsWith('https://')) {
+                  // Full URL: replace with relative URL including branch param
+                  link.setAttribute('href', `?branch=${branchRootId}#/node/${targetNodeId}`);
+                } else {
+                  // Relative hash: prepend branch param
+                  link.setAttribute('href', `?branch=${branchRootId}${href}`);
+                }
+              }
+            }
+          });
+        }
       } else {
         contentPreview.innerHTML = `<div class="markdown-content"><em>${t('messages.emptyContent')}</em></div>`;
       }
