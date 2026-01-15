@@ -419,7 +419,7 @@ function updateChildren(currentNodeId) {
       card.innerHTML = `
         <div class="child-card-icon">⚠️</div>
         <div class="child-card-title user-content">${escapeHtml(child.title)} (${t('nodeTypes.badge.broken')})</div>
-        <div class="child-card-preview">${t('labels.brokenSymlink')}</div>
+        <div class="child-card-preview user-content">${t('labels.brokenSymlink')}</div>
       `;
       grid.appendChild(card);
       return;
@@ -462,7 +462,7 @@ function updateChildren(currentNodeId) {
     card.innerHTML = `
       <div class="child-card-icon">${icon}</div>
       <div class="child-card-title user-content" style="${titleStyle}${isExternalSymlink ? ' opacity: 0.6;' : ''}">${escapeHtml(child.title)}${badge}</div>
-      <div class="child-card-preview" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${escapeHtml(preview)}</div>
+      <div class="child-card-preview user-content" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${escapeHtml(preview)}</div>
     `;
 
     // Drag & Drop (only if not an external symlink)
@@ -587,7 +587,7 @@ export async function updateRightPanel(currentNodeId) {
   if (displayNode.parent) {
     const parent = data.nodes[displayNode.parent];
     if (parent) {
-      html += `<div class="info-item"><div class="info-label">${t('labels.parent')}</div>${escapeHtml(parent.title)}</div>`;
+      html += `<div class="info-item"><div class="info-label">${t('labels.parent')}</div><span class="user-content">${escapeHtml(parent.title)}</span></div>`;
     }
   }
 
