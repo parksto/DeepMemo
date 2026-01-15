@@ -51,6 +51,7 @@ export function renderTags() {
       };
 
       const tagText = document.createElement('span');
+      tagText.className = 'user-content';
       tagText.textContent = tag;
 
       const removeBtn = document.createElement('span');

@@ -39,30 +39,24 @@
 
 /* Global Styles */
 body {
-  font-family: 'Sto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* System font by default for all UI elements */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   height: 100vh;
   overflow: hidden;
 }
 
-/* Force custom font on form elements */
-input, button, textarea, select {
-  font-family: inherit;
+/* Custom font mode: Apply Sto only to user content */
+body.custom-font .user-content {
+  font-family: 'Sto', serif;
 }
 
-/* System font override (when user prefers system fonts) */
-body.system-font {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-body.system-font pre,
-body.system-font code,
-body.system-font .markdown-rendered pre,
-body.system-font .markdown-rendered code {
-  font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
-}
-
-body.system-font .content-editor {
-  font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
+/* Code blocks always use monospace (in both modes) */
+pre, code,
+.markdown-rendered pre,
+.markdown-rendered code,
+.markdown-content pre,
+.markdown-content code {
+  font-family: 'Sto Fixed', 'SF Mono', 'Consolas', 'Courier New', monospace;
 }

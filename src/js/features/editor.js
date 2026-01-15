@@ -347,7 +347,7 @@ function updateBreadcrumb(currentNodeId) {
 
     // Show last 3 ancestors
     ancestorsToShow.slice(-3).forEach(ancestor => {
-      html += `<span class="breadcrumb-item breadcrumb-parent"
+      html += `<span class="breadcrumb-item breadcrumb-parent user-content"
                onclick="app.selectNodeById('${ancestor.id}')"
                title="${escapeHtml(ancestor.title)}">
                ${escapeHtml(ancestor.title)}</span>`;
@@ -356,7 +356,7 @@ function updateBreadcrumb(currentNodeId) {
   } else {
     // Show all ancestors (0-3)
     ancestorsToShow.forEach(ancestor => {
-      html += `<span class="breadcrumb-item breadcrumb-parent"
+      html += `<span class="breadcrumb-item breadcrumb-parent user-content"
                onclick="app.selectNodeById('${ancestor.id}')"
                title="${escapeHtml(ancestor.title)}">
                ${escapeHtml(ancestor.title)}</span>`;
@@ -365,7 +365,7 @@ function updateBreadcrumb(currentNodeId) {
   }
 
   // Current node (normal size, not clickable)
-  html += `<span class="breadcrumb-item breadcrumb-current">${escapeHtml(currentNode.title)}</span>`;
+  html += `<span class="breadcrumb-item breadcrumb-current user-content">${escapeHtml(currentNode.title)}</span>`;
 
   breadcrumb.innerHTML = html;
 }
@@ -418,7 +418,7 @@ function updateChildren(currentNodeId) {
       card.style.opacity = '0.5';
       card.innerHTML = `
         <div class="child-card-icon">⚠️</div>
-        <div class="child-card-title">${escapeHtml(child.title)} (${t('nodeTypes.badge.broken')})</div>
+        <div class="child-card-title user-content">${escapeHtml(child.title)} (${t('nodeTypes.badge.broken')})</div>
         <div class="child-card-preview">${t('labels.brokenSymlink')}</div>
       `;
       grid.appendChild(card);
@@ -461,7 +461,7 @@ function updateChildren(currentNodeId) {
 
     card.innerHTML = `
       <div class="child-card-icon">${icon}</div>
-      <div class="child-card-title" style="${titleStyle}${isExternalSymlink ? ' opacity: 0.6;' : ''}">${escapeHtml(child.title)}${badge}</div>
+      <div class="child-card-title user-content" style="${titleStyle}${isExternalSymlink ? ' opacity: 0.6;' : ''}">${escapeHtml(child.title)}${badge}</div>
       <div class="child-card-preview" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${escapeHtml(preview)}</div>
     `;
 
@@ -624,7 +624,7 @@ export async function updateRightPanel(currentNodeId) {
       const escapedTag = escapeHtml(item.tag);
 
       html += `
-        <div class="tag-cloud-item"
+        <div class="tag-cloud-item user-content"
              style="--tag-size: ${size}px;"
              data-tag="${escapedTag}"
              title="${t('tooltips.tagOccurrences', {count: item.count})}">
@@ -712,7 +712,7 @@ export async function updateRightPanel(currentNodeId) {
   html += '</div>';
 
   // Preferences section (Font + Language)
-  const isSystemFont = document.body.classList.contains('system-font');
+  const isCustomFont = document.body.classList.contains('custom-font');
   const currentLang = getCurrentLanguage();
   html += `
     <div class="info-section">
@@ -721,7 +721,7 @@ export async function updateRightPanel(currentNodeId) {
       <div class="info-item" style="cursor: pointer;" onclick="window.app.toggleFontPreference()">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span>${t('labels.systemFont')}</span>
-          <span style="font-size: 1.2em;">${isSystemFont ? '✅' : '☐'}</span>
+          <span style="font-size: 1.2em;">${isCustomFont ? '☐' : '✅'}</span>
         </div>
       </div>
 
@@ -878,7 +878,7 @@ export async function updateViewMode() {
         // Process attachment: URLs to blob URLs (pass node for metadata)
         renderedContent = await processAttachmentUrls(renderedContent, displayNode);
 
-        contentPreview.innerHTML = '<div class="markdown-content">' + renderedContent + '</div>';
+        contentPreview.innerHTML = '<div class="markdown-content user-content">' + renderedContent + '</div>';
 
         // Update internal links to preserve branch mode
         if (isBranchMode()) {
@@ -907,7 +907,7 @@ export async function updateViewMode() {
           });
         }
       } else {
-        contentPreview.innerHTML = `<div class="markdown-content"><em>${t('messages.emptyContent')}</em></div>`;
+        contentPreview.innerHTML = `<div class="markdown-content user-content"><em>${t('messages.emptyContent')}</em></div>`;
       }
     }
   } else {

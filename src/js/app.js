@@ -799,28 +799,29 @@ const app = {
    */
   initFontPreference() {
     const preference = localStorage.getItem('deepmemo_fontPreference');
-    // Default to system font, unless explicitly set to custom (Sto)
-    if (preference !== 'custom') {
-      document.body.classList.add('system-font');
+    // Apply custom font if preference is set to 'custom'
+    if (preference === 'custom') {
+      document.body.classList.add('custom-font');
     }
+    // Default is system font (no class needed)
   },
 
   /**
-   * Toggle font preference between custom (Sto) and system fonts
+   * Toggle font preference between custom (Sto for user content) and system fonts
    */
   toggleFontPreference() {
-    const isSystemFont = document.body.classList.contains('system-font');
+    const isCustomFont = document.body.classList.contains('custom-font');
 
-    if (isSystemFont) {
-      // Switch to custom font (Sto)
-      document.body.classList.remove('system-font');
-      localStorage.setItem('deepmemo_fontPreference', 'custom');
-      showToast(t('toast.customFontEnabled'), '✨');
-    } else {
-      // Switch to system font
-      document.body.classList.add('system-font');
+    if (isCustomFont) {
+      // Switch to system font (default, no class)
+      document.body.classList.remove('custom-font');
       localStorage.setItem('deepmemo_fontPreference', 'system');
       showToast(t('toast.systemFontEnabled'), '🔤');
+    } else {
+      // Switch to custom font (Sto for user content)
+      document.body.classList.add('custom-font');
+      localStorage.setItem('deepmemo_fontPreference', 'custom');
+      showToast(t('toast.customFontEnabled'), '✨');
     }
 
     // Re-render right panel to update checkbox

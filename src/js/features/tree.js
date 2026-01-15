@@ -246,7 +246,7 @@ export function renderTree(onNodeClick) {
         content.className = 'tree-node-content circular-symlink' + (isActive ? ' active' : '');
         content.setAttribute('data-node-id', nodeId);
         content.setAttribute('data-instance-key', instanceKey);
-        content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">🔄</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (' + t('nodeTypes.badge.circular') + ')</span>';
+        content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">🔄</span><span class="tree-node-title user-content" style="opacity:0.5">' + node.title + ' (' + t('nodeTypes.badge.circular') + ')</span>';
 
         content.onclick = () => {
           currentInstanceKey = instanceKey;
@@ -284,7 +284,7 @@ export function renderTree(onNodeClick) {
       content.className = 'tree-node-content broken-symlink' + (isActive ? ' active' : '');
       content.setAttribute('data-node-id', nodeId);
       content.setAttribute('data-instance-key', instanceKey);
-      content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">⚠️</span><span class="tree-node-title" style="opacity:0.5">' + node.title + ' (' + t('nodeTypes.badge.broken') + ')</span>';
+      content.innerHTML = '<span style="width:16px"></span><span class="tree-node-icon">⚠️</span><span class="tree-node-title user-content" style="opacity:0.5">' + node.title + ' (' + t('nodeTypes.badge.broken') + ')</span>';
 
       content.onclick = () => {
         currentInstanceKey = instanceKey;
@@ -368,7 +368,7 @@ export function renderTree(onNodeClick) {
 
     // Title
     const title = document.createElement('span');
-    title.className = 'tree-node-title';
+    title.className = 'tree-node-title user-content';
     title.textContent = displayTitle;
 
     if (isExternalSymlink) {
