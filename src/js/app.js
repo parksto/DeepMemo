@@ -699,13 +699,28 @@ const app = {
         if (age < 86400000) { // 24 hours
           this.pdfRateLimits = limits;
           console.log('[App] Loaded PDF rate limits from localStorage:', limits);
+          return;
         } else {
           console.log('[App] PDF rate limits expired, clearing');
           localStorage.removeItem('deepmemo_pdf_rate_limits');
         }
       }
+
+      // No stored limits or expired: initialize with full quota
+      this.pdfRateLimits = {
+        hourRemaining: 5,
+        dayRemaining: 20,
+        lastUpdate: Date.now()
+      };
+      console.log('[App] Initialized PDF rate limits with full quota');
     } catch (error) {
       console.error('[App] Failed to load PDF rate limits:', error);
+      // Fallback to full quota on error
+      this.pdfRateLimits = {
+        hourRemaining: 5,
+        dayRemaining: 20,
+        lastUpdate: Date.now()
+      };
     }
   },
 
