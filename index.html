@@ -93,6 +93,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <!-- Mobile warning banner -->
@@ -356,6 +357,15 @@
               <div style="font-size: 16px;">📊 <span data-i18n="modals.export.mermaid.title">Diagramme Mermaid</span></div>
               <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.mermaid.desc">
                 Diagramme visuel au format SVG
+              </div>
+            </div>
+          </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportPDF()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📄 <span data-i18n="modals.export.pdf.title">Document PDF</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.pdf.desc">
+                Document PDF avec sommaire hiérarchique et images
               </div>
             </div>
           </button>

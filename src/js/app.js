@@ -669,6 +669,64 @@ const app = {
   },
 
   /**
+   * Confirm PDF export (document with TOC)
+   */
+  async confirmExportPDF() {
+    // Save export info before closing modal (which resets it to null)
+    const type = this.exportType;
+    const branchId = this.exportBranchId;
+    this.closeExportModal();
+
+    try {
+      // TODO: Implement CloudFlare Worker for PDF generation
+      // Worker URL: https://pdf.deepmemo.org/generate (to be created)
+      // Needs: POST with { nodes: data.nodes, rootId: string, type: 'global'|'branch' }
+      // Rate limiting: 5 PDFs/hour, 20/day (hashed IP, 24h TTL)
+
+      showToast('Export PDF sera disponible prochainement via CloudFlare Worker', 'ℹ️');
+
+      // Placeholder for future implementation:
+      /*
+      if (!navigator.onLine) {
+        showToast(t('messages.pdfRequiresOnline'), '⚠️');
+        return;
+      }
+
+      const rootId = type === 'global'
+        ? DataModule.data.rootNodes[0]
+        : branchId;
+
+      const response = await fetch('https://pdf.deepmemo.org/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nodes: DataModule.data.nodes,
+          rootId,
+          type
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          showToast(t('messages.pdfRateLimitExceeded'), '⚠️');
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const node = DataModule.data.nodes[rootId];
+      const filename = `${node.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      downloadBlob(blob, filename);
+      showToast(t('toast.exportSuccess'), '✅');
+      */
+    } catch (error) {
+      console.error('[App] PDF export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
    * Import branch as children of current node
    */
   async importBranch(event) {
