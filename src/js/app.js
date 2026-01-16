@@ -60,6 +60,9 @@ const app = {
     EditorModule.initViewMode();
     this.initFontPreference();
 
+    // Load PDF rate limits from localStorage if available
+    this.loadPdfRateLimits();
+
     // Setup search input handler
     SearchModule.setupSearchInput();
 
@@ -684,6 +687,42 @@ const app = {
   },
 
   /**
+   * Load PDF rate limits from localStorage
+   */
+  loadPdfRateLimits() {
+    try {
+      const stored = localStorage.getItem('deepmemo_pdf_rate_limits');
+      if (stored) {
+        const limits = JSON.parse(stored);
+        // Only use if not older than 24 hours
+        const age = Date.now() - limits.lastUpdate;
+        if (age < 86400000) { // 24 hours
+          this.pdfRateLimits = limits;
+          console.log('[App] Loaded PDF rate limits from localStorage:', limits);
+        } else {
+          console.log('[App] PDF rate limits expired, clearing');
+          localStorage.removeItem('deepmemo_pdf_rate_limits');
+        }
+      }
+    } catch (error) {
+      console.error('[App] Failed to load PDF rate limits:', error);
+    }
+  },
+
+  /**
+   * Save PDF rate limits to localStorage
+   */
+  savePdfRateLimits() {
+    try {
+      if (this.pdfRateLimits) {
+        localStorage.setItem('deepmemo_pdf_rate_limits', JSON.stringify(this.pdfRateLimits));
+      }
+    } catch (error) {
+      console.error('[App] Failed to save PDF rate limits:', error);
+    }
+  },
+
+  /**
    * Confirm PDF export (document with TOC)
    * Shows privacy notice on first use
    */
@@ -850,6 +889,7 @@ const app = {
         dayRemaining: parseInt(response.headers.get('X-RateLimit-Remaining-Day') || '0'),
         lastUpdate: Date.now()
       };
+      this.savePdfRateLimits();
 
       if (!response.ok) {
         if (response.status === 429) {
