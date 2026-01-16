@@ -208,6 +208,7 @@ export default {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Expose-Headers': 'X-RateLimit-Remaining-Hour, X-RateLimit-Remaining-Day',
     };
 
     // Handle preflight
@@ -217,6 +218,29 @@ export default {
 
     if (request.method !== 'POST') {
       return new Response('Method not allowed', { status: 405 });
+    }
+
+    // Check referer to prevent abuse from clones
+    const referer = request.headers.get('Referer') || request.headers.get('Origin') || '';
+    const allowedOrigins = [
+      'http://localhost',
+      'http://127.0.0.1',
+      'https://deepmemo.org',
+      'https://deepmemo.ydns.eu' // Dev staging
+    ];
+
+    const isAllowed = allowedOrigins.some(origin => referer.startsWith(origin));
+    if (!isAllowed && referer) {
+      console.warn('[Worker] Blocked request from unauthorized origin:', referer);
+      return new Response(JSON.stringify({
+        error: 'Unauthorized origin. Please use the official DeepMemo instance or deploy your own Worker.'
+      }), {
+        status: 403,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     try {

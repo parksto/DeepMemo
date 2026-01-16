@@ -673,10 +673,14 @@ const app = {
    * @returns {string} Worker URL
    */
   getWorkerURL() {
-    // Use custom domain in production, workers.dev elsewhere
-    return window.location.hostname === 'deepmemo.org'
-      ? 'https://pdf.deepmemo.org/generate'
-      : 'https://deepmemo-pdf.sto07.workers.dev/generate';
+    // Localhost: use local Worker dev server if available
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8787/generate';
+    }
+
+    // Production and clones: use deployed Worker
+    // (Worker will check referer to prevent abuse from clones)
+    return 'https://pdf.deepmemo.org/generate';
   },
 
   /**
