@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Wrangler
+.wrangler/
+.mf/
+wrangler.toml.bak
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.dev.vars
+
+# OS
+.DS_Store
+Thumbs.db
