@@ -93,6 +93,7 @@ export default {
     pdfBranchExported: "Branche exportée (PDF)",
     pdfRequiresOnline: "Export PDF nécessite une connexion internet",
     pdfRateLimitExceeded: "Limite d'export PDF atteinte. Essayez plus tard.",
+    pdfWorkerUnavailable: "Serveur PDF inaccessible. Vérifiez votre connexion ou utilisez l'outil CLI offline.",
     branchImported: "{count} nœud(s) importés",
     comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",

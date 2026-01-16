@@ -85,6 +85,7 @@ export default {
     pdfBranchExported: "Branch exported (PDF)",
     pdfRequiresOnline: "PDF export requires an internet connection",
     pdfRateLimitExceeded: "PDF export limit reached. Try again later.",
+    pdfWorkerUnavailable: "PDF server unavailable. Check your connection or use the offline CLI tool.",
     branchImported: "{count} node(s) imported",
     comingSoon: "Feature coming soon",
     importError: "Import error",

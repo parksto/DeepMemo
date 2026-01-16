@@ -669,19 +669,14 @@ const app = {
   },
 
   /**
-   * Get CloudFlare Worker URL based on environment
+   * Get CloudFlare Worker URL
    * @returns {string} Worker URL
    */
   getWorkerURL() {
-    const hostname = window.location.hostname;
-
-    // Production: deepmemo.org uses custom domain
-    if (hostname === 'deepmemo.org') {
-      return 'https://pdf.deepmemo.org/generate';
-    }
-
-    // Dev: localhost and staging use workers.dev URL
-    return 'https://deepmemo-pdf.sto07.workers.dev/generate';
+    // Use custom domain in production, workers.dev elsewhere
+    return window.location.hostname === 'deepmemo.org'
+      ? 'https://pdf.deepmemo.org/generate'
+      : 'https://deepmemo-pdf.sto07.workers.dev/generate';
   },
 
   /**
@@ -745,6 +740,75 @@ const app = {
   },
 
   /**
+   * Prepare PDF data by resolving symlinks
+   * Returns a flat structure ready for the Worker
+   */
+  preparePDFData(rootId) {
+    const result = {};
+    const visited = new Set();
+
+    const processNode = (nodeId) => {
+      // Prevent cycles
+      if (visited.has(nodeId)) {
+        console.warn(`[PDF] Cycle detected for node ${nodeId}`);
+        return null;
+      }
+      visited.add(nodeId);
+
+      const node = DataModule.data.nodes[nodeId];
+      if (!node) {
+        console.warn(`[PDF] Node not found: ${nodeId}`);
+        return null;
+      }
+
+      // Resolve symlink
+      let resolvedNode;
+      if (node.type === 'symlink' && node.targetId) {
+        const target = DataModule.data.nodes[node.targetId];
+        if (!target) {
+          console.warn(`[PDF] Symlink target not found: ${node.targetId}`);
+          return null;
+        }
+        // Use target content but keep symlink's title and ID
+        resolvedNode = {
+          id: node.id,
+          title: node.title,
+          content: target.content || '',
+          children: target.children || [],
+          created: node.created,
+          modified: node.modified
+        };
+      } else {
+        // Regular node
+        resolvedNode = {
+          id: node.id,
+          title: node.title,
+          content: node.content || '',
+          children: node.children || [],
+          created: node.created,
+          modified: node.modified
+        };
+      }
+
+      // Process children recursively
+      const processedChildren = [];
+      for (const childId of resolvedNode.children) {
+        const processed = processNode(childId);
+        if (processed) {
+          processedChildren.push(childId);
+        }
+      }
+      resolvedNode.children = processedChildren;
+
+      result[nodeId] = resolvedNode;
+      return nodeId;
+    };
+
+    processNode(rootId);
+    return result;
+  },
+
+  /**
    * Execute PDF export (actual generation)
    */
   async executePdfExport(type, branchId) {
@@ -758,6 +822,10 @@ const app = {
         ? DataModule.data.rootNodes[0]
         : branchId;
 
+      // Prepare data by resolving symlinks
+      const pdfNodes = this.preparePDFData(rootId);
+      console.log(`[PDF] Prepared ${Object.keys(pdfNodes).length} nodes for export`);
+
       const workerURL = this.getWorkerURL();
       console.log(`[App] Generating PDF via ${workerURL}`);
       showToast(t('pdf.generating'), 'ℹ️');
@@ -766,7 +834,7 @@ const app = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nodes: DataModule.data.nodes,
+          nodes: pdfNodes,
           rootId,
           type
         })
@@ -804,7 +872,13 @@ const app = {
       }
     } catch (error) {
       console.error('[App] PDF export failed:', error);
-      showToast(t('toast.exportError') + ': ' + error.message, '⚠️');
+
+      // Network errors (offline, Worker unreachable)
+      if (error.name === 'TypeError' || error.message.includes('fetch')) {
+        showToast(t('messages.pdfWorkerUnavailable'), '⚠️');
+      } else {
+        showToast(t('toast.exportError') + ': ' + error.message, '⚠️');
+      }
     }
   },
 
