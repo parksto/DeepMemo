@@ -733,12 +733,13 @@ const app = {
       localStorage.setItem('deepmemo_pdf_privacy_accepted', 'true');
     }
 
+    // Save pending export BEFORE closing modal (which clears it)
+    const pending = this.pendingPdfExport;
     this.closePdfPrivacyModal();
 
     // Execute pending export
-    if (this.pendingPdfExport) {
-      const { type, branchId } = this.pendingPdfExport;
-      this.pendingPdfExport = null;
+    if (pending) {
+      const { type, branchId } = pending;
       await this.executePdfExport(type, branchId);
     }
   },
