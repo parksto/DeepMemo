@@ -89,6 +89,8 @@ export default {
     freemindBranchExported: "Branche exportée (FreeMind)",
     mermaidExported: "Diagramme exporté (Mermaid SVG)",
     mermaidBranchExported: "Branche exportée (Mermaid SVG)",
+    pdfExported: "Document PDF exporté",
+    pdfBranchExported: "Branche exportée (PDF)",
     branchImported: "{count} nœud(s) importés",
     comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",
@@ -238,6 +240,10 @@ export default {
       mermaid: {
         title: "Diagramme visuel",
         desc: "Diagramme visuel au format SVG"
+      },
+      pdf: {
+        title: "Document PDF",
+        desc: "Document PDF avec sommaire hiérarchique et images"
       }
     }
   },
@@ -360,6 +366,16 @@ export default {
   mobileWarning: {
     title: "Version mobile en développement",
     message: "L'expérience mobile est en cours d'amélioration. Pour une utilisation optimale, nous recommandons d'utiliser un ordinateur."
+  },
+
+  // PDF export
+  pdf: {
+    tableOfContents: "Sommaire",
+    cycleDetected: "Référence circulaire détectée",
+    brokenLink: "Lien cassé",
+    symlinkTo: "Lien vers",
+    see: "Voir",
+    generating: "Génération du PDF en cours..."
   },
 
   // Footer

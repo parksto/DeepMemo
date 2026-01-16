@@ -81,6 +81,8 @@ export default {
     freemindBranchExported: "Branch exported (FreeMind)",
     mermaidExported: "Diagram exported (Mermaid SVG)",
     mermaidBranchExported: "Branch exported (Mermaid SVG)",
+    pdfExported: "PDF document exported",
+    pdfBranchExported: "Branch exported (PDF)",
     branchImported: "{count} node(s) imported",
     comingSoon: "Feature coming soon",
     importError: "Import error",
@@ -230,6 +232,10 @@ export default {
       mermaid: {
         title: "Visual diagram",
         desc: "Visual diagram as SVG format"
+      },
+      pdf: {
+        title: "PDF Document",
+        desc: "PDF document with hierarchical table of contents and images"
       }
     }
   },
@@ -355,6 +361,16 @@ export default {
     description: "Knowledge management system based on recursive and interconnected nodes",
     ogTitle: "DeepMemo - Your second brain",
     keywords: "knowledge management, note-taking, PKM, second brain, Zettelkasten, hierarchical notes, symlinks, tags, offline-first, privacy-first, PWA"
+  },
+
+  // PDF export
+  pdf: {
+    tableOfContents: "Table of Contents",
+    cycleDetected: "Circular reference detected",
+    brokenLink: "Broken link",
+    symlinkTo: "Link to",
+    see: "See",
+    generating: "Generating PDF..."
   },
 
   // Footer
