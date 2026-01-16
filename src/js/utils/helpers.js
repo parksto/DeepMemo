@@ -32,3 +32,17 @@ export function highlightText(text, query) {
   const regex = new RegExp(`(${query})`, 'gi');
   return escapeHtml(text).replace(regex, '<span class="search-result-highlight">$1</span>');
 }
+
+/**
+ * Download a blob as a file
+ * @param {Blob} blob - Blob to download
+ * @param {string} filename - Desired filename
+ */
+export function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}

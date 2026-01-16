@@ -3,7 +3,7 @@
  * Modular ES6 version
  */
 
-import { generateId, escapeHtml } from './utils/helpers.js';
+import { generateId, escapeHtml, downloadBlob } from './utils/helpers.js';
 import { setupKeyboardShortcuts } from './utils/keyboard.js';
 import * as RoutingModule from './utils/routing.js';
 import * as DataModule from './core/data.js';
@@ -669,24 +669,85 @@ const app = {
   },
 
   /**
+   * Get CloudFlare Worker URL based on environment
+   * @returns {string} Worker URL
+   */
+  getWorkerURL() {
+    const hostname = window.location.hostname;
+
+    // Production: deepmemo.org uses custom domain
+    if (hostname === 'deepmemo.org') {
+      return 'https://pdf.deepmemo.org/generate';
+    }
+
+    // Dev: localhost and staging use workers.dev URL
+    return 'https://deepmemo-pdf.sto07.workers.dev/generate';
+  },
+
+  /**
    * Confirm PDF export (document with TOC)
+   * Shows privacy notice on first use
    */
   async confirmExportPDF() {
-    // Save export info before closing modal (which resets it to null)
+    // Save export info before closing modal
     const type = this.exportType;
     const branchId = this.exportBranchId;
     this.closeExportModal();
 
+    // Check if user has accepted privacy notice
+    const privacyAccepted = localStorage.getItem('deepmemo_pdf_privacy_accepted');
+
+    if (!privacyAccepted) {
+      // Store export info and show privacy modal
+      this.pendingPdfExport = { type, branchId };
+      this.showPdfPrivacyModal();
+      return;
+    }
+
+    // Proceed with export
+    await this.executePdfExport(type, branchId);
+  },
+
+  /**
+   * Show PDF privacy notice modal
+   */
+  showPdfPrivacyModal() {
+    document.getElementById('pdfPrivacyModal').style.display = 'flex';
+  },
+
+  /**
+   * Close PDF privacy notice modal
+   */
+  closePdfPrivacyModal() {
+    document.getElementById('pdfPrivacyModal').style.display = 'none';
+    this.pendingPdfExport = null;
+  },
+
+  /**
+   * Confirm PDF privacy and proceed with export
+   */
+  async confirmPdfPrivacyAndExport() {
+    const dontShowAgain = document.getElementById('pdfPrivacyDontShowAgain').checked;
+
+    if (dontShowAgain) {
+      localStorage.setItem('deepmemo_pdf_privacy_accepted', 'true');
+    }
+
+    this.closePdfPrivacyModal();
+
+    // Execute pending export
+    if (this.pendingPdfExport) {
+      const { type, branchId } = this.pendingPdfExport;
+      this.pendingPdfExport = null;
+      await this.executePdfExport(type, branchId);
+    }
+  },
+
+  /**
+   * Execute PDF export (actual generation)
+   */
+  async executePdfExport(type, branchId) {
     try {
-      // TODO: Implement CloudFlare Worker for PDF generation
-      // Worker URL: https://pdf.deepmemo.org/generate (to be created)
-      // Needs: POST with { nodes: data.nodes, rootId: string, type: 'global'|'branch' }
-      // Rate limiting: 5 PDFs/hour, 20/day (hashed IP, 24h TTL)
-
-      showToast('Export PDF sera disponible prochainement via CloudFlare Worker', 'ℹ️');
-
-      // Placeholder for future implementation:
-      /*
       if (!navigator.onLine) {
         showToast(t('messages.pdfRequiresOnline'), '⚠️');
         return;
@@ -696,7 +757,11 @@ const app = {
         ? DataModule.data.rootNodes[0]
         : branchId;
 
-      const response = await fetch('https://pdf.deepmemo.org/generate', {
+      const workerURL = this.getWorkerURL();
+      console.log(`[App] Generating PDF via ${workerURL}`);
+      showToast(t('pdf.generating'), 'ℹ️');
+
+      const response = await fetch(workerURL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -706,9 +771,17 @@ const app = {
         })
       });
 
+      // Store rate limit headers for display
+      this.pdfRateLimits = {
+        hourRemaining: parseInt(response.headers.get('X-RateLimit-Remaining-Hour') || '0'),
+        dayRemaining: parseInt(response.headers.get('X-RateLimit-Remaining-Day') || '0'),
+        lastUpdate: Date.now()
+      };
+
       if (!response.ok) {
         if (response.status === 429) {
-          showToast(t('messages.pdfRateLimitExceeded'), '⚠️');
+          const errorData = await response.json();
+          showToast(errorData.error || t('messages.pdfRateLimitExceeded'), '⚠️');
           return;
         }
         throw new Error(`HTTP ${response.status}`);
@@ -718,11 +791,19 @@ const app = {
       const node = DataModule.data.nodes[rootId];
       const filename = `${node.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
       downloadBlob(blob, filename);
-      showToast(t('toast.exportSuccess'), '✅');
-      */
+
+      const successMsg = type === 'global'
+        ? t('toast.pdfExported')
+        : t('toast.pdfBranchExported');
+      showToast(successMsg, '✅');
+
+      // Update right panel if visible
+      if (this.currentNodeId) {
+        EditorModule.updateRightPanel(this.currentNodeId, this.data);
+      }
     } catch (error) {
       console.error('[App] PDF export failed:', error);
-      showToast(t('toast.exportError'), '⚠️');
+      showToast(t('toast.exportError') + ': ' + error.message, '⚠️');
     }
   },
 

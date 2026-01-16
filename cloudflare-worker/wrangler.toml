@@ -1,6 +1,7 @@
 name = "deepmemo-pdf"
 main = "worker.js"
 compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Browser Rendering API binding
 browser = { binding = "BROWSER" }
@@ -9,7 +10,7 @@ browser = { binding = "BROWSER" }
 # Create with: wrangler kv:namespace create "RATE_LIMIT"
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-# id = "your_kv_namespace_id_here"  # Add after creating namespace
+# id = "c6d68f79351c44849f2d6026dc1b784d"  # Add after creating namespace
 
 # Custom domain (optional, configure in CloudFlare dashboard)
 # routes = [

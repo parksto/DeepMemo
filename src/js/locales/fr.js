@@ -91,6 +91,8 @@ export default {
     mermaidBranchExported: "Branche exportée (Mermaid SVG)",
     pdfExported: "Document PDF exporté",
     pdfBranchExported: "Branche exportée (PDF)",
+    pdfRequiresOnline: "Export PDF nécessite une connexion internet",
+    pdfRateLimitExceeded: "Limite d'export PDF atteinte. Essayez plus tard.",
     branchImported: "{count} nœud(s) importés",
     comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",
@@ -245,6 +247,21 @@ export default {
         title: "Document PDF",
         desc: "Document PDF avec sommaire hiérarchique et images"
       }
+    },
+    pdfPrivacy: {
+      title: "Export PDF - Confidentialité",
+      intro: "Pour protéger nos coûts serveur, nous limitons les exports :",
+      limitHour: "5 PDFs par heure (maximum)",
+      limitDay: "20 PDFs par jour (maximum)",
+      hashInfo: "Ces limites sont basées sur votre IP hashée (SHA-256), conservée 24h uniquement. Votre IP n'est jamais stockée en clair.",
+      noteTitle: "Note :",
+      noteContent: "Votre hébergeur web conserve déjà les IPs dans ses logs standards (30-90 jours). Notre système de rate limiting est plus court (24h) et utilise un hash cryptographique.",
+      noData: "Aucune donnée de votre document n'est sauvegardée. Le PDF est généré et envoyé directement à votre navigateur.",
+      offlineTitle: "Alternative offline :",
+      offlineContent: "Un outil CLI est disponible sur GitHub pour exporter sans limitation ni connexion internet (dossier bin/).",
+      dontShow: "Ne plus afficher ce message",
+      cancel: "Annuler",
+      confirm: "✓ Compris, générer"
     }
   },
 
@@ -281,7 +298,11 @@ export default {
     characters: "Caractères",
     words: "Mots",
     informations: "Informations",
-    symlinkTo: "Lien vers"
+    symlinkTo: "Lien vers",
+    pdfExport: "Export PDF",
+    pdfQuotaHour: "Restant (heure)",
+    pdfQuotaDay: "Restant (jour)",
+    pdfQuotaUpdated: "Mis à jour il y a {minutes} min"
   },
 
   // Node types and badges

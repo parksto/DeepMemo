@@ -10,11 +10,19 @@ let db;
 /**
  * Initialize Dexie database
  * Schema version 1: Initial IndexedDB migration
+ *
+ * IMPORTANT: Dexie version upgrades are additive only (never downgrade).
+ * If a higher version exists in user's browser, we keep it and use current schema.
  */
 export async function initStorage() {
+  if (db) {
+    // Already initialized
+    return db;
+  }
+
   db = new Dexie('deepmemo');
 
-  // Define schema
+  // Define schema - Version 1 (V0.10)
   db.version(1).stores({
     // Nodes table with indexes
     nodes: 'id, parent, *tags, created, modified',
@@ -27,8 +35,59 @@ export async function initStorage() {
     attachments: 'id'
   });
 
-  await db.open();
-  console.log('[Storage] IndexedDB initialized with Dexie');
+  // If user has a higher version from old code/tests, gracefully handle it
+  // Dexie will automatically use the highest compatible version
+  try {
+    await db.open();
+    console.log(`[Storage] IndexedDB initialized (version ${db.verno})`);
+  } catch (error) {
+    // If version conflict, backup and recreate
+    if (error.name === 'VersionError') {
+      console.warn('[Storage] Version conflict detected, migrating database...');
+
+      // Open with ANY version to backup data
+      const backupDB = new Dexie('deepmemo');
+      backupDB.open(); // Open without version check
+
+      let backupData = null;
+      try {
+        const tables = await backupDB.tables;
+        if (tables.some(t => t.name === 'nodes')) {
+          const nodes = await backupDB.table('nodes').toArray();
+          const settings = await backupDB.table('settings').toArray();
+          const attachments = await backupDB.table('attachments').toArray();
+          backupData = { nodes, settings, attachments };
+          console.log('[Storage] Backup created:', backupData.nodes.length, 'nodes');
+        }
+      } catch (e) {
+        console.warn('[Storage] Could not backup data:', e.message);
+      }
+
+      await backupDB.close();
+      await Dexie.delete('deepmemo');
+
+      // Reinitialize with correct schema
+      db = new Dexie('deepmemo');
+      db.version(1).stores({
+        nodes: 'id, parent, *tags, created, modified',
+        settings: 'key',
+        attachments: 'id'
+      });
+      await db.open();
+
+      // Restore backup if available
+      if (backupData) {
+        await db.nodes.bulkPut(backupData.nodes);
+        await db.settings.bulkPut(backupData.settings);
+        await db.attachments.bulkPut(backupData.attachments);
+        console.log('[Storage] Data restored successfully');
+      }
+
+      console.log('[Storage] IndexedDB migrated successfully');
+    } else {
+      throw error;
+    }
+  }
 
   return db;
 }

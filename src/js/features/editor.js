@@ -646,6 +646,20 @@ export async function updateRightPanel(currentNodeId) {
   html += `<div class="info-item"><div class="info-label">${t('labels.words')}</div>${content.split(/\s+/).filter(w => w).length}</div>`;
   html += '</div>';
 
+  // PDF Export quotas (if available)
+  if (window.app && window.app.pdfRateLimits) {
+    const limits = window.app.pdfRateLimits;
+    const age = Math.floor((Date.now() - limits.lastUpdate) / 1000 / 60); // minutes
+
+    html += `<div class="info-section"><h3>📄 ${t('labels.pdfExport')}</h3>`;
+    html += `<div class="info-item"><div class="info-label">${t('labels.pdfQuotaHour')}</div>${limits.hourRemaining}/5</div>`;
+    html += `<div class="info-item"><div class="info-label">${t('labels.pdfQuotaDay')}</div>${limits.dayRemaining}/20</div>`;
+    if (age < 60) {
+      html += `<div class="info-item" style="font-size: 12px; opacity: 0.6;">${t('labels.pdfQuotaUpdated', { minutes: age })}</div>`;
+    }
+    html += '</div>';
+  }
+
   // Keyboard shortcuts
   html += `
     <div class="shortcuts-hint">

@@ -377,6 +377,60 @@
     </div>
   </div>
 
+  <!-- Modal PDF Privacy Notice -->
+  <div class="modal-overlay" id="pdfPrivacyModal">
+    <div class="modal">
+      <h2>📄 <span data-i18n="modals.pdfPrivacy.title">Export PDF - Confidentialité</span></h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+          <span data-i18n="modals.pdfPrivacy.intro">
+            Pour protéger nos coûts serveur, nous limitons les exports :
+          </span>
+        </p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li data-i18n="modals.pdfPrivacy.limitHour">5 PDFs par heure (maximum)</li>
+          <li data-i18n="modals.pdfPrivacy.limitDay">20 PDFs par jour (maximum)</li>
+        </ul>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+          <span data-i18n="modals.pdfPrivacy.hashInfo">
+            Ces limites sont basées sur votre IP hashée (SHA-256), conservée 24h uniquement.
+            Votre IP n'est jamais stockée en clair.
+          </span>
+        </p>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+          <strong data-i18n="modals.pdfPrivacy.noteTitle">Note :</strong>
+          <span data-i18n="modals.pdfPrivacy.noteContent">
+            Votre hébergeur web conserve déjà les IPs dans ses logs standards (30-90 jours).
+            Notre système de rate limiting est plus court (24h) et utilise un hash cryptographique.
+          </span>
+        </p>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+          <span data-i18n="modals.pdfPrivacy.noData">
+            Aucune donnée de votre document n'est sauvegardée. Le PDF est généré
+            et envoyé directement à votre navigateur.
+          </span>
+        </p>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+          <strong data-i18n="modals.pdfPrivacy.offlineTitle">Alternative offline :</strong>
+          <span data-i18n="modals.pdfPrivacy.offlineContent">
+            Un outil CLI est disponible sur GitHub pour exporter sans limitation
+            ni connexion internet (dossier <code>bin/</code>).
+          </span>
+        </p>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="pdfPrivacyDontShowAgain">
+          <span data-i18n="modals.pdfPrivacy.dontShow">Ne plus afficher ce message</span>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" data-i18n="modals.pdfPrivacy.cancel"
+                onclick="app.closePdfPrivacyModal()">Annuler</button>
+        <button class="btn btn-small" data-i18n="modals.pdfPrivacy.confirm"
+                onclick="app.confirmPdfPrivacyAndExport()">✓ Compris, générer</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Mermaid.js for diagram export -->
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';

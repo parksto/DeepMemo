@@ -83,6 +83,8 @@ export default {
     mermaidBranchExported: "Branch exported (Mermaid SVG)",
     pdfExported: "PDF document exported",
     pdfBranchExported: "Branch exported (PDF)",
+    pdfRequiresOnline: "PDF export requires an internet connection",
+    pdfRateLimitExceeded: "PDF export limit reached. Try again later.",
     branchImported: "{count} node(s) imported",
     comingSoon: "Feature coming soon",
     importError: "Import error",
@@ -237,6 +239,21 @@ export default {
         title: "PDF Document",
         desc: "PDF document with hierarchical table of contents and images"
       }
+    },
+    pdfPrivacy: {
+      title: "PDF Export - Privacy",
+      intro: "To protect our server costs, we limit exports:",
+      limitHour: "5 PDFs per hour (maximum)",
+      limitDay: "20 PDFs per day (maximum)",
+      hashInfo: "These limits are based on your hashed IP (SHA-256), stored for 24h only. Your IP is never stored in plain text.",
+      noteTitle: "Note:",
+      noteContent: "Your web host already stores IPs in standard logs (30-90 days). Our rate limiting is shorter (24h) and uses a cryptographic hash.",
+      noData: "No data from your document is saved. The PDF is generated and sent directly to your browser.",
+      offlineTitle: "Offline alternative:",
+      offlineContent: "A CLI tool is available on GitHub to export without limitations or internet connection (bin/ folder).",
+      dontShow: "Don't show this again",
+      cancel: "Cancel",
+      confirm: "✓ OK, generate"
     }
   },
 
@@ -273,7 +290,11 @@ export default {
     characters: "Characters",
     words: "Words",
     informations: "Information",
-    symlinkTo: "Link to"
+    symlinkTo: "Link to",
+    pdfExport: "PDF Export",
+    pdfQuotaHour: "Remaining (hour)",
+    pdfQuotaDay: "Remaining (day)",
+    pdfQuotaUpdated: "Updated {minutes} min ago"
   },
 
   // Node types and badges
