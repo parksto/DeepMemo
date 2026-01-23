@@ -93,7 +93,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <!-- Mobile warning banner -->
@@ -123,7 +122,7 @@
       <div class="sidebar-actions">
         <button id="newRootNodeBtn" class="btn" data-i18n="actions.newNode" onclick="app.createRootNode()">➕ Nouveau nœud</button>
         <div class="import-export-zone">
-          <input type="file" id="importFile" accept=".json,.zip" onchange="app.importData(event)">
+          <input type="file" id="importFile" accept=".dm,.zip,.json" onchange="app.importData(event)">
           <label for="importFile" class="btn-import" data-i18n="actions.import">📂 Importer</label>
           <button class="btn-import" data-i18n="actions.export" onclick="app.openExportModal('global')">💾 Exporter</button>
         </div>
@@ -182,35 +181,48 @@
         </div>
 
         <div class="content-body">
-          <textarea class="content-editor user-content" id="nodeContent"
-                    data-i18n-placeholder="placeholders.nodeContent" placeholder="Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)"
-                    onchange="app.saveCurrentNode()"
-                    oninput="app.autoResizeTextarea(event.target)"></textarea>
+          <!-- Main content area (editor + preview in split-screen) -->
+          <div class="content-body-main">
+            <textarea class="content-editor user-content" id="nodeContent"
+                      data-i18n-placeholder="placeholders.nodeContent" placeholder="Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)"
+                      onchange="app.saveCurrentNode()"
+                      oninput="app.autoResizeTextarea(event.target)"></textarea>
 
-          <div class="content-preview" id="contentPreview" style="display: none;"></div>
+            <div class="content-preview" id="contentPreview" style="display: none;"></div>
 
-          <!-- Attachments Section -->
-          <div class="attachments-section" id="attachmentsSection" style="display: none;">
-            <div class="attachments-header"><span data-i18n="labels.attachments">📎 Fichiers attachés</span> (<span id="attachmentsCount">0</span>)</div>
-            <div class="attachments-list" id="attachmentsList"></div>
-            <button class="btn btn-secondary btn-small" id="addAttachmentBtn" data-i18n="actions.addAttachment" onclick="app.triggerFileUpload()">
-              📎 Ajouter un fichier
-            </button>
+            <!-- Live Preview Container (Split Screen) -->
+            <div class="live-preview-container" id="livePreviewContainer" style="display: none;">
+              <div class="live-preview-header" data-i18n="labels.preview">📖 Preview</div>
+              <div class="live-preview-content" id="livePreviewContent"></div>
+            </div>
           </div>
 
-          <div class="children-section" id="childrenSection" style="display: none;">
-            <div class="children-header"><span data-i18n="labels.children">📂 Nœuds enfants</span> (<span id="childrenCount">0</span>)</div>
-            <div class="children-grid" id="childrenGrid"></div>
+          <!-- Content footer: Attachments and Children sections (below editor/preview, same scroll) -->
+          <div class="content-footer">
+            <!-- Attachments Section -->
+            <div class="attachments-section" id="attachmentsSection" style="display: none;">
+              <div class="attachments-header"><span data-i18n="labels.attachments">📎 Fichiers attachés</span> (<span id="attachmentsCount">0</span>)</div>
+              <div class="attachments-list" id="attachmentsList"></div>
+              <button class="btn btn-secondary btn-small" id="addAttachmentBtn" data-i18n="actions.addAttachment" onclick="app.triggerFileUpload()">
+                📎 Ajouter un fichier
+              </button>
+            </div>
+
+            <div class="children-section" id="childrenSection" style="display: none;">
+              <div class="children-header"><span data-i18n="labels.children">📂 Nœuds enfants</span> (<span id="childrenCount">0</span>)</div>
+              <div class="children-grid" id="childrenGrid"></div>
+            </div>
           </div>
         </div>
 
         <div class="content-actions">
           <button class="btn btn-secondary btn-small" id="toggleViewMode" data-i18n="actions.toggleView" onclick="app.toggleViewMode()">👁️ Afficher</button>
+          <button class="btn btn-secondary btn-small" id="togglePreview" data-i18n="actions.togglePreview" data-i18n-title="tooltips.togglePreview" title="Enable/disable live preview (split-screen)" onclick="app.togglePreview()">📖 Preview</button>
           <button class="btn btn-secondary btn-small" data-i18n="actions.addChild" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
           <div style="margin-left: auto; display: flex; gap: 8px;">
             <button class="btn btn-secondary btn-small" data-i18n="actions.exportBranch" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
-            <input type="file" id="importBranchFile" accept=".json,.zip" onchange="app.importBranch(event)" style="display: none;">
+            <input type="file" id="importBranchFile" accept=".dm,.zip,.json" onchange="app.importBranch(event)" style="display: none;">
             <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n="actions.importBranch" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
           </div>
         </div>

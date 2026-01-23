@@ -37,6 +37,7 @@ export default {
     edit: "Éditer",
     view: "Afficher",
     toggleView: "👁️ Afficher",
+    togglePreview: "📖 Preview",
     addChild: "Ajouter un enfant",
     addFile: "Ajouter un fichier",
     addAttachment: "Ajouter un fichier",
@@ -98,6 +99,7 @@ export default {
     comingSoon: "Fonctionnalité bientôt disponible",
     importError: "Erreur lors de l'import",
     exportError: "Erreur lors de l'export",
+    dataLoadError: "Erreur lors du chargement des données",
     attachmentsNotAvailable: "⚠️ Attachments non disponibles (IndexedDB)",
     fileTooBig: "❌ Fichier trop volumineux (max 50MB)",
     fileAdded: "✅ Fichier ajouté : {name}",
@@ -303,7 +305,8 @@ export default {
     pdfExport: "Export PDF",
     pdfQuotaHour: "Restant (heure)",
     pdfQuotaDay: "Restant (jour)",
-    pdfQuotaUpdated: "Mis à jour il y a {minutes} min"
+    pdfQuotaUpdated: "Mis à jour il y a {minutes} min",
+    preview: "📖 Prévisualisation"
   },
 
   // Node types and badges
@@ -342,6 +345,7 @@ export default {
     shareBranch: "Copier l'URL en mode branche isolée (vue focus)",
     goToParent: "Remonter au parent",
     goToRoot: "Retour à la racine",
+    togglePreview: "Activer/désactiver la prévisualisation en temps réel (écran partagé)",
     exportBranch: "Exporter ce nœud et ses descendants",
     importBranch: "Importer une branche comme enfants",
     attachmentId: "ID de l'attachment",
@@ -397,6 +401,7 @@ export default {
     brokenLink: "Lien cassé",
     symlinkTo: "Lien vers",
     see: "Voir",
+    preparing: "Préparation des images...",
     generating: "Génération du PDF en cours..."
   },
 

@@ -19,6 +19,7 @@ import * as DragDropModule from './features/drag-drop.js';
 import * as AttachmentsModule from './core/attachments.js';
 import { initI18n, t, setLanguage, getCurrentLanguage } from './utils/i18n.js';
 import * as SyncModule from './utils/sync.js';
+import * as PreviewModule from './features/preview.js';
 
 /**
  * Main Application Object
@@ -58,6 +59,7 @@ const app = {
     // Initialize panels and view mode
     PanelsModule.initPanels();
     EditorModule.initViewMode();
+    PreviewModule.initPreview();
     this.initFontPreference();
 
     // Load PDF rate limits from localStorage if available
@@ -65,6 +67,9 @@ const app = {
 
     // Setup search input handler
     SearchModule.setupSearchInput();
+
+    // Setup preview listeners (for live preview)
+    PreviewModule.setupPreviewListeners();
 
     // Setup modal close on click outside
     this.setupModalCloseOnClickOutside();
@@ -277,6 +282,9 @@ const app = {
     // Display in editor
     EditorModule.displayNode(nodeId, () => this.render());
 
+    // Set current node ID for preview (will be activated in updateViewMode if in edit mode)
+    PreviewModule.setCurrentNodeId(nodeId);
+
     // Re-render tree to update active state
     this.render();
 
@@ -482,33 +490,18 @@ const app = {
     if (!file) return;
 
     try {
-      // Detect file type and call appropriate import function
-      if (file.name.endsWith('.zip')) {
-        await DataModule.importDataZIP(event, (nodeCount) => {
-          this.currentNodeId = null;
-          this.render();
-          this.updateNodeCounter();
+      // Use new import function that auto-detects format (.dm, .zip, .json)
+      await DataModule.importDataZIP(event, (nodeCount) => {
+        this.currentNodeId = null;
+        this.render();
+        this.updateNodeCounter();
 
-          // Reset UI
-          document.getElementById('emptyState').style.display = 'flex';
-          document.getElementById('editorContainer').style.display = 'none';
+        // Reset UI
+        document.getElementById('emptyState').style.display = 'flex';
+        document.getElementById('editorContainer').style.display = 'none';
 
-          showToast(t('toast.dataImportedZIP', { count: nodeCount }), '📥');
-        });
-      } else {
-        // Legacy JSON import
-        DataModule.importData(event, (nodeCount) => {
-          this.currentNodeId = null;
-          this.render();
-          this.updateNodeCounter();
-
-          // Reset UI
-          document.getElementById('emptyState').style.display = 'flex';
-          document.getElementById('editorContainer').style.display = 'none';
-
-          showToast(t('toast.dataImportedJSON', { count: nodeCount }), '📥');
-        });
-      }
+        showToast(t('toast.dataImported', { count: nodeCount }), '📥');
+      });
     } catch (error) {
       console.error('[App] Import failed:', error);
       showToast(t('toast.importError'), '⚠️');
@@ -798,14 +791,110 @@ const app = {
   },
 
   /**
-   * Prepare PDF data by resolving symlinks
-   * Returns a flat structure ready for the Worker
+   * Convert blob to base64 data URL
    */
-  preparePDFData(rootId) {
+  async blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
+
+  /**
+   * Process markdown content to replace attachment references with base64 data URLs
+   */
+  async processInlineImages(content, nodeAttachments) {
+    if (!content || !nodeAttachments || nodeAttachments.length === 0) {
+      return content;
+    }
+
+    // Detect markdown image references: ![alt](attach_id) or ![alt](attach_id "title")
+    const imageRegex = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+    let processedContent = content;
+    const replacements = [];
+
+    let match;
+    while ((match = imageRegex.exec(content)) !== null) {
+      const alt = match[1];
+      const ref = match[2];
+      const fullMatch = match[0];
+
+      // Strip "attachment:" prefix if present (for demo data compatibility)
+      const attachmentId = ref.startsWith('attachment:')
+        ? ref.substring('attachment:'.length)
+        : ref;
+
+      // Check if ref is an attachment ID
+      const attachment = nodeAttachments.find(att => att.id === attachmentId);
+      if (attachment) {
+        try {
+          const blob = await AttachmentsModule.getAttachment(attachment.id);
+          if (blob) {
+            const dataUrl = await this.blobToBase64(blob);
+            replacements.push({ from: fullMatch, to: `![${alt}](${dataUrl})` });
+            console.log(`[PDF] ✓ Converted inline image: ${attachment.name} (${attachment.type})`);
+          } else {
+            console.warn(`[PDF] Blob is null for attachment ${attachment.id}`);
+          }
+        } catch (error) {
+          console.warn(`[PDF] Failed to load attachment ${attachment.id}:`, error);
+        }
+      }
+    }
+
+    // Apply all replacements
+    for (const { from, to } of replacements) {
+      processedContent = processedContent.replace(from, to);
+    }
+
+    return processedContent;
+  },
+
+  /**
+   * Check if a node is within a branch scope
+   * @param {string} nodeId - Node ID to check
+   * @param {string} branchRootId - Branch root ID
+   * @returns {boolean} True if node is in branch
+   */
+  isNodeInBranch(nodeId, branchRootId) {
+    if (!branchRootId || nodeId === branchRootId) return true;
+
+    const collectBranchNodes = (rootId, collected = new Set()) => {
+      collected.add(rootId);
+      const node = DataModule.data.nodes[rootId];
+      if (node && node.children) {
+        for (const childId of node.children) {
+          const child = DataModule.data.nodes[childId];
+          if (child) {
+            if (child.type === 'symlink' && child.targetId) {
+              // Don't follow symlinks for scope detection
+              collected.add(childId);
+            } else {
+              collectBranchNodes(childId, collected);
+            }
+          }
+        }
+      }
+      return collected;
+    };
+
+    const branchNodes = collectBranchNodes(branchRootId);
+    return branchNodes.has(nodeId);
+  },
+
+  /**
+   * Prepare PDF data by resolving symlinks and converting inline images
+   * Returns a flat structure ready for the Worker
+   * @param {string} rootId - Root node ID
+   * @param {string|null} branchRootId - Branch root ID (null if global)
+   */
+  async preparePDFData(rootId, branchRootId = null) {
     const result = {};
     const visited = new Set();
 
-    const processNode = (nodeId) => {
+    const processNode = async (nodeId) => {
       // Prevent cycles
       if (visited.has(nodeId)) {
         console.warn(`[PDF] Cycle detected for node ${nodeId}`);
@@ -821,21 +910,33 @@ const app = {
 
       // Resolve symlink
       let resolvedNode;
+      let sourceNode; // Node to get attachments from
+
       if (node.type === 'symlink' && node.targetId) {
         const target = DataModule.data.nodes[node.targetId];
         if (!target) {
           console.warn(`[PDF] Symlink target not found: ${node.targetId}`);
           return null;
         }
+
+        // Check if symlink is external (target outside branch scope)
+        const isExternalSymlink = branchRootId && !this.isNodeInBranch(node.targetId, branchRootId);
+
         // Use target content but keep symlink's title and ID
         resolvedNode = {
           id: node.id,
           title: node.title,
           content: target.content || '',
-          children: target.children || [],
+          // External symlinks don't include children (act as leaves)
+          children: isExternalSymlink ? [] : (target.children || []),
           created: node.created,
           modified: node.modified
         };
+        sourceNode = target; // Get attachments from target
+
+        if (isExternalSymlink) {
+          console.log(`[PDF] External symlink detected: ${node.id} -> ${node.targetId} (no descendants)`);
+        }
       } else {
         // Regular node
         resolvedNode = {
@@ -846,12 +947,21 @@ const app = {
           created: node.created,
           modified: node.modified
         };
+        sourceNode = node;
+      }
+
+      // Process inline images in content
+      if (resolvedNode.content && sourceNode.attachments) {
+        resolvedNode.content = await this.processInlineImages(
+          resolvedNode.content,
+          sourceNode.attachments
+        );
       }
 
       // Process children recursively
       const processedChildren = [];
       for (const childId of resolvedNode.children) {
-        const processed = processNode(childId);
+        const processed = await processNode(childId);
         if (processed) {
           processedChildren.push(childId);
         }
@@ -862,7 +972,7 @@ const app = {
       return nodeId;
     };
 
-    processNode(rootId);
+    await processNode(rootId);
     return result;
   },
 
@@ -880,8 +990,10 @@ const app = {
         ? DataModule.data.rootNodes[0]
         : branchId;
 
-      // Prepare data by resolving symlinks
-      const pdfNodes = this.preparePDFData(rootId);
+      // Prepare data by resolving symlinks and converting inline images
+      showToast(t('pdf.preparing'), 'ℹ️');
+      // Pass branchId as context for external symlink detection
+      const pdfNodes = await this.preparePDFData(rootId, type === 'branch' ? branchId : null);
       console.log(`[PDF] Prepared ${Object.keys(pdfNodes).length} nodes for export`);
 
       const workerURL = this.getWorkerURL();
@@ -955,35 +1067,19 @@ const app = {
     if (!file) return;
 
     try {
-      // Detect file type and call appropriate import function
-      if (file.name.endsWith('.zip')) {
-        await DataModule.importBranchZIP(event, this.currentNodeId, (nodeCount, importedRootId) => {
-          this.render();
-          this.updateNodeCounter();
-          showToast(t('toast.dataImportedZIP', { count: nodeCount }), '⬆️');
+      // Use new import function that auto-detects format (.dm, .zip, .json)
+      await DataModule.importBranchZIP(event, this.currentNodeId, (nodeCount, importedRootId) => {
+        this.render();
+        this.updateNodeCounter();
+        showToast(t('toast.dataImported', { count: nodeCount }), '⬆️');
 
-          // Optionally select the imported root
-          if (importedRootId) {
-            setTimeout(() => {
-              this.selectNodeById(importedRootId);
-            }, 100);
-          }
-        });
-      } else {
-        // Legacy JSON import
-        DataModule.importBranch(event, this.currentNodeId, (nodeCount, importedRootId) => {
-          this.render();
-          this.updateNodeCounter();
-          showToast(t('toast.dataImportedJSON', { count: nodeCount }), '⬆️');
-
-          // Optionally select the imported root
-          if (importedRootId) {
-            setTimeout(() => {
-              this.selectNodeById(importedRootId);
-            }, 100);
-          }
-        });
-      }
+        // Optionally select the imported root
+        if (importedRootId) {
+          setTimeout(() => {
+            this.selectNodeById(importedRootId);
+          }, 100);
+        }
+      });
     } catch (error) {
       console.error('[App] Branch import failed:', error);
       showToast(t('toast.importError'), '⚠️');
@@ -1065,6 +1161,13 @@ const app = {
   },
   toggleViewMode() {
     EditorModule.toggleViewMode();
+  },
+
+  /**
+   * Toggle live preview (split-screen mode)
+   */
+  togglePreview() {
+    PreviewModule.togglePreview();
   },
 
   /**

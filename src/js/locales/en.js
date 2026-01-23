@@ -29,6 +29,7 @@ export default {
     edit: "Edit",
     view: "View",
     toggleView: "👁️ View",
+    togglePreview: "📖 Preview",
     addChild: "Add child",
     addFile: "Add file",
     addAttachment: "Add file",
@@ -90,6 +91,7 @@ export default {
     comingSoon: "Feature coming soon",
     importError: "Import error",
     exportError: "Export error",
+    dataLoadError: "Data loading error",
     attachmentsNotAvailable: "⚠️ Attachments not available (IndexedDB)",
     fileTooBig: "❌ File too large (max 50MB)",
     fileAdded: "✅ File added: {name}",
@@ -295,7 +297,8 @@ export default {
     pdfExport: "PDF Export",
     pdfQuotaHour: "Remaining (hour)",
     pdfQuotaDay: "Remaining (day)",
-    pdfQuotaUpdated: "Updated {minutes} min ago"
+    pdfQuotaUpdated: "Updated {minutes} min ago",
+    preview: "📖 Preview"
   },
 
   // Node types and badges
@@ -329,6 +332,7 @@ export default {
     shareBranch: "Copy URL in isolated branch mode (focus view)",
     goToParent: "Go to parent",
     goToRoot: "Back to root",
+    togglePreview: "Enable/disable live preview (split-screen)",
     exportBranch: "Export this node and its descendants",
     importBranch: "Import a branch as children",
     attachmentId: "Attachment ID",
@@ -392,6 +396,7 @@ export default {
     brokenLink: "Broken link",
     symlinkTo: "Link to",
     see: "See",
+    preparing: "Preparing images...",
     generating: "Generating PDF..."
   },
 

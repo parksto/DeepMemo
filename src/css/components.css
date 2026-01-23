@@ -460,11 +460,16 @@
   border-radius: 8px;
   padding: 16px;
   color: var(--text-primary);
-  font-family: 'Sto', 'Courier New', monospace;
-  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 16px;
   line-height: 1.6;
   outline: none;
   overflow: hidden;
+}
+
+/* Custom font mode: use Sto Fixed for editor */
+body.custom-font .content-editor {
+  font-family: 'Sto Fixed', 'Courier New', monospace;
 }
 
 .content-editor:focus {
@@ -1274,7 +1279,7 @@
   background: var(--bg-tertiary);
   padding: 2px 6px;
   border-radius: 3px;
-  font-family: 'Sto Fixed', 'Courier New', monospace;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 0.9em;
   color: var(--accent-text);
 }
@@ -1285,13 +1290,19 @@
   border-radius: 6px;
   overflow-x: auto;
   margin-bottom: 16px;
-  font-family: 'Sto Fixed', 'Courier New', monospace;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
 .markdown-content pre code {
   background: none;
   padding: 0;
   color: var(--text-primary);
+}
+
+/* Custom font mode: use Sto Fixed for code blocks */
+body.custom-font .markdown-content code,
+body.custom-font .markdown-content pre {
+  font-family: 'Sto Fixed', 'Courier New', monospace;
 }
 
 .markdown-content blockquote {
@@ -1351,6 +1362,98 @@
 .markdown-content em {
   font-style: italic;
   color: var(--text-secondary);
+}
+
+/* CONTENT BODY MAIN (wrapper for editor + preview split) */
+.content-body-main {
+  /* Normal mode: no special styling, acts as transparent wrapper */
+}
+
+/* CONTENT FOOTER (Attachments & Children) */
+.content-footer {
+  /* Inherits padding from parent .content-body (30px) */
+  padding-top: 0;
+}
+
+/* LIVE PREVIEW (Split Screen) */
+.content-body.split-screen-mode {
+  /* Remove padding - will be applied to each column instead */
+  padding: 0;
+}
+
+.content-body.split-screen-mode .content-body-main {
+  display: flex;
+  gap: 0;
+  align-items: flex-start; /* Align tops */
+}
+
+.content-body.split-screen-mode .content-editor {
+  width: 50%;
+  border-right: 1px solid var(--border);
+  padding: 30px;
+  /* Keep default overflow behavior for auto-resize to work */
+  min-height: 400px;
+  box-sizing: border-box;
+}
+
+.live-preview-container {
+  width: 50%;
+  display: none;
+  flex-direction: column;
+  /* Height will be set dynamically via JS to match textarea height */
+  overflow: hidden;
+}
+
+.content-body.split-screen-mode .live-preview-container {
+  display: flex;
+}
+
+.live-preview-header {
+  padding: 12px 30px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0; /* Don't shrink */
+}
+
+.live-preview-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto; /* Internal scroll for preview */
+  overflow-x: hidden;
+  background: var(--bg-primary);
+}
+
+.live-preview-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.live-preview-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.live-preview-content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.live-preview-content::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Hide original preview in split-screen mode (we use live preview instead) */
+.content-body.split-screen-mode #contentPreview {
+  display: none;
+}
+
+/* In split-screen mode, content-footer stays full width below the split */
+.content-body.split-screen-mode .content-footer {
+  width: 100%;
+  padding: 0 30px 30px 30px;
 }
 
 /* ====================================
@@ -1434,6 +1537,27 @@
 
 .mobile-warning-close:active {
   transform: scale(0.95);
+}
+
+/* Mobile: disable live preview */
+@media (max-width: 768px) {
+  .content-body.split-screen-mode {
+    padding: 30px;
+  }
+
+  .content-body.split-screen-mode .content-body-main {
+    display: block;
+  }
+
+  .content-body.split-screen-mode .content-editor {
+    width: 100%;
+    border-right: none;
+    padding: 0;
+  }
+
+  .live-preview-container {
+    display: none !important;
+  }
 }
 
 /* Mobile adjustments */

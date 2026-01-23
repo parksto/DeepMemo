@@ -12,6 +12,7 @@ import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
 import * as AttachmentsModule from '../core/attachments.js';
 import { t, getCurrentLanguage } from '../utils/i18n.js';
+import * as PreviewModule from './preview.js';
 
 // View mode state
 let viewMode = 'view'; // 'edit' or 'view' (default: view)
@@ -112,7 +113,7 @@ export function displayNode(nodeId, renderCallback) {
   // Clean up blob URLs from previous node
   cleanupBlobUrls();
 
-  // Force view mode when switching nodes (no longer persistent)
+  // Force view mode when switching nodes (default behavior)
   viewMode = 'view';
   localStorage.setItem('deepmemo_viewMode', viewMode);
 
@@ -870,6 +871,7 @@ export function toggleViewMode() {
  */
 export async function updateViewMode() {
   const toggleBtn = document.getElementById('toggleViewMode');
+  const togglePreviewBtn = document.getElementById('togglePreview');
   const contentEditor = document.getElementById('nodeContent');
   const contentPreview = document.getElementById('contentPreview');
 
@@ -878,6 +880,16 @@ export async function updateViewMode() {
     toggleBtn.textContent = `✏️ ${t('actions.edit')}`;
     contentEditor.style.display = 'none';
     contentPreview.style.display = 'block';
+
+    // Disable live preview UI in view mode (but don't change user preference)
+    if (PreviewModule.isPreviewEnabled()) {
+      PreviewModule.disablePreviewUI();
+    }
+
+    // Hide preview toggle button in view mode
+    if (togglePreviewBtn) {
+      togglePreviewBtn.style.display = 'none';
+    }
 
     // Render markdown content
     const currentNodeId = getCurrentNodeId();
@@ -930,6 +942,21 @@ export async function updateViewMode() {
     contentEditor.style.display = 'block';
     contentPreview.style.display = 'none';
     autoResizeTextarea(contentEditor);
+
+    // Show preview toggle button in edit mode
+    if (togglePreviewBtn) {
+      togglePreviewBtn.style.display = '';
+    }
+
+    // Auto-activate preview if user preference is enabled (check localStorage, not current state)
+    const savedPreview = localStorage.getItem('deepmemo_previewEnabled');
+    if (savedPreview === 'true') {
+      // Wait for DOM to be ready
+      requestAnimationFrame(() => {
+        // Force enable without checking current state (might be false from view mode)
+        PreviewModule.activatePreviewFromPreference();
+      });
+    }
   }
 }
 
