@@ -1,6 +1,7 @@
 # Architecture - Attachments & Files (V0.8)
 
 **Implémentation** : V0.8 (25 décembre 2025)
+**Architecture actuelle** : V0.10 (IndexedDB avec Dexie.js)
 **Statut** : ✅ Implémenté et déployé
 
 > [English version](./SPEC-ATTACHMENTS.md)
@@ -49,9 +50,12 @@ Attacher des fichiers (images, PDFs, documents, etc.) aux nœuds DeepMemo, avec 
 
 ### Structure de données
 
-#### localStorage (`deepmemo_data`)
+#### Métadonnées des nœuds (V0.10 : IndexedDB base `deepmemo`, store `nodes`)
+
+> **Note** : En V0.8-V0.9, les métadonnées des nœuds étaient stockées dans localStorage. Depuis V0.10, tout est dans IndexedDB avec Dexie.js.
 
 ```javascript
+// Structure en mémoire (chargée depuis IndexedDB)
 data = {
   nodes: {
     "node_123": {
@@ -83,20 +87,29 @@ data = {
 }
 ```
 
-#### IndexedDB (`deepmemo-files`)
+#### Blobs des attachments (IndexedDB base `deepmemo`, store `attachments`)
 
-**Database name** : `deepmemo-files`
-**Version** : `1`
+**Database name** : `deepmemo` (V0.10 : base unifiée avec Dexie.js)
 **Object Store** : `attachments`
 **Key** : `id` (string, ex: "attach_001")
 **Value** : `Blob` (le fichier binaire)
 
 ```javascript
-// Structure IndexedDB
+// Structure du store attachments dans IndexedDB
 {
   "attach_001": Blob { size: 45678, type: "image/png" },
   "attach_002": Blob { size: 234567, type: "application/pdf" }
 }
+```
+
+**Structure de la base V0.10** (avec Dexie.js) :
+```javascript
+const db = new Dexie('deepmemo');
+db.version(1).stores({
+  nodes: 'id, created, modified',
+  settings: 'key',
+  attachments: 'id'
+});
 ```
 
 ---
@@ -525,22 +538,30 @@ Fichiers : 12.3 MB / ~500 MB
 
 ## 🔄 Migration et rétrocompatibilité
 
-### Migration V0.8 → V0.9
+### Migration V0.9 → V0.10 (IndexedDB)
 
-**Pas de migration nécessaire** :
-- Les données existantes continuent de fonctionner
-- Les nœuds n'ont simplement pas de fichiers attachés
-- Pas de changement breaking dans la structure de `data`
+**Migration automatique** (implémentée dans `src/js/core/migration.js`) :
+- Toutes les données migrées de localStorage vers IndexedDB avec Dexie.js
+- Métadonnées des nœuds : localStorage → IndexedDB store `nodes`
+- Blobs des attachments : base `deepmemo-files` → base unifiée `deepmemo` store `attachments`
+- Données localStorage originales préservées en backup
+- Non-destructif : rollback possible si nécessaire
+
+**Augmentation de capacité** :
+- localStorage : limite ~5-10 MB
+- IndexedDB : capacité 500 MB - 1 GB
 
 ### Rétrocompatibilité
 
-**Import JSON simple** :
-- Les exports V0.8 (JSON simple) restent importables
+**Support d'import legacy** :
+- Exports V0.8/V0.9 (JSON simple) restent importables
 - Détection automatique de l'absence d'attachments
+- Exports `.zip` des anciennes versions fonctionnent sans problème
 
-**Export rétrocompatible** :
-- On pourrait ajouter un bouton "Exporter en JSON (sans fichiers)" pour legacy
-- Mais pas obligatoire : le ZIP avec juste `data.json` est équivalent
+**Formats d'export** :
+- Archives `.dm` (ZIP avec metadata.json) - Format standard depuis V0.10
+- Export `.json` simple pour interchange (sans attachments)
+- Exports `.zip` legacy toujours supportés pour l'import
 
 ---
 
@@ -624,6 +645,7 @@ try {
 
 ---
 
-**Dernière mise à jour** : 2025-12-27 (statut)
-**Implémentation complète** : 2025-12-25
-**Statut** : ✅ Déployé en V0.8
+**Dernière mise à jour** : 2026-01-19
+**Implémentation complète** : 2025-12-25 (V0.8)
+**Version actuelle** : V0.10.4 (IndexedDB avec Dexie.js)
+**Statut** : ✅ Déployé et prêt pour la production

@@ -20,6 +20,7 @@ import * as AttachmentsModule from './core/attachments.js';
 import { initI18n, t, setLanguage, getCurrentLanguage } from './utils/i18n.js';
 import * as SyncModule from './utils/sync.js';
 import * as PreviewModule from './features/preview.js';
+import * as FSSyncModule from './features/fs-sync.js';
 
 /**
  * Main Application Object
@@ -1083,6 +1084,32 @@ const app = {
     } catch (error) {
       console.error('[App] Branch import failed:', error);
       showToast(t('toast.importError'), '⚠️');
+    }
+  },
+
+  /**
+   * Export current branch to File System
+   * Uses File System Access API (Chrome/Edge only)
+   */
+  async exportToFileSystem() {
+    await FSSyncModule.showExportDialog(this.currentNodeId);
+  },
+
+  /**
+   * Import branch from File System
+   * Uses File System Access API (Chrome/Edge only)
+   */
+  async importFromFileSystem() {
+    if (!this.currentNodeId) {
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
+      return;
+    }
+
+    const result = await FSSyncModule.showImportDialog(this.currentNodeId);
+
+    if (result) {
+      this.render();
+      this.updateNodeCounter();
     }
   },
 

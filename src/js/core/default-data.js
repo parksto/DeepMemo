@@ -443,7 +443,7 @@ Isole une sous-arborescence pour travailler au calme.
 Attache des images, PDFs, documents à tes nœuds.
 
 ## ⬇️ Export/Import
-Sauvegarde et partage tes données (global ou par branche).
+Sauvegarde et partage tes données : .dm (archive), .json, FreeMind, Mermaid, PDF.
 
 ## ⌨️ Raccourcis clavier
 Navigue rapidement sans utiliser la souris.
@@ -1003,6 +1003,27 @@ En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta st
 
 *(Capture d'écran en fichier joint—démonstration concrète des attachments !)*
 
+## 📄 Export PDF : Document imprimable
+
+**Nouveau** : Export de branches en **PDF** pour impression ou archivage :
+
+**Fonctionnement** :
+- Génération en ligne via CloudFlare Worker (ou CLI offline avec Node.js)
+- Symlinks résolus automatiquement avec leur contenu
+- Images inline (attachments convertis en base64)
+- Table des matières hiérarchique
+- Rate limiting (5 PDFs/heure, 20/jour) pour éviter les abus
+
+**Utilité** :
+- Documentation imprimable
+- Archivage long terme (format universel)
+- Partage avec personnes non-techniques
+
+**Confidentialité** :
+- IP hashée (SHA-256) côté serveur pour le rate limiting
+- Données non conservées après génération
+- Alternative CLI 100% offline disponible (\`bin/branch2pdf.js\`)
+
 ---
 
 **Exemple concret ci-dessous** 👇`,
@@ -1259,480 +1280,34 @@ Quand tu passes en **mode Affichage** (👁️), l'image s'affiche directement !
         id: ids.future,
         type: "node",
         title: "🔮 Directions explorées",
-        content: `# Directions explorées pour DeepMemo
+        content: `# Directions explorées
 
-DeepMemo est **un projet en exploration**. Voici quelques directions que nous trouvons prometteuses.
+DeepMemo est **un projet open-source** qui avance à son rythme, sans promesses ni calendrier.
 
-> ⚠️ **Important** : Ces idées ne sont pas encore implémentées. C'est une réflexion ouverte sur ce qui pourrait être utile.
+## 👥 Collaboration & Partage
 
-## 🧭 Trois grandes directions
+**Actuellement** : L'export/import de branches (\`.dm\`) permet déjà une collaboration de base :
+- Tu exportes une branche → tu l'envoies à quelqu'un → il l'importe chez lui
+- Collaboration offline, via fichiers (email, Git, USB, etc.)
+- Contrôle total : chacun décide ce qu'il partage
 
-### 1. 🎯 Nœuds actifs (Données intelligentes)
+**Explorations futures** : Des pistes de synchronisation sont à l'étude, mais rien de concret pour l'instant. L'idée serait de permettre une collaboration temps réel tout en gardant la souveraineté des données (pas de plateforme centrale).
 
-Des nœuds qui ont un **comportement** au lieu d'être simplement du texte :
-- Un "Budget" qui calcule automatiquement solde et alertes
-- Une "Recette" qui génère une liste de courses
-- Un "Cours" qui suit la progression des élèves
+## 🌱 Open Source
 
-**Ce qui rend ça intéressant** : Les types eux-mêmes seraient des nœuds. Tu pourrais créer tes propres types ou utiliser ceux partagés par la communauté.
+DeepMemo est sous licence **MIT**. Contributions bienvenues sur [GitHub](https://github.com/parksto/DeepMemo) :
+- Code, idées, documentation
+- Rapports de bugs, suggestions
+- Cas d'usage réels qui aident à comprendre les besoins
 
-### 2. 🔔 Automatisation & Connectivité
-
-Rendre DeepMemo **contrôlable depuis l'extérieur** et capable d'agir sur plusieurs nœuds :
-- **API externe** : Commandes vocales, Zapier, webhooks...
-- **Triggers multi-nœuds** : Une action → plusieurs effets en cascade
-- **Assistants IA** : Agents qui analysent ton graph et proposent des actions
-- **Interopérabilité** : Hub central qui connecte tes outils existants
-
-**Ce qui rend ça intéressant** : DeepMemo devient un hub de ton écosystème numérique, pas un silo isolé.
-
-### 3. 👥 Collaboration & Partage
-
-Permettre le travail collaboratif tout en gardant le contrôle :
-- **Permissions fines** : Qui peut lire/éditer/exécuter quoi
-- **Templates partageables** : Structures prêtes à l'emploi
-- **Souveraineté des données** : Chacun héberge son instance, partage ce qu'il veut
-- **Synchronisation** : Modifications en temps réel
-
-**Ce qui rend ça intéressant** : Collaboration décentralisée. Pas de plateforme centrale qui possède tes données.
-
-## 🌱 Pourquoi partager ces idées ?
-
-DeepMemo est **Open Source (MIT)**. Ces directions sont des pistes de réflexion, pas des promesses.
-
-Si certaines te parlent, tu peux :
-- **Expérimenter** : Tester DeepMemo et voir ce qui manque
-- **Contribuer** : Proposer des idées, du code, de la doc sur [GitHub](https://github.com/parksto/DeepMemo)
-- **Partager** : Tes cas d'usage aident à comprendre les besoins réels
-
----
-
-**Explore les sous-nœuds** pour des exemples concrets de ces concepts.`,
-        children: [ids.activeNodes, ids.triggers, ids.multiUser],
+Pas de pression, pas de roadmap stricte. On publie ce qu'on a quand c'est prêt.`,
+        children: [ids.multiUser],
         parent: ids.root,
-        tags: ["futur", "exploration", "open-source"],
+        tags: ["futur", "collaboration", "open-source"],
         links: [],
         backlinks: [],
         created: now + 19,
         modified: now + 19
-      },
-
-      // Futur : Nœuds actifs
-      [ids.activeNodes]: {
-        id: ids.activeNodes,
-        type: "node",
-        title: "🎯 Nœuds actifs (Types personnalisés)",
-        content: `# Nœuds actifs : Des données qui se comportent
-
-## 💡 L'idée principale
-
-Au lieu que tous les nœuds soient "passifs" (juste du texte), certains pourraient avoir des **comportements**.
-
-**Le concept clé** : Les **types eux-mêmes sont des nœuds** !
-
-## 🌍 Cas d'usage concrets
-
-### 📚 Éducation collaborative
-
-Un **prof** crée un type "Cours Interactif" avec :
-- Schéma : chapitres, exercices, quizz, ressources
-- Scripts : calcul progression, scoring, certificat
-- Vue : interface pédagogique avec timeline
-
-Les **élèves** forkent le cours dans leur espace :
-- Ils ajoutent leurs notes personnelles
-- Répondent aux exercices (scoring automatique)
-- Le prof voit en temps réel qui bloque où
-
-**Ce qui rend ça intéressant** : Le cours est vivant, adapté à chaque élève, mais partagé depuis une même source.
-
-### 🏢 Documentation vivante d'équipe
-
-Une **équipe** crée un type "Process d'entreprise" :
-- Schéma : étapes, responsables, outils
-- Scripts : alertes si non respecté, stats d'utilisation
-- Vue : flowchart visuel interactif
-
-Chaque process (onboarding, release, support) devient un nœud actif :
-- Toujours à jour (modification propagée)
-- Traçable (qui a changé quoi)
-- Actionnable (boutons "Démarrer le process")
-
-**Ce qui rend ça intéressant** : La doc devient un outil, pas juste du texte oublié dans un wiki.
-
-## 🧩 Comment ça marcherait ?
-
-### Les types sont des nœuds descripteurs
-
-Un nœud spécial peut **définir un type** :
-- **Schéma de données** : Quels champs ?
-- **Scripts** : Que fait-il quand on le sauvegarde ?
-- **Actions** : Quels boutons afficher ?
-- **Affichage** : Comment le rendre visuellement ?
-
-**Exemple** : Type "Budget"
-\`\`\`javascript
-Schéma :
-  - revenus (nombre)
-  - dépenses (nombre)
-  - solde (calculé auto)
-
-Scripts :
-  - onSave: "solde = revenus - dépenses"
-  - onAlert: "si solde < 0, tag 'alerte'"
-
-Affichage :
-  - Barres de progression colorées
-\`\`\`
-
-### Bibliothèque partageable
-
-**Types personnels** → Créés par toi
-**Types d'équipe** → Partagés avec ton groupe
-**Types communautaires** → Open source, contributifs
-
-Tu **choisis** les types que tu installes, comme des plugins.
-
-## 🛠️ Créer un type = Programmation visuelle
-
-Tu décris le comportement dans un nœud, DeepMemo l'exécute.
-
-**Pas besoin de coder** (sauf si tu veux des scripts avancés).
-
----
-
-**Exemple concret ci-dessous** 👇`,
-        children: [ids.activeNodesExample],
-        parent: ids.future,
-        tags: ["futur", "nœuds-actifs", "types"],
-        links: [],
-        backlinks: [],
-        created: now + 20,
-        modified: now + 20
-      },
-
-      // Exemple : Nœuds actifs
-      [ids.activeNodesExample]: {
-        id: ids.activeNodesExample,
-        type: "node",
-        title: "Exemple : Budget automatique",
-        content: `# Exemple : Un nœud "Budget" qui calcule
-
-Imagine un nœud de type **Budget** qui calcule automatiquement.
-
-## 💰 Données
-
-\`\`\`
-Revenus : 3000€
-Dépenses : 2700€
-\`\`\`
-
-## 🧮 Calcul automatique
-
-Le nœud calculerait tout seul :
-\`\`\`
-Solde = 3000 - 2700 = 300€
-\`\`\`
-
-## 🎨 Affichage personnalisé
-
-Au lieu de texte brut, tu verrais :
-- Une barre de progression (Dépenses / Revenus)
-- Le solde en vert si positif, rouge si négatif
-- Un graphique de l'évolution
-
-## 🔔 Alertes automatiques
-
-Si Dépenses > 90% des Revenus :
-- Le nœud s'ajoute automatiquement le tag **alerte**
-- Une notification s'affiche : "⚠️ Budget presque épuisé"
-
-## ✅ Avantages
-
-- **Moins d'erreurs** : Pas de calcul manuel
-- **Toujours à jour** : Recalcul automatique
-- **Visuellement clair** : Pas besoin de lire du texte
-- **Actions automatiques** : Tags, alertes, etc.
-
----
-
-**C'est de la programmation sans code** : tu définis des comportements, DeepMemo les exécute.`,
-        children: [],
-        parent: ids.activeNodes,
-        tags: ["exemple", "budget", "automatisation"],
-        links: [],
-        backlinks: [],
-        created: now + 21,
-        modified: now + 21
-      },
-
-      // Futur : Automatisation & Connectivité
-      [ids.triggers]: {
-        id: ids.triggers,
-        type: "node",
-        title: "🔔 Automatisation & Connectivité",
-        content: `# Automatisation & Connectivité
-
-Rendre DeepMemo **contrôlable depuis l'extérieur** et capable d'agir intelligemment.
-
-## 🎤 Le cas d'usage qui a tout déclenché
-
-DeepMemo est né d'une idée simple : pouvoir dire à un assistant vocal :
-
-> **"Rajoute dans la liste des choses à faire avec Émilien : parler du projet Fitness-Chrono"**
-
-Et que ça **fonctionne** : nœud créé au bon endroit + symlink auto vers le projet.
-
-**Ce cas combine** : API externe, nœuds actifs, auto-symlink.
-
-👉 **Voir l'exemple détaillé ci-dessous** pour comprendre comment.
-
-## 🔌 API externe : Contrôle depuis n'importe où
-
-DeepMemo pourrait exposer une **API HTTP** :
-
-**Cas d'usage** :
-- **Assistant vocal** : "Alexa, ajoute X à ma liste"
-- **Email → DeepMemo** : Email avec facture PDF → crée nœud Facture auto
-- **Zapier/IFTTT** : Webhook quand événement → action DeepMemo
-- **Home Assistant** : Frigo vide → ajout liste courses
-- **Scripts perso** : Automatiser ton workflow quotidien
-
-**Ce qui rend ça intéressant** : DeepMemo devient le hub central de ton écosystème numérique.
-
-## ⚡ Triggers multi-nœuds : Workflows en cascade
-
-Une action → plusieurs nœuds mis à jour :
-
-**Exemple** : "Planifier une recette"
-1. Clic sur "Planifier" sur recette
-2. **→** Ajoute ingrédients à liste de courses
-3. **→** Crée tâche "Faire les courses" dans planning
-4. **→** Calcule impact sur budget semaine
-5. **→** Alerte si budget dépassé
-
-**Résultat** : Un clic → 4 nœuds synchronisés automatiquement.
-
-## 🤖 Assistants IA : Analyse et propositions
-
-Des agents IA qui **comprennent ton graph** :
-
-**Agent "Analyste"** :
-- Analyse ton activité
-- Détecte patterns : "Tu passes 60% de ton temps sur X"
-- Propose optimisations
-
-**Agent "Chercheur"** :
-- Tu demandes : "Trouve des infos sur [sujet]"
-- Il scrape le web, crée des nœuds, les lie à ton projet
-- Résume les points clés
-
-**Agent "Planificateur"** :
-- "Planifie ma semaine"
-- Analyse tes todos, événements, projets
-- Détecte conflits, propose planning optimal
-
-**Ce qui rend ça intéressant** : L'IA devient un collaborateur qui enrichit ton graph.
-
-## 🌐 Interopérabilité : Hub, pas silo
-
-DeepMemo pourrait **connecter tes outils existants** au lieu de les remplacer :
-
-**Import/Export automatique** :
-- Notion, Obsidian, Roam, Evernote
-- Google Calendar, Todoist, Trello
-- Gmail (emails → nœuds), GitHub (repos → nœuds)
-
-**Workflow intelligent** :
-\`\`\`
-Email reçu avec facture PDF
-→ DeepMemo détecte auto
-→ Crée nœud [Facture] avec données extraites
-→ Lie à [Projet] et [Budget]
-→ Ajoute [Todo] "Payer avant le 15"
-→ Sync avec ton calendrier
-\`\`\`
-
-**Ce qui rend ça intéressant** : DeepMemo orchestre ton écosystème, ne l'isole pas.
-
----
-
-**Exemples concrets ci-dessous** 👇`,
-        children: [ids.triggersExample, ids.triggersVoiceExample],
-        parent: ids.future,
-        tags: ["futur", "automatisation", "API", "IA"],
-        links: [],
-        backlinks: [],
-        created: now + 22,
-        modified: now + 22
-      },
-
-      // Exemple : Triggers
-      [ids.triggersExample]: {
-        id: ids.triggersExample,
-        type: "node",
-        title: "Exemple : Recette → Liste de courses",
-        content: `# Exemple : Recette qui génère une liste de courses
-
-Imagine que tu planifies tes repas de la semaine.
-
-## 🗂️ Structure
-
-\`\`\`
-📋 Mes listes
-└── 🛒 Liste de courses de la semaine
-
-🍰 Recettes
-├── 🍪 Cookies au chocolat
-│   ├── Farine (200g)
-│   ├── Sucre (90g)
-│   └── Chocolat (100g)
-└── 🥗 Salade César
-    ├── Salade romaine
-    ├── Parmesan
-    └── Croûtons
-\`\`\`
-
-## ⚡ Action déclenchée
-
-Tu vas sur "🍪 Cookies au chocolat" et cliques sur **"Ajouter aux courses"**.
-
-**Ce qui se passe** :
-1. Le nœud Recette **collecte** ses enfants (ingrédients)
-2. Il **trigger** la liste de courses avec ces données
-3. La liste de courses **reçoit** le message
-4. Elle **ajoute** automatiquement :
-   - Farine : 200g
-   - Sucre : 90g
-   - Chocolat : 100g
-
-## 🎁 Bonus : Fusion intelligente
-
-Si tu ajoutes **deux recettes** qui utilisent du sucre :
-- Cookies : 90g de sucre
-- Gâteau : 150g de sucre
-
-La liste de courses **fusionne** automatiquement :
-- Sucre : **240g** (au lieu de deux lignes séparées)
-
-## ✅ Avantages
-
-- **Rapidité** : Plus besoin de copier-coller
-- **Fiabilité** : Pas d'oubli d'ingrédient
-- **Intelligence** : Fusion automatique des quantités
-- **Contexte** : Tu sais que le sucre vient de 2 recettes
-
----
-
-**C'est de l'automatisation intelligente** : les nœuds se parlent et collaborent.`,
-        children: [],
-        parent: ids.triggers,
-        tags: ["exemple", "recette", "automatisation"],
-        links: [],
-        backlinks: [],
-        created: now + 23,
-        modified: now + 23
-      },
-
-      // Exemple : Triggers + Commande vocale
-      [ids.triggersVoiceExample]: {
-        id: ids.triggersVoiceExample,
-        type: "node",
-        title: "Exemple : Commande vocale + auto-symlink",
-        content: `# Exemple : La commande vocale qui a inspiré DeepMemo
-
-Cet exemple montre le **cas d'usage initial** qui a motivé la création de DeepMemo.
-
-## 🎤 La commande vocale
-
-Imagine que tu dis à ton assistant vocal :
-
-> **"Rajoute dans la \`liste des choses à faire avec Émilien\` : \`parler du projet Fitness-Chrono\`"**
-
-## 🧩 Ce qui se passe
-
-### 1. Parsing de la commande
-
-L'assistant vocal envoie une requête à DeepMemo :
-\`\`\`javascript
-POST /api/trigger
-{
-  "targetNode": "liste des choses à faire avec Émilien",  // Référence du nœud cible
-  "action": "addChild",                                   // Action à déclencher
-  "data": {
-    "title": "parler du projet Fitness-Chrono"           // Titre du nouveau nœud
-  }
-}
-\`\`\`
-
-### 2. Recherche du nœud cible
-
-DeepMemo trouve le nœud "Liste des choses à faire avec Émilien" :
-- Par **titre exact** (ou fuzzy matching)
-- Par **mot-clé** prédéfini (ex: tu as tagué ce nœud avec "Émilien-todos")
-- Par **ID direct** si tu utilises une syntaxe plus technique
-
-### 3. Création du nœud enfant
-
-DeepMemo crée automatiquement :
-\`\`\`
-📋 Liste des choses à faire avec Émilien
-├── [existant] Regarder le film qu'il m'a recommandé
-├── [existant] Lui prêter le livre sur l'architecture logicielle
-└── [NOUVEAU] Parler du projet Fitness-Chrono
-\`\`\`
-
-### 4. Intelligence : Auto-symlink (grâce au type actif)
-
-**Bonus automatique** : Le nœud "Liste des choses à faire avec Émilien" a un **type actif** qui détecte :
-- Le mot-clé "projet" dans le titre
-- Un nœud existant nommé "Fitness-Chrono" dans ta branche "Projets"
-
-**Action automatique** :
-Le type actif **crée un symlink** vers la branche "Fitness-Chrono" :
-\`\`\`
-📋 Liste des choses à faire avec Émilien
-└── Parler du projet Fitness-Chrono
-    └── 🔗 [symlink automatique vers] Projet Fitness-Chrono
-\`\`\`
-
-**Résultat** : Quand tu ouvres cette tâche, tu as **directement accès** à toutes les infos du projet (contexte complet).
-
-## 🎯 Pourquoi c'est puissant ?
-
-**Interface naturelle** :
-- Tu parles comme à un humain
-- Pas besoin de naviguer dans l'arborescence
-- Pas besoin de chercher manuellement le projet lié
-
-**Automatisation intelligente** :
-- Le nœud "liste" **sait** comment gérer ce type d'ajout
-- Il **détecte** les références à d'autres nœuds
-- Il **crée** automatiquement les liens pertinents
-
-**Contexte préservé** :
-- La tâche est liée au projet
-- Tu peux naviguer facilement entre "Liste Émilien" et "Projet Fitness-Chrono"
-- Pas de duplication, juste des **connexions intelligentes**
-
-## 🔮 Vision future
-
-Cette commande illustre **trois concepts** de DeepMemo :
-
-1. **API externe** : Contrôler DeepMemo depuis n'importe où (vocal, Zapier, Home Assistant, etc.)
-2. **Nœuds actifs** : Le nœud "liste" a un comportement intelligent (type personnalisé)
-3. **Triggers multi-nœuds** : Une action déclenche plusieurs effets (création + symlink)
-
----
-
-**C'est exactement ce genre d'usage fluide et intelligent que DeepMemo vise à rendre possible.**`,
-        children: [],
-        parent: ids.triggers,
-        tags: ["exemple", "vocal", "automatisation", "origine"],
-        links: [],
-        backlinks: [],
-        created: now + 24,
-        modified: now + 24
       },
 
       // Futur : Collaboration & Partage
@@ -1742,152 +1317,35 @@ Cette commande illustre **trois concepts** de DeepMemo :
         title: "👥 Collaboration & Partage",
         content: `# Collaboration & Partage
 
-Permettre le travail collaboratif **tout en gardant le contrôle**.
+## 📦 Actuellement : Partage de fichiers .dm
 
-## 🔐 Permissions fines (chmod-style)
+DeepMemo permet déjà de **collaborer de manière asynchrone** grâce à l'export/import de branches :
 
-Inspiré du système de fichiers Unix :
-- **Lecture (r)** : Voir le nœud et ses enfants
-- **Écriture (w)** : Modifier le contenu
-- **Exécution (x)** : Déclencher actions/scripts
-
-**Niveaux** :
-- **Propriétaire** : Toi (contrôle total)
-- **Groupe** : Équipe/famille
-- **Autres** : Public
-
-**Cas d'usage** :
-- **Recettes familiales** : Famille peut ajouter, amis peuvent consulter
-- **Projet d'équipe** : Devs modifient code, clients voient roadmap
-- **Notes de cours** : Groupe d'étude ajoute questions, public lit
-
-## 📋 Templates partageables
-
-Des **structures prêtes à l'emploi** que tu peux forker :
-
-**Templates communautaires** :
-- "Business Plan Startup" (structure complète + calculs)
-- "Gestion de Projet Agile" (sprints + backlogs)
-- "Journal de Recherche" (notes + références + graphes)
-
-**Tu forks** → adaptes à tes besoins → partages ta version.
-
-**Ce qui rend ça intéressant** : Pas besoin de tout créer from scratch.
-
-## 🌍 Souveraineté des données : Décentralisation
-
-**Modèle** :
-- Chacun **héberge son propre graph** (ou choisit un hébergeur de confiance)
-- Les nœuds publics sont accessibles via permissions
-- Pas de plateforme centrale qui possède tes données
-
-**Exemple** :
-\`\`\`
-Jean partage :
-[Recette: Gâteau chocolat]
-  ├─ permissions: world (read)
-
-Alice voit la recette, mais elle reste sur le serveur de Jean.
-Alice commente → crée un nœud chez elle, lié à celui de Jean.
-\`\`\`
+**Workflow actuel** :
+1. Tu exportes une branche en fichier \`.dm\` (archive complète avec pièces jointes)
+2. Tu partages le fichier (email, cloud, USB...)
+3. Ton collaborateur l'importe dans son DeepMemo
+4. Il modifie, ajoute des nœuds, puis te renvoie une nouvelle version
+5. Tu importes la mise à jour (fusion intelligente)
 
 **Avantages** :
-- Tes données t'appartiennent vraiment
-- Pas de censure centralisée
-- Pas de pub ciblée invasive
-- Monétisation directe possible (vendre accès à tes nœuds premium si tu veux)
+- 100% offline et décentralisé
+- Aucun serveur tiers requis
+- Contrôle total sur tes données
+- Format ouvert et documenté
 
-**Ce qui rend ça intéressant** : Alternative crédible aux plateformes centralisées (Facebook, Notion...).
+## 🔄 Explorations futures
 
-## 🔄 Synchronisation en temps réel
+Des **pistes de synchronisation** sont à l'étude pour permettre une collaboration en temps réel, mais le projet avance à son rythme. L'important est de garder une approche **simple, fiable et respectueuse de la vie privée**.
 
-Modifications synchronisées comme Google Docs :
-- Voir les curseurs des autres
-- Résolution automatique des conflits
-- Historique complet des changements
-
----
-
-**Exemple concret ci-dessous** 👇`,
-        children: [ids.multiUserExample],
+Pour l'instant, l'export/import fonctionne bien et répond à la plupart des besoins de collaboration.`,
+        children: [],
         parent: ids.future,
         tags: ["futur", "collaboration", "décentralisation"],
         links: [],
         backlinks: [],
         created: now + 25,
         modified: now + 25
-      },
-
-      // Exemple : Multi-utilisateur
-      [ids.multiUserExample]: {
-        id: ids.multiUserExample,
-        type: "node",
-        title: "Exemple : Projet d'équipe",
-        content: `# Exemple : Gérer un projet avec une équipe
-
-Imagine que tu gères un projet de développement web avec une équipe.
-
-## 🗂️ Structure
-
-\`\`\`
-🌐 Projet Site Web
-├── 📋 Roadmap (lecture seule pour développeurs)
-├── 💻 Code (écriture pour développeurs)
-├── 🐛 Bugs (écriture pour testeurs)
-├── 📊 Statistiques (lecture seule pour clients)
-└── 💰 Budget (lecture uniquement pour toi)
-\`\`\`
-
-## 🔐 Permissions par branche
-
-### Roadmap
-
-- **Toi** : rwx (Écriture + planification)
-- **Développeurs** : r-- (Consultation uniquement)
-- **Clients** : r-- (Suivi de l'avancement)
-
-### Code
-
-- **Toi** : rwx
-- **Développeurs** : rw- (Peuvent modifier)
-- **Clients** : --- (Pas d'accès)
-
-### Bugs
-
-- **Toi** : rwx
-- **Développeurs** : rw- (Peuvent corriger)
-- **Testeurs** : rw- (Peuvent signaler)
-- **Clients** : r-- (Peuvent voir l'état)
-
-### Budget
-
-- **Toi** : rwx
-- **Tous** : --- (Privé)
-
-## 🔄 Collaboration en temps réel
-
-Quand un développeur modifie du code :
-- Tu **vois** sa modification en direct
-- Pas de conflit (merge automatique)
-- Historique préservé (qui a fait quoi)
-
-## ✅ Avantages
-
-- **Contrôle précis** : Chacun voit ce qu'il doit voir
-- **Collaboration fluide** : Pas besoin d'envoyer des fichiers
-- **Traçabilité** : Historique complet des modifications
-- **Flexibilité** : Permissions ajustables à tout moment
-
----
-
-**C'est un système de fichiers intelligent** : chacun travaille sur sa partie, tout reste synchronisé.`,
-        children: [],
-        parent: ids.multiUser,
-        tags: ["exemple", "équipe", "collaboration"],
-        links: [],
-        backlinks: [],
-        created: now + 26,
-        modified: now + 26
       },
 
       // 🚀 Premiers pas
@@ -2396,7 +1854,7 @@ Isolate a sub-tree to work in peace.
 Attach images, PDFs, documents to your nodes.
 
 ## ⬇️ Export/Import
-Save and share your data (global or by branch).
+Save and share your data: .dm (archive), .json, FreeMind, Mermaid, PDF.
 
 ## ⌨️ Keyboard shortcuts
 Navigate quickly without using the mouse.
@@ -2956,6 +2414,27 @@ In addition to ZIP, you can export as a **mindmap** to visualize and edit your s
 
 *(Screenshot as attached file—concrete demonstration of attachments!)*
 
+## 📄 PDF Export: Printable document
+
+**New**: Export branches as **PDF** for printing or archiving:
+
+**How it works**:
+- Online generation via CloudFlare Worker (or offline CLI with Node.js)
+- Symlinks automatically resolved with their content
+- Inline images (attachments converted to base64)
+- Hierarchical table of contents
+- Rate limiting (5 PDFs/hour, 20/day) to prevent abuse
+
+**Usefulness**:
+- Printable documentation
+- Long-term archiving (universal format)
+- Sharing with non-technical people
+
+**Privacy**:
+- Hashed IP (SHA-256) server-side for rate limiting
+- Data not retained after generation
+- 100% offline CLI alternative available (\`bin/branch2pdf.js\`)
+
 ---
 
 **Concrete example below** 👇`,
@@ -3212,480 +2691,34 @@ When you switch to **View mode** (👁️), the image displays directly!
         id: ids.future,
         type: "node",
         title: "🔮 Explored directions",
-        content: `# Explored directions for DeepMemo
+        content: `# Explored directions
 
-DeepMemo is **an exploration project**. Here are some directions we find promising.
+DeepMemo is **an open-source project** that progresses at its own pace, with no promises or strict timeline.
 
-> ⚠️ **Important**: These ideas are not yet implemented. This is an open reflection on what could be useful.
+## 👥 Collaboration & Sharing
 
-## 🧭 Three main directions
+**Currently**: Branch export/import (\`.dm\`) already enables basic collaboration:
+- You export a branch → send it to someone → they import it
+- Offline collaboration via files (email, Git, USB, etc.)
+- Total control: everyone decides what they share
 
-### 1. 🎯 Active nodes (Smart data)
+**Future explorations**: Synchronization approaches are being explored, but nothing concrete yet. The idea would be to enable real-time collaboration while maintaining data sovereignty (no central platform).
 
-Nodes that have **behavior** instead of just being text:
-- A "Budget" that automatically calculates balance and alerts
-- A "Recipe" that generates a shopping list
-- A "Course" that tracks student progress
+## 🌱 Open Source
 
-**What makes it interesting**: The types themselves would be nodes. You could create your own types or use those shared by the community.
+DeepMemo is under **MIT license**. Contributions welcome on [GitHub](https://github.com/parksto/DeepMemo):
+- Code, ideas, documentation
+- Bug reports, suggestions
+- Real-world use cases that help understand needs
 
-### 2. 🔔 Automation & Connectivity
-
-Make DeepMemo **controllable from outside** and capable of acting on multiple nodes:
-- **External API**: Voice commands, Zapier, webhooks...
-- **Multi-node triggers**: One action → multiple cascading effects
-- **AI assistants**: Agents that analyze your graph and suggest actions
-- **Interoperability**: Central hub that connects your existing tools
-
-**What makes it interesting**: DeepMemo becomes a hub of your digital ecosystem, not an isolated silo.
-
-### 3. 👥 Collaboration & Sharing
-
-Enable collaborative work while keeping control:
-- **Fine-grained permissions**: Who can read/edit/execute what
-- **Shareable templates**: Ready-to-use structures
-- **Data sovereignty**: Everyone hosts their instance, shares what they want
-- **Synchronization**: Real-time modifications
-
-**What makes it interesting**: Decentralized collaboration. No central platform that owns your data.
-
-## 🌱 Why share these ideas?
-
-DeepMemo is **Open Source (MIT)**. These directions are discussion points, not promises.
-
-If some resonate with you, you can:
-- **Experiment**: Test DeepMemo and see what's missing
-- **Contribute**: Propose ideas, code, documentation on [GitHub](https://github.com/parksto/DeepMemo)
-- **Share**: Your use cases help understand real needs
-
----
-
-**Explore the sub-nodes** for concrete examples of these concepts.`,
-        children: [ids.activeNodes, ids.triggers, ids.multiUser],
+No pressure, no strict roadmap. We publish what we have when it's ready.`,
+        children: [ids.multiUser],
         parent: ids.root,
         tags: ["future", "exploration", "open-source"],
         links: [],
         backlinks: [],
         created: now + 19,
         modified: now + 19
-      },
-
-      // Future: Active nodes
-      [ids.activeNodes]: {
-        id: ids.activeNodes,
-        type: "node",
-        title: "🎯 Active nodes (Custom types)",
-        content: `# Active nodes: Data that behaves
-
-## 💡 The main idea
-
-Instead of all nodes being "passive" (just text), some could have **behaviors**.
-
-**The key concept**: The **types themselves are nodes**!
-
-## 🌍 Concrete use cases
-
-### 📚 Collaborative education
-
-A **teacher** creates an "Interactive Course" type with:
-- Schema: chapters, exercises, quizzes, resources
-- Scripts: progress calculation, scoring, certificate
-- View: pedagogical interface with timeline
-
-**Students** fork the course into their space:
-- They add their personal notes
-- Answer exercises (automatic scoring)
-- The teacher sees in real-time who's stuck where
-
-**What makes it interesting**: The course is alive, adapted to each student, but shared from the same source.
-
-### 🏢 Living team documentation
-
-A **team** creates a "Company Process" type:
-- Schema: steps, responsible parties, tools
-- Scripts: alerts if not followed, usage stats
-- View: interactive visual flowchart
-
-Each process (onboarding, release, support) becomes an active node:
-- Always up to date (propagated modification)
-- Traceable (who changed what)
-- Actionable (buttons to "Start process")
-
-**What makes it interesting**: Documentation becomes a tool, not just forgotten text in a wiki.
-
-## 🧩 How would it work?
-
-### Types are descriptor nodes
-
-A special node can **define a type**:
-- **Data schema**: What fields?
-- **Scripts**: What does it do when saved?
-- **Actions**: What buttons to display?
-- **Display**: How to render it visually?
-
-**Example**: "Budget" type
-\`\`\`javascript
-Schema:
-  - income (number)
-  - expenses (number)
-  - balance (auto-calculated)
-
-Scripts:
-  - onSave: "balance = income - expenses"
-  - onAlert: "if balance < 0, tag 'alert'"
-
-Display:
-  - Colored progress bars
-\`\`\`
-
-### Shareable library
-
-**Personal types** → Created by you
-**Team types** → Shared with your group
-**Community types** → Open source, contributive
-
-You **choose** which types to install, like plugins.
-
-## 🛠️ Creating a type = Visual programming
-
-You describe the behavior in a node, DeepMemo executes it.
-
-**No need to code** (unless you want advanced scripts).
-
----
-
-**Concrete example below** 👇`,
-        children: [ids.activeNodesExample],
-        parent: ids.future,
-        tags: ["future", "active-nodes", "types"],
-        links: [],
-        backlinks: [],
-        created: now + 20,
-        modified: now + 20
-      },
-
-      // Example: Active nodes
-      [ids.activeNodesExample]: {
-        id: ids.activeNodesExample,
-        type: "node",
-        title: "Example: Automatic budget",
-        content: `# Example: A "Budget" node that calculates
-
-Imagine a **Budget** type node that calculates automatically.
-
-## 💰 Data
-
-\`\`\`
-Income: $3000
-Expenses: $2700
-\`\`\`
-
-## 🧮 Automatic calculation
-
-The node would calculate on its own:
-\`\`\`
-Balance = 3000 - 2700 = $300
-\`\`\`
-
-## 🎨 Custom display
-
-Instead of plain text, you would see:
-- A progress bar (Expenses / Income)
-- Balance in green if positive, red if negative
-- An evolution chart
-
-## 🔔 Automatic alerts
-
-If Expenses > 90% of Income:
-- The node automatically adds the **alert** tag
-- A notification displays: "⚠️ Budget almost exhausted"
-
-## ✅ Advantages
-
-- **Fewer errors**: No manual calculation
-- **Always up to date**: Automatic recalculation
-- **Visually clear**: No need to read text
-- **Automatic actions**: Tags, alerts, etc.
-
----
-
-**This is no-code programming**: you define behaviors, DeepMemo executes them.`,
-        children: [],
-        parent: ids.activeNodes,
-        tags: ["example", "budget", "automation"],
-        links: [],
-        backlinks: [],
-        created: now + 21,
-        modified: now + 21
-      },
-
-      // Future: Automation & Connectivity
-      [ids.triggers]: {
-        id: ids.triggers,
-        type: "node",
-        title: "🔔 Automation & Connectivity",
-        content: `# Automation & Connectivity
-
-Make DeepMemo **controllable from outside** and capable of acting intelligently.
-
-## 🎤 The use case that started it all
-
-DeepMemo was born from a simple idea: being able to tell a voice assistant:
-
-> **"Add to the to-do list with Emilien: talk about the Fitness-Chrono project"**
-
-And have it **work**: node created in the right place + auto-symlink to the project.
-
-**This case combines**: External API, active nodes, auto-symlink.
-
-👉 **See the detailed example below** to understand how.
-
-## 🔌 External API: Control from anywhere
-
-DeepMemo could expose an **HTTP API**:
-
-**Use cases**:
-- **Voice assistant**: "Alexa, add X to my list"
-- **Email → DeepMemo**: Email with invoice PDF → auto-creates Invoice node
-- **Zapier/IFTTT**: Webhook when event → DeepMemo action
-- **Home Assistant**: Empty fridge → add to shopping list
-- **Personal scripts**: Automate your daily workflow
-
-**What makes it interesting**: DeepMemo becomes the central hub of your digital ecosystem.
-
-## ⚡ Multi-node triggers: Cascading workflows
-
-One action → multiple nodes updated:
-
-**Example**: "Schedule a recipe"
-1. Click "Schedule" on recipe
-2. **→** Adds ingredients to shopping list
-3. **→** Creates "Go shopping" task in planner
-4. **→** Calculates impact on week budget
-5. **→** Alerts if budget exceeded
-
-**Result**: One click → 4 nodes synchronized automatically.
-
-## 🤖 AI assistants: Analysis and suggestions
-
-AI agents that **understand your graph**:
-
-**"Analyst" agent**:
-- Analyzes your activity
-- Detects patterns: "You spend 60% of your time on X"
-- Suggests optimizations
-
-**"Researcher" agent**:
-- You ask: "Find info on [topic]"
-- It scrapes the web, creates nodes, links them to your project
-- Summarizes key points
-
-**"Planner" agent**:
-- "Plan my week"
-- Analyzes your todos, events, projects
-- Detects conflicts, suggests optimal planning
-
-**What makes it interesting**: AI becomes a collaborator that enriches your graph.
-
-## 🌐 Interoperability: Hub, not silo
-
-DeepMemo could **connect your existing tools** instead of replacing them:
-
-**Automatic import/export**:
-- Notion, Obsidian, Roam, Evernote
-- Google Calendar, Todoist, Trello
-- Gmail (emails → nodes), GitHub (repos → nodes)
-
-**Intelligent workflow**:
-\`\`\`
-Email received with invoice PDF
-→ DeepMemo auto-detects
-→ Creates [Invoice] node with extracted data
-→ Links to [Project] and [Budget]
-→ Adds [Todo] "Pay before the 15th"
-→ Syncs with your calendar
-\`\`\`
-
-**What makes it interesting**: DeepMemo orchestrates your ecosystem, doesn't isolate it.
-
----
-
-**Concrete examples below** 👇`,
-        children: [ids.triggersExample, ids.triggersVoiceExample],
-        parent: ids.future,
-        tags: ["future", "automation", "API", "AI"],
-        links: [],
-        backlinks: [],
-        created: now + 22,
-        modified: now + 22
-      },
-
-      // Example: Triggers
-      [ids.triggersExample]: {
-        id: ids.triggersExample,
-        type: "node",
-        title: "Example: Recipe → Shopping list",
-        content: `# Example: Recipe that generates a shopping list
-
-Imagine you're planning your week's meals.
-
-## 🗂️ Structure
-
-\`\`\`
-📋 My lists
-└── 🛒 Week's shopping list
-
-🍰 Recipes
-├── 🍪 Chocolate Chip Cookies
-│   ├── Flour (200g)
-│   ├── Sugar (90g)
-│   └── Chocolate (100g)
-└── 🥗 Caesar Salad
-    ├── Romaine lettuce
-    ├── Parmesan
-    └── Croutons
-\`\`\`
-
-## ⚡ Triggered action
-
-You go to "🍪 Chocolate Chip Cookies" and click **"Add to shopping"**.
-
-**What happens**:
-1. The Recipe node **collects** its children (ingredients)
-2. It **triggers** the shopping list with this data
-3. The shopping list **receives** the message
-4. It **adds** automatically:
-   - Flour: 200g
-   - Sugar: 90g
-   - Chocolate: 100g
-
-## 🎁 Bonus: Smart merging
-
-If you add **two recipes** that use sugar:
-- Cookies: 90g sugar
-- Cake: 150g sugar
-
-The shopping list **automatically merges**:
-- Sugar: **240g** (instead of two separate lines)
-
-## ✅ Advantages
-
-- **Speed**: No more copy-paste
-- **Reliability**: No forgotten ingredient
-- **Intelligence**: Automatic quantity merging
-- **Context**: You know the sugar comes from 2 recipes
-
----
-
-**This is intelligent automation**: nodes talk to each other and collaborate.`,
-        children: [],
-        parent: ids.triggers,
-        tags: ["example", "recipe", "automation"],
-        links: [],
-        backlinks: [],
-        created: now + 23,
-        modified: now + 23
-      },
-
-      // Example: Triggers + Voice command
-      [ids.triggersVoiceExample]: {
-        id: ids.triggersVoiceExample,
-        type: "node",
-        title: "Example: Voice command + auto-symlink",
-        content: `# Example: The voice command that inspired DeepMemo
-
-This example shows the **initial use case** that motivated the creation of DeepMemo.
-
-## 🎤 The voice command
-
-Imagine you tell your voice assistant:
-
-> **"Add to the \`to-do list with Emilien\`: \`talk about the Fitness-Chrono project\`"**
-
-## 🧩 What happens
-
-### 1. Parsing the command
-
-The voice assistant sends a request to DeepMemo:
-\`\`\`javascript
-POST /api/trigger
-{
-  "targetNode": "to-do list with Emilien",  // Target node reference
-  "action": "addChild",                      // Action to trigger
-  "data": {
-    "title": "talk about the Fitness-Chrono project"  // New node title
-  }
-}
-\`\`\`
-
-### 2. Search for target node
-
-DeepMemo finds the "To-do list with Emilien" node:
-- By **exact title** (or fuzzy matching)
-- By **predefined keyword** (e.g., you tagged this node with "Emilien-todos")
-- By **direct ID** if you use a more technical syntax
-
-### 3. Create child node
-
-DeepMemo automatically creates:
-\`\`\`
-📋 To-do list with Emilien
-├── [existing] Watch the movie he recommended
-├── [existing] Lend him the book on software architecture
-└── [NEW] Talk about the Fitness-Chrono project
-\`\`\`
-
-### 4. Intelligence: Auto-symlink (thanks to active type)
-
-**Automatic bonus**: The "To-do list with Emilien" node has an **active type** that detects:
-- The "project" keyword in the title
-- An existing node named "Fitness-Chrono" in your "Projects" branch
-
-**Automatic action**:
-The active type **creates a symlink** to the "Fitness-Chrono" branch:
-\`\`\`
-📋 To-do list with Emilien
-└── Talk about the Fitness-Chrono project
-    └── 🔗 [automatic symlink to] Fitness-Chrono Project
-\`\`\`
-
-**Result**: When you open this task, you have **direct access** to all project info (complete context).
-
-## 🎯 Why is it powerful?
-
-**Natural interface**:
-- You speak like to a human
-- No need to navigate the tree
-- No need to manually search for the linked project
-
-**Intelligent automation**:
-- The "list" node **knows** how to handle this type of addition
-- It **detects** references to other nodes
-- It **creates** relevant links automatically
-
-**Preserved context**:
-- The task is linked to the project
-- You can easily navigate between "Emilien List" and "Fitness-Chrono Project"
-- No duplication, just **smart connections**
-
-## 🔮 Future vision
-
-This command illustrates **three concepts** of DeepMemo:
-
-1. **External API**: Control DeepMemo from anywhere (voice, Zapier, Home Assistant, etc.)
-2. **Active nodes**: The "list" node has intelligent behavior (custom type)
-3. **Multi-node triggers**: One action triggers multiple effects (creation + symlink)
-
----
-
-**This is exactly the kind of fluid and intelligent usage that DeepMemo aims to make possible.**`,
-        children: [],
-        parent: ids.triggers,
-        tags: ["example", "voice", "automation", "origin"],
-        links: [],
-        backlinks: [],
-        created: now + 24,
-        modified: now + 24
       },
 
       // Future: Collaboration & Sharing
@@ -3695,152 +2728,35 @@ This command illustrates **three concepts** of DeepMemo:
         title: "👥 Collaboration & Sharing",
         content: `# Collaboration & Sharing
 
-Enable collaborative work **while keeping control**.
+## 📦 Currently: .dm file sharing
 
-## 🔐 Fine-grained permissions (chmod-style)
+DeepMemo already allows **asynchronous collaboration** through branch export/import:
 
-Inspired by the Unix file system:
-- **Read (r)**: See the node and its children
-- **Write (w)**: Modify content
-- **Execute (x)**: Trigger actions/scripts
-
-**Levels**:
-- **Owner**: You (total control)
-- **Group**: Team/family
-- **Others**: Public
-
-**Use cases**:
-- **Family recipes**: Family can add, friends can view
-- **Team project**: Devs modify code, clients see roadmap
-- **Class notes**: Study group adds questions, public reads
-
-## 📋 Shareable templates
-
-**Ready-to-use structures** you can fork:
-
-**Community templates**:
-- "Startup Business Plan" (complete structure + calculations)
-- "Agile Project Management" (sprints + backlogs)
-- "Research Journal" (notes + references + graphs)
-
-**You fork** → adapt to your needs → share your version.
-
-**What makes it interesting**: No need to create everything from scratch.
-
-## 🌍 Data sovereignty: Decentralization
-
-**Model**:
-- Everyone **hosts their own graph** (or chooses a trusted hoster)
-- Public nodes are accessible via permissions
-- No central platform that owns your data
-
-**Example**:
-\`\`\`
-John shares:
-[Recipe: Chocolate Cake]
-  ├─ permissions: world (read)
-
-Alice sees the recipe, but it stays on John's server.
-Alice comments → creates a node on her side, linked to John's.
-\`\`\`
+**Current workflow**:
+1. You export a branch as a \`.dm\` file (complete archive with attachments)
+2. You share the file (email, cloud, USB...)
+3. Your collaborator imports it into their DeepMemo
+4. They modify, add nodes, then send you back a new version
+5. You import the update (smart merge)
 
 **Advantages**:
-- Your data really belongs to you
-- No centralized censorship
-- No invasive targeted advertising
-- Direct monetization possible (sell access to your premium nodes if you want)
+- 100% offline and decentralized
+- No third-party server required
+- Total control over your data
+- Open and documented format
 
-**What makes it interesting**: Credible alternative to centralized platforms (Facebook, Notion...).
+## 🔄 Future explorations
 
-## 🔄 Real-time synchronization
+**Synchronization approaches** are being explored to enable real-time collaboration, but the project moves at its own pace. The important thing is to maintain a **simple, reliable, and privacy-respecting** approach.
 
-Modifications synchronized like Google Docs:
-- See others' cursors
-- Automatic conflict resolution
-- Complete change history
-
----
-
-**Concrete example below** 👇`,
-        children: [ids.multiUserExample],
+For now, export/import works well and meets most collaboration needs.`,
+        children: [],
         parent: ids.future,
         tags: ["future", "collaboration", "decentralization"],
         links: [],
         backlinks: [],
         created: now + 25,
         modified: now + 25
-      },
-
-      // Example: Multi-user
-      [ids.multiUserExample]: {
-        id: ids.multiUserExample,
-        type: "node",
-        title: "Example: Team project",
-        content: `# Example: Managing a project with a team
-
-Imagine you're managing a web development project with a team.
-
-## 🗂️ Structure
-
-\`\`\`
-🌐 Website Project
-├── 📋 Roadmap (read-only for developers)
-├── 💻 Code (write for developers)
-├── 🐛 Bugs (write for testers)
-├── 📊 Statistics (read-only for clients)
-└── 💰 Budget (read-only for you)
-\`\`\`
-
-## 🔐 Permissions by branch
-
-### Roadmap
-
-- **You**: rwx (Write + planning)
-- **Developers**: r-- (View only)
-- **Clients**: r-- (Track progress)
-
-### Code
-
-- **You**: rwx
-- **Developers**: rw- (Can modify)
-- **Clients**: --- (No access)
-
-### Bugs
-
-- **You**: rwx
-- **Developers**: rw- (Can fix)
-- **Testers**: rw- (Can report)
-- **Clients**: r-- (Can see status)
-
-### Budget
-
-- **You**: rwx
-- **Everyone**: --- (Private)
-
-## 🔄 Real-time collaboration
-
-When a developer modifies code:
-- You **see** their modification in real-time
-- No conflict (automatic merge)
-- Preserved history (who did what)
-
-## ✅ Advantages
-
-- **Precise control**: Everyone sees what they should see
-- **Fluid collaboration**: No need to send files
-- **Traceability**: Complete modification history
-- **Flexibility**: Permissions adjustable anytime
-
----
-
-**It's an intelligent file system**: everyone works on their part, everything stays synchronized.`,
-        children: [],
-        parent: ids.multiUser,
-        tags: ["example", "team", "collaboration"],
-        links: [],
-        backlinks: [],
-        created: now + 26,
-        modified: now + 26
       },
 
       // 🚀 First steps

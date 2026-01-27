@@ -2,7 +2,7 @@
 
 *[Version française](TODO.fr.md)*
 
-**Last update**: January 1, 2026 (V0.9.4 - Polish & bug fixes)
+**Last update**: January 19, 2026 (V0.10.4 - IndexedDB & .dm format)
 
 ---
 
@@ -385,6 +385,80 @@ DeepMemo V0.8 is **complete and deployed** with all the following features:
 
 ---
 
+## 💾 V0.10 - IndexedDB Migration & .dm Format - ✅ COMPLETED
+
+**Date**: January 19, 2026
+**Context**: Scalable storage with IndexedDB, official .dm archive format, and PDF export
+
+### IndexedDB with Dexie.js
+- [x] Migration from localStorage to IndexedDB (automatic, non-destructive)
+- [x] Three object stores: `nodes`, `settings`, `attachments`
+- [x] 500 MB - 1 GB storage capacity (vs ~5-10 MB with localStorage)
+- [x] Module structure: `storage.js` (Dexie layer), `migration.js` (migration logic)
+- [x] Backup preservation: Original localStorage data kept after migration
+- [x] Migration flag: `deepmemo_migrated_to_indexeddb` in localStorage
+
+### .dm Archive Format
+- [x] Official `.dm` file extension (ZIP archive with custom extension)
+- [x] `metadata.json`: Version, type (global/branch), title, date, stats, generator info
+- [x] `data.json`: Node tree structure (unchanged from V0.9)
+- [x] `attachments/` folder: Attachment files with naming convention
+- [x] Auto-detection: Magic number detection (PK = ZIP, else JSON)
+- [x] File filters: `.dm,.zip,.json` in native file picker
+- [x] Backward compatible: Supports legacy .json and .zip imports
+- [x] Documentation: Complete spec in `docs/FILE-FORMATS.md` v2.0
+
+### Improved Import
+- [x] Global import choice: "Replace all" (destructive) or "Merge" (add to roots)
+- [x] Branch import from global: Accepts global exports
+  - Single root → imports as branch
+  - Multiple roots → creates container node with export title
+- [x] JSON Schema validation: Against `docs/schemas/deepmemo-v1.0.json`
+- [x] Graceful degradation: Missing files tolerated, warnings displayed
+
+### PDF Export
+- [x] CloudFlare Worker: Online generation with Browser Rendering API
+  - Rate limiting: 5 PDFs/hour, 20/day per IP
+  - IP hashing (SHA-256) for privacy
+  - CORS headers for quota exposure
+  - Referer/origin protection
+  - **Status**: Code complete, not yet deployed to production
+- [x] CLI tool: `bin/branch2pdf.js` for 100% offline generation
+  - Node.js + Puppeteer
+  - Supports .dm archives (ZIP extraction)
+  - No rate limiting
+- [x] Symlink resolution: Content included, descendants excluded if external to scope
+- [x] Inline images: Attachments converted to base64 data URLs
+- [x] Cycle detection: Prevents infinite loops
+- [x] Table of contents: Simplified hierarchical structure
+- [x] Privacy modal: First-use notice (localStorage persistence)
+- [x] Quota display: Real-time quota info in right panel
+
+### Demo Content Update
+- [x] Cleaned speculative content: Removed "active types", "triggers", "automation" nodes
+- [x] Updated "Collaboration & Sharing": Focus on current export/import .dm workflow
+- [x] Added PDF section: Documented online and offline PDF export options
+- [x] Simplified "Explored Directions": Vague mention of future sync without promises
+- [x] Tone adjustment: "We're exploring, we'll see" - no teasing of unimplemented features
+- [x] Template literal fixes: Escaped backticks in markdown content (`.dm` → `\`.dm\``)
+
+### Documentation
+- [x] FILE-FORMATS.md v2.0: Complete .dm format specification
+- [x] FORMATS-FICHIERS.md v2.0: French version synchronized
+- [x] file-formats/ZIP-FORMAT.md: Quick reference for .dm structure
+- [x] file-formats/JSON-STRUCTURE.md: LLM-friendly JSON guide
+- [x] file-formats/SCHEMA-VALIDATION.md: Validation documentation
+- [x] docs/schemas/: JSON Schema files for validation
+- [x] cloudflare-worker/README.md: PDF Worker deployment guide
+- [x] cloudflare-worker/PRIVACY-NOTICE.md: User privacy notice
+
+### Bug Fixes
+- [x] Template literal errors: Fixed escaped backticks in `default-data.js`
+- [x] Missing i18n keys: Added all PDF-related translation keys
+- [x] Attachment format: Ensured array-of-objects format (not strings)
+
+---
+
 ## 💭 Backlog Ideas (V1.1+)
 
 See `docs/ROADMAP.md` section "V1.0 - Complete System" and `docs/VISION.md` for:
@@ -397,21 +471,22 @@ See `docs/ROADMAP.md` section "V1.0 - Complete System" and `docs/VISION.md` for:
 
 ## 📊 Project Status
 
-**Current version**: V0.9.4 (January 2026)
-**Status**: ✅ Stable, documented, deployed in production
-**Deployment**: ✅ **deepmemo.org** (IN PRODUCTION)
+**Current version**: V0.10.4 (January 2026)
+**Status**: ✅ Stable, documented, deployed locally (production at V0.10.3)
+**Deployment**: 🟡 **deepmemo.org** (V0.10.3 - V0.10.4 pending deployment)
 **License**: MIT (Open Source)
 
 **Codebase**:
-- ~11000 lines JS (modular ES6 architecture)
-- ~1750 lines CSS (organized in 5 files)
-- 18 modules JS (core, features, ui, utils, locales)
+- ~13.2K lines JS (modular ES6 architecture)
+- ~1.8K lines CSS (organized in 6 files)
+- ~20 modules JS (core, features, ui, utils, locales)
 - 100% Vanilla JavaScript (no framework)
+- **Total**: ~42.6K lines / 2.3M characters (code + docs)
 
 **Data**:
-- LocalStorage (structured data, ~5-10 MB)
-- IndexedDB (attached files, ~500 MB)
-- Export format: ZIP (data.json + attachments/)
+- IndexedDB with Dexie.js (structured data + files, 500 MB - 1 GB)
+- Automatic migration from localStorage (V0.9 → V0.10)
+- Export formats: `.dm` (ZIP archive), `.json` (interchange), FreeMind, Mermaid, PDF
 
 ---
 

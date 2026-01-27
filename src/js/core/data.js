@@ -4,7 +4,7 @@
  * V0.10: Migrated from localStorage to IndexedDB
  */
 
-import { generateId } from '../utils/helpers.js';
+import { generateId, downloadBlob } from '../utils/helpers.js';
 import { getDefaultData } from './default-data.js';
 import * as AttachmentsModule from './attachments.js';
 import * as Storage from './storage.js';
@@ -180,7 +180,11 @@ function migrateSymlinks() {
  * Export data as JSON file
  */
 export function exportData() {
-  const dataStr = JSON.stringify(data, null, 2);
+  const exportData = {
+    $schema: 'https://deepmemo.org/schemas/v1.0/deepmemo.json',
+    ...data
+  };
+  const dataStr = JSON.stringify(exportData, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -192,10 +196,12 @@ export function exportData() {
 
 /**
  * Import data from JSON file
+ * @deprecated Use importDataZIP() instead (supports .dm, .zip, .json auto-detection)
  * @param {Event} event - File input change event
  * @param {Function} onSuccess - Callback on successful import
  */
 export function importData(event, onSuccess) {
+  console.warn('[Import] Using deprecated importData(). Use importDataZIP() instead.');
   const file = event.target.files[0];
   if (!file) return;
 
@@ -265,6 +271,7 @@ export function exportBranch(nodeId) {
   const nodeCount = Object.keys(branchNodes).length;
 
   const branchData = {
+    $schema: 'https://deepmemo.org/schemas/v1.0/deepmemo.json',
     type: 'deepmemo-branch',
     version: '1.0',
     _documentation: EXPORT_FORMAT_DOC_URL,
@@ -286,11 +293,13 @@ export function exportBranch(nodeId) {
 
 /**
  * Import a branch as children of current node
+ * @deprecated Use importBranchZIP() instead (supports .dm, .zip, .json auto-detection)
  * @param {Event} event - File input change event
  * @param {string} parentId - Parent node ID (or null for root)
  * @param {Function} onSuccess - Callback on successful import
  */
 export function importBranch(event, parentId, onSuccess) {
+  console.warn('[Import] Using deprecated importBranch(). Use importBranchZIP() instead.');
   const file = event.target.files[0];
   if (!file) return;
 
@@ -324,7 +333,7 @@ export function importBranch(event, parentId, onSuccess) {
         const newNode = {
           ...oldNode,
           id: newId,
-          parent: oldId === imported.branchRootId
+          parent: oldId === branchRootId
             ? parentId
             : (oldNode.parent ? oldToNewId[oldNode.parent] : null),
           children: oldNode.children.map(childId => oldToNewId[childId]),
@@ -459,25 +468,78 @@ export function wouldCreateCycleWithMove(nodeId, newParentId) {
 }
 
 /**
- * Export all data as ZIP with attachments
+ * Generate metadata.json for .dm archive
+ * @param {string} type - "global" or "branch"
+ * @param {Object} options - Additional metadata options
+ * @returns {Object} Metadata object
+ */
+function generateMetadata(type, options = {}) {
+  const metadata = {
+    $schema: 'https://deepmemo.org/schemas/v1.0/metadata.json',
+    version: '1.0',
+    type,
+    exported: Date.now(),
+    generator: 'DeepMemo v0.10.4'
+  };
+
+  if (options.title) {
+    metadata.title = options.title;
+  }
+
+  if (type === 'branch' && options.branchRootId) {
+    metadata.branchRootId = options.branchRootId;
+  }
+
+  if (options.nodeCount !== undefined) {
+    metadata.nodeCount = options.nodeCount;
+  }
+
+  if (options.attachmentCount !== undefined) {
+    metadata.attachmentCount = options.attachmentCount;
+  }
+
+  if (options.totalSize !== undefined) {
+    metadata.totalSize = options.totalSize;
+  }
+
+  return metadata;
+}
+
+/**
+ * Export all data as .dm archive (ZIP) with attachments
  */
 export async function exportDataZIP() {
   try {
     const zip = new JSZip();
 
-    // Add data.json
-    const dataStr = JSON.stringify(data, null, 2);
-    zip.file('data.json', dataStr);
-
     // Collect all attachment IDs from all nodes
     const attachmentIds = new Set();
+    let totalSize = 0;
     for (const node of Object.values(data.nodes)) {
       if (node.attachments) {
         for (const attachment of node.attachments) {
           attachmentIds.add(attachment.id);
+          totalSize += attachment.size || 0;
         }
       }
     }
+
+    // Generate metadata.json
+    const metadata = generateMetadata('global', {
+      title: 'Full Backup',
+      nodeCount: Object.keys(data.nodes).length,
+      attachmentCount: attachmentIds.size,
+      totalSize
+    });
+    zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+
+    // Add data.json with $schema
+    const exportData = {
+      $schema: 'https://deepmemo.org/schemas/v1.0/deepmemo.json',
+      ...data
+    };
+    const dataStr = JSON.stringify(exportData, null, 2);
+    zip.file('data.json', dataStr);
 
     // Add attachments to ZIP
     const attachmentsFolder = zip.folder('attachments');
@@ -499,24 +561,19 @@ export async function exportDataZIP() {
       }
     }
 
-    // Generate and download ZIP
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(zipBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `deepmemo-export-${Date.now()}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Generate and download .dm archive
+    const dmBlob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob(dmBlob, `deepmemo-export-${Date.now()}.dm`);
 
-    console.log(`[Export] ZIP created with ${attachmentIds.size} attachments`);
+    console.log(`[Export] .dm archive created with ${attachmentIds.size} attachments`);
   } catch (error) {
-    console.error('[Export] Failed to create ZIP:', error);
+    console.error('[Export] Failed to create .dm archive:', error);
     i18nAlert('exportError', { message: error.message });
   }
 }
 
 /**
- * Export a branch as ZIP with attachments
+ * Export a branch as .dm archive (ZIP) with attachments
  * @param {string} nodeId - Root node ID to export
  */
 export async function exportBranchZIP(nodeId) {
@@ -533,29 +590,40 @@ export async function exportBranchZIP(nodeId) {
     const branchNodes = collectBranchNodes(nodeId);
     const nodeCount = Object.keys(branchNodes).length;
 
+    // Collect attachment IDs from branch nodes only
+    const attachmentIds = new Set();
+    let totalSize = 0;
+    for (const branchNode of Object.values(branchNodes)) {
+      if (branchNode.attachments) {
+        for (const attachment of branchNode.attachments) {
+          attachmentIds.add(attachment.id);
+          totalSize += attachment.size || 0;
+        }
+      }
+    }
+
+    // Generate metadata.json
+    const metadata = generateMetadata('branch', {
+      title: node.title,
+      branchRootId: nodeId,
+      nodeCount,
+      attachmentCount: attachmentIds.size,
+      totalSize
+    });
+    zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+
+    // Add data.json with $schema
     const branchData = {
+      $schema: 'https://deepmemo.org/schemas/v1.0/deepmemo.json',
       type: 'deepmemo-branch',
       version: '1.0',
-      _documentation: EXPORT_FORMAT_DOC_URL,
       branchRootId: nodeId,
       exported: Date.now(),
       nodeCount: nodeCount,
       nodes: branchNodes
     };
-
-    // Add data.json
     const dataStr = JSON.stringify(branchData, null, 2);
     zip.file('data.json', dataStr);
-
-    // Collect attachment IDs from branch nodes only
-    const attachmentIds = new Set();
-    for (const branchNode of Object.values(branchNodes)) {
-      if (branchNode.attachments) {
-        for (const attachment of branchNode.attachments) {
-          attachmentIds.add(attachment.id);
-        }
-      }
-    }
 
     // Add attachments to ZIP
     const attachmentsFolder = zip.folder('attachments');
@@ -577,24 +645,21 @@ export async function exportBranchZIP(nodeId) {
       }
     }
 
-    // Generate and download ZIP
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(zipBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `deepmemo-branch-${node.title.replace(/[^a-z0-9]/gi, '_')}-${Date.now()}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Generate and download .dm archive
+    const dmBlob = await zip.generateAsync({ type: 'blob' });
+    const sanitizedTitle = node.title.replace(/[^a-z0-9]/gi, '_');
+    downloadBlob(dmBlob, `deepmemo-branch-${sanitizedTitle}-${Date.now()}.dm`);
 
-    console.log(`[Export] Branch ZIP created with ${nodeCount} nodes and ${attachmentIds.size} attachments`);
+    console.log(`[Export] Branch .dm archive created with ${nodeCount} nodes and ${attachmentIds.size} attachments`);
   } catch (error) {
-    console.error('[Export] Failed to create branch ZIP:', error);
+    console.error('[Export] Failed to create branch .dm archive:', error);
     i18nAlert('exportError', { message: error.message });
   }
 }
 
 /**
- * Import data from ZIP with attachments
+ * Detect file format and import data
+ * Supports: .dm, .zip (legacy), .json (interchange), and misnamed files
  * @param {Event} event - File input change event
  * @param {Function} onSuccess - Callback on successful import
  */
@@ -603,99 +668,31 @@ export async function importDataZIP(event, onSuccess) {
   if (!file) return;
 
   try {
-    // Load ZIP
-    const zip = await JSZip.loadAsync(file);
+    // Detect format by reading file content
+    const arrayBuffer = await file.arrayBuffer();
+    let isArchive = false;
+    let zip = null;
 
-    // Extract data.json
-    const dataJsonFile = zip.file('data.json');
-    if (!dataJsonFile) {
-      i18nAlert('dataJsonNotFound');
-      return;
+    // Check if it's a ZIP file (magic number: PK)
+    const header = new Uint8Array(arrayBuffer.slice(0, 2));
+    if (header[0] === 0x50 && header[1] === 0x4B) {
+      // It's a ZIP file
+      try {
+        zip = await JSZip.loadAsync(arrayBuffer);
+        isArchive = true;
+      } catch (zipError) {
+        console.error('[Import] ZIP parsing failed:', zipError);
+        isArchive = false;
+      }
     }
 
-    const dataStr = await dataJsonFile.async('string');
-    const imported = JSON.parse(dataStr);
-
-    if (!imported.nodes || !imported.rootNodes) {
-      alert('Fichier JSON invalide');
-      return;
-    }
-
-    const nodeCount = Object.keys(imported.nodes).length;
-
-    // Extract attachments
-    const attachmentsFolder = zip.folder('attachments');
-    let attachmentCount = 0;
-
-    if (attachmentsFolder) {
-      const attachmentFiles = [];
-      attachmentsFolder.forEach((relativePath, file) => {
-        if (!file.dir) {
-          attachmentFiles.push({ path: relativePath, file });
-        }
-      });
-      attachmentCount = attachmentFiles.length;
-
-      if (!i18nConfirm('importDataWithFiles', { count: nodeCount, fileCount: attachmentCount })) {
-        event.target.value = '';
-        return;
-      }
-
-      // Build list of attachment IDs from imported nodes
-      const attachmentIds = new Set();
-      Object.values(imported.nodes).forEach(node => {
-        if (node.attachments) {
-          node.attachments.forEach(att => {
-            attachmentIds.add(att.id);
-          });
-        }
-      });
-
-      // Restore attachments to IndexedDB
-      for (const { path, file } of attachmentFiles) {
-        const blob = await file.async('blob');
-
-        // Find which attachment ID this file corresponds to
-        // Filename format: {attachmentId}_{originalName}
-        // Problem: attachment IDs contain underscores (e.g., "demo_mindmap_svg")
-        // Solution: check which ID matches the start of the path
-        let attachId = null;
-        for (const id of attachmentIds) {
-          if (path.startsWith(id + '_')) {
-            attachId = id;
-            break;
-          }
-        }
-
-        if (attachId) {
-          await AttachmentsModule.saveAttachment(attachId, blob);
-          console.log(`[Import] Restored attachment: ${attachId} (${blob.size} bytes)`);
-        } else {
-          console.warn(`[Import] Could not find attachment ID for file: ${path}`);
-        }
-      }
+    if (isArchive) {
+      // Archive format (.dm or .zip)
+      await importFromArchive(zip, file.name, onSuccess);
     } else {
-      if (!i18nConfirm('importData', { count: nodeCount })) {
-        event.target.value = '';
-        return;
-      }
-    }
-
-    // Import data
-    data.nodes = imported.nodes;
-    data.rootNodes = imported.rootNodes;
-    saveData();
-
-    // Clean orphaned attachment references (nodes referencing non-existent files)
-    const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
-    if (cleanupStats.cleaned > 0) {
-      saveData(); // Save again after cleanup
-    }
-
-    console.log(`[Import] Imported ${nodeCount} nodes and ${attachmentCount} attachments`);
-
-    if (onSuccess) {
-      onSuccess(nodeCount);
+      // Plain JSON format - convert arrayBuffer to text
+      const text = new TextDecoder('utf-8').decode(arrayBuffer);
+      await importFromJSONText(text, onSuccess);
     }
   } catch (err) {
     alert('Erreur lors de l\'import : ' + err.message);
@@ -706,7 +703,209 @@ export async function importDataZIP(event, onSuccess) {
 }
 
 /**
+ * Import from archive (.dm or .zip)
+ * @param {JSZip} zip - Loaded ZIP archive
+ * @param {string} filename - Original filename
+ * @param {Function} onSuccess - Callback on successful import
+ */
+async function importFromArchive(zip, filename, onSuccess) {
+  // Extract data.json
+  const dataJsonFile = zip.file('data.json');
+  if (!dataJsonFile) {
+    i18nAlert('dataJsonNotFound');
+    return;
+  }
+
+  const dataStr = await dataJsonFile.async('string');
+  const imported = JSON.parse(dataStr);
+
+  // Check if metadata.json exists (new .dm format)
+  const metadataJsonFile = zip.file('metadata.json');
+  if (metadataJsonFile) {
+    const metadataStr = await metadataJsonFile.async('string');
+    const metadata = JSON.parse(metadataStr);
+    console.log(`[Import] Loading .dm archive (v${metadata.version}, type: ${metadata.type})`);
+  } else {
+    console.log(`[Import] Loading legacy .zip archive (no metadata.json)`);
+  }
+
+  // Validate structure
+  if (!imported.nodes || !imported.rootNodes) {
+    alert('Fichier JSON invalide');
+    return;
+  }
+
+  const nodeCount = Object.keys(imported.nodes).length;
+
+  // Ask user to replace or merge
+  const choice = confirm(
+    `Import ${nodeCount} nodes.\n\n` +
+    `Click OK to REPLACE all current data.\n` +
+    `Click Cancel to ADD to current roots (merge).`
+  );
+
+  const shouldReplace = choice; // true = replace, false = merge
+
+  // Extract attachments
+  const attachmentsFolder = zip.folder('attachments');
+  let attachmentCount = 0;
+
+  if (attachmentsFolder) {
+    const attachmentFiles = [];
+    attachmentsFolder.forEach((relativePath, file) => {
+      if (!file.dir) {
+        attachmentFiles.push({ path: relativePath, file });
+      }
+    });
+    attachmentCount = attachmentFiles.length;
+
+    if (shouldReplace) {
+      if (!i18nConfirm('importDataWithFiles', { count: nodeCount, fileCount: attachmentCount })) {
+        return;
+      }
+    }
+
+    // Build list of attachment IDs from imported nodes
+    const attachmentIds = new Set();
+    Object.values(imported.nodes).forEach(node => {
+      if (node.attachments) {
+        node.attachments.forEach(att => {
+          attachmentIds.add(att.id);
+        });
+      }
+    });
+
+    // Restore attachments to IndexedDB
+    for (const { path, file } of attachmentFiles) {
+      const blob = await file.async('blob');
+
+      // Find which attachment ID this file corresponds to
+      // Filename format: {attachmentId}_{originalName}
+      let attachId = null;
+      for (const id of attachmentIds) {
+        if (path.startsWith(id + '_')) {
+          attachId = id;
+          break;
+        }
+      }
+
+      if (attachId) {
+        await AttachmentsModule.saveAttachment(attachId, blob);
+        console.log(`[Import] Restored attachment: ${attachId} (${blob.size} bytes)`);
+      } else {
+        console.warn(`[Import] Could not find attachment ID for file: ${path}`);
+      }
+    }
+  } else {
+    if (shouldReplace && !i18nConfirm('importData', { count: nodeCount })) {
+      return;
+    }
+  }
+
+  // Import data
+  if (shouldReplace) {
+    // Replace mode (destructive)
+    data.nodes = imported.nodes;
+    data.rootNodes = imported.rootNodes;
+    console.log(`[Import] Replaced all data with ${nodeCount} nodes and ${attachmentCount} attachments from archive`);
+  } else {
+    // Merge mode (additive)
+    data.nodes = { ...data.nodes, ...imported.nodes };
+
+    // Add new root nodes (avoid duplicates)
+    for (const newRoot of imported.rootNodes) {
+      if (!data.rootNodes.includes(newRoot)) {
+        data.rootNodes.push(newRoot);
+      }
+    }
+
+    console.log(`[Import] Merged ${nodeCount} nodes and ${attachmentCount} attachments, ${imported.rootNodes.length} new roots added`);
+  }
+
+  await saveData();
+
+  // Clean orphaned attachment references
+  const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
+  if (cleanupStats.cleaned > 0) {
+    await saveData();
+  }
+
+  if (onSuccess) {
+    onSuccess(nodeCount);
+  }
+}
+
+/**
+ * Import from plain JSON text
+ * @param {string} text - JSON text content
+ * @param {Function} onSuccess - Callback on successful import
+ */
+async function importFromJSONText(text, onSuccess) {
+  const imported = JSON.parse(text);
+
+  // Validate structure
+  if (!imported.nodes || !imported.rootNodes) {
+    alert('Fichier JSON invalide');
+    return;
+  }
+
+  const nodeCount = Object.keys(imported.nodes).length;
+
+  // Ask user to replace or merge
+  const choice = confirm(
+    `Import ${nodeCount} nodes.\n\n` +
+    `Click OK to REPLACE all current data.\n` +
+    `Click Cancel to ADD to current roots (merge).`
+  );
+
+  const shouldReplace = choice; // true = replace, false = merge
+
+  if (shouldReplace) {
+    // Replace mode (destructive)
+    if (!i18nConfirm('importData', { count: nodeCount })) {
+      return;
+    }
+
+    data.nodes = imported.nodes;
+    data.rootNodes = imported.rootNodes;
+    console.log(`[Import] Replaced all data with ${nodeCount} nodes from JSON`);
+  } else {
+    // Merge mode (additive)
+    // Merge nodes (imported nodes will overwrite existing ones with same ID)
+    data.nodes = { ...data.nodes, ...imported.nodes };
+
+    // Add new root nodes (avoid duplicates)
+    for (const newRoot of imported.rootNodes) {
+      if (!data.rootNodes.includes(newRoot)) {
+        data.rootNodes.push(newRoot);
+      }
+    }
+
+    console.log(`[Import] Merged ${nodeCount} nodes, ${imported.rootNodes.length} new roots added`);
+  }
+
+  await saveData();
+
+  // Clean orphaned attachment references
+  const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
+  if (cleanupStats.cleaned > 0) {
+    await saveData();
+  }
+
+  if (onSuccess) {
+    onSuccess(nodeCount);
+  }
+}
+
+/**
  * Import branch from ZIP with attachments
+ * @param {Event} event - File input change event
+ * @param {string} parentId - Parent node ID
+ * @param {Function} onSuccess - Callback on successful import
+ */
+/**
+ * Import branch from archive or JSON
+ * Supports: .dm, .zip (legacy), .json (interchange), and misnamed files
  * @param {Event} event - File input change event
  * @param {string} parentId - Parent node ID
  * @param {Function} onSuccess - Callback on successful import
@@ -716,161 +915,368 @@ export async function importBranchZIP(event, parentId, onSuccess) {
   if (!file) return;
 
   try {
-    // Load ZIP
-    const zip = await JSZip.loadAsync(file);
+    // Detect format by reading file content
+    const arrayBuffer = await file.arrayBuffer();
+    let isArchive = false;
+    let zip = null;
 
-    // Extract data.json
-    const dataJsonFile = zip.file('data.json');
-    if (!dataJsonFile) {
-      i18nAlert('dataJsonNotFound');
-      return;
-    }
-
-    const dataStr = await dataJsonFile.async('string');
-    const imported = JSON.parse(dataStr);
-
-    // Validate branch format
-    if (imported.type !== 'deepmemo-branch' || !imported.nodes || !imported.branchRootId) {
-      alert('Fichier de branche invalide. Utilise l\'import global pour les exports complets.');
-      return;
-    }
-
-    const nodeCount = Object.keys(imported.nodes).length;
-
-    // Extract attachments
-    const attachmentsFolder = zip.folder('attachments');
-    let attachmentCount = 0;
-    const attachmentFiles = [];
-
-    if (attachmentsFolder) {
-      attachmentsFolder.forEach((relativePath, file) => {
-        if (!file.dir) {
-          attachmentFiles.push({ path: relativePath, file });
-        }
-      });
-      attachmentCount = attachmentFiles.length;
-    }
-
-    if (!i18nConfirm('importBranchWithFiles', { count: nodeCount, fileCount: attachmentCount })) {
-      event.target.value = '';
-      return;
-    }
-
-    // Generate new IDs to avoid conflicts
-    const oldToNewId = {};
-    const oldToNewAttachId = {};
-
-    Object.keys(imported.nodes).forEach(oldId => {
-      oldToNewId[oldId] = generateId();
-    });
-
-    // Collect old attachment IDs and generate new ones
-    Object.values(imported.nodes).forEach(node => {
-      if (node.attachments) {
-        node.attachments.forEach(att => {
-          if (!oldToNewAttachId[att.id]) {
-            oldToNewAttachId[att.id] = AttachmentsModule.generateAttachmentId();
-          }
-        });
-      }
-    });
-
-    // Restore attachments to IndexedDB with new IDs
-    for (const { path, file } of attachmentFiles) {
-      const blob = await file.async('blob');
-
-      // Find which old attachment ID this file corresponds to
-      // Filename format: {attachmentId}_{originalName}
-      // Problem: attachment IDs contain underscores (e.g., "demo_mindmap_svg")
-      // Solution: check which ID from oldToNewAttachId matches the start of the path
-      let oldAttachId = null;
-      for (const id of Object.keys(oldToNewAttachId)) {
-        if (path.startsWith(id + '_')) {
-          oldAttachId = id;
-          break;
-        }
-      }
-
-      if (oldAttachId) {
-        const newAttachId = oldToNewAttachId[oldAttachId];
-        await AttachmentsModule.saveAttachment(newAttachId, blob);
-        console.log(`[Import] Restored attachment: ${oldAttachId} -> ${newAttachId} (${blob.size} bytes)`);
-      } else {
-        console.warn(`[Import] Could not find attachment ID for file: ${path}`);
+    // Check if it's a ZIP file (magic number: PK)
+    const header = new Uint8Array(arrayBuffer.slice(0, 2));
+    if (header[0] === 0x50 && header[1] === 0x4B) {
+      // It's a ZIP file
+      try {
+        zip = await JSZip.loadAsync(arrayBuffer);
+        isArchive = true;
+      } catch (zipError) {
+        console.error('[Import Branch] ZIP parsing failed:', zipError);
+        isArchive = false;
       }
     }
 
-    // Import nodes with new IDs
-    const importedRootId = oldToNewId[imported.branchRootId];
-
-    Object.entries(imported.nodes).forEach(([oldId, oldNode]) => {
-      const newId = oldToNewId[oldId];
-      const newNode = {
-        ...oldNode,
-        id: newId,
-        parent: oldId === imported.branchRootId
-          ? parentId
-          : (oldNode.parent ? oldToNewId[oldNode.parent] : null),
-        children: oldNode.children.map(childId => oldToNewId[childId]),
-        modified: Date.now()
-      };
-
-      // Update targetId for symlinks
-      if (newNode.type === 'symlink' && newNode.targetId) {
-        newNode.targetId = oldToNewId[newNode.targetId] || newNode.targetId;
-      }
-
-      // Update attachment IDs in metadata
-      if (newNode.attachments) {
-        newNode.attachments = newNode.attachments.map(att => ({
-          ...att,
-          id: oldToNewAttachId[att.id] || att.id
-        }));
-      }
-
-      // Update attachment references in content (attachment:OLD_ID -> attachment:NEW_ID)
-      if (newNode.content) {
-        for (const [oldAttachId, newAttachId] of Object.entries(oldToNewAttachId)) {
-          const oldRef = `attachment:${oldAttachId}`;
-          const newRef = `attachment:${newAttachId}`;
-          newNode.content = newNode.content.replaceAll(oldRef, newRef);
-        }
-      }
-
-      data.nodes[newId] = newNode;
-    });
-
-    // Attach to parent or root
-    if (parentId === null) {
-      if (!data.rootNodes.includes(importedRootId)) {
-        data.rootNodes.push(importedRootId);
-      }
+    if (isArchive) {
+      await importBranchFromArchive(zip, file.name, parentId, onSuccess);
     } else {
-      const parent = data.nodes[parentId];
-      if (parent && !parent.children.includes(importedRootId)) {
-        parent.children.push(importedRootId);
-      }
-    }
-
-    saveData();
-
-    // Clean orphaned attachment references (nodes referencing non-existent files)
-    const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
-    if (cleanupStats.cleaned > 0) {
-      saveData(); // Save again after cleanup
-    }
-
-    console.log(`[Import] Imported branch with ${nodeCount} nodes and ${attachmentCount} attachments`);
-
-    if (onSuccess) {
-      onSuccess(nodeCount, importedRootId);
+      // It's JSON - convert arrayBuffer to text
+      const text = new TextDecoder('utf-8').decode(arrayBuffer);
+      await importBranchFromJSONText(text, parentId, onSuccess);
     }
   } catch (err) {
     alert('Erreur lors de l\'import : ' + err.message);
-    console.error('[Import] Failed:', err);
+    console.error('[Import Branch] Failed:', err);
   }
 
   event.target.value = '';
+}
+
+/**
+ * Import branch from archive (.dm or .zip)
+ * @param {JSZip} zip - Loaded ZIP archive
+ * @param {string} filename - Original filename
+ * @param {string} parentId - Parent node ID
+ * @param {Function} onSuccess - Callback on successful import
+ */
+async function importBranchFromArchive(zip, filename, parentId, onSuccess) {
+  // Extract data.json
+  const dataJsonFile = zip.file('data.json');
+  if (!dataJsonFile) {
+    i18nAlert('dataJsonNotFound');
+    return;
+  }
+
+  const dataStr = await dataJsonFile.async('string');
+  const imported = JSON.parse(dataStr);
+
+  // Check if metadata.json exists (new .dm format)
+  const metadataJsonFile = zip.file('metadata.json');
+  if (metadataJsonFile) {
+    const metadataStr = await metadataJsonFile.async('string');
+    const metadata = JSON.parse(metadataStr);
+    console.log(`[Import Branch] Loading .dm archive (v${metadata.version}, type: ${metadata.type})`);
+  } else {
+    console.log(`[Import Branch] Loading legacy .zip archive (no metadata.json)`);
+  }
+
+  // Detect format: branch export or global export
+  let branchRootId;
+  let isGlobalExport = false;
+
+  if (imported.type === 'deepmemo-branch' && imported.branchRootId) {
+    // Standard branch export
+    branchRootId = imported.branchRootId;
+  } else if (imported.rootNodes && imported.nodes) {
+    // Global export - create a container node if multiple roots
+    isGlobalExport = true;
+
+    if (imported.rootNodes.length === 0) {
+      alert('Export global vide (pas de nœuds racine).');
+      return;
+    } else if (imported.rootNodes.length === 1) {
+      // Single root - use it directly
+      branchRootId = imported.rootNodes[0];
+      console.log(`[Import Branch] Global export with single root, using it directly`);
+    } else {
+      // Multiple roots - create container node
+      const containerTitle = filename.replace(/\.(dm|zip|json)$/i, '') || 'Imported Content';
+      const containerId = generateId();
+
+      // Create container node with children = rootNodes
+      imported.nodes[containerId] = {
+        id: containerId,
+        type: 'note',
+        title: containerTitle,
+        content: `Imported from ${filename}`,
+        children: imported.rootNodes,
+        parent: null,
+        tags: [],
+        attachments: [],
+        created: Date.now(),
+        modified: Date.now()
+      };
+
+      // Update parent of all roots to point to container
+      imported.rootNodes.forEach(rootId => {
+        if (imported.nodes[rootId]) {
+          imported.nodes[rootId].parent = containerId;
+        }
+      });
+
+      branchRootId = containerId;
+      console.log(`[Import Branch] Global export with ${imported.rootNodes.length} roots, created container: ${containerTitle}`);
+    }
+  } else {
+    alert('Fichier invalide. Format non reconnu.');
+    return;
+  }
+
+  const nodeCount = Object.keys(imported.nodes).length;
+
+  // Extract attachments
+  const attachmentsFolder = zip.folder('attachments');
+  let attachmentCount = 0;
+  const attachmentFiles = [];
+
+  if (attachmentsFolder) {
+    attachmentsFolder.forEach((relativePath, file) => {
+      if (!file.dir) {
+        attachmentFiles.push({ path: relativePath, file });
+      }
+    });
+    attachmentCount = attachmentFiles.length;
+  }
+
+  if (!i18nConfirm('importBranchWithFiles', { count: nodeCount, fileCount: attachmentCount })) {
+    return;
+  }
+
+  // Generate new IDs to avoid conflicts
+  const oldToNewId = {};
+  const oldToNewAttachId = {};
+
+  Object.keys(imported.nodes).forEach(oldId => {
+    oldToNewId[oldId] = generateId();
+  });
+
+  // Collect old attachment IDs and generate new ones
+  Object.values(imported.nodes).forEach(node => {
+    if (node.attachments) {
+      node.attachments.forEach(att => {
+        if (!oldToNewAttachId[att.id]) {
+          oldToNewAttachId[att.id] = AttachmentsModule.generateAttachmentId();
+        }
+      });
+    }
+  });
+
+  // Restore attachments to IndexedDB with new IDs
+  for (const { path, file } of attachmentFiles) {
+    const blob = await file.async('blob');
+
+    let oldAttachId = null;
+    for (const id of Object.keys(oldToNewAttachId)) {
+      if (path.startsWith(id + '_')) {
+        oldAttachId = id;
+        break;
+      }
+    }
+
+    if (oldAttachId) {
+      const newAttachId = oldToNewAttachId[oldAttachId];
+      await AttachmentsModule.saveAttachment(newAttachId, blob);
+      console.log(`[Import] Restored attachment: ${oldAttachId} -> ${newAttachId} (${blob.size} bytes)`);
+    } else {
+      console.warn(`[Import] Could not find attachment ID for file: ${path}`);
+    }
+  }
+
+  // Import nodes with new IDs
+  const importedRootId = oldToNewId[branchRootId];
+
+  Object.entries(imported.nodes).forEach(([oldId, oldNode]) => {
+    const newId = oldToNewId[oldId];
+    const newNode = {
+      ...oldNode,
+      id: newId,
+      parent: oldId === branchRootId
+        ? parentId
+        : (oldNode.parent ? oldToNewId[oldNode.parent] : null),
+      children: oldNode.children.map(childId => oldToNewId[childId]),
+      modified: Date.now()
+    };
+
+    // Update targetId for symlinks
+    if (newNode.type === 'symlink' && newNode.targetId) {
+      newNode.targetId = oldToNewId[newNode.targetId] || newNode.targetId;
+    }
+
+    // Update attachment IDs in metadata
+    if (newNode.attachments) {
+      newNode.attachments = newNode.attachments.map(att => ({
+        ...att,
+        id: oldToNewAttachId[att.id] || att.id
+      }));
+    }
+
+    // Update attachment references in content
+    if (newNode.content) {
+      for (const [oldAttachId, newAttachId] of Object.entries(oldToNewAttachId)) {
+        const oldRef = `attachment:${oldAttachId}`;
+        const newRef = `attachment:${newAttachId}`;
+        newNode.content = newNode.content.replaceAll(oldRef, newRef);
+      }
+    }
+
+    data.nodes[newId] = newNode;
+  });
+
+  // Attach to parent or root
+  if (parentId === null) {
+    if (!data.rootNodes.includes(importedRootId)) {
+      data.rootNodes.push(importedRootId);
+    }
+  } else {
+    const parent = data.nodes[parentId];
+    if (parent && !parent.children.includes(importedRootId)) {
+      parent.children.push(importedRootId);
+    }
+  }
+
+  await saveData();
+
+  // Clean orphaned attachment references
+  const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
+  if (cleanupStats.cleaned > 0) {
+    await saveData();
+  }
+
+  console.log(`[Import] Imported branch with ${nodeCount} nodes and ${attachmentCount} attachments from archive`);
+
+  if (onSuccess) {
+    onSuccess(nodeCount, importedRootId);
+  }
+}
+
+/**
+ * Import branch from plain JSON text
+ * @param {string} text - JSON text content
+ * @param {string} parentId - Parent node ID
+ * @param {Function} onSuccess - Callback on successful import
+ */
+async function importBranchFromJSONText(text, parentId, onSuccess) {
+  const imported = JSON.parse(text);
+
+  // Detect format: branch export or global export
+  let branchRootId;
+  let isGlobalExport = false;
+
+  if (imported.type === 'deepmemo-branch' && imported.branchRootId) {
+    // Standard branch export
+    branchRootId = imported.branchRootId;
+  } else if (imported.rootNodes && imported.nodes) {
+    // Global export - create a container node if multiple roots
+    isGlobalExport = true;
+
+    if (imported.rootNodes.length === 0) {
+      alert('Export global vide (pas de nœuds racine).');
+      return;
+    } else if (imported.rootNodes.length === 1) {
+      // Single root - use it directly
+      branchRootId = imported.rootNodes[0];
+      console.log(`[Import Branch] Global export with single root, using it directly`);
+    } else {
+      // Multiple roots - create container node
+      const containerTitle = 'Imported Content';
+      const containerId = generateId();
+
+      // Create container node with children = rootNodes
+      imported.nodes[containerId] = {
+        id: containerId,
+        type: 'note',
+        title: containerTitle,
+        content: `Imported from JSON file`,
+        children: imported.rootNodes,
+        parent: null,
+        tags: [],
+        attachments: [],
+        created: Date.now(),
+        modified: Date.now()
+      };
+
+      // Update parent of all roots to point to container
+      imported.rootNodes.forEach(rootId => {
+        if (imported.nodes[rootId]) {
+          imported.nodes[rootId].parent = containerId;
+        }
+      });
+
+      branchRootId = containerId;
+      console.log(`[Import Branch] Global export with ${imported.rootNodes.length} roots, created container: ${containerTitle}`);
+    }
+  } else {
+    alert('Fichier invalide. Format non reconnu.');
+    return;
+  }
+
+  const nodeCount = Object.keys(imported.nodes).length;
+
+  if (!i18nConfirm('importBranch', { count: nodeCount })) {
+    return;
+  }
+
+  // Generate new IDs to avoid conflicts
+  const oldToNewId = {};
+
+  Object.keys(imported.nodes).forEach(oldId => {
+    oldToNewId[oldId] = generateId();
+  });
+
+  // Import nodes with new IDs
+  const importedRootId = oldToNewId[branchRootId];
+
+  Object.entries(imported.nodes).forEach(([oldId, oldNode]) => {
+    const newId = oldToNewId[oldId];
+    const newNode = {
+      ...oldNode,
+      id: newId,
+      parent: oldId === branchRootId
+        ? parentId
+        : (oldNode.parent ? oldToNewId[oldNode.parent] : null),
+      children: oldNode.children.map(childId => oldToNewId[childId]),
+      modified: Date.now()
+    };
+
+    // Update targetId for symlinks
+    if (newNode.type === 'symlink' && newNode.targetId) {
+      newNode.targetId = oldToNewId[newNode.targetId] || newNode.targetId;
+    }
+
+    data.nodes[newId] = newNode;
+  });
+
+  // Attach to parent or root
+  if (parentId === null) {
+    if (!data.rootNodes.includes(importedRootId)) {
+      data.rootNodes.push(importedRootId);
+    }
+  } else {
+    const parent = data.nodes[parentId];
+    if (parent && !parent.children.includes(importedRootId)) {
+      parent.children.push(importedRootId);
+    }
+  }
+
+  await saveData();
+
+  // Clean orphaned attachment references
+  const cleanupStats = await AttachmentsModule.cleanOrphanedReferences(data);
+  if (cleanupStats.cleaned > 0) {
+    await saveData();
+  }
+
+  console.log(`[Import] Imported branch with ${nodeCount} nodes from JSON`);
+
+  if (onSuccess) {
+    onSuccess(nodeCount, importedRootId);
+  }
 }
 
 /**

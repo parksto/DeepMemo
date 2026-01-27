@@ -1142,7 +1142,7 @@ C'est une **plateforme** où :
 
 ---
 
-**Document Vision - Décembre 2025**
-*Ces concepts seront implémentés progressivement, en commençant par les fondations (V0.9+).*
+**Document Vision - Janvier 2026**
+*Ces concepts seront implémentés progressivement, en commençant par les fondations (V1.0+).*
 
-**État actuel** : V0.8 complète - Voir le contenu de démo dans l'application pour une introduction accessible à ces concepts (section "🔮 Directions explorées").
+**État actuel** : V0.10.4 complète (IndexedDB + format .dm + export PDF) - Voir le contenu de démo dans l'application pour une introduction accessible à ces concepts (section "🔮 Directions explorées").

@@ -6,6 +6,66 @@
 
 ---
 
+## 📚 Documentation Index
+
+> **Central index of all DeepMemo documentation**. Use this list when updating documentation to ensure nothing is forgotten.
+
+### 🎯 Core Documentation (Bilingual)
+
+**General**
+- [`README.md`](README.md) / [`README.fr.md`](README.fr.md) - Main overview (V0.10.4)
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) / [`ARCHITECTURE.fr.md`](ARCHITECTURE.fr.md) - Technical architecture
+- [`VISION.md`](VISION.md) / [`VISION.fr.md`](VISION.fr.md) - Project vision and philosophy
+- [`ROADMAP.md`](ROADMAP.md) / [`ROADMAP.fr.md`](ROADMAP.fr.md) - Development roadmap
+
+**Technical Specs**
+- [`FILE-FORMATS.md`](FILE-FORMATS.md) / [`FORMATS-FICHIERS.md`](FORMATS-FICHIERS.md) - Export/import formats (⚠️ EN: v2.0, FR: v1.0)
+- [`SPEC-ATTACHMENTS.md`](SPEC-ATTACHMENTS.md) / [`SPEC-ATTACHMENTS.fr.md`](SPEC-ATTACHMENTS.fr.md) - Attachment system
+- [`STORAGE.md`](STORAGE.md) / [`STORAGE.fr.md`](STORAGE.fr.md) - IndexedDB storage
+- [`I18N.md`](I18N.md) / [`I18N.fr.md`](I18N.fr.md) - Internationalization
+- [`PWA.md`](PWA.md) / [`PWA.fr.md`](PWA.fr.md) - Progressive Web App
+
+**Detailed Topics**
+- [`HIERARCHICAL_STRUCTURES.md`](HIERARCHICAL_STRUCTURES.md) / [`HIERARCHICAL_STRUCTURES.fr.md`](HIERARCHICAL_STRUCTURES.fr.md) - Hierarchical structures
+- [`TODO.md`](TODO.md) / [`TODO.fr.md`](TODO.fr.md) - Development tasks
+
+**Contributing**
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) / [`CONTRIBUTING.fr.md`](CONTRIBUTING.fr.md) - Contribution guide
+
+### 📄 File Format Details
+
+- [`file-formats/JSON-STRUCTURE.md`](file-formats/JSON-STRUCTURE.md) - JSON interchange format
+- [`file-formats/ZIP-FORMAT.md`](file-formats/ZIP-FORMAT.md) - .dm archive format
+- [`file-formats/SCHEMA-VALIDATION.md`](file-formats/SCHEMA-VALIDATION.md) - JSON Schema validation
+
+### 🔮 Prospective (Future Vision)
+
+- [`Prospective/1-FUTURE-VISION.md`](Prospective/1-FUTURE-VISION.md) - Long-term vision
+- [`Prospective/2-DEEPMEMO-ACTIVE-NODES.md`](Prospective/2-DEEPMEMO-ACTIVE-NODES.md) - Active nodes concept
+- [`Prospective/3-USE-CASES.md`](Prospective/3-USE-CASES.md) - Future use cases
+- [`Prospective/4-PARADOX.md`](Prospective/4-PARADOX.md) - Philosophical paradoxes
+- [`Prospective/5-ACTION.md`](Prospective/5-ACTION.md) - Action plans
+
+### 🛠️ Development
+
+- [`CONTEXT-CLAUDE-PROJECTS.md`](CONTEXT-CLAUDE-PROJECTS.md) - Context for Claude Code (⚠️ Should be CLAUDE.md at root)
+- [`../cloudflare-worker/README.md`](../cloudflare-worker/README.md) - PDF export worker
+- [`../cloudflare-worker/PRIVACY-NOTICE.md`](../cloudflare-worker/PRIVACY-NOTICE.md) - PDF privacy notice
+
+### 📋 Update Checklist
+
+When making significant changes to DeepMemo, ensure you update:
+1. ✅ Both language versions (EN + FR) of affected files
+2. ✅ Version numbers in README files
+3. ✅ ROADMAP for new features or completed items
+4. ✅ ARCHITECTURE for structural changes
+5. ✅ FILE-FORMATS / FORMATS-FICHIERS for data format changes
+6. ✅ SPEC-ATTACHMENTS for attachment-related changes
+7. ✅ Relevant file-formats/ subdirectory files
+8. ✅ This index if new documentation is added
+
+---
+
 DeepMemo is a personal knowledge management system based on a **hierarchical network** of recursive, interconnected, and active nodes. Everything (notes, projects, contacts, files, ideas) is a node that can contain other nodes infinitely.
 
 ## 🎯 Core Concept
@@ -112,6 +172,32 @@ Each node has:
 - **Supported types**: Images, PDFs, videos, audio, documents (50 MB max per file)
 - **Documentation**: Complete spec in `docs/SPEC-ATTACHMENTS.md`
 
+### 💾 IndexedDB Storage (V0.10)
+- **Scalable storage**: Migration from localStorage to IndexedDB with Dexie.js
+- **Increased capacity**: 500 MB - 1 GB storage (vs ~5-10 MB with localStorage)
+- **Performance**: Better handling of large datasets and attachments
+- **Automatic migration**: Seamless upgrade from V0.9 preserving all data
+- **Backup support**: Original localStorage data preserved after migration
+
+### 📦 .dm Archive Format (V0.10)
+- **Standard export format**: `.dm` files (ZIP archives with custom extension)
+- **Complete packaging**: Includes metadata.json, data.json, and attachments folder
+- **Version tracking**: Export metadata with version, date, node count, generator info
+- **Backward compatible**: Still supports .json and legacy ZIP formats
+- **LLM-friendly**: .json interchange format still available for AI generation
+- **Documentation**: Full spec in `docs/FILE-FORMATS.md`
+
+### 📄 PDF Export (V0.10)
+- **Document generation**: Export branches as formatted PDF documents
+- **Symlink resolution**: Automatically includes linked content
+- **Inline images**: Attachments converted to base64 for embedding
+- **Table of contents**: Hierarchical TOC for navigation
+- **Two implementations**:
+  - **CloudFlare Worker**: Online generation with rate limiting (code ready, not yet deployed)
+  - **CLI tool**: 100% offline with `bin/branch2pdf.js` (Node.js + Puppeteer)
+- **Privacy-focused**: IP hashing (SHA-256) for online version
+- **Documentation**: `cloudflare-worker/README.md`
+
 ### ⌨️ Keyboard Shortcuts
 - `Alt+N`: New node (child if a node is selected, root otherwise)
 - `Alt+E`: Switch to edit mode (with automatic focus)
@@ -119,20 +205,20 @@ Each node has:
 - `Escape`: Go up to parent
 - `↑↓←→`: Navigation in the tree
 
-## 🏗️ Current Architecture (V0.8 - Modular ES6)
+## 🏗️ Current Architecture (V0.10 - Modular ES6)
 
 ### Format
 - **Modular multifile**: HTML + CSS + ES6 modules JS
 - `index.html`: Minimal HTML structure
-- `src/css/`: Organized styles (base, layout, components, utilities)
+- `src/css/`: Organized styles (base, layout, components, utilities, mobile)
 - `src/js/app.js`: Main entry point
-- `src/js/core/`: Data management (data, attachments, default-data)
+- `src/js/core/`: Data management (data, storage, migration, attachments, default-data)
 - `src/js/features/`: Functional modules (tree, editor, search, tags, drag-drop, modals)
-- `src/js/ui/`: UI components (toast, panels)
-- `src/js/utils/`: Utilities (routing, keyboard, helpers, i18n)
+- `src/js/ui/`: UI components (toast, panels, mobile-tabs)
+- `src/js/utils/`: Utilities (routing, keyboard, helpers, i18n, sync)
 - **100% Vanilla** JavaScript ES6+ (no framework)
 - CSS Variables for theming
-- LocalStorage + IndexedDB for persistence
+- **IndexedDB with Dexie.js** for persistence (V0.10)
 
 ### Data Structure
 ```javascript
@@ -194,7 +280,8 @@ python3 -m http.server 8000
 - HTML5
 - CSS3 (Variables, Flexbox, Grid)
 - JavaScript ES6+ (Classes, Modules)
-- LocalStorage + IndexedDB
+- IndexedDB with Dexie.js (V0.10)
+- Service Worker (PWA)
 
 ## 👤 Author
 
@@ -208,4 +295,4 @@ You can use, modify, and distribute DeepMemo freely. Your data belongs to you, s
 
 ---
 
-**DeepMemo V0.9.4** - January 2026
+**DeepMemo V0.10.4** - January 2026

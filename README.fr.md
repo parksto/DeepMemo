@@ -70,9 +70,10 @@ python -m http.server 8000
 - 🔖 URLs bookmarkables (`?branch=X#/node/Y`)
 
 **Partage & Collaboration** :
-- 📤 Export/Import (global ou branche, format ZIP)
+- 📤 Export/Import : .dm (archive), .json (LLM-friendly), FreeMind, Mermaid, PDF
 - 🌐 URLs partageables (lecture seule, données locales)
-- 🔐 Souveraineté des données (LocalStorage + IndexedDB)
+- 🔐 Souveraineté des données (IndexedDB)
+- 📄 Génération PDF (en ligne avec rate limiting ou CLI offline)
 
 **UX** :
 - 🎨 Drag & Drop complet (déplacer, dupliquer, lier)
@@ -92,7 +93,7 @@ python -m http.server 8000
 - Code : [Pull Requests](https://github.com/parksto/DeepMemo/pulls)
 - Documentation : Toujours améliorable !
 
-**Vision long-terme** : Voir [ROADMAP.md](docs/ROADMAP.md) pour les directions explorées (nœuds actifs, automatisation, collaboration décentralisée).
+**Vision long-terme** : Voir [ROADMAP.md](docs/ROADMAP.md) pour l'historique du projet et les directions explorées (collaboration décentralisée, synchronisation).
 
 ---
 
@@ -116,8 +117,8 @@ python -m http.server 8000
 **100% Vanilla** : HTML5, CSS3, JavaScript ES6+ (aucun framework)
 
 **Stockage** :
-- LocalStorage (données structurées)
-- IndexedDB (fichiers attachés)
+- IndexedDB avec Dexie.js (nœuds, paramètres, attachments)
+- LocalStorage (legacy, support migration)
 
 **Architecture** : Modules ES6, structure multifile
 
@@ -127,11 +128,16 @@ python -m http.server 8000
 
 ## 📝 Version actuelle
 
-**V0.9.4** (Janvier 2026) - Stable et complète
+**V0.10.4** (Janvier 2026) - Stable et complète
 
-Derniers ajouts : Polissage UI avec nouvelle palette de couleurs, gestion spéciale des symlinks cassés/externes, amélioration export FreeMind, protection contre corruption des données.
+Derniers ajouts :
+- Stockage IndexedDB avec Dexie.js (capacité 500MB-1GB)
+- Format archive .dm (ZIP avec metadata)
+- Export PDF (en ligne via CloudFlare Worker ou CLI offline)
+- Améliorations import (choix remplacer/fusionner, support export global dans import branche)
+- Images inline dans PDFs, gestion scope des symlinks
 
-Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import branche, attachments, PWA installable.
+Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, drag & drop, export/import multi-formats (.dm, .json, FreeMind, Mermaid, PDF), attachments avec IndexedDB, PWA installable, interface bilingue.
 
 [→ Voir ROADMAP.md pour l'historique complet](docs/ROADMAP.md)
 

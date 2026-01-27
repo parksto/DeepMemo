@@ -71,9 +71,10 @@ python -m http.server 8000
 - 🔖 Bookmarkable URLs (`?branch=X#/node/Y`)
 
 **Sharing & Collaboration**:
-- 📤 Export/Import (global or branch, ZIP format)
+- 📤 Export/Import: .dm (archive), .json (LLM-friendly), FreeMind, Mermaid, PDF
 - 🌐 Shareable URLs (read-only, local data)
 - 🔐 Data sovereignty (LocalStorage + IndexedDB)
+- 📄 PDF generation (online with rate limiting or offline CLI)
 
 **UX**:
 - 🎨 Full Drag & Drop (move, duplicate, link)
@@ -93,7 +94,7 @@ python -m http.server 8000
 - Code: [Pull Requests](https://github.com/parksto/DeepMemo/pulls)
 - Documentation: Always improvable!
 
-**Long-term vision**: See [ROADMAP.md](docs/ROADMAP.md) for explored directions (active nodes, automation, decentralized collaboration).
+**Long-term vision**: See [ROADMAP.md](docs/ROADMAP.md) for project history and explored directions (decentralized collaboration, synchronization).
 
 ---
 
@@ -117,8 +118,8 @@ python -m http.server 8000
 **100% Vanilla**: HTML5, CSS3, JavaScript ES6+ (no framework)
 
 **Storage**:
-- LocalStorage (structured data)
-- IndexedDB (file attachments)
+- IndexedDB with Dexie.js (nodes, settings, attachments)
+- LocalStorage (legacy, migration support)
 
 **Architecture**: ES6 modules, multifile structure
 
@@ -128,11 +129,16 @@ python -m http.server 8000
 
 ## 📝 Current Version
 
-**V0.9.4** (January 2026) - Stable and feature-complete
+**V0.10.4** (January 2026) - Stable and feature-complete
 
-Latest additions: UI polish with new color palette, special handling for broken/external symlinks, improved FreeMind export, data corruption protection.
+Latest additions:
+- IndexedDB storage with Dexie.js (500MB-1GB capacity)
+- .dm archive format (ZIP-based with metadata)
+- PDF export (online via CloudFlare Worker or offline CLI)
+- Import improvements (replace/merge choice, global export support in branch import)
+- Inline images in PDFs, symlink scope awareness
 
-Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, branch export/import, attachments, installable PWA.
+Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, multi-format export/import (.dm, .json, FreeMind, Mermaid, PDF), attachments with IndexedDB, installable PWA, bilingual interface.
 
 [→ See ROADMAP.md for complete history](docs/ROADMAP.md)
 

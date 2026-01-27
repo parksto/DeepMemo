@@ -1,7 +1,7 @@
-# 🏗️ DeepMemo - Technical Architecture V0.9
+# 🏗️ DeepMemo - Technical Architecture V0.10
 
-**Last updated**: December 28, 2025
-**Version**: 0.9 (ES6 modular architecture + PWA + Attachments + i18n)
+**Last updated**: January 19, 2026
+**Version**: 0.10 (ES6 modular architecture + IndexedDB + .dm format + PDF export)
 
 > 📖 **[Version française disponible](./ARCHITECTURE.fr.md)** | **English version**
 
@@ -9,17 +9,17 @@
 
 ## 📐 Overview
 
-DeepMemo is a **single-page application** (SPA) built with vanilla JavaScript ES6, HTML5, and CSS3, using LocalStorage for data persistence.
+DeepMemo is a **single-page application** (SPA) built with vanilla JavaScript ES6, HTML5, and CSS3, using IndexedDB (Dexie.js) for scalable data persistence.
 
-**V0.9 Architecture**: Modular ES6 + Internationalization
+**V0.10 Architecture**: Modular ES6 + IndexedDB + .dm format
 - `index.html`: HTML structure (~190 lines)
-- `src/css/`: Modular styles (~1500 lines across 5 files)
-- `src/js/`: **13 ES6 modules** organized (~3000 lines)
-  - `app.js`: Main entry point (~830 lines)
-  - `core/`: Data management
+- `src/css/`: Modular styles (~1.8K lines across 6 files)
+- `src/js/`: **~20 ES6 modules** organized (~13.2K lines)
+  - `app.js`: Main entry point
+  - `core/`: Data management + storage + migration
   - `features/`: Business features
   - `ui/`: User interface
-  - `utils/`: Utilities
+  - `utils/`: Utilities + sync
 
 ---
 
@@ -29,10 +29,12 @@ DeepMemo is a **single-page application** (SPA) built with vanilla JavaScript ES
 
 ```
 src/js/
-├── app.js                      # Entry point (~830 lines)
+├── app.js                      # Entry point
 │
 ├── core/
-│   ├── data.js                 # Data + localStorage + export/import
+│   ├── data.js                 # Data management + export/import
+│   ├── storage.js              # IndexedDB layer (Dexie.js)
+│   ├── migration.js            # localStorage → IndexedDB migration
 │   ├── attachments.js          # File attachments (IndexedDB)
 │   └── default-data.js         # Default demo content
 │
@@ -41,7 +43,7 @@ src/js/
 │   ├── editor.js               # Editor + breadcrumb + attachments UI
 │   ├── search.js               # Global search
 │   ├── tags.js                 # Tags + autocomplete
-│   ├── modals.js               # Modals (Move/Link/Duplicate)
+│   ├── modals.js               # Modals (Move/Link/Duplicate + Markdown Help)
 │   └── drag-drop.js            # Complete drag & drop
 │
 ├── ui/
@@ -52,8 +54,9 @@ src/js/
 ├── utils/
 │   ├── routing.js              # URL navigation
 │   ├── keyboard.js             # Keyboard shortcuts
-│   ├── helpers.js              # Utility functions
-│   └── i18n.js                 # Internationalization system
+│   ├── helpers.js              # Utility functions (incl. downloadBlob)
+│   ├── i18n.js                 # Internationalization system
+│   └── sync.js                 # Multi-tab sync (BroadcastChannel)
 │
 └── locales/
     ├── fr.js                   # French dictionary
@@ -187,10 +190,10 @@ export class DeepMemoApp {
 ### core/data.js
 
 **Responsibilities**:
-- Data structure management
-- localStorage save/load
-- JSON export/import
+- Data structure management in memory
+- Export/import (.dm archives and .json files)
 - CRUD operations on nodes
+- Coordination with storage.js for persistence
 
 **Exports**:
 ```javascript
@@ -206,6 +209,54 @@ export function isDescendantOf(nodeId, ancestorId)
 export function wouldCreateCycle(targetId, parentId)
 export function wouldCreateCycleWithMove(nodeId, newParentId)
 ```
+
+### core/storage.js (V0.10)
+
+**Responsibilities**:
+- IndexedDB persistence layer using Dexie.js
+- Three object stores: `nodes`, `settings`, `attachments`
+- Async read/write operations
+- Database initialization and management
+
+**Exports**:
+```javascript
+export async function initStorage()
+export async function loadNodes()
+export async function saveNodes(nodes)
+export async function loadSettings()
+export async function saveSetting(key, value)
+export async function getStats()
+```
+
+**Database structure**:
+```javascript
+const db = new Dexie('deepmemo');
+db.version(1).stores({
+  nodes: 'id, created, modified',
+  settings: 'key',
+  attachments: 'id'
+});
+```
+
+### core/migration.js (V0.10)
+
+**Responsibilities**:
+- One-time migration from localStorage to IndexedDB
+- Data preservation and backup
+- Migration flag management
+- Error handling and rollback
+
+**Exports**:
+```javascript
+export async function migrateFromLocalStorage()
+```
+
+**Migration process**:
+1. Check migration flag in localStorage
+2. Read old data from `deepmemo_data` and `deepmemo_settings`
+3. Write to IndexedDB via storage.js
+4. Set migration flag to prevent re-running
+5. Keep original localStorage data as backup
 
 ### core/attachments.js
 

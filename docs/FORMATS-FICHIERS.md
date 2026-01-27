@@ -1,498 +1,664 @@
 # Référence des Formats de Fichiers DeepMemo
 
-**Version :** 1.0
-**Dernière mise à jour :** 2026-01-02
+**Version :** 2.0
+**Dernière mise à jour :** 2026-01-17
 
-Ce document décrit tous les formats de fichiers utilisés par DeepMemo pour l'export et l'import de données. Ces spécifications permettent aux outils externes (y compris les assistants IA comme Claude) de générer des fichiers compatibles avec DeepMemo.
+Ce document décrit tous les formats de fichiers utilisés par DeepMemo pour l'export et l'import de données.
 
 ---
 
 ## Table des Matières
 
-1. [Vue d'ensemble de la structure de données](#vue-densemble-de-la-structure-de-données)
-2. [Format Archive ZIP](#format-archive-zip)
-3. [Format FreeMind .mm](#format-freemind-mm)
-4. [Format Mermaid SVG](#format-mermaid-svg)
-5. [Structure IndexedDB](#structure-indexeddb)
-6. [Exemples](#exemples)
+1. [Vue d'ensemble](#vue-densemble)
+2. [Format Archive .dm (Standard)](#format-archive-dm-standard)
+3. [Format JSON d'Interchange](#format-json-dinterchange)
+4. [Formats d'Export (Lecture Seule)](#formats-dexport-lecture-seule)
+5. [Validation JSON Schema](#validation-json-schema)
+6. [Migration depuis v1.0](#migration-depuis-v10)
 
 ---
 
-## Vue d'ensemble de la structure de données
+## Vue d'ensemble
 
-### Objet Node (Nœud)
+DeepMemo utilise **deux formats principaux** pour l'export/import de données :
 
-Chaque nœud dans DeepMemo a la structure suivante :
+### `.dm` (Archive DeepMemo) - **Format Standard**
+
+Le format de fichier officiel DeepMemo. Pense au `.docx` pour Word ou `.psd` pour Photoshop.
+
+- ✅ **Complet** : Inclut données + pièces jointes + métadonnées + icône
+- ✅ **Pérenne** : Basé sur ZIP, extensible sans rupture de compatibilité
+- ✅ **Intégration OS** : Extension personnalisée avec icône
+- ✅ **Recommandé** pour tous les exports (globaux ou branches)
+
+**Structure de fichier** : Archive ZIP contenant `data.json`, `metadata.json`, `icon.png`, et dossier `attachments/`.
+
+### `.json` (Format d'Interchange) - **Usage Technique/LLM**
+
+Un simple fichier JSON pour des cas d'usage techniques spécifiques.
+
+- ✅ **Compatible LLM** : ChatGPT/Claude peuvent générer ce format directement
+- ✅ **Éditable** : Texte brut, facile à modifier avec des scripts
+- ✅ **Léger** : Pas de pièces jointes, pas de métadonnées
+- ⚠️ **Limitation** : Ne peut pas inclure les fichiers joints (métadonnées uniquement)
+
+**Utiliser quand** : Génération de données par IA, édition manuelle, partage ultra-léger.
+
+---
+
+## Format Archive .dm (Standard)
+
+### Structure de Fichier
+
+Un fichier `.dm` est une **archive ZIP** avec la structure suivante :
+
+```
+export.dm (archive ZIP)
+├── metadata.json          # Métadonnées de l'export (version, type, date, etc.)
+├── data.json             # Structure complète de l'arborescence
+└── attachments/          # Fichiers joints (si présents)
+    ├── attach_123_abc_document.pdf
+    ├── attach_456_def_image.png
+    └── ...
+```
+
+**Fichiers optionnels** (réservés pour usage futur) :
+- `icon.png` - Icône visuelle (512×512) pour preview/app desktop
+- `preview.html` - Preview HTML autonome
+
+**Note** : Le fichier `.dm` est une archive ZIP standard - tu peux l'extraire avec n'importe quel outil ZIP (7zip, unzip, etc.).
+
+### metadata.json
+
+Contient les informations sur l'export lui-même :
 
 ```json
 {
-  "id": "node_1735820000123_abc",
-  "title": "Titre du nœud",
-  "content": "Contenu en markdown...",
+  "$schema": "https://deepmemo.org/schemas/v1.0/metadata.json",
+  "version": "1.0",
+  "type": "branch",
+  "title": "Documentation",
+  "exported": 1737115200000,
+  "branchRootId": "node_1234567890_abc",
+  "nodeCount": 42,
+  "attachmentCount": 5,
+  "totalSize": 1048576,
+  "generator": "DeepMemo v0.10.4"
+}
+```
+
+**Champs** :
+- `version` (string, requis) : Version du format (`"1.0"`)
+- `type` (string, requis) : `"global"` ou `"branch"`
+- `title` (string, optionnel) : Nom lisible de l'export
+- `exported` (number, requis) : Timestamp d'export (Unix millisecondes)
+- `branchRootId` (string, requis pour branch) : ID du nœud racine
+- `nodeCount` (number, optionnel) : Nombre total de nœuds
+- `attachmentCount` (number, optionnel) : Nombre total de fichiers joints
+- `totalSize` (number, optionnel) : Taille totale des pièces jointes en octets
+- `generator` (string, optionnel) : Identifiant du logiciel d'export
+
+**Schema** : [`schemas/v1.0/metadata.json`](../schemas/v1.0/metadata.json)
+
+### data.json
+
+Contient l'arborescence complète. Le format dépend du type d'export.
+
+#### Export Global
+
+```json
+{
+  "$schema": "https://deepmemo.org/schemas/v1.0/deepmemo.json",
+  "nodes": {
+    "node_123_abc": {
+      "id": "node_123_abc",
+      "title": "Mon Nœud",
+      "content": "Contenu markdown...",
+      "type": "note",
+      "parent": null,
+      "children": ["node_456_def"],
+      "tags": ["important"],
+      "attachments": [],
+      "created": 1737115200000,
+      "modified": 1737115200000
+    },
+    "node_456_def": { /* ... */ }
+  },
+  "rootNodes": ["node_123_abc"]
+}
+```
+
+**Structure** :
+- `nodes` (objet) : Dictionnaire de tous les nœuds, indexés par ID
+- `rootNodes` (array) : IDs des nœuds racines
+
+#### Export Branche
+
+```json
+{
+  "$schema": "https://deepmemo.org/schemas/v1.0/deepmemo.json",
+  "type": "deepmemo-branch",
+  "version": "1.0",
+  "branchRootId": "node_123_abc",
+  "exported": 1737115200000,
+  "nodeCount": 2,
+  "nodes": {
+    "node_123_abc": { /* ... */ },
+    "node_456_def": { /* ... */ }
+  }
+}
+```
+
+**Structure** :
+- `type` (string) : Toujours `"deepmemo-branch"`
+- `version` (string) : Version du format (`"1.0"`)
+- `branchRootId` (string) : ID de la racine de la branche
+- `exported` (number) : Timestamp d'export
+- `nodeCount` (number) : Nombre de nœuds dans la branche
+- `nodes` (objet) : Dictionnaire des nœuds de la branche uniquement
+
+**Pas de tableau `rootNodes`** dans les exports de branche.
+
+**Schema** : [`schemas/v1.0/deepmemo.json`](../schemas/v1.0/deepmemo.json)
+
+### Structure d'un Nœud
+
+Chaque nœud a la structure suivante :
+
+```json
+{
+  "id": "node_1737115200000_abc",
+  "title": "Titre du Nœud",
+  "content": "Contenu markdown...",
   "type": "note",
-  "parent": "parent_node_id",
+  "parent": "parent_id",
   "children": ["child1_id", "child2_id"],
   "tags": ["tag1", "tag2"],
   "attachments": [
     {
-      "id": "attach_1735820000456_xyz",
+      "id": "attach_1737115200456_xyz",
       "name": "document.pdf",
       "type": "application/pdf",
       "size": 1234567
     }
   ],
-  "created": 1735820000000,
-  "modified": 1735820000000
+  "created": 1737115200000,
+  "modified": 1737115200000
 }
 ```
 
-#### Champs d'un nœud
+**Champs requis** :
+- `id` (string) : ID unique, format `node_{timestamp}_{random}`
+- `title` (string) : Nom/titre du nœud (peut inclure des emojis)
+- `type` (string) : `"note"` ou `"symlink"`
+- `parent` (string|null) : ID du nœud parent, `null` pour les racines
+- `children` (array) : IDs des nœuds enfants
+- `created` (number) : Timestamp de création (Unix ms)
+- `modified` (number) : Timestamp de dernière modification (Unix ms)
 
-- **id** (string, requis) : Identifiant unique, format `node_timestamp_random`
-- **title** (string, requis) : Titre/nom du nœud
-- **content** (string, optionnel) : Contenu en Markdown
-- **type** (string, requis) : Soit `"note"` soit `"symlink"`
-- **parent** (string|null, requis) : ID du nœud parent, ou `null` pour les nœuds racines
-- **children** (array, requis) : Tableau des IDs des nœuds enfants
-- **tags** (array, optionnel) : Tableau de chaînes de caractères (tags)
-- **attachments** (array, optionnel) : Tableau d'objets pièces jointes (voir ci-dessous)
-- **created** (number, requis) : Timestamp Unix (millisecondes)
-- **modified** (number, requis) : Timestamp Unix (millisecondes)
+**Champs optionnels** :
+- `content` (string) : Contenu texte en Markdown
+- `tags` (array) : Chaînes de caractères de tags
+- `attachments` (array) : Objets métadonnées des pièces jointes (voir ci-dessous)
 
 #### Nœuds Symlink
 
-Les symlinks ont des champs additionnels :
+Les symlinks ont un champ supplémentaire `targetId` :
 
 ```json
 {
-  "id": "symlink_1735820000123_abc",
-  "title": "Titre personnalisé du Symlink",
+  "id": "symlink_1737115200000_xyz",
+  "title": "Titre Personnalisé du Symlink",
   "type": "symlink",
-  "targetId": "target_node_id",
+  "targetId": "node_123_abc",
   "parent": "parent_id",
   "children": [],
-  "created": 1735820000000,
-  "modified": 1735820000000
+  "created": 1737115200000,
+  "modified": 1737115200000
 }
 ```
 
 **Important** :
-- Les symlinks peuvent avoir un **titre personnalisé** différent de leur cible
-- Le `title` est stocké sur le symlink lui-même, pas hérité de la cible
-- Les symlinks n'ont typiquement pas de `content` ou de `children`
-- `targetId` pointe vers le nœud réel
+- Le `title` est stocké sur le symlink lui-même (peut différer de la cible)
+- Les symlinks n'ont généralement pas de `content` ou `children`
+- `targetId` doit pointer vers un nœud existant dans le dataset
 
-#### Objets Attachment (Pièce jointe)
+#### Objets Attachment (Pièces Jointes)
 
-⚠️ **CRITIQUE** : Les attachments DOIVENT être un tableau d'objets, PAS de chaînes de caractères !
+⚠️ **CRITIQUE** : Les attachments DOIVENT être un **tableau d'objets**, PAS de chaînes de caractères !
 
 ```json
 {
-  "id": "attach_1735820000456_xyz",
+  "id": "attach_1737115200456_xyz",
   "name": "document.pdf",
   "type": "application/pdf",
   "size": 1234567
 }
 ```
 
-- **id** (string) : ID unique de la pièce jointe, format `attach_timestamp_random`
-- **name** (string) : Nom de fichier original avec extension
-- **type** (string) : Type MIME (ex: `"image/png"`, `"application/pdf"`)
-- **size** (number) : Taille du fichier en octets
+**Champs** :
+- `id` (string) : ID unique, format `attach_{timestamp}_{random}`
+- `name` (string) : Nom de fichier original avec extension
+- `type` (string) : Type MIME (ex : `"image/png"`, `"application/pdf"`)
+- `size` (number) : Taille du fichier en octets
+
+**Séparation du stockage** :
+- **Métadonnées** (id, name, type, size) : Stockées dans `data.json`
+- **Blob** (fichier réel) : Stocké dans le dossier `attachments/`
+
+### icon.png (Optionnel - Usage Futur)
+
+**Statut** : Fichier optionnel, réservé pour fonctionnalité future
+
+**Format** : Image PNG, 512×512 pixels recommandé
+
+**Cas d'usage prévus** :
+- Application desktop avec icônes personnalisées (nécessite app Tauri/Electron)
+- Preview HTML embarquée (`preview.html`) avec icône visuelle
+- Galerie UI DeepMemo des "exports récents"
+
+**Implémentation actuelle** :
+- ❌ Non généré à l'export
+- ❌ Ignoré à l'import (si présent)
+- ℹ️ La spécification réserve ce nom de fichier pour éviter les conflits dans les versions futures
+
+**Génération future** (quand implémentée) :
+- Extraire l'emoji du titre du nœud racine, rendre en PNG
+- Fallback vers l'icône DeepMemo par défaut
+- Icônes personnalisées uploadées par l'utilisateur
+
+### Dossier attachments/
+
+Contient les fichiers joints réels.
+
+**Convention de nommage** : `{attachmentId}_{nomOriginal}`
+
+Exemple :
+```
+attachments/
+├── attach_1737115200456_xyz_document.pdf
+└── attach_1737115300123_abc_screenshot.png
+```
+
+**Validation** :
+- Les fichiers DOIVENT correspondre aux IDs référencés dans les tableaux `attachments` des nœuds
+- Fichiers manquants : L'import réussit, mais les pièces jointes ne s'afficheront pas
+- Fichiers extra : Ignorés (pas d'erreur)
+
+### Comportement à l'Import
+
+#### Import Global
+
+- **Remplace TOUTES les données existantes** (opération destructive)
+- Les IDs de nœuds sont **préservés** (pas de régénération)
+- Les IDs de pièces jointes sont **préservés**
+- L'utilisateur DOIT confirmer (toutes les données actuelles seront perdues)
+
+#### Import Branche
+
+- **Fusionne** avec les données existantes (non-destructif)
+- Les IDs de nœuds sont **régénérés** pour éviter les conflits
+- Les IDs de pièces jointes sont **régénérés**
+- Les relations parent-enfant sont **remappées**
+- La racine de la branche devient enfant du nœud parent sélectionné
 
 ---
 
-## Format Archive ZIP
+## Format JSON d'Interchange
 
-DeepMemo utilise des archives ZIP pour l'export/import complet avec pièces jointes.
+### Objectif
 
-### Structure de fichiers
+Un **simple fichier JSON** pour des cas d'usage techniques où le format `.dm` complet n'est pas nécessaire.
 
-```
-deepmemo-export-1735820000000.zip
-├── data.json                 # Fichier de données principal
-└── attachments/              # Dossier des pièces jointes
-    ├── attach_123_file1.pdf
-    ├── attach_456_image.png
-    └── ...
-```
+**Cas d'usage** :
+- ✅ **Génération IA/LLM** : ChatGPT, Claude, etc. peuvent générer du JSON directement
+- ✅ **Édition manuelle** : Modifier la structure dans un éditeur de texte
+- ✅ **Scripting** : Parser/manipuler avec des outils JSON standard
+- ✅ **Partage léger** : Branches sans pièces jointes
 
-### Export Global ZIP
+**Limitations** :
+- ❌ **Pas de fichiers joints** (métadonnées uniquement)
+- ❌ **Pas de métadonnées** (version, date d'export, icône, etc.)
+- ❌ **Pas le format standard** (utiliser `.dm` pour les exports complets)
 
-Un **export global** inclut TOUTES les données et pièces jointes.
+### Structure de Fichier
 
-#### `data.json` (Global)
+Le fichier `.json` contient **uniquement l'arborescence de données**, pas de métadonnées ni pièces jointes.
+
+#### Format Global
 
 ```json
 {
   "nodes": {
-    "node_1": { ... },
-    "node_2": { ... }
+    "node_123_abc": { /* ... */ },
+    "node_456_def": { /* ... */ }
   },
-  "rootNodes": ["node_1", "node_3"]
+  "rootNodes": ["node_123_abc"]
 }
 ```
 
-**Structure** :
-- **nodes** (objet) : Dictionnaire de tous les nœuds, indexés par ID de nœud
-- **rootNodes** (array) : Tableau des IDs des nœuds racines
-
-#### Dossier Attachments
-
-Chaque fichier joint est nommé : `{attachmentId}_{nomOriginal}`
-
-Exemple : `attach_1735820000456_xyz_document.pdf`
-
-### Export Branche ZIP
-
-Un **export de branche** inclut uniquement un sous-arbre spécifique avec ses pièces jointes.
-
-#### `data.json` (Branche)
+#### Format Branche
 
 ```json
 {
   "type": "deepmemo-branch",
   "version": "1.0",
-  "branchRootId": "node_123",
-  "exported": 1735820000000,
-  "nodeCount": 42,
+  "branchRootId": "node_123_abc",
+  "exported": 1737115200000,
+  "nodeCount": 2,
   "nodes": {
-    "node_123": { ... },
-    "node_124": { ... }
+    "node_123_abc": { /* ... */ },
+    "node_456_def": { /* ... */ }
   }
 }
 ```
 
-**Structure** :
-- **type** (string) : Toujours `"deepmemo-branch"`
-- **version** (string) : Version du format (actuellement `"1.0"`)
-- **branchRootId** (string) : ID du nœud racine de cette branche
-- **exported** (number) : Timestamp Unix (millisecondes)
-- **nodeCount** (number) : Nombre de nœuds dans cette branche
-- **nodes** (objet) : Dictionnaire des nœuds de la branche uniquement
+**Schema** : Identique à `data.json` dans les archives `.dm` - [`schemas/v1.0/deepmemo.json`](schemas/v1.0/deepmemo.json)
 
-**Important** : Les exports de branche n'incluent PAS le tableau `rootNodes`.
+### Génération avec IA/LLM
 
-### Comportement à l'import
+**Template de prompt pour ChatGPT/Claude** :
 
-#### Import Global
-- **Remplace TOUTES les données existantes**
-- Les IDs de nœuds sont **préservés** (pas de régénération)
-- Toutes les pièces jointes sont restaurées avec leurs IDs originaux
-- L'utilisateur doit confirmer (les données seront perdues !)
+> Génère une branche DeepMemo au format JSON avec la structure suivante :
+> - Nœud racine : "Machine Learning Basics"
+> - Nœuds enfants : "Supervised Learning", "Unsupervised Learning", "Neural Networks"
+> - Chaque nœud doit avoir du contenu markdown expliquant le concept
+> - Utilise le format JSON d'interchange DeepMemo
+>
+> Suis cette structure :
+> ```json
+> {
+>   "type": "deepmemo-branch",
+>   "version": "1.0",
+>   "branchRootId": "node_{timestamp}_{random}",
+>   "exported": {current_timestamp_ms},
+>   "nodeCount": {total_nodes},
+>   "nodes": { /* ... */ }
+> }
+> ```
 
-#### Import Branche
-- **Fusionne** avec les données existantes
-- Les IDs de nœuds sont **régénérés** pour éviter les conflits
-- Les IDs de pièces jointes sont également régénérés
-- Les relations parent-enfant sont remappées
-- La racine de la branche devient enfant du parent sélectionné
-
----
-
-## Format FreeMind .mm
-
-**Export uniquement** - DeepMemo peut exporter au format mindmap FreeMind/Freeplane.
-
-### Structure de fichier
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0.1">
-  <node TEXT="Titre du nœud racine" ID="node_123">
-    <richcontent TYPE="NOTE">
-      <html>
-        <head></head>
-        <body>
-          <p style="white-space: pre-wrap;">Contenu du nœud ici...</p>
-        </body>
-      </html>
-    </richcontent>
-    <node TEXT="Nœud enfant" ID="node_456">
-      <!-- Enfants récursivement -->
-    </node>
-    <node TEXT="Nœud Symlink" ID="symlink_789" COLOR="#ff9900" STYLE="bubble">
-      <arrowlink DESTINATION="node_target" COLOR="#ff9900" STARTARROW="None" ENDARROW="Default"/>
-    </node>
-  </node>
-</map>
-```
-
-### Caractéristiques principales
-
-1. **Attributs de nœud** :
-   - `TEXT` : Titre du nœud (échappé XML, **emojis supprimés**)
-   - `ID` : ID DeepMemo original du nœud
-   - `COLOR` : `"#ff9900"` pour les symlinks uniquement
-   - `STYLE` : `"bubble"` pour les symlinks uniquement
-
-2. **Contenu** : Stocké dans `<richcontent TYPE="NOTE">` (nœuds normaux uniquement)
-
-3. **Symlinks** :
-   - Couleur orange et style bulle
-   - Élément `<arrowlink>` pointant vers la cible
-   - Pas de contenu ou d'enfants exportés
-
-4. **Gestion des emojis** : Tous les emojis sont **supprimés** des titres pour une meilleure compatibilité
-
-5. **Racines multiples** : Si plusieurs nœuds racines sont exportés, une racine virtuelle "DeepMemo" est créée
-
-### Échappement XML
-
-Les caractères sont échappés comme suit :
-- `&` → `&amp;`
-- `<` → `&lt;`
-- `>` → `&gt;`
-- `"` → `&quot;`
-- `'` → `&apos;`
-
----
-
-## Format Mermaid SVG
-
-**Export uniquement** - DeepMemo peut exporter en syntaxe mindmap Mermaid et générer un SVG.
-
-### Syntaxe Mermaid
-
-```mermaid
-mindmap
-  root((Titre du nœud racine))
-    Enfant 1
-      Petit-enfant 1
-      Petit-enfant 2
-    Enfant 2
-    🔗 Nœud Symlink
-```
-
-### Caractéristiques principales
-
-1. **Nœud racine** : Double parenthèses `((titre))`
-2. **Indentation** : 2 espaces par niveau
-3. **Symlinks** : Préfixés avec l'emoji `🔗`
-4. **Pas d'enfants pour les symlinks** : Évite la duplication
-
-### Échappement de caractères
-
-La syntaxe Mermaid est fragile. Les caractères sont échappés/remplacés :
-- `()[]{}` → espaces
-- `"` → `'`
-- Retours à la ligne → espaces
-- Espaces multiples → espace unique
-
-### Rendu
-
-- Utilise [Mermaid.js](https://mermaid.js.org/) v10+ (chargé via CDN)
-- Exporté comme fichier SVG (graphique vectoriel)
-- Entièrement rendu, prêt à visualiser
-
----
-
-## Structure IndexedDB
-
-DeepMemo stocke les fichiers joints dans IndexedDB (pas dans localStorage).
-
-### Nom de la base de données
-
-`deepmemo-attachments`
-
-### Object Store
-
-**Nom** : `files`
-**Clé** : `id` (ID de la pièce jointe)
-
-### Objet stocké
-
-```javascript
+**Template de structure de nœud** :
+```json
 {
-  id: "attach_1735820000456_xyz",  // Clé primaire
-  blob: Blob                        // Données binaires du fichier
+  "id": "node_{timestamp}_{random}",
+  "title": "Titre du Nœud",
+  "content": "Contenu markdown ici...",
+  "type": "note",
+  "parent": "parent_id_ou_null",
+  "children": [],
+  "tags": [],
+  "created": {timestamp_ms},
+  "modified": {timestamp_ms}
 }
 ```
 
-**Important** : Seul le blob est stocké dans IndexedDB. Les métadonnées (nom, type, taille) sont stockées dans le tableau `attachments` du nœud.
+**Bonnes pratiques pour la génération LLM** :
+1. Utiliser des timestamps réalistes (temps Unix actuel en millisecondes)
+2. Assurer des liens parent-enfant bidirectionnels
+3. Générer des IDs uniques (jamais réutiliser)
+4. Utiliser `null` pour les parents des nœuds racines
+5. Inclure du contenu markdown (supporte la spec CommonMark complète)
+6. Peut référencer des pièces jointes dans les métadonnées, mais ne peut pas inclure les fichiers
 
-### Modèle d'accès
+### Import
 
-1. Lire le nœud depuis localStorage → obtenir les métadonnées de la pièce jointe
-2. Utiliser l'ID de la pièce jointe pour récupérer le blob depuis IndexedDB
-3. Combiner métadonnées + blob pour l'affichage/téléchargement
+DeepMemo **détecte automatiquement** et accepte les deux formats `.dm` et `.json` :
+
+```javascript
+// Auto-détection basée sur l'extension de fichier
+if (file.name.endsWith('.dm')) {
+  // Extraire le ZIP, lire data.json + attachments
+} else if (file.name.endsWith('.json')) {
+  // Parser le JSON directement
+}
+```
+
+---
+
+## Formats d'Export (Lecture Seule)
+
+DeepMemo peut exporter vers des formats supplémentaires pour **usage externe** (non importables) :
+
+### 1. FreeMind .mm (Mindmap)
+
+Format mindmap basé XML compatible avec FreeMind/Freeplane/XMind.
+
+**Fonctionnalités** :
+- Structure hiérarchique préservée
+- Symlinks rendus avec couleur orange + liens flèches
+- Contenu des nœuds stocké dans éléments `<richcontent>`
+- Emojis supprimés des titres pour compatibilité
+
+**Cas d'usage** : Éditer/visualiser dans un logiciel de mindmap externe
+
+**Détails** : Voir [file-formats/FREEMIND-FORMAT.md](file-formats/FREEMIND-FORMAT.md) (à créer)
+
+### 2. Mermaid SVG (Diagramme Visuel)
+
+Mindmap Mermaid rendu exporté en graphique vectoriel SVG.
+
+**Fonctionnalités** :
+- Représentation visuelle de l'arbre
+- Entièrement rendu, prêt à visualiser
+- Symlinks marqués avec préfixe 🔗
+- Format vectoriel scalable
+
+**Cas d'usage** : Inclure des diagrammes dans la documentation, présentations
+
+**Détails** : Voir [file-formats/MERMAID-FORMAT.md](file-formats/MERMAID-FORMAT.md) (à créer)
+
+### 3. Document PDF
+
+Export PDF pour documentation imprimable et archivage long terme.
+
+**Fonctionnalités** :
+- Symlinks automatiquement résolus avec leur contenu
+- Images inline (pièces jointes converties en base64)
+- Table des matières hiérarchique
+- Formatage responsive pour impression
+
+**Deux implémentations** :
+1. **En ligne** : CloudFlare Worker avec Browser Rendering API
+   - Rate limiting (5 PDFs/heure, 20/jour) pour prévenir l'abus
+   - IP hashée (SHA-256) pour la confidentialité
+   - **Statut** : Code fonctionnel, pas encore déployé en production
+2. **Offline** : Outil CLI avec Puppeteer (`bin/branch2pdf.js`)
+   - Génération 100% locale
+   - Pas de rate limits
+   - Nécessite Node.js
+
+**Détails** : Voir [`cloudflare-worker/README.md`](../cloudflare-worker/README.md)
+
+---
+
+## Validation JSON Schema
+
+Toutes les structures JSON sont validées contre des JSON Schemas formels.
+
+### Schemas Disponibles
+
+1. **Structure de données** : [`schemas/v1.0/deepmemo.json`](schemas/v1.0/deepmemo.json)
+   - Valide le contenu de `data.json`
+   - Supporte les formats global et branche
+   - Valide les nœuds, pièces jointes, relations
+
+2. **Métadonnées** : [`schemas/v1.0/metadata.json`](schemas/v1.0/metadata.json)
+   - Valide `metadata.json` dans les archives `.dm`
+   - Assure que les champs requis sont présents
+
+### Utilisation
+
+**Exemple de validation (JavaScript)** :
+
+```javascript
+import Ajv from 'ajv';
+
+// Charger le schema
+const schema = await fetch('schemas/v1.0/deepmemo.json')
+  .then(r => r.json());
+
+// Compiler le validateur
+const ajv = new Ajv();
+const validate = ajv.compile(schema);
+
+// Valider les données
+const valid = validate(importedData);
+if (!valid) {
+  console.error('Erreurs de validation:', validate.errors);
+  throw new Error('Format de données DeepMemo invalide');
+}
+```
+
+**Exemple de validation (CLI)** :
+
+```bash
+# Utiliser ajv-cli
+npm install -g ajv-cli
+ajv validate -s schemas/v1.0/deepmemo.json -d export-data.json
+```
+
+### Règles de Validation
+
+**Formats d'ID** :
+- IDs de nœuds : `^(node|symlink)_\d+_[a-z0-9]+$`
+- IDs de pièces jointes : `^attach_\d+_[a-z0-9]+$`
+
+**Relations** :
+- Si A a B dans `children`, B doit avoir A comme `parent`
+- Les nœuds racines doivent avoir `parent === null`
+- Les symlinks doivent avoir `targetId` pointant vers un nœud existant
+
+**Timestamps** :
+- Unix millisecondes (13 chiffres)
+- Doit être >= 0
+
+**Pièces jointes** :
+- Doit être un tableau d'objets (pas de chaînes !)
+- Chaque pièce jointe doit avoir `id`, `name`, `type`, `size`
+
+---
+
+## Migration depuis v1.0
+
+**Changements dans v2.0** :
+
+1. **Nouveau format standard** : `.dm` (archive ZIP) remplace le JSON autonome comme format d'export recommandé
+2. **Fichier métadonnées** : Ajout de `metadata.json` à tous les exports `.dm`
+3. **Support icône** : Ajout de `icon.png` aux archives
+4. **JSON renommé** : Le JSON autonome est maintenant le "format d'interchange" (pas le format primaire)
+
+**Rétrocompatibilité** :
+- ✅ Les anciens exports `.json` fonctionnent toujours (auto-détectés à l'import)
+- ✅ Les anciens exports ZIP sans métadonnées fonctionnent toujours (métadonnées optionnelles)
+- ✅ Aucun changement cassant à la structure `data.json`
+
+**Migration** :
+- Aucune action requise - les exports existants continuent de fonctionner
+- Les nouveaux exports utilisent le format `.dm` par défaut
+- Les utilisateurs peuvent toujours exporter en `.json` pour les workflows LLM
 
 ---
 
 ## Exemples
 
-### Exemple 1 : Export de branche simple
+### Archive .dm Complète (Branche)
 
-Une branche minimale avec 2 nœuds :
+**Fichier** : `documentation.dm`
 
+**Contenu** :
+
+**`metadata.json`** :
+```json
+{
+  "version": "1.0",
+  "type": "branch",
+  "title": "Documentation",
+  "exported": 1737115200000,
+  "branchRootId": "node_abc",
+  "nodeCount": 3,
+  "attachmentCount": 1,
+  "totalSize": 524288,
+  "generator": "DeepMemo v0.10.4"
+}
+```
+
+**`data.json`** :
 ```json
 {
   "type": "deepmemo-branch",
   "version": "1.0",
   "branchRootId": "node_abc",
-  "exported": 1735820000000,
-  "nodeCount": 2,
+  "exported": 1737115200000,
+  "nodeCount": 3,
   "nodes": {
     "node_abc": {
       "id": "node_abc",
-      "title": "Tutoriel",
-      "content": "# Démarrage\n\nBienvenue dans DeepMemo !",
+      "title": "📚 Documentation",
+      "content": "# Bienvenue\n\nHub principal de documentation.",
       "type": "note",
       "parent": null,
-      "children": ["node_def"],
-      "tags": ["tutoriel"],
-      "created": 1735820000000,
-      "modified": 1735820000000
+      "children": ["node_def", "symlink_ghi"],
+      "tags": ["docs"],
+      "attachments": [
+        {
+          "id": "attach_123",
+          "name": "spec.pdf",
+          "type": "application/pdf",
+          "size": 524288
+        }
+      ],
+      "created": 1737115200000,
+      "modified": 1737115200000
     },
     "node_def": {
       "id": "node_def",
-      "title": "Étape 1",
-      "content": "D'abord, créez un nœud...",
+      "title": "Démarrage",
+      "content": "## Installation\n\n...",
       "type": "note",
       "parent": "node_abc",
       "children": [],
       "tags": [],
-      "created": 1735820000000,
-      "modified": 1735820000000
-    }
-  }
-}
-```
-
-### Exemple 2 : Branche avec Symlink
-
-```json
-{
-  "type": "deepmemo-branch",
-  "version": "1.0",
-  "branchRootId": "node_root",
-  "exported": 1735820000000,
-  "nodeCount": 3,
-  "nodes": {
-    "node_root": {
-      "id": "node_root",
-      "title": "Projet",
-      "type": "note",
-      "parent": null,
-      "children": ["node_task", "symlink_ref"],
-      "created": 1735820000000,
-      "modified": 1735820000000
+      "attachments": [],
+      "created": 1737115200000,
+      "modified": 1737115200000
     },
-    "node_task": {
-      "id": "node_task",
-      "title": "Liste de tâches",
-      "content": "- [ ] Tâche 1\n- [ ] Tâche 2",
-      "type": "note",
-      "parent": "node_root",
-      "children": [],
-      "created": 1735820000000,
-      "modified": 1735820000000
-    },
-    "symlink_ref": {
-      "id": "symlink_ref",
-      "title": "Référence rapide",
+    "symlink_ghi": {
+      "id": "symlink_ghi",
+      "title": "Référence Rapide",
       "type": "symlink",
-      "targetId": "node_task",
-      "parent": "node_root",
+      "targetId": "node_def",
+      "parent": "node_abc",
       "children": [],
-      "created": 1735820000000,
-      "modified": 1735820000000
+      "created": 1737115200000,
+      "modified": 1737115200000
     }
   }
 }
 ```
 
-### Exemple 3 : Nœud avec pièces jointes
-
-```json
-{
-  "id": "node_docs",
-  "title": "Documentation",
-  "content": "Voir les fichiers joints pour les détails.",
-  "type": "note",
-  "parent": null,
-  "children": [],
-  "tags": ["docs"],
-  "attachments": [
-    {
-      "id": "attach_123_abc",
-      "name": "specification.pdf",
-      "type": "application/pdf",
-      "size": 524288
-    },
-    {
-      "id": "attach_456_def",
-      "name": "diagramme.png",
-      "type": "image/png",
-      "size": 102400
-    }
-  ],
-  "created": 1735820000000,
-  "modified": 1735820000000
-}
-```
-
-**Structure ZIP correspondante** :
-```
-deepmemo-branch-Documentation-1735820000000.zip
-├── data.json
-└── attachments/
-    ├── attach_123_abc_specification.pdf
-    └── attach_456_def_diagramme.png
-```
+**`attachments/attach_123_spec.pdf`** : Fichier PDF binaire
 
 ---
 
-## Générer des fichiers DeepMemo avec l'IA
+## Voir Aussi
 
-### Pour Claude AI Projects
-
-Pour générer un fichier d'import de branche DeepMemo :
-
-1. **Créer la structure JSON** en suivant le format de branche
-2. **Générer des IDs uniques** : Utiliser le format `node_{timestamp}_{random}`
-3. **Définir des timestamps corrects** : Unix en millisecondes
-4. **Construire les relations parent-enfant** : Assurer la cohérence bidirectionnelle
-5. **Valider le JSON** : Doit être du JSON valide avec échappement approprié
-6. **Sauvegarder comme fichier `.json`** : L'utilisateur peut importer via l'interface DeepMemo
-
-### Template de génération rapide
-
-```json
-{
-  "type": "deepmemo-branch",
-  "version": "1.0",
-  "branchRootId": "node_{TIMESTAMP}_{RANDOM}",
-  "exported": {CURRENT_TIMESTAMP},
-  "nodeCount": {COUNT},
-  "nodes": {
-    "node_{TIMESTAMP}_{RANDOM}": {
-      "id": "node_{TIMESTAMP}_{RANDOM}",
-      "title": "Votre titre ici",
-      "content": "Votre contenu markdown ici...",
-      "type": "note",
-      "parent": null,
-      "children": [],
-      "tags": [],
-      "created": {CURRENT_TIMESTAMP},
-      "modified": {CURRENT_TIMESTAMP}
-    }
-  }
-}
-```
-
-### Bonnes pratiques
-
-1. **Utiliser des timestamps réalistes** : Temps Unix actuel en millisecondes
-2. **Liens parent-enfant cohérents** : Si A est parent de B, B doit avoir A dans ses enfants
-3. **IDs uniques** : Ne jamais réutiliser des IDs, même entre différents exports
-4. **Markdown valide** : Le champ content supporte la spec CommonMark complète
-5. **Champs optionnels** : N'inclure tags/attachments que si nécessaire
-6. **Cibles de symlinks** : S'assurer que targetId pointe vers un nœud du même export
+- [JSON Schema Specification](https://json-schema.org/)
+- [SPEC-ATTACHMENTS.md](SPEC-ATTACHMENTS.md) - Système de pièces jointes détaillé
+- [STORAGE.md](STORAGE.md) - Structure de stockage IndexedDB
+- [I18N.md](I18N.md) - Internationalisation
+- [CloudFlare Worker README](../cloudflare-worker/README.md) - Export PDF
 
 ---
 
-## Historique des versions
+## Historique des Versions
+
+- **2.0** (2026-01-17) : Révision majeure
+  - Format archive `.dm` comme nouveau standard
+  - Ajout de la spécification `metadata.json`
+  - Ajout de la validation JSON Schema
+  - Renommage JSON en "format d'interchange"
+  - Ajout du support icône
+  - Clarification du workflow de génération LLM
 
 - **1.0** (2026-01-02) : Spécification initiale
   - Format archive ZIP (global + branche)
@@ -500,11 +666,3 @@ Pour générer un fichier d'import de branche DeepMemo :
   - Export Mermaid SVG
   - Structure IndexedDB
   - Documentation complète du modèle de données
-
----
-
-## Voir aussi
-
-- [SPEC-ATTACHMENTS-FR.md](SPEC-ATTACHMENTS-FR.md) - Spécification détaillée du système de pièces jointes
-- [SPEC-ATTACHMENTS.md](SPEC-ATTACHMENTS.md) - Detailed attachment system specification
-- [README-FR.md](../README-FR.md) - Documentation principale du projet

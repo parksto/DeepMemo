@@ -25,7 +25,9 @@ export default {
     import: "Importer",
     export: "Exporter",
     exportBranch: "⬇️ Export branche",
+    exportFS: "💾 Export FS",
     importBranch: "⬆️ Import branche",
+    importFS: "📂 Import FS",
     save: "Enregistrer",
     cancel: "Annuler",
     delete: "Supprimer",
@@ -347,7 +349,9 @@ export default {
     goToRoot: "Retour à la racine",
     togglePreview: "Activer/désactiver la prévisualisation en temps réel (écran partagé)",
     exportBranch: "Exporter ce nœud et ses descendants",
+    exportFS: "Exporter vers le système de fichiers local (Chrome/Edge uniquement)",
     importBranch: "Importer une branche comme enfants",
+    importFS: "Importer depuis le système de fichiers local (Chrome/Edge uniquement)",
     attachmentId: "ID de l'attachment",
     copyMarkdown: "Copier la syntaxe markdown",
     download: "Télécharger",
@@ -403,6 +407,20 @@ export default {
     see: "Voir",
     preparing: "Préparation des images...",
     generating: "Génération du PDF en cours..."
+  },
+
+  // File System Sync
+  fsSync: {
+    notSupported: "File System Sync nécessite Chrome ou Edge.",
+    branchModeOnly: "File System Sync fonctionne uniquement en mode branche.",
+    exporting: "Export vers le système de fichiers...",
+    exportSuccess: "Exporté {count} nœuds ({files} fichiers)",
+    exportError: "Échec de l'export : {message}",
+    importing: "Import depuis le système de fichiers...",
+    importSuccess: "Importé {count} nœuds",
+    importError: "Échec de l'import : {message}",
+    permissionDenied: "Permission refusée. Autorisez l'accès au système de fichiers.",
+    diskFull: "Disque plein. Export annulé."
   },
 
   // Footer

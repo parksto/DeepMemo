@@ -58,5 +58,5 @@ pre, code,
 .markdown-rendered code,
 .markdown-content pre,
 .markdown-content code {
-  font-family: 'Sto Fixed', 'SF Mono', 'Consolas', 'Courier New', monospace;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }

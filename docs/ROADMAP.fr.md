@@ -2,7 +2,7 @@
 
 > 🌍 **Versions linguistiques** : [English](ROADMAP.md) | [Français](ROADMAP.fr.md)
 
-## 📍 État actuel : V0.9.4 (Janvier 2026)
+## 📍 État actuel : V0.10.4 (Janvier 2026)
 
 ### ✅ Fonctionnalités implémentées
 
@@ -70,11 +70,13 @@
 - [x] Documentation complète dans panneau droit
 
 #### Persistance
-- [x] LocalStorage pour les données
+- [x] IndexedDB avec Dexie.js (V0.10)
+- [x] Migration automatique depuis localStorage (V0.10)
 - [x] Export JSON global
 - [x] Import JSON global
 - [x] Export de branche (nœud + descendants)
 - [x] Import de branche (non-destructif, avec régénération IDs)
+- [x] Format archive .dm (V0.10)
 - [x] Sauvegarde auto à chaque modification
 
 #### Rendu et Affichage (V0.7+)
@@ -413,6 +415,80 @@ DeepMemo/
 
 ---
 
+## 💾 V0.10 - Migration IndexedDB & Format .dm (Janvier 2026) - ✅ COMPLÉTÉ
+
+**Contexte** : Stockage scalable avec IndexedDB, format officiel d'archive .dm, et export PDF
+
+### Stockage IndexedDB ✅
+- [x] **Intégration Dexie.js** : Wrapper IndexedDB moderne pour stockage robuste
+- [x] **Capacité augmentée** : 500 MB - 1 GB de stockage (vs ~5-10 MB avec localStorage)
+- [x] **Trois stores** : `nodes`, `settings`, `attachments`
+- [x] **Migration automatique** : Mise à niveau transparente depuis V0.9 en préservant toutes les données
+- [x] **Support backup** : Données localStorage originales préservées après migration
+- [x] **Flag de migration** : `deepmemo_migrated_to_indexeddb` dans localStorage
+- [x] **Structure modulaire** : `storage.js` (couche Dexie), `migration.js` (logique migration)
+
+### Format Archive .dm ✅
+- [x] **Format officiel** : Extension `.dm` (archive ZIP avec extension personnalisée)
+- [x] **metadata.json** : Version, type (global/branch), titre, date, stats, générateur
+- [x] **data.json** : Structure arborescente (inchangée depuis V0.9)
+- [x] **Dossier attachments/** : Fichiers joints avec convention de nommage
+- [x] **Rétrocompatible** : Supporte imports legacy .json et .zip
+- [x] **Auto-détection** : Détection par magic number (PK = ZIP, sinon JSON)
+- [x] **Filtres fichiers** : `.dm,.zip,.json` dans sélecteur natif
+- [x] **Documentation** : Spec complète dans `docs/FORMATS-FICHIERS.md` v2.0
+
+### Import Amélioré ✅
+- [x] **Choix import global** : "Tout remplacer" (destructif) ou "Fusionner" (ajouter aux racines)
+- [x] **Import branche depuis global** : Accepte les exports globaux
+  - Racine unique → importe comme branche
+  - Racines multiples → crée nœud container avec titre de l'export
+- [x] **Validation JSON Schema** : Contre `docs/schemas/deepmemo-v1.0.json`
+- [x] **Dégradation gracieuse** : Fichiers manquants tolérés, avertissements affichés
+
+### Export PDF ✅
+- [x] **CloudFlare Worker** : Génération en ligne avec Browser Rendering API
+  - Rate limiting : 5 PDFs/heure, 20/jour par IP
+  - Hashing IP (SHA-256) pour confidentialité
+  - Headers CORS pour exposition quotas
+  - Protection referer/origin
+  - **Statut** : Code complet, pas encore déployé en production
+- [x] **Outil CLI** : `bin/branch2pdf.js` pour génération 100% offline
+  - Node.js + Puppeteer
+  - Supporte archives .dm (extraction ZIP)
+  - Pas de rate limiting
+- [x] **Résolution symlinks** : Contenu inclus, descendants exclus si externe au scope
+- [x] **Images inline** : Pièces jointes converties en data URLs base64
+- [x] **Détection cycles** : Prévient les boucles infinies
+- [x] **Table des matières** : Structure hiérarchique simplifiée
+- [x] **Modale confidentialité** : Notice première utilisation (persistence localStorage)
+- [x] **Affichage quotas** : Info quotas temps réel dans panneau droit
+
+### Mise à Jour Contenu Démo ✅
+- [x] **Nettoyage contenu spéculatif** : Supprimé nœuds "types actifs", "triggers", "automatisation"
+- [x] **Mise à jour "Collaboration & Partage"** : Focus sur workflow export/import .dm actuel
+- [x] **Ajout section PDF** : Documentation options export PDF en ligne et offline
+- [x] **Simplification "Directions Explorées"** : Mention vague de sync future sans promesses
+- [x] **Ajustement ton** : "On explore, on verra" - pas de teasing de features non implémentées
+- [x] **Corrections template literals** : Backticks échappés dans contenu markdown (`.dm` → `\`.dm\``)
+
+### Documentation ✅
+- [x] **FILE-FORMATS.md v2.0** : Spécification complète format .dm
+- [x] **FORMATS-FICHIERS.md v2.0** : Version française synchronisée
+- [x] **file-formats/ZIP-FORMAT.md** : Référence rapide structure .dm
+- [x] **file-formats/JSON-STRUCTURE.md** : Guide JSON compatible LLM
+- [x] **file-formats/SCHEMA-VALIDATION.md** : Documentation validation
+- [x] **docs/schemas/** : Fichiers JSON Schema pour validation
+- [x] **cloudflare-worker/README.md** : Guide déploiement Worker PDF
+- [x] **cloudflare-worker/PRIVACY-NOTICE.md** : Notice confidentialité utilisateur
+
+### Corrections de Bugs ✅
+- [x] **Erreurs template literals** : Backticks échappés corrigés dans `default-data.js`
+- [x] **Clés i18n manquantes** : Ajout toutes clés traduction liées PDF
+- [x] **Format attachments** : Assuré format array-d'objets (pas strings)
+
+---
+
 ## 🌟 V1.0 - Types actifs et système complet
 
 ### Types de nœuds actifs (Fondations)
@@ -485,16 +561,23 @@ DeepMemo/
 
 ## 📊 Métriques de progression
 
-### Code
-- **Lignes de code** : ~3600 (V0.6 single-file)
-- **Fonctions** : ~50
-- **Événements** : ~30
+### Code (V0.10.4)
+- **Total** : ~42.6K lignes / 2.3M caractères
+  - Code : ~19.8K lignes (JS, HTML, CSS, JSON, SVG)
+  - Documentation : ~22.8K lignes (Markdown)
+- **Codebase principal** :
+  - JavaScript : ~13.2K lignes
+  - CSS : ~1.8K lignes
+  - HTML : ~1.8K lignes
 - **Raccourcis clavier** : 7
+- **Modules** : ~20 modules ES6
 
 ### Données
 - **Types de base** : 1 (Nœud)
-- **Propriétés par nœud** : 10
-- **Relations** : parent, children, links, backlinks, symlinks
+- **Types de nœuds** : 2 (note, symlink)
+- **Propriétés par nœud** : ~10
+- **Relations** : parent, children, tags, attachments, targetId (symlinks)
+- **Stockage** : IndexedDB (Dexie.js) avec 3 stores
 
 ### Tests utilisateur
 - [x] Fabien utilise activement (création de contenu)
@@ -520,19 +603,21 @@ DeepMemo/
 ### Ce qui doit encore être amélioré
 - ⚠️ Pas de tests automatisés
 - ⚠️ Performance avec beaucoup de nœuds (>1000) à tester
-- ⚠️ Qualité de code (JSDoc, séparation des responsabilités)
+- ⚠️ Qualité de code (JSDoc, meilleure sûreté de typage)
 
 ### Décisions techniques validées
 - ✅ Vanilla JS : pas de overhead, contrôle total
-- ✅ LocalStorage : assez pour MVP, migration backend prévue
+- ✅ IndexedDB avec Dexie.js : stockage scalable, excellentes performances (V0.10)
+- ✅ Architecture ES6 modulaire : séparation claire des responsabilités (V0.8)
 - ✅ Dark theme par défaut : préférence utilisateur
 - ✅ Keyboard-first : efficacité maximale
+- ✅ PWA offline-first : expérience utilisateur fiable
 
 ---
 
-**Dernière mise à jour** : 1er Janvier 2026 (V0.9.4 polish & corrections)
-**Version actuelle** : V0.9.4 (✅ COMPLÉTÉ & DÉPLOYÉ)
-**Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
+**Dernière mise à jour** : 19 Janvier 2026 (V0.10.4 IndexedDB & format .dm)
+**Version actuelle** : V0.10.4 (✅ COMPLÉTÉ & DÉPLOYÉ EN LOCAL)
+**Production** : V0.10.3 sur **deepmemo.org** (V0.10.4 en attente de déploiement)
 **Prochaine milestone** : V1.0 (Types de nœuds actifs - fondations)
 
 ---

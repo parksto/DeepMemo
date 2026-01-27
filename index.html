@@ -93,6 +93,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 </head>
 <body>
   <!-- Mobile warning banner -->
@@ -222,8 +223,10 @@
           <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
           <div style="margin-left: auto; display: flex; gap: 8px;">
             <button class="btn btn-secondary btn-small" data-i18n="actions.exportBranch" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
+            <button class="btn btn-secondary btn-small" data-i18n="actions.exportFS" data-i18n-title="tooltips.exportFS" onclick="app.exportToFileSystem()" title="Exporter vers dossier local">💾 Export FS</button>
             <input type="file" id="importBranchFile" accept=".dm,.zip,.json" onchange="app.importBranch(event)" style="display: none;">
             <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n="actions.importBranch" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
+            <button class="btn btn-secondary btn-small" data-i18n="actions.importFS" data-i18n-title="tooltips.importFS" onclick="app.importFromFileSystem()" title="Importer depuis dossier local">📂 Import FS</button>
           </div>
         </div>
 

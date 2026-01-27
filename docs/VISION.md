@@ -1142,7 +1142,7 @@ It's a **platform** where:
 
 ---
 
-**Vision Document - December 2025**
-*These concepts will be implemented progressively, starting with the foundations (V0.9+).*
+**Vision Document - January 2026**
+*These concepts will be implemented progressively, starting with the foundations (V1.0+).*
 
-**Current state**: V0.8 complete - See the demo content in the application for an accessible introduction to these concepts (section "🔮 Future Directions").
+**Current state**: V0.10.4 complete (IndexedDB + .dm format + PDF export) - See the demo content in the application for an accessible introduction to these concepts (section "🔮 Explored Directions").

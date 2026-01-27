@@ -17,7 +17,9 @@ export default {
     import: "Import",
     export: "Export",
     exportBranch: "⬇️ Export branch",
+    exportFS: "💾 Export FS",
     importBranch: "⬆️ Import branch",
+    importFS: "📂 Import FS",
     save: "Save",
     cancel: "Cancel",
     delete: "Delete",
@@ -334,7 +336,9 @@ export default {
     goToRoot: "Back to root",
     togglePreview: "Enable/disable live preview (split-screen)",
     exportBranch: "Export this node and its descendants",
+    exportFS: "Export to local file system (Chrome/Edge only)",
     importBranch: "Import a branch as children",
+    importFS: "Import from local file system (Chrome/Edge only)",
     attachmentId: "Attachment ID",
     copyMarkdown: "Copy markdown syntax",
     download: "Download",
@@ -398,6 +402,20 @@ export default {
     see: "See",
     preparing: "Preparing images...",
     generating: "Generating PDF..."
+  },
+
+  // File System Sync
+  fsSync: {
+    notSupported: "File System Sync requires Chrome or Edge browser.",
+    branchModeOnly: "File System Sync only works in Branch Mode.",
+    exporting: "Exporting to file system...",
+    exportSuccess: "Exported {count} nodes ({files} files)",
+    exportError: "Export failed: {message}",
+    importing: "Importing from file system...",
+    importSuccess: "Imported {count} nodes",
+    importError: "Import failed: {message}",
+    permissionDenied: "Permission denied. Grant file system access.",
+    diskFull: "Disk full. Export cancelled."
   },
 
   // Footer

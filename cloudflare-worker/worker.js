@@ -116,10 +116,11 @@ function buildHTML(node, nodesMap, depth, tocEntries) {
 }
 
 function generateTOC(tocEntries) {
-  let toc = '<h1>Table des matières</h1><ul class="toc">';
+  let toc = '<h1>Table des matières</h1>';
+  toc += '<ul class="toc">';
   tocEntries.forEach((entry) => {
     const indent = "&nbsp;&nbsp;".repeat(entry.level * 2);
-    toc += `<li>${indent}<a href="#${entry.id}">${escapeHtml(entry.title)}</a></li>`;
+    toc += `<li class="toc-entry">${indent}${escapeHtml(entry.title)}</li>`;
   });
   return toc + "</ul>";
 }
@@ -128,7 +129,7 @@ const darkThemeCSS = `
   @page { margin: 1.5cm; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    line-height: 1.6;
+    line-height: normal;
     color: #333;
     background: #fff;
   }
@@ -144,7 +145,8 @@ const darkThemeCSS = `
   .heading-6 { font-size: 1.0em; font-weight: bold; margin: 0.7em 0 0.3em; color: #34495e; }
   .node-wrapper { page-break-after: always; }
   ul.toc { list-style: none; padding-left: 0; }
-  ul.toc li { margin: 0.4em 0; }
+  ul.toc li { margin: 0.5em 0; line-height: 1.4; }
+  .toc { page-break-after: always; }
   img { max-width: 100%; height: auto; }
   .toc { page-break-after: always; }
   hr { border: 0; border-top: 1px solid #eee; margin: 1em 0; }

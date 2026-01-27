@@ -2,7 +2,7 @@
 
 *[English version](TODO.md)*
 
-**Dernière mise à jour** : 1er Janvier 2026 (V0.9.4 - Polish et corrections)
+**Dernière mise à jour** : 19 Janvier 2026 (V0.10.4 - IndexedDB & format .dm)
 
 ---
 
@@ -385,6 +385,80 @@ DeepMemo V0.8 est **complète et déployée** avec toutes les fonctionnalités s
 
 ---
 
+## 💾 V0.10 - Migration IndexedDB & Format .dm - ✅ COMPLÉTÉ
+
+**Date** : 19 Janvier 2026
+**Contexte** : Stockage scalable avec IndexedDB, format officiel d'archive .dm, et export PDF
+
+### IndexedDB avec Dexie.js
+- [x] Migration de localStorage vers IndexedDB (automatique, non-destructif)
+- [x] Trois object stores : `nodes`, `settings`, `attachments`
+- [x] Capacité 500 MB - 1 GB (vs ~5-10 MB avec localStorage)
+- [x] Structure modulaire : `storage.js` (couche Dexie), `migration.js` (logique migration)
+- [x] Préservation backup : Données localStorage originales conservées après migration
+- [x] Flag de migration : `deepmemo_migrated_to_indexeddb` dans localStorage
+
+### Format Archive .dm
+- [x] Extension officielle `.dm` (archive ZIP avec extension personnalisée)
+- [x] `metadata.json` : Version, type (global/branch), titre, date, stats, info générateur
+- [x] `data.json` : Structure arborescence (inchangée depuis V0.9)
+- [x] Dossier `attachments/` : Fichiers joints avec convention de nommage
+- [x] Auto-détection : Détection par magic number (PK = ZIP, sinon JSON)
+- [x] Filtres fichiers : `.dm,.zip,.json` dans sélecteur natif
+- [x] Rétrocompatible : Supporte imports legacy .json et .zip
+- [x] Documentation : Spec complète dans `docs/FORMATS-FICHIERS.md` v2.0
+
+### Import Amélioré
+- [x] Choix import global : "Tout remplacer" (destructif) ou "Fusionner" (ajout racines)
+- [x] Import branche depuis global : Accepte exports globaux
+  - Racine unique → importe comme branche
+  - Racines multiples → crée nœud container avec titre export
+- [x] Validation JSON Schema : Contre `docs/schemas/deepmemo-v1.0.json`
+- [x] Dégradation gracieuse : Fichiers manquants tolérés, avertissements affichés
+
+### Export PDF
+- [x] CloudFlare Worker : Génération en ligne avec Browser Rendering API
+  - Rate limiting : 5 PDFs/heure, 20/jour par IP
+  - Hashing IP (SHA-256) pour confidentialité
+  - Headers CORS pour exposition quotas
+  - Protection referer/origin
+  - **Statut** : Code complet, pas encore déployé en production
+- [x] Outil CLI : `bin/branch2pdf.js` pour génération 100% offline
+  - Node.js + Puppeteer
+  - Supporte archives .dm (extraction ZIP)
+  - Pas de rate limiting
+- [x] Résolution symlinks : Contenu inclus, descendants exclus si externe au scope
+- [x] Images inline : Pièces jointes converties en data URLs base64
+- [x] Détection cycles : Prévient boucles infinies
+- [x] Table des matières : Structure hiérarchique simplifiée
+- [x] Modale confidentialité : Notice première utilisation (persistence localStorage)
+- [x] Affichage quotas : Info quotas temps réel dans panneau droit
+
+### Mise à Jour Contenu Démo
+- [x] Nettoyage contenu spéculatif : Supprimé nœuds "types actifs", "triggers", "automatisation"
+- [x] Mise à jour "Collaboration & Partage" : Focus workflow export/import .dm actuel
+- [x] Ajout section PDF : Documentation options export PDF en ligne et offline
+- [x] Simplification "Directions Explorées" : Mention vague sync future sans promesses
+- [x] Ajustement ton : "On explore, on verra" - pas de teasing features non implémentées
+- [x] Corrections template literals : Backticks échappés dans contenu markdown (`.dm` → `\`.dm\``)
+
+### Documentation
+- [x] FILE-FORMATS.md v2.0 : Spécification complète format .dm
+- [x] FORMATS-FICHIERS.md v2.0 : Version française synchronisée
+- [x] file-formats/ZIP-FORMAT.md : Référence rapide structure .dm
+- [x] file-formats/JSON-STRUCTURE.md : Guide JSON compatible LLM
+- [x] file-formats/SCHEMA-VALIDATION.md : Documentation validation
+- [x] docs/schemas/ : Fichiers JSON Schema pour validation
+- [x] cloudflare-worker/README.md : Guide déploiement Worker PDF
+- [x] cloudflare-worker/PRIVACY-NOTICE.md : Notice confidentialité utilisateur
+
+### Corrections de Bugs
+- [x] Erreurs template literals : Backticks échappés corrigés dans `default-data.js`
+- [x] Clés i18n manquantes : Ajout toutes clés traduction liées PDF
+- [x] Format attachments : Assuré format array-d'objets (pas strings)
+
+---
+
 ## 💭 Idées backlog (V1.1+)
 
 Voir `docs/ROADMAP.md` section "V1.0 - Système complet" et `docs/VISION.md` pour :
@@ -397,21 +471,22 @@ Voir `docs/ROADMAP.md` section "V1.0 - Système complet" et `docs/VISION.md` pou
 
 ## 📊 État du projet
 
-**Version actuelle** : V0.9.4 (Janvier 2026)
-**Statut** : ✅ Stable, documentée, déployée en production
-**Déploiement** : ✅ **deepmemo.org** (EN PRODUCTION)
+**Version actuelle** : V0.10.4 (Janvier 2026)
+**Statut** : ✅ Stable, documentée, déployée localement (production à V0.10.3)
+**Déploiement** : 🟡 **deepmemo.org** (V0.10.3 - V0.10.4 en attente de déploiement)
 **Licence** : MIT (Open Source)
 
 **Codebase** :
-- ~11000 lignes JS (architecture modulaire ES6)
-- ~1750 lignes CSS (organisé en 5 fichiers)
-- 18 modules JS (core, features, ui, utils, locales)
+- ~13.2K lignes JS (architecture modulaire ES6)
+- ~1.8K lignes CSS (organisé en 6 fichiers)
+- ~20 modules JS (core, features, ui, utils, locales)
 - 100% Vanilla JavaScript (pas de framework)
+- **Total** : ~42.6K lignes / 2.3M caractères (code + docs)
 
 **Données** :
-- LocalStorage (données structurées, ~5-10 MB)
-- IndexedDB (fichiers attachés, ~500 MB)
-- Format export : ZIP (data.json + attachments/)
+- IndexedDB avec Dexie.js (données structurées + fichiers, 500 MB - 1 GB)
+- Migration automatique depuis localStorage (V0.9 → V0.10)
+- Formats export : `.dm` (archive ZIP), `.json` (interchange), FreeMind, Mermaid, PDF
 
 ---
 
