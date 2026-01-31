@@ -1,0 +1,1049 @@
+/**
+ * DeepMemo - Editor Module
+ * Handles node editing, breadcrumb, children display, and right panel
+ */
+
+import { data, saveData } from '../core/data.js';
+import { showToast } from '../ui/toast.js';
+import { escapeHtml } from '../utils/helpers.js';
+import * as TagsModule from './tags.js';
+import { isBranchMode, isNodeInBranch, getBranchRootId, updatePageTitle } from './tree.js';
+import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
+import { initDragDrop } from './drag-drop.js';
+import * as AttachmentsModule from '../core/attachments.js';
+import { t, getCurrentLanguage } from '../utils/i18n.js';
+import * as PreviewModule from './preview.js';
+
+// View mode state
+let viewMode = 'view'; // 'edit' or 'view' (default: view)
+
+// Track active blob URLs for cleanup
+let activeBlobUrls = [];
+
+/**
+ * Initialize view mode from localStorage
+ */
+export function initViewMode() {
+  const savedMode = localStorage.getItem('deepmemo_viewMode');
+  if (savedMode) {
+    viewMode = savedMode;
+  }
+}
+
+/**
+ * Clean up all active blob URLs to prevent memory leaks
+ */
+function cleanupBlobUrls() {
+  activeBlobUrls.forEach(url => URL.revokeObjectURL(url));
+  activeBlobUrls = [];
+}
+
+/**
+ * Process attachment: URLs in rendered HTML
+ * Replaces attachment:ID with blob URLs from IndexedDB
+ * @param {string} html - Rendered HTML content
+ * @param {Object} node - Current node (to get attachment metadata)
+ * @returns {Promise<string>} - HTML with blob URLs
+ */
+async function processAttachmentUrls(html, node) {
+  // Find all attachment:ID references in href and src attributes
+  const attachmentPattern = /attachment:([a-zA-Z0-9_]+)/g;
+  const matches = [...html.matchAll(attachmentPattern)];
+
+  if (matches.length === 0) {
+    return html;
+  }
+
+  let processedHtml = html;
+
+  // Process each attachment reference
+  for (const match of matches) {
+    const attachmentId = match[1];
+    const fullPattern = match[0]; // "attachment:attach_123"
+
+    try {
+      // Fetch blob from IndexedDB
+      const blob = await AttachmentsModule.getAttachment(attachmentId);
+
+      if (blob) {
+        // Get MIME type from attachment metadata
+        let mimeType = blob.type || 'application/octet-stream';
+
+        if (node?.attachments) {
+          const attachmentMeta = node.attachments.find(a => a.id === attachmentId);
+          if (attachmentMeta?.type) {
+            mimeType = attachmentMeta.type;
+          }
+        }
+
+        // Recreate blob with correct MIME type if needed
+        // This is crucial for SVG files which need 'image/svg+xml' to render
+        let typedBlob = blob;
+        if (blob.type !== mimeType) {
+          typedBlob = new Blob([blob], { type: mimeType });
+          console.log(`[Editor] Fixed MIME type for ${attachmentId}: ${blob.type} -> ${mimeType}`);
+        }
+
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(typedBlob);
+        activeBlobUrls.push(blobUrl);
+
+        // Replace attachment:ID with blob URL
+        processedHtml = processedHtml.replace(fullPattern, blobUrl);
+      } else {
+        console.warn(`[Editor] Attachment not found: ${attachmentId}`);
+        // Replace with error indicator
+        processedHtml = processedHtml.replace(fullPattern, '#attachment-not-found');
+      }
+    } catch (error) {
+      console.error(`[Editor] Error loading attachment ${attachmentId}:`, error);
+      processedHtml = processedHtml.replace(fullPattern, '#attachment-error');
+    }
+  }
+
+  return processedHtml;
+}
+
+/**
+ * Display a node in the editor
+ * @param {string} nodeId - Node ID to display
+ * @param {Function} renderCallback - Callback to trigger tree re-render
+ */
+export function displayNode(nodeId, renderCallback) {
+  // Clean up blob URLs from previous node
+  cleanupBlobUrls();
+
+  // Force view mode when switching nodes (default behavior)
+  viewMode = 'view';
+  localStorage.setItem('deepmemo_viewMode', viewMode);
+
+  const node = data.nodes[nodeId];
+  if (!node) return;
+
+  // Get display node (target for symlinks)
+  const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
+
+  // Check for broken symlink FIRST (target doesn't exist)
+  if (!displayNode) {
+    // Broken symlink
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('editorContainer').style.display = 'flex';
+
+    document.getElementById('nodeTitle').value = node.title + ' (' + t('nodeTypes.badge.broken').toUpperCase() + ')';
+    const contentEditor = document.getElementById('nodeContent');
+    contentEditor.value = t('messages.brokenSymlink');
+    contentEditor.disabled = true;
+
+    // Display metadata for broken symlink
+    const metaDiv = document.getElementById('nodeMeta');
+    metaDiv.innerHTML = `⚠️ ${t('toast.brokenLink')}`;
+
+    // Clear other sections
+    document.getElementById('childrenSection').style.display = 'none';
+    document.getElementById('attachmentsSection').style.display = 'none';
+
+    // Set current node for UI
+    setCurrentNodeId(nodeId);
+    TagsModule.setCurrentNodeId(nodeId);
+
+    // Update UI components
+    updateBreadcrumb(nodeId);
+    updateRightPanel(nodeId);
+    updateShareLinks(nodeId);
+    updateViewMode();
+    TagsModule.renderTags();
+
+    showToast(t('toast.brokenLink'), '⚠️');
+    return;
+  }
+
+  // Check for external symlink (ONLY in branch mode, target exists but is outside branch)
+  if (node.type === 'symlink' && node.targetId && isBranchMode() && !isNodeInBranch(node.targetId)) {
+    // External symlink (only possible in branch mode)
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('editorContainer').style.display = 'flex';
+
+    document.getElementById('nodeTitle').value = node.title + ' (' + t('nodeTypes.badge.external').toUpperCase() + ')';
+    const contentEditor = document.getElementById('nodeContent');
+    contentEditor.value = t('messages.externalSymlink');
+    contentEditor.disabled = true;
+
+    // Display metadata for external symlink
+    const metaDiv = document.getElementById('nodeMeta');
+    metaDiv.innerHTML = `⚠️ ${t('toast.externalSymlink')}`;
+
+    // Clear other sections
+    document.getElementById('childrenSection').style.display = 'none';
+    document.getElementById('attachmentsSection').style.display = 'none';
+
+    // Set current node for UI
+    setCurrentNodeId(nodeId);
+    TagsModule.setCurrentNodeId(nodeId);
+
+    // Update UI components
+    updateBreadcrumb(nodeId);
+    updateRightPanel(nodeId);
+    updateShareLinks(nodeId);
+    updateViewMode();
+    TagsModule.renderTags();
+
+    showToast(t('toast.externalSymlink'), '🚫');
+    return;
+  }
+
+  // Enable editor
+  document.getElementById('nodeContent').disabled = false;
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('editorContainer').style.display = 'flex';
+
+  // Display title and content
+  // For symlinks: show symlink title (not target title)
+  document.getElementById('nodeTitle').value = node.title;
+  const contentEditor = document.getElementById('nodeContent');
+  contentEditor.value = displayNode.content || '';
+
+  // Auto-resize textarea
+  autoResizeTextarea(contentEditor);
+
+  // Display metadata
+  const metaDiv = document.getElementById('nodeMeta');
+  let metaHtml = `${t('labels.created')}: ${new Date(displayNode.created).toLocaleDateString()}`;
+
+  // For symlinks: add indicator with link to original
+  if (node.type === 'symlink') {
+    const targetTitle = escapeHtml(displayNode.title);
+    metaHtml += ` | 🔗 <span style="opacity: 0.7;">${t('labels.symlinkTo')}: <a href="#" onclick="app.selectNodeById('${node.targetId}'); event.preventDefault();" style="color: var(--primary); text-decoration: underline;">${targetTitle}</a></span>`;
+  }
+
+  metaDiv.innerHTML = metaHtml;
+
+  // Set current node for view mode
+  setCurrentNodeId(nodeId);
+
+  // Reset scroll to top when displaying a node
+  const contentBody = document.querySelector('.content-body');
+  if (contentBody) {
+    contentBody.scrollTo(0, 0);
+  }
+
+  // Set current node for tags module (must be before updateRightPanel)
+  TagsModule.setCurrentNodeId(nodeId);
+
+  // Update UI components
+  updateBreadcrumb(nodeId);
+  updateAttachments(nodeId);
+  updateChildren(nodeId);
+  updateRightPanel(nodeId);
+  updateShareLinks(nodeId);
+  updateViewMode();
+
+  // Render tags
+  TagsModule.renderTags();
+}
+
+/**
+ * Save current node
+ * @param {string} nodeId - Node ID to save
+ */
+export function saveNode(nodeId) {
+  const node = data.nodes[nodeId];
+  if (!node) return;
+
+  // Don't save if editor is disabled (broken/external symlinks display error messages)
+  const contentEditor = document.getElementById('nodeContent');
+  if (contentEditor && contentEditor.disabled) {
+    return;
+  }
+
+  // For symlinks: save title to symlink, content to target
+  if (node.type === 'symlink') {
+    const targetNode = data.nodes[node.targetId];
+    if (!targetNode) return;
+
+    // Title is saved on the symlink itself
+    node.title = document.getElementById('nodeTitle').value;
+    node.modified = Date.now();
+
+    // Content is saved on the target node
+    targetNode.content = document.getElementById('nodeContent').value;
+    targetNode.modified = Date.now();
+  } else {
+    // Normal node: save both title and content
+    node.title = document.getElementById('nodeTitle').value;
+    node.content = document.getElementById('nodeContent').value;
+    node.modified = Date.now();
+  }
+
+  saveData();
+  showToast(t('toast.saved'), '💾');
+
+  // Update page title if this is the branch root node
+  if (nodeId === getBranchRootId()) {
+    updatePageTitle();
+  }
+}
+
+/**
+ * Auto-resize textarea based on content
+ * @param {HTMLTextAreaElement} textarea - Textarea element
+ */
+export function autoResizeTextarea(textarea) {
+  if (!textarea) return;
+
+  // Reset height to auto to get accurate scrollHeight
+  textarea.style.height = 'auto';
+  // Set height to match content (no max-height, parent content-body handles scroll)
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+/**
+ * Update breadcrumb navigation with intelligent formatting
+ * Format: .../[parent]/[current] where parent is smaller and transparent
+ * In branch mode, path stops at branchRootId
+ * @param {string} currentNodeId - Current node ID
+ */
+function updateBreadcrumb(currentNodeId) {
+  const breadcrumb = document.getElementById('breadcrumb');
+  const path = [];
+  let nodeId = currentNodeId;
+  const branchRootId = isBranchMode() ? getBranchRootId() : null;
+
+  // Build path from current to root (or branchRootId in branch mode)
+  while (nodeId) {
+    const node = data.nodes[nodeId];
+    if (node) {
+      path.unshift({ id: nodeId, title: node.title });
+
+      // Stop at branchRootId in branch mode
+      if (branchRootId && nodeId === branchRootId) {
+        break;
+      }
+
+      nodeId = node.parent;
+    } else break;
+  }
+
+  let html = `<span class="breadcrumb-item breadcrumb-home" onclick="app.goToRoot()" title="${t('tooltips.goToRoot')}">🏠</span>`;
+
+  if (path.length === 0) {
+    // No node selected - just show home
+    breadcrumb.innerHTML = html;
+    return;
+  }
+
+  // Always show separator after home
+  html += '<span class="breadcrumb-separator">›</span>';
+
+  // Show up to 3 ancestors before current node
+  const currentNode = path[path.length - 1];
+  const ancestorsToShow = path.slice(0, -1); // All ancestors
+
+  if (ancestorsToShow.length > 3) {
+    // Show ellipsis for deep paths (more than 3 ancestors)
+    html += '<span class="breadcrumb-ellipsis" title="' +
+      path.slice(0, -4).map(p => escapeHtml(p.title)).join(' › ') +
+      '">...</span>';
+    html += '<span class="breadcrumb-separator">›</span>';
+
+    // Show last 3 ancestors
+    ancestorsToShow.slice(-3).forEach(ancestor => {
+      html += `<span class="breadcrumb-item breadcrumb-parent user-content"
+               onclick="app.selectNodeById('${ancestor.id}')"
+               title="${escapeHtml(ancestor.title)}">
+               ${escapeHtml(ancestor.title)}</span>`;
+      html += '<span class="breadcrumb-separator">›</span>';
+    });
+  } else {
+    // Show all ancestors (0-3)
+    ancestorsToShow.forEach(ancestor => {
+      html += `<span class="breadcrumb-item breadcrumb-parent user-content"
+               onclick="app.selectNodeById('${ancestor.id}')"
+               title="${escapeHtml(ancestor.title)}">
+               ${escapeHtml(ancestor.title)}</span>`;
+      html += '<span class="breadcrumb-separator">›</span>';
+    });
+  }
+
+  // Current node (normal size, not clickable)
+  html += `<span class="breadcrumb-item breadcrumb-current user-content">${escapeHtml(currentNode.title)}</span>`;
+
+  breadcrumb.innerHTML = html;
+}
+
+/**
+ * Update children display
+ * @param {string} currentNodeId - Current node ID
+ */
+function updateChildren(currentNodeId) {
+  const node = data.nodes[currentNodeId];
+  const section = document.getElementById('childrenSection');
+  const grid = document.getElementById('childrenGrid');
+
+  // For symlinks, display target's children
+  const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
+  if (!displayNode) {
+    section.style.display = 'none';
+    return;
+  }
+
+  const totalChildren = displayNode.children.length;
+
+  if (totalChildren === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  document.getElementById('childrenCount').textContent = totalChildren;
+
+  grid.innerHTML = '';
+
+  displayNode.children.forEach(childId => {
+    const child = data.nodes[childId];
+    if (!child) return;
+
+    const isSymlink = child.type === 'symlink';
+    const childDisplayNode = isSymlink ? data.nodes[child.targetId] : child;
+
+    // Check if symlink is external (pointing outside branch)
+    let isExternalSymlink = false;
+    if (isSymlink && child.targetId && isBranchMode()) {
+      isExternalSymlink = !isNodeInBranch(child.targetId);
+    }
+
+    if (!childDisplayNode) {
+      // Broken symlink
+      const card = document.createElement('div');
+      card.className = 'child-card broken-symlink';
+      card.style.opacity = '0.5';
+      card.innerHTML = `
+        <div class="child-card-icon">⚠️</div>
+        <div class="child-card-title user-content">${escapeHtml(child.title)} (${t('nodeTypes.badge.broken')})</div>
+        <div class="child-card-preview user-content">${t('labels.brokenSymlink')}</div>
+      `;
+      grid.appendChild(card);
+      return;
+    }
+
+    const icon = isSymlink ? (isExternalSymlink ? '🔗🚫' : '🔗') : (childDisplayNode.children.length > 0 ? '📂' : '📄');
+    const preview = childDisplayNode.content?.substring(0, 50) || t('messages.emptyContent');
+
+    const card = document.createElement('div');
+    card.className = isSymlink ? 'child-card symlink-card' : 'child-card';
+
+    if (isSymlink) {
+      if (isExternalSymlink) {
+        card.style.border = '1px dashed var(--text-secondary)';
+        card.style.opacity = '0.4';
+        card.style.cursor = 'not-allowed';
+      } else {
+        card.style.border = '1px dashed var(--accent)';
+        card.style.opacity = '0.9';
+      }
+    }
+
+    // Click handler
+    if (isExternalSymlink) {
+      card.onclick = () => {
+        showToast(t('toast.externalSymlink'), '🚫');
+      };
+    } else {
+      const targetId = isSymlink ? child.targetId : childId;
+      card.onclick = () => {
+        if (window.app && window.app.selectNodeById) {
+          window.app.selectNodeById(targetId);
+        }
+      };
+    }
+
+    const titleStyle = isSymlink ? 'font-style: italic;' : '';
+    const badge = isSymlink ? ` <span class="symlink-badge" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${isExternalSymlink ? t('nodeTypes.badge.external') : t('nodeTypes.badge.link')}</span>` : '';
+
+    card.innerHTML = `
+      <div class="child-card-icon">${icon}</div>
+      <div class="child-card-title user-content" style="${titleStyle}${isExternalSymlink ? ' opacity: 0.6;' : ''}">${escapeHtml(child.title)}${badge}</div>
+      <div class="child-card-preview user-content" style="${isExternalSymlink ? 'opacity: 0.5;' : ''}">${escapeHtml(preview)}</div>
+    `;
+
+    // Drag & Drop (only if not an external symlink)
+    if (!isExternalSymlink) {
+      initDragDrop(card, childId, () => {
+        // Re-render children after drop
+        updateChildren(currentNodeId);
+      });
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+/**
+ * Get icon for attachment based on MIME type
+ * @param {string} mimeType - MIME type
+ * @returns {string} - Emoji icon
+ */
+function getAttachmentIcon(mimeType) {
+  if (!mimeType) return '📎';
+
+  if (mimeType.startsWith('image/')) return '🖼️';
+  if (mimeType.startsWith('video/')) return '🎬';
+  if (mimeType.startsWith('audio/')) return '🎵';
+  if (mimeType === 'application/pdf') return '📄';
+  if (mimeType.includes('word') || mimeType.includes('document')) return '📝';
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊';
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📽️';
+  if (mimeType.includes('zip') || mimeType.includes('archive') ||
+      mimeType.includes('gzip') || mimeType.includes('x-tar') ||
+      mimeType.includes('rar') || mimeType.includes('7z')) return '📦';
+  if (mimeType.includes('text/')) return '📃';
+
+  return '📎';
+}
+
+/**
+ * Update attachments section
+ * @param {string} currentNodeId - Current node ID
+ */
+function updateAttachments(currentNodeId) {
+  const node = data.nodes[currentNodeId];
+  const section = document.getElementById('attachmentsSection');
+  const list = document.getElementById('attachmentsList');
+  const countSpan = document.getElementById('attachmentsCount');
+
+  // For symlinks, display target's attachments
+  const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
+  if (!displayNode) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // Initialize attachments array if doesn't exist
+  if (!displayNode.attachments) {
+    displayNode.attachments = [];
+  }
+
+  const totalAttachments = displayNode.attachments.length;
+
+  // Always show section (so the "Add file" button is visible)
+  section.style.display = 'block';
+  countSpan.textContent = totalAttachments;
+
+  list.innerHTML = '';
+
+  // If no attachments, just show empty list (button remains visible)
+  if (totalAttachments === 0) {
+    return;
+  }
+
+  displayNode.attachments.forEach(attachment => {
+    const item = document.createElement('div');
+    item.className = 'attachment-item';
+
+    const icon = getAttachmentIcon(attachment.type);
+    const formattedSize = AttachmentsModule.formatFileSize(attachment.size);
+
+    // Determine markdown syntax based on type
+    const isImage = attachment.type.startsWith('image/');
+    const markdownSyntax = isImage
+      ? `![${attachment.name}](attachment:${attachment.id})`
+      : `[${attachment.name}](attachment:${attachment.id})`;
+
+    item.innerHTML = `
+      <div class="attachment-icon">${icon}</div>
+      <div class="attachment-info">
+        <div class="attachment-name">${escapeHtml(attachment.name)}</div>
+        <div class="attachment-id" title="${t('tooltips.attachmentId')}">ID: ${attachment.id}</div>
+        <div class="attachment-size">${formattedSize}</div>
+      </div>
+      <div class="attachment-actions">
+        <button class="attachment-btn" onclick="app.copyAttachmentSyntax('${escapeHtml(markdownSyntax)}')" title="${t('tooltips.copyMarkdown')}">📋</button>
+        <button class="attachment-btn" onclick="app.downloadAttachment('${attachment.id}', '${escapeHtml(attachment.name)}')" title="${t('tooltips.download')}">⬇️</button>
+        <button class="attachment-btn delete" onclick="app.deleteAttachment('${attachment.id}')" title="${t('tooltips.deleteFile')}">🗑️</button>
+      </div>
+    `;
+
+    list.appendChild(item);
+  });
+}
+
+/**
+ * Update right panel
+ * @param {string} currentNodeId - Current node ID
+ */
+export async function updateRightPanel(currentNodeId) {
+  const node = data.nodes[currentNodeId];
+  const panel = document.getElementById('panelBody');
+
+  // For symlinks, show target info
+  const displayNode = node.type === 'symlink' ? data.nodes[node.targetId] : node;
+  if (!displayNode) {
+    panel.innerHTML = `<div class="info-section"><h3>⚠️ ${t('toast.brokenLink')}</h3></div>`;
+    return;
+  }
+
+  let html = `<div class="info-section"><h3>${t('labels.structure')}</h3>`;
+  const childCount = displayNode.children.length;
+  html += `<div class="info-item"><div class="info-label">${t('labels.children')}</div>${t('app.nodeCounter', {count: childCount})}</div>`;
+
+  // Show parent
+  if (displayNode.parent) {
+    const parent = data.nodes[displayNode.parent];
+    if (parent) {
+      html += `<div class="info-item"><div class="info-label">${t('labels.parent')}</div><span class="user-content">${escapeHtml(parent.title)}</span></div>`;
+    }
+  }
+
+  html += '</div>';
+
+  // Show node type
+  html += `<div class="info-section"><h3>${t('labels.type')}</h3>`;
+  html += `<div class="info-item">${node.type === 'symlink' ? t('nodeTypes.symlink') : t('nodeTypes.node')}</div>`;
+  html += '</div>';
+
+  // Show dates
+  html += `<div class="info-section"><h3>${t('labels.dates')}</h3>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.created')}</div>${new Date(displayNode.created).toLocaleString()}</div>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.modified')}</div>${new Date(displayNode.modified).toLocaleString()}</div>`;
+  html += '</div>';
+
+  // Show branch tags cloud
+  html += `<div class="info-section"><h3>${t('labels.tagsInBranch')}</h3>`;
+  const branchTags = TagsModule.collectBranchTags();
+
+  if (branchTags.length > 0) {
+    // Calculate sizes for cloud (based on frequency)
+    const maxCount = Math.max(...branchTags.map(t => t.count));
+    const minSize = 11;
+    const maxSize = 18;
+
+    const maxTagsToShow = 10;
+    const tagsToDisplay = branchTags.slice(0, maxTagsToShow);
+
+    html += '<div class="tag-cloud">';
+    tagsToDisplay.forEach(item => {
+      // Size proportional to frequency
+      const size = minSize + ((item.count / maxCount) * (maxSize - minSize));
+      const escapedTag = escapeHtml(item.tag);
+
+      html += `
+        <div class="tag-cloud-item user-content"
+             style="--tag-size: ${size}px;"
+             data-tag="${escapedTag}"
+             title="${t('tooltips.tagOccurrences', {count: item.count})}">
+          🏷️ ${escapedTag}
+        </div>
+      `;
+    });
+
+    html += '</div>';
+  } else {
+    html += `<div class="info-item" style="opacity: 0.5;">${t('labels.noTags')}</div>`;
+  }
+  html += '</div>';
+
+  // Show statistics
+  html += `<div class="info-section"><h3>${t('labels.statistics')}</h3>`;
+  const content = displayNode.content || '';
+  html += `<div class="info-item"><div class="info-label">${t('labels.characters')}</div>${content.length}</div>`;
+  html += `<div class="info-item"><div class="info-label">${t('labels.words')}</div>${content.split(/\s+/).filter(w => w).length}</div>`;
+  html += '</div>';
+
+  // PDF Export quotas (if available)
+  if (window.app && window.app.pdfRateLimits) {
+    const limits = window.app.pdfRateLimits;
+    const age = Math.floor((Date.now() - limits.lastUpdate) / 1000 / 60); // minutes
+
+    html += `<div class="info-section"><h3>📄 ${t('labels.pdfExport')}</h3>`;
+    html += `<div class="info-item"><div class="info-label">${t('labels.pdfQuotaHour')}</div>${limits.hourRemaining}/5</div>`;
+    html += `<div class="info-item"><div class="info-label">${t('labels.pdfQuotaDay')}</div>${limits.dayRemaining}/20</div>`;
+    if (age < 60) {
+      html += `<div class="info-item" style="font-size: 12px; opacity: 0.6;">${t('labels.pdfQuotaUpdated', { minutes: age })}</div>`;
+    }
+    html += '</div>';
+  }
+
+  // Keyboard shortcuts
+  html += `
+    <div class="shortcuts-hint">
+      <div class="shortcuts-title">${t('labels.keyboardShortcuts')}</div>
+      <div class="shortcuts-section">
+        <div><kbd>Alt+N</kbd> ${t('keyboard.newNode')}</div>
+        <div><kbd>Ctrl+K</kbd> ${t('keyboard.search')}</div>
+        <div><kbd>Alt+H</kbd> ${t('keyboard.markdownHelp')}</div>
+        <div><kbd>Alt+E</kbd> ${t('keyboard.editMode')}</div>
+      </div>
+      <div class="shortcuts-section">
+        <div><kbd>↑</kbd><kbd>↓</kbd> ${t('keyboard.navigateTree')}</div>
+        <div><kbd>→</kbd> ${t('keyboard.expandNode')}</div>
+        <div><kbd>←</kbd> ${t('keyboard.collapseOrParent')}</div>
+        <div><kbd>Entrée</kbd> ${t('keyboard.activateNode')}</div>
+      </div>
+      <div class="shortcuts-section">
+        <div><kbd>Esc</kbd> ${t('keyboard.goToParent')}</div>
+      </div>
+    </div>
+  `;
+
+  // Storage section
+  html += `<div class="info-section"><h3>${t('labels.storage')}</h3>`;
+
+  try {
+    const totalSize = await AttachmentsModule.getTotalSize();
+    const allAttachments = await AttachmentsModule.listAttachments();
+    const attachmentCount = allAttachments.length;
+
+    const formattedSize = AttachmentsModule.formatFileSize(totalSize);
+    const estimatedLimit = 500 * 1024 * 1024; // 500 MB estimated browser limit
+    const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100));
+
+    html += `<div class="info-item">
+      <div class="info-label">${t('storage.files')}</div>
+      <div>${formattedSize}${t('storage.maxSize')}</div>
+    </div>`;
+
+    html += `<div class="storage-bar-container">
+      <div class="storage-bar" style="width: ${percentage}%"></div>
+    </div>`;
+
+    html += `<div class="info-item" style="margin-top: 8px;">
+      <div>${t('storage.filesCount', {count: attachmentCount})}</div>
+    </div>`;
+
+    html += `<button class="btn btn-secondary btn-small"
+                     style="width: 100%; margin-top: 12px;"
+                     onclick="window.app.cleanOrphanedAttachments()">
+      ${t('storage.cleanOrphans')}
+    </button>`;
+
+    html += `<button class="btn btn-secondary btn-small"
+                     style="width: 100%; margin-top: 8px;"
+                     onclick="window.app.cleanOrphanedNodes()">
+      ${t('storage.cleanOrphanNodes')}
+    </button>`;
+  } catch (error) {
+    console.error('[Editor] Failed to get storage info:', error);
+    html += `<div class="info-item" style="opacity: 0.5;">${t('storage.storageError')}</div>`;
+  }
+
+  html += '</div>';
+
+  // Preferences section (Font + Language)
+  const isCustomFont = document.body.classList.contains('custom-font');
+  const currentLang = getCurrentLanguage();
+  html += `
+    <div class="info-section">
+      <h3>${t('labels.preferences')}</h3>
+
+      <div class="info-item" style="cursor: pointer;" onclick="window.app.toggleFontPreference()">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>${t('labels.systemFont')}</span>
+          <span style="font-size: 1.2em;">${isCustomFont ? '☐' : '✅'}</span>
+        </div>
+      </div>
+
+      <div class="info-item" style="margin-top: 12px;">
+        <div class="info-label">${t('labels.language')}</div>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button class="btn btn-small ${currentLang === 'fr' ? 'btn-primary' : 'btn-secondary'}"
+                  style="flex: 1;"
+                  onclick="window.app.changeLanguage('fr')">
+            ${t('labels.french')}
+          </button>
+          <button class="btn btn-small ${currentLang === 'en' ? 'btn-primary' : 'btn-secondary'}"
+                  style="flex: 1;"
+                  onclick="window.app.changeLanguage('en')">
+            ${t('labels.english')}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="info-section" style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center;">
+      <a href="${t('footer.githubLink')}"
+         target="_blank"
+         rel="noopener noreferrer"
+         style="color: var(--text-secondary); text-decoration: none; font-size: 13px; opacity: 0.8; transition: opacity 0.2s;"
+         onmouseover="this.style.opacity='1'"
+         onmouseout="this.style.opacity='0.8'">
+        💻 ${t('footer.openSource')}
+      </a>
+    </div>
+  `;
+
+  panel.innerHTML = html;
+
+  // Add click handlers to tag cloud items (after DOM insertion)
+  setTimeout(() => {
+    document.querySelectorAll('.tag-cloud-item').forEach(item => {
+      const tag = item.dataset.tag;
+      if (tag) {
+        item.onclick = () => window.app.openSearchWithTag(tag);
+        item.style.cursor = 'pointer';
+      }
+    });
+  }, 0);
+}
+
+/**
+ * Create a new root node
+ * @param {Function} onSuccess - Callback after creation (receives nodeId)
+ */
+export function createRootNode(onSuccess) {
+  const id = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+  data.nodes[id] = {
+    id,
+    type: 'node',
+    title: t('messages.newNodeTitle'),
+    content: '',
+    children: [],
+    parent: null,
+    tags: [],
+    created: Date.now(),
+    modified: Date.now()
+  };
+
+  data.rootNodes.push(id);
+  saveData();
+
+  if (onSuccess) onSuccess(id);
+
+  showToast(t('toast.rootNodeCreated'), '➕');
+}
+
+/**
+ * Create a child node
+ * @param {string} parentId - Parent node ID
+ * @param {Function} onSuccess - Callback after creation (receives nodeId)
+ */
+export function createChildNode(parentId, onSuccess) {
+  let parent = data.nodes[parentId];
+  if (!parent) return;
+
+  // Si le parent est un symlink, créer l'enfant pour la cible
+  let actualParentId = parentId;
+  if (parent.type === 'symlink') {
+    actualParentId = parent.targetId;
+    parent = data.nodes[actualParentId];
+    if (!parent) {
+      showToast(t('toast.brokenSymlink'), '⚠️');
+      return;
+    }
+  }
+
+  const id = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+  data.nodes[id] = {
+    id,
+    type: 'node',
+    title: t('messages.newNodeTitle'),
+    content: '',
+    children: [],
+    parent: actualParentId,
+    tags: [],
+    created: Date.now(),
+    modified: Date.now()
+  };
+
+  parent.children.push(id);
+  saveData();
+
+  if (onSuccess) onSuccess(id);
+
+  showToast(t('toast.childNodeCreated'), '➕');
+}
+
+/**
+ * Toggle between view and edit modes
+ */
+export function toggleViewMode() {
+  viewMode = viewMode === 'edit' ? 'view' : 'edit';
+  localStorage.setItem('deepmemo_viewMode', viewMode);
+  updateViewMode();
+}
+
+/**
+ * Update display based on current view mode
+ */
+export async function updateViewMode() {
+  const toggleBtn = document.getElementById('toggleViewMode');
+  const togglePreviewBtn = document.getElementById('togglePreview');
+  const contentEditor = document.getElementById('nodeContent');
+  const contentPreview = document.getElementById('contentPreview');
+
+  if (viewMode === 'view') {
+    // View mode: show rendered markdown
+    toggleBtn.textContent = `✏️ ${t('actions.edit')}`;
+    contentEditor.style.display = 'none';
+    contentPreview.style.display = 'block';
+
+    // Disable live preview UI in view mode (but don't change user preference)
+    if (PreviewModule.isPreviewEnabled()) {
+      PreviewModule.disablePreviewUI();
+    }
+
+    // Hide preview toggle button in view mode
+    if (togglePreviewBtn) {
+      togglePreviewBtn.style.display = 'none';
+    }
+
+    // Render markdown content
+    const currentNodeId = getCurrentNodeId();
+    if (currentNodeId) {
+      const node = data.nodes[currentNodeId];
+      const displayNode = node?.type === 'symlink' ? data.nodes[node.targetId] : node;
+
+      if (displayNode?.content) {
+        // Use marked.js for markdown rendering (loaded from CDN in index.html)
+        let renderedContent = window.marked ? window.marked.parse(displayNode.content) : displayNode.content;
+
+        // Process attachment: URLs to blob URLs (pass node for metadata)
+        renderedContent = await processAttachmentUrls(renderedContent, displayNode);
+
+        contentPreview.innerHTML = '<div class="markdown-content user-content">' + renderedContent + '</div>';
+
+        // Update internal links to preserve branch mode
+        if (isBranchMode()) {
+          const branchRootId = getBranchRootId();
+          const links = contentPreview.querySelectorAll('a');
+          links.forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            // Extract node ID from href (supports both relative #/node/123 and full URLs)
+            const match = href.match(/#\/node\/([^?#]+)/);
+            if (match) {
+              const targetNodeId = match[1];
+              // Only add branch param if target node is in current branch
+              if (isNodeInBranch(targetNodeId)) {
+                // Check if it's a full URL or just a hash
+                if (href.startsWith('http://') || href.startsWith('https://')) {
+                  // Full URL: replace with relative URL including branch param
+                  link.setAttribute('href', `?branch=${branchRootId}#/node/${targetNodeId}`);
+                } else {
+                  // Relative hash: prepend branch param
+                  link.setAttribute('href', `?branch=${branchRootId}${href}`);
+                }
+              }
+            }
+          });
+        }
+      } else {
+        contentPreview.innerHTML = `<div class="markdown-content user-content"><em>${t('messages.emptyContent')}</em></div>`;
+      }
+    }
+  } else {
+    // Edit mode: show textarea
+    toggleBtn.textContent = `👁️ ${t('actions.view')}`;
+    contentEditor.style.display = 'block';
+    contentPreview.style.display = 'none';
+    autoResizeTextarea(contentEditor);
+
+    // Show preview toggle button in edit mode
+    if (togglePreviewBtn) {
+      togglePreviewBtn.style.display = '';
+    }
+
+    // Auto-activate preview if user preference is enabled (check localStorage, not current state)
+    const savedPreview = localStorage.getItem('deepmemo_previewEnabled');
+    if (savedPreview === 'true') {
+      // Wait for DOM to be ready
+      requestAnimationFrame(() => {
+        // Force enable without checking current state (might be false from view mode)
+        PreviewModule.activatePreviewFromPreference();
+      });
+    }
+  }
+}
+
+/**
+ * Update share links href attributes
+ * @param {string} currentNodeId - Current node ID
+ */
+function updateShareLinks(currentNodeId) {
+  const shareLink = document.getElementById('shareLink');
+  const shareBranchLink = document.getElementById('shareBranchLink');
+
+  if (!currentNodeId) {
+    shareLink.href = '#';
+    shareBranchLink.href = '#';
+    return;
+  }
+
+  // Build proper URLs for middle-click and right-click
+  const branchRootId = isBranchMode() ? getBranchRootId() : null;
+  shareLink.href = getShareableUrl(currentNodeId, branchRootId);
+  shareBranchLink.href = getShareableBranchUrl(currentNodeId);
+}
+
+/**
+ * Get current node ID (temporary - will be passed as parameter later)
+ */
+let currentNodeIdCache = null;
+export function setCurrentNodeId(nodeId) {
+  currentNodeIdCache = nodeId;
+}
+function getCurrentNodeId() {
+  return currentNodeIdCache;
+}
+
+/**
+ * Delete current node
+ * @param {string} nodeId - Node ID to delete
+ * @param {Function} onSuccess - Callback after deletion (receives parentId or null)
+ */
+export function deleteNode(nodeId, onSuccess) {
+  const node = data.nodes[nodeId];
+  if (!node) return;
+
+  const isSymlink = node.type === 'symlink';
+  const confirmMessage = isSymlink
+    ? t('confirms.deleteSymlink')
+    : t('confirms.deleteNode');
+
+  if (!confirm(confirmMessage)) return;
+
+  const parentId = node.parent;
+
+  if (isSymlink) {
+    // Remove from parent's children
+    if (node.parent) {
+      const parent = data.nodes[node.parent];
+      parent.children = parent.children.filter(id => id !== nodeId);
+    } else {
+      data.rootNodes = data.rootNodes.filter(id => id !== nodeId);
+    }
+
+    // Delete just the symlink
+    delete data.nodes[nodeId];
+    showToast(t('toast.symlinkDeleted'), '🔗');
+  } else {
+    // Recursive deletion for normal nodes
+    const deleteRecursive = (id) => {
+      const n = data.nodes[id];
+      if (!n) return;
+      n.children.forEach(childId => deleteRecursive(childId));
+      delete data.nodes[id];
+    };
+
+    // Remove from parent
+    if (node.parent) {
+      const parent = data.nodes[node.parent];
+      parent.children = parent.children.filter(id => id !== nodeId);
+    } else {
+      data.rootNodes = data.rootNodes.filter(id => id !== nodeId);
+    }
+
+    deleteRecursive(nodeId);
+    showToast(t('toast.nodeDeleted'), '🗑️');
+  }
+
+  saveData();
+
+  // Call success callback with parent ID
+  if (onSuccess) {
+    onSuccess(parentId && data.nodes[parentId] ? parentId : null);
+  }
+}

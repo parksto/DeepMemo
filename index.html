@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="description" data-i18n-content="meta.description" content="Knowledge management system based on recursive and interconnected nodes">
+  <meta name="keywords" data-i18n-content="meta.keywords" content="knowledge management, note-taking, PKM, second brain, Zettelkasten, hierarchical notes, symlinks, tags, offline-first, privacy-first, PWA">
+  <meta name="author" content="DeepMemo Team">
+  <title data-i18n="meta.title">DeepMemo - Your second brain, organized and connected</title>
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://deepmemo.org/">
+
+  <!-- PWA and Apple Meta Tags -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" id="app-manifest" href="manifest-fr.json">
+  <meta name="application-name" content="DeepMemo">
+  <meta name="apple-mobile-web-app-title" content="DeepMemo">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Open Graph (Facebook, LinkedIn) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://deepmemo.org/">
+  <meta property="og:title" data-i18n-content="meta.ogTitle" content="DeepMemo - Your second brain">
+  <meta property="og:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs et interconnectés">
+  <meta property="og:image" content="https://deepmemo.org/icons/og-image.png">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="fr_FR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://deepmemo.org/">
+  <meta name="twitter:title" data-i18n-content="meta.ogTitle" content="DeepMemo - Your second brain">
+  <meta name="twitter:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs et interconnectés">
+  <meta name="twitter:image" content="https://deepmemo.org/icons/twitter-card.png">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DeepMemo",
+    "url": "https://deepmemo.org/",
+    "description": "Privacy-first knowledge management system with hierarchical nodes, symlinks, tags, and branch isolation. Works fully offline.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Any (Web-based)",
+    "browserRequirements": "Requires JavaScript. Works with all modern browsers.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "DeepMemo Team"
+    },
+    "featureList": [
+      "Hierarchical knowledge network",
+      "Symlinks and tags",
+      "Branch isolation mode",
+      "File attachments (up to 50MB per file)",
+      "Full offline support (PWA)",
+      "Privacy-first (local storage only, no server)",
+      "Bilingual interface (French/English)",
+      "Export/Import (ZIP format)",
+      "Multi-tab synchronization",
+      "Keyboard shortcuts"
+    ],
+    "screenshot": "https://deepmemo.org/icons/screenshot.png",
+    "softwareVersion": "0.10.5",
+    "releaseNotes": "https://deepmemo.org/docs/ROADMAP.md",
+    "inLanguage": ["en", "fr"]
+  }
+  </script>
+  <script>
+    // Load correct manifest and update lang attribute based on language preference
+    (function() {
+      const savedLang = localStorage.getItem('deepmemo_lang');
+      const browserLang = navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+      const lang = savedLang || browserLang;
+      const manifestHref = lang === 'en' ? 'manifest-en.json' : 'manifest-fr.json';
+
+      // Update manifest
+      document.getElementById('app-manifest').href = manifestHref;
+
+      // Update HTML lang attribute
+      document.documentElement.lang = lang;
+    })();
+  </script>
+  <link rel="stylesheet" href="src/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+</head>
+<body>
+  <!-- Mobile warning banner -->
+  <div id="mobileWarningBanner" class="mobile-warning-banner" style="display: none;">
+    <div class="mobile-warning-content">
+      <span class="mobile-warning-icon">📱</span>
+      <div class="mobile-warning-text">
+        <strong data-i18n="mobileWarning.title">Version mobile en développement</strong>
+        <p data-i18n="mobileWarning.message">L'expérience mobile est en cours d'amélioration. Pour une utilisation optimale, nous recommandons d'utiliser un ordinateur.</p>
+      </div>
+      <button class="mobile-warning-close" onclick="app.closeMobileWarning()" data-i18n-title="actions.close" title="Fermer">✕</button>
+    </div>
+  </div>
+
+  <button class="right-panel-toggle-external" onclick="app.toggleRightPanel()" aria-label="Ouvrir les informations">ℹ️</button>
+
+  <div class="app-container">
+    <div class="sidebar" role="navigation" aria-label="Arborescence">
+      <div class="sidebar-header">
+        <a href="./" style="text-decoration: none; color: inherit;">
+          <h1 data-i18n="app.title">🌟 DeepMemo</h1>
+        </a>
+        <div class="tagline" data-i18n="app.tagline">Ton second cerveau</div>
+        <div class="node-counter" id="nodeCounter">0 nœuds</div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button id="newRootNodeBtn" class="btn" data-i18n="actions.newNode" onclick="app.createRootNode()">➕ Nouveau nœud</button>
+        <div class="import-export-zone">
+          <input type="file" id="importFile" accept=".dm,.zip,.json" onchange="app.importData(event)">
+          <label for="importFile" class="btn-import" data-i18n="actions.import">📂 Importer</label>
+          <button class="btn-import" data-i18n="actions.export" onclick="app.openExportModal('global')">💾 Exporter</button>
+        </div>
+      </div>
+
+      <div class="branch-mode-indicator" id="branchModeIndicator" style="display: none;">
+        <span class="branch-mode-text" data-i18n="labels.branchMode">mode branche</span>
+        <a href="./" class="branch-mode-exit" aria-label="Revenir à la racine" title="Revenir à la racine">⤴️</a>
+      </div>
+
+      <div class="tree-container" id="treeContainer"></div>
+      <div class="sidebar-resizer" id="sidebarResizer"></div>
+    </div>
+
+    <div class="main-content" role="main">
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state-icon" data-i18n="empty.icon">🧩</div>
+        <h2 data-i18n="messages.welcome">Bienvenue dans DeepMemo</h2>
+        <p data-i18n="messages.welcomeSubtitle">Crée ton premier nœud pour commencer</p>
+      </div>
+
+      <div id="editorContainer" style="display: none; flex: 1; display: flex; flex-direction: column;">
+        <div class="breadcrumb" id="breadcrumb"></div>
+
+        <div class="content-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="text" class="content-title-input user-content" id="nodeTitle"
+                   data-i18n-placeholder="placeholders.nodeTitle" placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
+            <a href="#" id="shareLink" data-i18n-title="tooltips.shareNode" title="Copier l'URL de ce nœud (préserve le contexte actuel)"
+               aria-label="Copier l'URL de ce nœud"
+               style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
+               onmouseover="this.style.opacity='1'"
+               onmouseout="this.style.opacity='0.6'"
+               onclick="app.shareNode(event)">🔗</a>
+            <a href="#" id="shareBranchLink" data-i18n-title="tooltips.shareBranch" title="Copier l'URL en mode branche isolée (vue focus)"
+               aria-label="Copier l'URL en mode branche"
+               style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
+               onmouseover="this.style.opacity='1'"
+               onmouseout="this.style.opacity='0.6'"
+               onclick="app.shareBranch(event)">🌿</a>
+          </div>
+          <div class="content-meta"><span id="nodeMeta"></span></div>
+
+          <div class="tags-container" id="tagsContainer">
+            <!-- Tags générés dynamiquement -->
+            <div style="position: relative;">
+              <input type="text" class="tag-input" id="tagInput"
+                     data-i18n-placeholder="placeholders.tagInput" placeholder="+ tag"
+                     onkeydown="app.handleTagInput(event)"
+                     oninput="app.handleTagAutocomplete(event)"
+                     onfocus="app.showTagAutocomplete()"
+                     onblur="app.hideTagAutocomplete()">
+              <div class="tag-autocomplete" id="tagAutocomplete" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-body">
+          <!-- Main content area (editor + preview in split-screen) -->
+          <div class="content-body-main">
+            <textarea class="content-editor user-content" id="nodeContent"
+                      data-i18n-placeholder="placeholders.nodeContent" placeholder="Écris ton contenu ici... (Utilise [[Nom du nœud]] pour créer des liens)"
+                      onchange="app.saveCurrentNode()"
+                      oninput="app.autoResizeTextarea(event.target)"></textarea>
+
+            <div class="content-preview" id="contentPreview" style="display: none;"></div>
+
+            <!-- Live Preview Container (Split Screen) -->
+            <div class="live-preview-container" id="livePreviewContainer" style="display: none;">
+              <div class="live-preview-header" data-i18n="labels.preview">📖 Preview</div>
+              <div class="live-preview-content" id="livePreviewContent"></div>
+            </div>
+          </div>
+
+          <!-- Content footer: Attachments and Children sections (below editor/preview, same scroll) -->
+          <div class="content-footer">
+            <!-- Attachments Section -->
+            <div class="attachments-section" id="attachmentsSection" style="display: none;">
+              <div class="attachments-header"><span data-i18n="labels.attachments">📎 Fichiers attachés</span> (<span id="attachmentsCount">0</span>)</div>
+              <div class="attachments-list" id="attachmentsList"></div>
+              <button class="btn btn-secondary btn-small" id="addAttachmentBtn" data-i18n="actions.addAttachment" onclick="app.triggerFileUpload()">
+                📎 Ajouter un fichier
+              </button>
+            </div>
+
+            <div class="children-section" id="childrenSection" style="display: none;">
+              <div class="children-header"><span data-i18n="labels.children">📂 Nœuds enfants</span> (<span id="childrenCount">0</span>)</div>
+              <div class="children-grid" id="childrenGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-actions">
+          <button class="btn btn-secondary btn-small" id="toggleViewMode" data-i18n="actions.toggleView" onclick="app.toggleViewMode()">👁️ Afficher</button>
+          <button class="btn btn-secondary btn-small" id="togglePreview" data-i18n="actions.togglePreview" data-i18n-title="tooltips.togglePreview" title="Enable/disable live preview (split-screen)" onclick="app.togglePreview()">📖 Preview</button>
+          <button class="btn btn-secondary btn-small" data-i18n="actions.addChild" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
+          <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
+          <div style="margin-left: auto; display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-small" data-i18n="actions.exportBranch" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
+            <button class="btn btn-secondary btn-small" data-i18n="actions.exportFS" data-i18n-title="tooltips.exportFS" onclick="app.exportToFileSystem()" title="Exporter vers dossier local">💾 Export FS</button>
+            <input type="file" id="importBranchFile" accept=".dm,.zip,.json" onchange="app.importBranch(event)" style="display: none;">
+            <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n="actions.importBranch" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
+            <button class="btn btn-secondary btn-small" data-i18n="actions.importFS" data-i18n-title="tooltips.importFS" onclick="app.importFromFileSystem()" title="Importer depuis dossier local">📂 Import FS</button>
+          </div>
+        </div>
+
+        <!-- Hidden file input for attachments -->
+        <input type="file" id="attachmentFileInput" style="display: none;" onchange="app.handleAttachmentUpload(event)">
+      </div>
+    </div>
+
+    <div class="right-panel" id="rightPanel" role="complementary" aria-label="Informations">
+      <div class="panel-header">
+        <button class="right-panel-toggle" onclick="app.toggleRightPanel()" aria-label="Fermer les informations">✕</button>
+        <div class="panel-title">Informations</div>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="toast-icon" id="toastIcon">✅</div>
+    <div class="toast-message" id="toastMessage">Message</div>
+  </div>
+
+  <div class="search-modal" id="searchModal">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <div class="search-icon">🔍</div>
+        <input type="text" class="search-input" id="searchInput"
+               data-i18n-placeholder="placeholders.search" placeholder="Rechercher dans tous les nœuds..." autocomplete="off">
+        <span class="search-hint">Esc</span>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div class="search-empty">
+          <div class="search-empty-icon">💭</div>
+          <div data-i18n="modals.search.emptyHint">Tape pour rechercher dans tes nœuds</div>
+        </div>
+      </div>
+      <div class="search-footer">
+        <div class="search-footer-item" data-i18n="modals.search.navigate"><kbd>↑</kbd><kbd>↓</kbd> Naviguer</div>
+        <div class="search-footer-item" data-i18n="modals.search.open"><kbd>Entrée</kbd> Ouvrir</div>
+        <div class="search-footer-item" data-i18n="modals.search.close"><kbd>Esc</kbd> Fermer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Symlink -->
+  <div class="modal-overlay" id="symlinkModal">
+    <div class="modal">
+      <h2 data-i18n="modals.symlink.title">🔗 Créer un lien symbolique</h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.symlink.subtitle">
+          Choisis où afficher ce nœud comme lien symbolique :
+        </p>
+        <div class="node-selector" id="nodeSelector"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" data-i18n="modals.symlink.cancel" onclick="app.closeSymlinkModal()">Annuler</button>
+        <button class="btn btn-small" data-i18n="modals.symlink.confirm" onclick="app.confirmSymlink()">🔗 Créer le lien</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Actions (Déplacer/Lien/Dupliquer) -->
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal">
+      <h2 data-i18n="modals.actions.title">⚙️ Actions sur le nœud</h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.actions.subtitle">
+          Que veux-tu faire avec ce nœud ?
+        </p>
+
+        <!-- Choix de l'action -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+          <button class="btn btn-secondary btn-small" id="actionMove" data-i18n="modals.actions.move" onclick="app.selectAction('move')" style="flex: 1; border-radius: 8px;">
+            ↗️ Déplacer
+          </button>
+          <button class="btn btn-secondary btn-small" id="actionLink" data-i18n="modals.actions.link" onclick="app.selectAction('link')" style="flex: 1; border-radius: 8px;">
+            🔗 Lien
+          </button>
+          <button class="btn btn-secondary btn-small" id="actionDuplicate" data-i18n="modals.actions.duplicate" onclick="app.selectAction('duplicate')" style="flex: 1; border-radius: 8px;">
+            📋 Dupliquer
+          </button>
+          <button class="btn btn-secondary btn-small" id="actionDelete" data-i18n="modals.actions.delete" onclick="app.selectAction('delete')" style="flex: 1; border-radius: 8px;">
+            🗑️ Supprimer
+          </button>
+        </div>
+
+        <div id="actionDescription" style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; min-height: 40px; display: none;">
+        </div>
+
+        <div class="node-selector" id="actionNodeSelector" style="display: none;"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" data-i18n="modals.actions.cancel" onclick="app.closeActionModal()">Annuler</button>
+        <button class="btn btn-small" id="confirmActionBtn" data-i18n="modals.actions.confirm" onclick="app.confirmAction()" disabled>✓ Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Aide Markdown -->
+  <div class="modal-overlay" id="markdownHelpModal">
+    <div class="modal" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+      <h2>📘 <span data-i18n="modals.markdown.title">Guide Markdown</span></h2>
+      <div class="modal-body" id="markdownHelpContent">
+        <!-- Content will be dynamically generated by modals.js with i18n -->
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-small" data-i18n="actions.close" onclick="app.closeMarkdownHelp()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Export Choice -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal">
+      <h2>📤 <span data-i18n="modals.export.title">Export</span></h2>
+      <div class="modal-body">
+        <p id="exportModalSubtitle" style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.export.subtitle">
+          Choisir le format d'export :
+        </p>
+
+        <!-- Choix du format d'export -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="btn btn-secondary" onclick="app.confirmExportZIP()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📦 <span data-i18n="modals.export.zip.title">Archive ZIP</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.zip.desc">
+                Export complet avec toutes les données et fichiers attachés
+              </div>
+            </div>
+          </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportFreeMind()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">🧠 <span data-i18n="modals.export.freemind.title">Mindmap FreeMind</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.freemind.desc">
+                Fichier .mm éditable dans Freeplane/FreeMind/XMind
+              </div>
+            </div>
+          </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportMermaid()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📊 <span data-i18n="modals.export.mermaid.title">Diagramme Mermaid</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.mermaid.desc">
+                Diagramme visuel au format SVG
+              </div>
+            </div>
+          </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportPDF()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📄 <span data-i18n="modals.export.pdf.title">Document PDF</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.pdf.desc">
+                Document PDF avec sommaire hiérarchique et images
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" data-i18n="modals.export.cancel" onclick="app.closeExportModal()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PDF Privacy Notice -->
+  <div class="modal-overlay" id="pdfPrivacyModal">
+    <div class="modal">
+      <h2>📄 <span data-i18n="modals.pdfPrivacy.title">Export PDF - Confidentialité</span></h2>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+          <span data-i18n="modals.pdfPrivacy.intro">
+            Pour protéger nos coûts serveur, nous limitons les exports :
+          </span>
+        </p>
+        <ul style="margin-left: 20px; margin-bottom: 16px;">
+          <li data-i18n="modals.pdfPrivacy.limitHour">5 PDFs par heure (maximum)</li>
+          <li data-i18n="modals.pdfPrivacy.limitDay">20 PDFs par jour (maximum)</li>
+        </ul>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+          <span data-i18n="modals.pdfPrivacy.hashInfo">
+            Ces limites sont basées sur votre IP hashée (SHA-256), conservée 24h uniquement.
+            Votre IP n'est jamais stockée en clair.
+          </span>
+        </p>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+          <strong data-i18n="modals.pdfPrivacy.noteTitle">Note :</strong>
+          <span data-i18n="modals.pdfPrivacy.noteContent">
+            Votre hébergeur web conserve déjà les IPs dans ses logs standards (30-90 jours).
+            Notre système de rate limiting est plus court (24h) et utilise un hash cryptographique.
+          </span>
+        </p>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+          <span data-i18n="modals.pdfPrivacy.noData">
+            Aucune donnée de votre document n'est sauvegardée. Le PDF est généré
+            et envoyé directement à votre navigateur.
+          </span>
+        </p>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+          <strong data-i18n="modals.pdfPrivacy.offlineTitle">Alternative offline :</strong>
+          <span data-i18n="modals.pdfPrivacy.offlineContent">
+            Un outil CLI est disponible sur GitHub pour exporter sans limitation
+            ni connexion internet (dossier <code>bin/</code>).
+          </span>
+        </p>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="pdfPrivacyDontShowAgain">
+          <span data-i18n="modals.pdfPrivacy.dontShow">Ne plus afficher ce message</span>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-small" data-i18n="modals.pdfPrivacy.cancel"
+                onclick="app.closePdfPrivacyModal()">Annuler</button>
+        <button class="btn btn-small" data-i18n="modals.pdfPrivacy.confirm"
+                onclick="app.confirmPdfPrivacyAndExport()">✓ Compris, générer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mermaid.js for diagram export -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    window.mermaid = mermaid;
+  </script>
+
+  <!-- Enregistrement du Service Worker pour PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('[PWA] Service Worker enregistré:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('[PWA] Échec enregistrement Service Worker:', error);
+          });
+      });
+    }
+  </script>
+
+  <script type="module" src="src/js/app.js"></script>
+</body>
+</html>

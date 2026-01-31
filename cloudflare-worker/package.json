@@ -1,0 +1,21 @@
+{
+  "name": "deepmemo-pdf-worker",
+  "version": "1.0.0",
+  "description": "CloudFlare Worker for DeepMemo PDF generation with rate limiting",
+  "type": "module",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "@cloudflare/puppeteer": "^0.0.10",
+    "marked": "^11.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.59.2"
+  },
+  "author": "DeepMemo Team",
+  "license": "MIT"
+}

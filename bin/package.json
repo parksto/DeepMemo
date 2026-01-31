@@ -1,0 +1,25 @@
+{
+  "name": "deepmemo-cli",
+  "version": "1.0.0",
+  "description": "Command-line tools for DeepMemo",
+  "main": "branch2pdf.js",
+  "scripts": {
+    "pdf": "node branch2pdf.js"
+  },
+  "keywords": [
+    "deepmemo",
+    "pdf",
+    "markdown",
+    "cli",
+    "puppeteer"
+  ],
+  "author": "DeepMemo Team",
+  "license": "MIT",
+  "dependencies": {
+    "marked": "^11.0.0",
+    "puppeteer": "^21.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
