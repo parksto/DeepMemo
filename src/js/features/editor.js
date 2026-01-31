@@ -959,7 +959,7 @@ export async function updateViewMode() {
 }
 
 /**
- * Update share links href attributes
+ * Update URL links href attributes
  * @param {string} currentNodeId - Current node ID
  */
 function updateShareLinks(currentNodeId) {

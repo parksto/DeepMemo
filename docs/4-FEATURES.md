@@ -267,7 +267,7 @@ Le tree affiche différemment chaque type de node :
 
 **Activation** :
 - URL : `?branch=node_123#/node/node_456`
-- UI : Bouton "Share Branch" → génère URL
+- UI : Bouton "Copy Branch URL" → génère URL
 
 **Effets** :
 - Sidebar affiche **uniquement** les descendants de `branchRootId`
@@ -351,7 +351,7 @@ Quand branch mode est actif :
 | **Search** | Global | **Scoped** to branch descendants |
 | **Breadcrumb** | Root → ... → Node | **Branch Root → ... → Node** |
 | **Page Title** | "DeepMemo" | "DeepMemo - [Branch Name]" |
-| **Share URLs** | Preserve context | Preserve `?branch=` param |
+| **Copy URLs** | Preserve context | Preserve `?branch=` param |
 
 📍 **Références** :
 - Disable new root : `app.js:261-264`
@@ -419,7 +419,7 @@ getBranchUrl(branchRootId)
 
 📍 **Références** :
 - `src/js/utils/routing.js:80-95`
-- `index.html:155-166` (share buttons)
+- `index.html:155-166` (copy URL buttons)
 - `src/js/features/editor.js:963-977` (updateShareLinks)
 
 ---
@@ -475,7 +475,7 @@ Project B (outside branch)
 
 #### Workflow : Entrer en Branch Mode
 
-1. User clique sur "Share Branch" (🌿) dans right panel
+1. User clique sur "Copy Branch URL" (🌿) dans right panel
 2. Génère URL : `?branch=node_123#/node/node_123`
 3. Copie dans clipboard
 4. User colle URL dans nouvelle tab (même navigateur)

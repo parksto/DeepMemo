@@ -517,7 +517,7 @@ Liste complète des fonctionnalités implémentées dans V0.10.5
 ### 6.1 Activation
 - URL: `?branch=nodeId`
 - "Isolate Branch" dans action modal
-- Share branch URL
+- Copy branch URL
 
 ### 6.2 Comportement
 - Sidebar: Seul le sous-arbre visible
