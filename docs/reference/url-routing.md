@@ -16,7 +16,7 @@
 3. [Paramètres de Routing](#paramètres-de-routing)
 4. [Fonctions du Module](#fonctions-du-module)
 5. [Intégration App](#intégration-app)
-6. [Partage d'URL](#partage-durl)
+6. [Copie d'URL](#copie-durl)
 7. [Cas d'Usage](#cas-dusage)
 8. [Référence Rapide](#référence-rapide)
 
@@ -405,10 +405,10 @@ window.addEventListener('hashchange', () => {
 export function getNodeUrl(nodeId, currentBranchRootId = null)
 ```
 
-**Description** : Génère une URL partageable pour un nœud, préservant le contexte de branche.
+**Description** : Génère une URL pour un nœud, préservant le contexte de branche.
 
 **Paramètres** :
-- `nodeId` (string) : ID du nœud à partager
+- `nodeId` (string) : ID du nœud
 - `currentBranchRootId` (string | null) : Racine de branche actuelle (null pour mode global)
 
 **Retour** : URL complète (string)
@@ -455,7 +455,7 @@ export function getBranchUrl(branchRootId)
 **Comportement** :
 - **Toujours** ajoute `?branch=` param
 - Sélectionne automatiquement le nœud racine de la branche
-- Utilisé par le bouton "🌿 Share Branch"
+- Utilisé par le bouton "🌿 Copy Branch URL"
 
 **Exemple** :
 ```javascript
@@ -626,7 +626,7 @@ if (Object.keys(this.data.nodes).length === 0) {
 
 ---
 
-## Partage d'URL
+## Copie d'URL
 
 ### Boutons de Copie d'URL (UI)
 
@@ -725,7 +725,7 @@ copyBranchUrl(event) {
 **Comportement** :
 - **Toujours** crée une URL de branche isolée
 - URL : `?branch={currentNodeId}#/node/{currentNodeId}`
-- Utile pour partager un sous-arbre dans un nouvel onglet
+- Utile pour ouvrir un sous-arbre dans un nouvel onglet
 
 📍 **Référence** : `app.js:1171-1188`
 
@@ -747,12 +747,12 @@ copyBranchUrl(event) {
 
 ---
 
-### 2. Partage entre Onglets (Même Session)
+### 2. Multi-tab (Même Session)
 
 **Objectif** : Ouvrir le même nœud dans un nouvel onglet en préservant le contexte.
 
 **Steps** :
-1. Cliquer sur 🔗 (Share Node)
+1. Cliquer sur 🔗 (Copy URL)
 2. URL copiée dans le presse-papiers
 3. Ouvrir nouvel onglet
 4. Coller URL → Nœud chargé avec le même contexte
@@ -769,7 +769,7 @@ copyBranchUrl(event) {
 
 **Steps** :
 1. Sélectionner le nœud racine du sous-arbre
-2. Cliquer sur 🌿 (Share Branch)
+2. Cliquer sur 🌿 (Copy Branch URL)
 3. URL copiée : `?branch=rootId#/node/rootId`
 4. Ouvrir dans nouvel onglet → Sidebar n'affiche que les descendants
 
@@ -893,7 +893,7 @@ User Action → URL Change → Event → Handler → UI Update
 ├─ Click link │            │       │          └─ selectNode()
 ├─ Type URL   └─ hash mod. │       │             render()
 ├─ Bookmark               └─ hashchange        updateBreadcrumb()
-├─ Share                              └─ handleHashChange()
+├─ Copy URL                           └─ handleHashChange()
 └─ Button
 ```
 
@@ -926,7 +926,7 @@ User Action → URL Change → Event → Handler → UI Update
 |---------|--------|---------|
 | `src/js/utils/routing.js` | 95 | Module complet de routing |
 | `src/js/app.js` | 1629 | Intégration app (lignes 97-220 pour routing) |
-| `index.html` | 473 | Boutons de partage (lignes 155-166) |
+| `index.html` | 473 | Boutons de copie d'URL (lignes 155-166) |
 
 **Total** : ~2197 lignes de code analysées
 
