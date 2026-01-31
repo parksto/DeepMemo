@@ -403,13 +403,13 @@ updateBranchModeIndicator() {
 
 **Current Node URL** (preserve branch context) :
 ```javascript
-getShareableUrl(nodeId, branchRootId)
+getNodeUrl(nodeId, branchRootId)
 // → https://deepmemo.org/?branch=node_123#/node/node_456
 ```
 
 **Branch Isolation URL** (always creates branch) :
 ```javascript
-getShareableBranchUrl(branchRootId)
+getBranchUrl(branchRootId)
 // → https://deepmemo.org/?branch=node_456#/node/node_456
 ```
 

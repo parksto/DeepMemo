@@ -330,8 +330,8 @@ export default {
 
   // Tooltips
   tooltips: {
-    shareNode: "Copy URL of this node (preserves current context)",
-    shareBranch: "Copy URL in isolated branch mode (focus view)",
+    copyNodeUrl: "Copy URL of this node (preserves current context)",
+    copyBranchUrl: "Copy URL in isolated branch mode (focus view)",
     goToParent: "Go to parent",
     goToRoot: "Back to root",
     togglePreview: "Enable/disable live preview (split-screen)",

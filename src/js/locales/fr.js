@@ -343,8 +343,8 @@ export default {
 
   // Tooltips
   tooltips: {
-    shareNode: "Copier l'URL de ce nœud (préserve le contexte actuel)",
-    shareBranch: "Copier l'URL en mode branche isolée (vue focus)",
+    copyNodeUrl: "Copier l'URL de ce nœud (préserve le contexte actuel)",
+    copyBranchUrl: "Copier l'URL en mode branche isolée (vue focus)",
     goToParent: "Remonter au parent",
     goToRoot: "Retour à la racine",
     togglePreview: "Activer/désactiver la prévisualisation en temps réel (écran partagé)",

@@ -1128,10 +1128,10 @@ const app = {
   },
 
   /**
-   * Share current node (copy URL to clipboard on left-click)
+   * Copy current node URL to clipboard (left-click)
    * Preserves current context (branch or global)
    */
-  shareNode(event) {
+  copyNodeUrl(event) {
     if (!this.currentNodeId) {
       showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
@@ -1143,7 +1143,7 @@ const app = {
       event.preventDefault();
       // URL to copy: preserve current context (branch mode if active)
       const branchRootId = TreeModule.isBranchMode() ? TreeModule.getBranchRootId() : null;
-      const urlToCopy = RoutingModule.getShareableUrl(this.currentNodeId, branchRootId);
+      const urlToCopy = RoutingModule.getNodeUrl(this.currentNodeId, branchRootId);
 
       // Ctrl+Click or Cmd+Click: copy markdown format [Title](URL)
       if (event.ctrlKey || event.metaKey) {
@@ -1166,10 +1166,10 @@ const app = {
   },
 
   /**
-   * Share current branch (copy URL to clipboard on left-click)
+   * Copy current branch URL to clipboard (left-click)
    * Always creates an isolated branch URL
    */
-  shareBranch(event) {
+  copyBranchUrl(event) {
     if (!this.currentNodeId) {
       showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
@@ -1179,7 +1179,7 @@ const app = {
     // Allow middle-click (button 1) and right-click (button 2) to work normally
     if (event && event.button === 0) {
       event.preventDefault();
-      const url = RoutingModule.getShareableBranchUrl(this.currentNodeId);
+      const url = RoutingModule.getBranchUrl(this.currentNodeId);
       navigator.clipboard.writeText(url).then(() => {
         showToast(t('toast.branchLinkCopied'), '🌿');
       }).catch(() => {

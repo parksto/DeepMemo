@@ -65,7 +65,7 @@ DeepMemo utilise un système de **hash-based routing** combiné à des **query p
 | **Query params** | Mode branche via `?branch=id` |
 | **LocalFirst** | URLs valides uniquement sur même PC/navigateur/utilisateur |
 | **Bookmarkable** | Sauvegarde de contexte dans les favoris navigateur |
-| **Shareable** | Copie d'URL pour ouvrir dans nouvel onglet (même session) |
+| **Copyable** | Copie d'URL pour ouvrir dans nouvel onglet (même session) |
 | **History** | Utilise `history.replaceState` (pas de navigation arrière) |
 
 ⚠️ **Important** : DeepMemo stocke les données **localement** (IndexedDB). Les URLs ne pointent **pas** vers un serveur - elles servent de bookmarks locaux.
@@ -398,11 +398,11 @@ window.addEventListener('hashchange', () => {
 
 ---
 
-### getShareableUrl()
+### getNodeUrl()
 
 **Signature** :
 ```javascript
-export function getShareableUrl(nodeId, currentBranchRootId = null)
+export function getNodeUrl(nodeId, currentBranchRootId = null)
 ```
 
 **Description** : Génère une URL partageable pour un nœud, préservant le contexte de branche.
@@ -416,17 +416,17 @@ export function getShareableUrl(nodeId, currentBranchRootId = null)
 **Exemples** :
 ```javascript
 // Mode global
-getShareableUrl('node_123', null)
+getNodeUrl('node_123', null)
 → 'https://deepmemo.org/#/node/node_123'
 
 // Mode branche
-getShareableUrl('node_456', 'root_1')
+getNodeUrl('node_456', 'root_1')
 → 'https://deepmemo.org/?branch=root_1#/node/node_456'
 ```
 
 **Code** :
 ```javascript
-export function getShareableUrl(nodeId, currentBranchRootId = null) {
+export function getNodeUrl(nodeId, currentBranchRootId = null) {
   const baseUrl = `${window.location.origin}${window.location.pathname}`;
   const search = currentBranchRootId ? `?branch=${currentBranchRootId}` : '';
   const hash = `#/node/${nodeId}`;
@@ -438,11 +438,11 @@ export function getShareableUrl(nodeId, currentBranchRootId = null) {
 
 ---
 
-### getShareableBranchUrl()
+### getBranchUrl()
 
 **Signature** :
 ```javascript
-export function getShareableBranchUrl(branchRootId)
+export function getBranchUrl(branchRootId)
 ```
 
 **Description** : Génère une URL de branche isolée (force toujours le mode branche).
@@ -459,13 +459,13 @@ export function getShareableBranchUrl(branchRootId)
 
 **Exemple** :
 ```javascript
-getShareableBranchUrl('node_456')
+getBranchUrl('node_456')
 → 'https://deepmemo.org/?branch=node_456#/node/node_456'
 ```
 
 **Code** :
 ```javascript
-export function getShareableBranchUrl(branchRootId) {
+export function getBranchUrl(branchRootId) {
   const baseUrl = `${window.location.origin}${window.location.pathname}`;
   return `${baseUrl}?branch=${branchRootId}#/node/${branchRootId}`;
 }
@@ -628,34 +628,34 @@ if (Object.keys(this.data.nodes).length === 0) {
 
 ## Partage d'URL
 
-### Boutons de Partage (UI)
+### Boutons de Copie d'URL (UI)
 
 **Emplacement** : Header de l'éditeur
 
 **Boutons** :
-1. 🔗 "Share Node" (`#shareLink`)
-2. 🌿 "Share Branch" (`#shareBranchLink`)
+1. 🔗 "Copy URL" (`#shareLink`)
+2. 🌿 "Copy Branch URL" (`#shareBranchLink`)
 
 **HTML** :
 ```html
 <a href="#" id="shareLink"
    title="Copier l'URL de ce nœud (préserve le contexte actuel)"
-   onclick="app.shareNode(event)">🔗</a>
+   onclick="app.copyNodeUrl(event)">🔗</a>
 
 <a href="#" id="shareBranchLink"
    title="Copier l'URL en mode branche isolée (vue focus)"
-   onclick="app.shareBranch(event)">🌿</a>
+   onclick="app.copyBranchUrl(event)">🌿</a>
 ```
 
 📍 **Référence** : `index.html:155-166`
 
 ---
 
-### shareNode() - Partage avec Contexte
+### copyNodeUrl() - Copie URL avec Contexte
 
 **Fonction** :
 ```javascript
-shareNode(event) {
+copyNodeUrl(event) {
   if (!this.currentNodeId) {
     showToast(t('toast.selectNodeFirst'), 'ℹ️');
     return;
@@ -667,7 +667,7 @@ shareNode(event) {
 
     // URL to copy: preserve current context (branch mode if active)
     const branchRootId = TreeModule.isBranchMode() ? TreeModule.getBranchRootId() : null;
-    const urlToCopy = RoutingModule.getShareableUrl(this.currentNodeId, branchRootId);
+    const urlToCopy = RoutingModule.getNodeUrl(this.currentNodeId, branchRootId);
 
     // Ctrl+Click or Cmd+Click: copy markdown format [Title](URL)
     if (event.ctrlKey || event.metaKey) {
@@ -699,11 +699,11 @@ shareNode(event) {
 
 ---
 
-### shareBranch() - Partage Isolé
+### copyBranchUrl() - Copie URL Branche Isolée
 
 **Fonction** :
 ```javascript
-shareBranch(event) {
+copyBranchUrl(event) {
   if (!this.currentNodeId) {
     showToast(t('toast.selectNodeFirst'), 'ℹ️');
     return;
@@ -712,7 +712,7 @@ shareBranch(event) {
   // Only prevent default and copy on left-click (button 0)
   if (event && event.button === 0) {
     event.preventDefault();
-    const url = RoutingModule.getShareableBranchUrl(this.currentNodeId);
+    const url = RoutingModule.getBranchUrl(this.currentNodeId);
     navigator.clipboard.writeText(url).then(() => {
       showToast(t('toast.branchLinkCopied'), '🌿');
     }).catch(() => {
@@ -865,11 +865,11 @@ Voir : [Subtask 1](https://deepmemo.org/?branch=project_456#/node/subtask_789)
 | `parseHash()` | - | `{mode, branchRootId, nodeId}` | Parse URL actuelle | `routing.js:12` |
 | `updateHash()` | `nodeId, branchRootId?` | `void` | Met à jour URL | `routing.js:40` |
 | `setupHashListener()` | `onHashChange` | `void` | Écoute hashchange | `routing.js:67` |
-| `getShareableUrl()` | `nodeId, branchRootId?` | `string` | URL avec contexte | `routing.js:80` |
-| `getShareableBranchUrl()` | `branchRootId` | `string` | URL branche isolée | `routing.js:92` |
+| `getNodeUrl()` | `nodeId, branchRootId?` | `string` | URL avec contexte | `routing.js:80` |
+| `getBranchUrl()` | `branchRootId` | `string` | URL branche isolée | `routing.js:92` |
 | `handleHashChange()` | `parsed` | `void` | Gère changement URL | `app.js:188` |
-| `shareNode()` | `event` | `void` | Copie URL nœud | `app.js:1134` |
-| `shareBranch()` | `event` | `void` | Copie URL branche | `app.js:1171` |
+| `copyNodeUrl()` | `event` | `void` | Copie URL nœud | `app.js:1134` |
+| `copyBranchUrl()` | `event` | `void` | Copie URL branche | `app.js:1171` |
 
 ---
 

@@ -8,7 +8,7 @@ import { showToast } from '../ui/toast.js';
 import { escapeHtml } from '../utils/helpers.js';
 import * as TagsModule from './tags.js';
 import { isBranchMode, isNodeInBranch, getBranchRootId, updatePageTitle } from './tree.js';
-import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
+import { getNodeUrl, getBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
 import * as AttachmentsModule from '../core/attachments.js';
 import { t, getCurrentLanguage } from '../utils/i18n.js';
@@ -974,8 +974,8 @@ function updateShareLinks(currentNodeId) {
 
   // Build proper URLs for middle-click and right-click
   const branchRootId = isBranchMode() ? getBranchRootId() : null;
-  shareLink.href = getShareableUrl(currentNodeId, branchRootId);
-  shareBranchLink.href = getShareableBranchUrl(currentNodeId);
+  shareLink.href = getNodeUrl(currentNodeId, branchRootId);
+  shareBranchLink.href = getBranchUrl(currentNodeId);
 }
 
 /**

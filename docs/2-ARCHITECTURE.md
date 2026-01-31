@@ -1290,7 +1290,7 @@ showToast('Error loading data', 'error');
 - Hash-based routing (`#/node/id`)
 - Query params (`?branch=id`)
 - Browser history
-- Shareable URLs
+- URL generation (bookmarks, multi-tab)
 
 #### Format URL
 
@@ -1313,8 +1313,8 @@ https://deepmemo.org/?branch=node_123#/node/node_456
 |----------|-------------|
 | `navigateToNode(nodeId)` | Change hash → `#/node/{id}` |
 | `navigateToHash()` | Parse hash et render node |
-| `getShareableUrl(nodeId)` | Génère URL complète |
-| `getShareableBranchUrl(branchId, nodeId)` | URL avec ?branch |
+| `getNodeUrl(nodeId)` | Génère URL complète |
+| `getBranchUrl(branchId, nodeId)` | URL avec ?branch |
 
 ---
 
