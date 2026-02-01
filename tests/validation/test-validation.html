@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validation Tests - DeepMemo</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 {
+      color: #4ec9b0;
+    }
+    .summary {
+      margin: 20px 0;
+      padding: 15px;
+      background: #2d2d2d;
+      border-radius: 4px;
+      font-size: 18px;
+    }
+    .summary.pass {
+      border-left: 4px solid #4caf50;
+    }
+    .summary.fail {
+      border-left: 4px solid #f44336;
+    }
+    .test {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+    .test.pass {
+      background: #1e3a1e;
+      border-color: #4caf50;
+    }
+    .test.fail {
+      background: #3a1e1e;
+      border-color: #f44336;
+    }
+    .test h3 {
+      margin: 0 0 10px 0;
+    }
+    .errors {
+      margin-top: 10px;
+      padding: 10px;
+      background: #2d2d2d;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .errors div {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 DeepMemo Validation Tests</h1>
+  <div id="summary"></div>
+  <div id="results"></div>
+
+  <script type="module">
+    import { validateGlobalExport, validateBranchExport } from '../../src/js/core/validation.js';
+
+    const summaryDiv = document.getElementById('summary');
+    const resultsDiv = document.getElementById('results');
+
+    let totalTests = 0;
+    let passedTests = 0;
+
+    function runTest(name, validationFn, data, shouldPass) {
+      totalTests++;
+      const result = validationFn(data);
+      const passed = result.valid === shouldPass;
+
+      if (passed) passedTests++;
+
+      const testDiv = document.createElement('div');
+      testDiv.className = `test ${passed ? 'pass' : 'fail'}`;
+
+      let html = `<h3>${passed ? '✅' : '❌'} ${name}</h3>`;
+      html += `<div>Expected: ${shouldPass ? 'PASS' : 'FAIL'} | Got: ${result.valid ? 'PASS' : 'FAIL'}</div>`;
+
+      if (result.errors.length > 0) {
+        html += `<div class="errors"><strong>Errors (${result.errors.length}):</strong>`;
+        result.errors.forEach(err => {
+          html += `<div>• ${err}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (result.warnings.length > 0) {
+        html += `<div class="errors"><strong>Warnings (${result.warnings.length}):</strong>`;
+        result.warnings.forEach(warn => {
+          html += `<div>⚠️ ${warn}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      testDiv.innerHTML = html;
+      resultsDiv.appendChild(testDiv);
+    }
+
+    function updateSummary() {
+      const allPassed = passedTests === totalTests;
+      summaryDiv.className = `summary ${allPassed ? 'pass' : 'fail'}`;
+      summaryDiv.innerHTML = `
+        <strong>${allPassed ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}</strong><br>
+        ${passedTests} / ${totalTests} tests passed
+      `;
+    }
+
+    // Test 1: Valid minimal export
+    runTest('Valid minimal export', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          title: 'Test',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, true);
+
+    // Test 2: Missing nodes field
+    runTest('Missing nodes field', validateGlobalExport, {
+      rootNodes: []
+    }, false);
+
+    // Test 3: Missing rootNodes field
+    runTest('Missing rootNodes field', validateGlobalExport, {
+      nodes: {}
+    }, false);
+
+    // Test 4: Node missing id
+    runTest('Node missing id field', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          type: 'node',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, false);
+
+    // Test 5: Invalid node type
+    runTest('Invalid node type', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'invalid-type',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, false);
+
+    // Test 6: Broken parent reference
+    runTest('Broken parent reference', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          parent: 'nonexistent',
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, false);
+
+    // Test 7: Broken child reference
+    runTest('Broken child reference', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          parent: null,
+          children: ['nonexistent'],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, false);
+
+    // Test 8: Symlink missing targetId
+    runTest('Symlink missing targetId', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          parent: null,
+          children: ['sym-1'],
+          created: 123,
+          modified: 123
+        },
+        'sym-1': {
+          id: 'sym-1',
+          type: 'symlink',
+          parent: 'node-1',
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, false);
+
+    // Test 9: Cycle detection
+    runTest('Cycle detection (A→B→C→A)', validateGlobalExport, {
+      nodes: {
+        'a': {
+          id: 'a',
+          type: 'node',
+          parent: null,
+          children: ['b'],
+          created: 123,
+          modified: 123
+        },
+        'b': {
+          id: 'b',
+          type: 'node',
+          parent: 'a',
+          children: ['c'],
+          created: 123,
+          modified: 123
+        },
+        'c': {
+          id: 'c',
+          type: 'node',
+          parent: 'b',
+          children: ['a'],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['a']
+    }, false);
+
+    // Test 10: Valid branch export
+    runTest('Valid branch export', validateBranchExport, {
+      type: 'deepmemo-branch',
+      branchRootId: 'root',
+      nodes: {
+        'root': {
+          id: 'root',
+          type: 'node',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      }
+    }, true);
+
+    // Test 11: Branch export missing branchRootId
+    runTest('Branch missing branchRootId', validateBranchExport, {
+      type: 'deepmemo-branch',
+      nodes: {
+        'root': {
+          id: 'root',
+          type: 'node',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      }
+    }, false);
+
+    // Test 12: Valid with symlink
+    runTest('Valid export with symlink', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          parent: null,
+          children: ['node-2', 'sym-1'],
+          created: 123,
+          modified: 123
+        },
+        'node-2': {
+          id: 'node-2',
+          type: 'node',
+          parent: 'node-1',
+          children: [],
+          created: 123,
+          modified: 123
+        },
+        'sym-1': {
+          id: 'sym-1',
+          type: 'symlink',
+          parent: 'node-1',
+          children: [],
+          targetId: 'node-2',
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, true);
+
+    // Test 13: Root node with non-null parent (should fail)
+    runTest('Root node with parent', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          parent: 'node-2',
+          children: [],
+          created: 123,
+          modified: 123
+        },
+        'node-2': {
+          id: 'node-2',
+          type: 'node',
+          parent: null,
+          children: ['node-1'],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['node-1']
+    }, false);
+
+    // Test 14: Accept missing optional fields (tags, content, etc.)
+    runTest('Accept missing optional fields', validateGlobalExport, {
+      nodes: {
+        'node-1': {
+          id: 'node-1',
+          type: 'node',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+          // No title, content, tags, attachments, etc.
+        }
+      },
+      rootNodes: ['node-1']
+    }, true);
+
+    // Test 15: Legacy type "note" (backwards compatibility)
+    runTest('Legacy type "note" accepted', validateGlobalExport, {
+      nodes: {
+        'legacy-1': {
+          id: 'legacy-1',
+          type: 'note',
+          parent: null,
+          children: [],
+          created: 123,
+          modified: 123
+        }
+      },
+      rootNodes: ['legacy-1']
+    }, true);
+
+    // Update summary
+    updateSummary();
+  </script>
+</body>
+</html>

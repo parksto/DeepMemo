@@ -127,7 +127,13 @@ export default {
     importError: "Import error: {message}",
     exportError: "Export error: {message}",
     mermaidNotAvailable: "Mermaid.js is not loaded. Cannot export to SVG.",
-    brokenSymlink: "⚠️ Broken symlink: target node no longer exists."
+    brokenSymlink: "⚠️ Broken symlink: target node no longer exists.",
+    validationFailed: "Import validation failed",
+    missingRequiredField: "Missing required field: {field}",
+    invalidNodeType: "Invalid node type in {nodeId}: {type}",
+    brokenReference: "Broken reference: {nodeId} → {refId}",
+    symlinkMissingTarget: "Symlink {nodeId} missing targetId",
+    cycleDetected: "Cycle detected in hierarchy involving {nodeId}"
   },
 
   // Confirmation dialogs
