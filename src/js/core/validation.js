@@ -262,16 +262,16 @@ export function validateMetadata(metadata) {
   }
 
   // Check recommended fields (warnings only)
-  const recommendedFields = ['version', 'exportDate', 'exportType', 'nodeCount'];
+  const recommendedFields = ['version', 'exported', 'type', 'nodeCount'];
   for (const field of recommendedFields) {
     if (!(field in metadata)) {
       result.warnings.push(`Metadata missing recommended field: "${field}"`);
     }
   }
 
-  // Validate exportType if present
-  if (metadata.exportType && !['full', 'branch'].includes(metadata.exportType)) {
-    result.warnings.push(`Unknown exportType: "${metadata.exportType}" (expected "full" or "branch")`);
+  // Validate type if present
+  if (metadata.type && !['global', 'branch'].includes(metadata.type)) {
+    result.warnings.push(`Unknown type: "${metadata.type}" (expected "global" or "branch")`);
   }
 
   return result;
