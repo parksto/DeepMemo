@@ -1,11 +1,15 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://deepmemo.org/schemas/v1.0/metadata.json",
   "title": "DeepMemo Archive Metadata",
   "description": "JSON Schema for metadata.json file in .dm archives",
   "type": "object",
   "required": ["version", "type", "exported"],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference URL"
+    },
     "version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+$",
@@ -28,7 +32,7 @@
     },
     "branchRootId": {
       "type": "string",
-      "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$",
+      "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
       "description": "ID of the branch root node (required for branch exports)"
     },
     "nodeCount": {
@@ -58,6 +62,13 @@
       },
       "then": {
         "required": ["branchRootId"],
+        "properties": {
+          "branchRootId": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+            "description": "ID of the branch root node (required for branch exports)"
+          }
+        },
         "description": "Branch exports must specify branchRootId"
       }
     }

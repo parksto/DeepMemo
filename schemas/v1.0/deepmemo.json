@@ -1,24 +1,28 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://deepmemo.org/schemas/v1.0/deepmemo.json",
   "title": "DeepMemo Data Structure",
   "description": "JSON Schema for DeepMemo data format (v1.0)",
   "oneOf": [
-    { "$ref": "#/$defs/globalExport" },
-    { "$ref": "#/$defs/branchExport" }
+    { "$ref": "#/definitions/globalExport" },
+    { "$ref": "#/definitions/branchExport" }
   ],
-  "$defs": {
+  "definitions": {
     "globalExport": {
       "type": "object",
       "description": "Global export containing all data",
       "required": ["nodes", "rootNodes"],
       "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "JSON Schema reference URL"
+        },
         "nodes": {
           "type": "object",
           "description": "Dictionary of all nodes, keyed by node ID",
           "patternProperties": {
-            "^(node|symlink)_\\d+_[a-z0-9]+$": {
-              "$ref": "#/$defs/node"
+            "^(node|symlink)_\\d+_[a-z0-9_]+$": {
+              "$ref": "#/definitions/node"
             }
           },
           "additionalProperties": false
@@ -28,7 +32,7 @@
           "description": "Array of root-level node IDs",
           "items": {
             "type": "string",
-            "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$"
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
           }
         }
       },
@@ -39,6 +43,10 @@
       "description": "Branch export containing a subtree",
       "required": ["type", "version", "branchRootId", "exported", "nodeCount", "nodes"],
       "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "JSON Schema reference URL"
+        },
         "type": {
           "type": "string",
           "const": "deepmemo-branch",
@@ -51,7 +59,7 @@
         },
         "branchRootId": {
           "type": "string",
-          "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$",
+          "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
           "description": "ID of the root node of this branch"
         },
         "exported": {
@@ -68,8 +76,8 @@
           "type": "object",
           "description": "Dictionary of branch nodes, keyed by node ID",
           "patternProperties": {
-            "^(node|symlink)_\\d+_[a-z0-9]+$": {
-              "$ref": "#/$defs/node"
+            "^(node|symlink)_\\d+_[a-z0-9_]+$": {
+              "$ref": "#/definitions/node"
             }
           },
           "additionalProperties": false
@@ -84,8 +92,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$",
-          "description": "Unique node identifier (node_timestamp_random or symlink_timestamp_random)"
+          "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+          "description": "Unique node identifier: 'node_timestamp_random' for regular nodes, 'symlink_timestamp_random' for symlinks"
         },
         "title": {
           "type": "string",
@@ -106,7 +114,7 @@
             { "type": "null" },
             {
               "type": "string",
-              "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$"
+              "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
             }
           ],
           "description": "Parent node ID, or null for root nodes"
@@ -116,7 +124,7 @@
           "description": "Array of child node IDs",
           "items": {
             "type": "string",
-            "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$"
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
           }
         },
         "tags": {
@@ -131,7 +139,23 @@
           "type": "array",
           "description": "Array of attachment metadata objects (optional)",
           "items": {
-            "$ref": "#/$defs/attachment"
+            "$ref": "#/definitions/attachment"
+          }
+        },
+        "links": {
+          "type": "array",
+          "description": "Array of outgoing link node IDs (optional)",
+          "items": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
+          }
+        },
+        "backlinks": {
+          "type": "array",
+          "description": "Array of incoming link node IDs (optional)",
+          "items": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
           }
         },
         "created": {
@@ -146,7 +170,7 @@
         },
         "targetId": {
           "type": "string",
-          "pattern": "^(node|symlink)_\\d+_[a-z0-9]+$",
+          "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
           "description": "Target node ID (required for symlinks only)"
         }
       },
@@ -157,7 +181,19 @@
           },
           "then": {
             "required": ["targetId"],
-            "description": "Symlinks must have a targetId"
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^symlink_\\d+_[a-z0-9_]+$",
+                "description": "Symlink IDs must start with 'symlink_'"
+              },
+              "targetId": {
+                "type": "string",
+                "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+                "description": "Target node ID (required for symlinks)"
+              }
+            },
+            "description": "Symlinks must have a targetId and ID starting with 'symlink_'"
           }
         },
         {
@@ -168,7 +204,14 @@
             "not": {
               "required": ["targetId"]
             },
-            "description": "Regular nodes cannot have a targetId"
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^node_\\d+_[a-z0-9_]+$",
+                "description": "Regular node IDs must start with 'node_'"
+              }
+            },
+            "description": "Regular nodes cannot have a targetId and ID must start with 'node_'"
           }
         }
       ],
@@ -181,8 +224,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^attach_\\d+_[a-z0-9]+$",
-          "description": "Unique attachment identifier (attach_timestamp_random)"
+          "pattern": "^attach_\\d+_[a-z0-9_]+$",
+          "description": "Unique attachment identifier (standard format: attach_timestamp_random, but custom IDs with underscores accepted)"
         },
         "name": {
           "type": "string",
