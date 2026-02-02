@@ -5,7 +5,7 @@
 > **Version** : V0.10.5
 > **Mise à jour** : 2026-01-31
 >
-> 📍 **Sources** : `src/js/utils/routing.js` (95 lignes), `src/js/app.js` (lignes 97-220), `index.html` (lignes 155-166)
+> 📍 **Sources** : `src/js/utils/routing.js` (95 lignes), `src/js/app.js` (lignes 97-99, 111-117, 188-220), `index.html` (lignes 155-166)
 
 ---
 
@@ -120,7 +120,7 @@ https://deepmemo.org/?branch={branchRootId}#/node/{nodeId}
 - Indicateur "🌿 mode branche" visible
 - Breadcrumb démarre à la racine de la branche
 
-📍 **Référence** : `routing.js:14` (parsing), `app.js:192-203` (activation)
+📍 **Référence** : `routing.js:14` (parsing), `app.js:192-200` (activation)
 
 ---
 
@@ -695,7 +695,7 @@ copyNodeUrl(event) {
 - **Ctrl/Cmd+Click** : Copie format Markdown `[Title](URL)` avec contexte préservé
 - **Middle-click / Right-click** : Comportement navigateur par défaut
 
-📍 **Référence** : `app.js:1134-1165`
+📍 **Référence** : `app.js:1134-1166`
 
 ---
 
@@ -727,7 +727,7 @@ copyBranchUrl(event) {
 - URL : `?branch={currentNodeId}#/node/{currentNodeId}`
 - Utile pour ouvrir un sous-arbre dans un nouvel onglet
 
-📍 **Référence** : `app.js:1171-1188`
+📍 **Référence** : `app.js:1172-1189`
 
 ---
 
@@ -810,7 +810,7 @@ const exitLink = indicator.querySelector('.branch-mode-exit');
 exitLink.href = `./#/node/${branchRootId}`;
 ```
 
-📍 **Référence** : `4-FEATURES.md:388-389`
+📍 **Référence** : `app.js:373-375`
 
 ---
 
@@ -869,7 +869,7 @@ Voir : [Subtask 1](https://deepmemo.org/?branch=project_456#/node/subtask_789)
 | `getBranchUrl()` | `branchRootId` | `string` | URL branche isolée | `routing.js:92` |
 | `handleHashChange()` | `parsed` | `void` | Gère changement URL | `app.js:188` |
 | `copyNodeUrl()` | `event` | `void` | Copie URL nœud | `app.js:1134` |
-| `copyBranchUrl()` | `event` | `void` | Copie URL branche | `app.js:1171` |
+| `copyBranchUrl()` | `event` | `void` | Copie URL branche | `app.js:1172` |
 
 ---
 

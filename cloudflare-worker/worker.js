@@ -10,6 +10,51 @@ import puppeteer from '@cloudflare/puppeteer';
 import { marked } from 'marked';
 
 /**
+ * Sanitize a string for use as a filename
+ * Unified version matching helpers.js implementation
+ * @param {string} text - Text to sanitize
+ * @param {Object|number} options - Options object or maxLength
+ * @param {number} options.maxLength - Maximum length (default: 50)
+ * @param {boolean} options.preserveSpaces - Keep spaces for filesystem (default: false)
+ * @returns {string} Sanitized filename-safe string
+ */
+function sanitizeFilename(text, options = {}) {
+  // Backwards compatibility: if options is a number, treat it as maxLength
+  if (typeof options === 'number') {
+    options = { maxLength: options };
+  }
+
+  const { maxLength = 50, preserveSpaces = false } = options;
+
+  if (!text || typeof text !== 'string') {
+    return 'Untitled';
+  }
+
+  let result = text;
+  result = result.replace(/\s+/g, ' ');
+
+  if (preserveSpaces) {
+    // Filesystem mode: only replace forbidden characters
+    result = result.replace(/[/:*?"<>|]/g, '_');
+    result = result.replace(/^\.+/, '_');
+  } else {
+    // Export mode: convert to web-friendly format
+    result = result.replace(/\s*-\s*/g, '-');
+    result = result.replace(/[^a-z0-9-]/gi, '-');
+    result = result.replace(/-+/g, '-');
+    result = result.replace(/^-+|-+$/g, '');
+  }
+
+  result = result.substring(0, maxLength).trim();
+
+  if (!preserveSpaces) {
+    result = result.replace(/-+$/, '');
+  }
+
+  return result || 'Untitled';
+}
+
+/**
  * Hash IP address for privacy-friendly rate limiting
  */
 async function hashIP(ip) {
@@ -281,7 +326,7 @@ export default {
       // Generate PDF
       const pdfBuffer = await generatePDF(env, nodes, rootId);
       const node = nodes[rootId];
-      const filename = `${node.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      const filename = `${sanitizeFilename(node.title)}.pdf`;
 
       return new Response(pdfBuffer, {
         headers: {

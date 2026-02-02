@@ -455,7 +455,7 @@ src/js/
 │   ├── attachments.js       # Gestion fichiers (244 lignes)
 │   ├── migration.js         # Migration localStorage (211 lignes)
 │   ├── default-data.js      # Contenu démo (2610 lignes)
-│   └── pdf-export-new.js    # Export PDF obsolète? (481 lignes)
+│   └── pdf-export-new.js    # Export PDF obsolète? (557 lignes)
 │
 ├── features/                 # Fonctionnalités utilisateur
 │   ├── tree.js              # Arborescence sidebar (686 lignes)
@@ -475,7 +475,7 @@ src/js/
 │   ├── routing.js           # Navigation URL (92 lignes)
 │   ├── keyboard.js          # Raccourcis clavier (51 lignes)
 │   ├── i18n.js              # Internationalisation (227 lignes)
-│   ├── helpers.js           # Fonctions utilitaires (38 lignes)
+│   ├── helpers.js           # Fonctions utilitaires (126 lignes)
 │   ├── sync.js              # Multi-tab sync (70 lignes)
 │   └── frontmatter.js       # Parse YAML (55 lignes)
 │
@@ -487,9 +487,9 @@ src/js/
 **Total** : ~12,300 lignes de JavaScript
 
 📍 **Vérification** :
-- Core : 5879 lignes
+- Core : 5955 lignes
 - Features : 4840 lignes
-- Utils : 605 lignes
+- Utils : 693 lignes
 
 ### Conventions de nommage
 
@@ -789,7 +789,7 @@ export function getDefaultData(language = 'fr') {
 
 ### pdf-export-new.js - Export PDF (obsolète?)
 
-**Fichier** : `src/js/core/pdf-export-new.js` (481 lignes)
+**Fichier** : `src/js/core/pdf-export-new.js` (557 lignes)
 
 **Statut** : Semble obsolète, fonctionnalité déplacée vers :
 - CloudFlare Worker : `cloudflare-worker/src/index.js`
@@ -1389,7 +1389,7 @@ t('messages.nodeCount', { count: 5 }) // → "5 nodes"
 
 ### helpers.js - Utilitaires
 
-**Fichier** : `src/js/utils/helpers.js` (38 lignes)
+**Fichier** : `src/js/utils/helpers.js` (126 lignes)
 
 **Fonctions** :
 
@@ -1397,9 +1397,11 @@ t('messages.nodeCount', { count: 5 }) // → "5 nodes"
 |----------|-------------|
 | `generateId()` | Génère ID unique (timestamp + random) |
 | `escapeHtml(text)` | Échappe HTML (XSS protection) |
+| `highlightText(text, query)` | Highlight search matches |
 | `downloadBlob(blob, filename)` | Télécharge fichier |
+| `sanitizeFilename(text, options)` | Sanitize pour exports/filesystem |
 
-📍 **Référence** : `src/js/utils/helpers.js:1-38`
+📍 **Référence** : `src/js/utils/helpers.js:1-126`
 
 ---
 

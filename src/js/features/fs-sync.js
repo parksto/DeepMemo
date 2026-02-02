@@ -5,7 +5,7 @@
  */
 
 import { data, saveData } from '../core/data.js';
-import { generateId } from '../utils/helpers.js';
+import { generateId, sanitizeFilename } from '../utils/helpers.js';
 import * as AttachmentsModule from '../core/attachments.js';
 import * as TreeModule from './tree.js';
 import { showToast } from '../ui/toast.js';
@@ -28,23 +28,8 @@ export function isFileSystemSyncSupported() {
 // SECTION 2: Sanitization & Collisions
 // ============================================================================
 
-/**
- * Sanitize un nom de fichier pour être compatible cross-platform
- * @param {string} title - Titre du nœud
- * @returns {string} Nom de fichier sanitizé
- */
-function sanitizeFilename(title) {
-  if (!title || typeof title !== 'string') {
-    return 'Untitled';
-  }
-
-  return title
-    .replace(/[/:*?"<>|]/g, '_')     // Caractères interdits Windows
-    .replace(/^\.+/, '_')             // Pas de points au début
-    .replace(/\s+/g, ' ')             // Collapse espaces multiples
-    .substring(0, 200)                // Limite longueur (sécurité)
-    .trim() || 'Untitled';
-}
+// Note: sanitizeFilename() is now imported from helpers.js
+// It's used with { preserveSpaces: true, maxLength: 200 } for filesystem compatibility
 
 /**
  * Enlève TOUS les suffixes accumulés " (N)" d'un nom de fichier
@@ -197,7 +182,7 @@ async function exportNodeRecursive(
     progressCallback({ current: stats.nodes, message: `Exporting: ${node.title}` });
   }
 
-  const baseName = sanitizeFilename(node.title);
+  const baseName = sanitizeFilename(node.title, { preserveSpaces: true, maxLength: 200 });
 
   // CAS 1: SYMLINKS → fichier .dmlink
   if (node.type === 'symlink') {
@@ -318,7 +303,7 @@ async function exportAttachments(node, dirHandle) {
       }
 
       // Sanitize le nom et extraire extension
-      const sanitizedName = sanitizeFilename(attachment.name) || `attachment`;
+      const sanitizedName = sanitizeFilename(attachment.name, { preserveSpaces: true, maxLength: 200 }) || `attachment`;
       const match = sanitizedName.match(/^(.+?)(\.[^.]+)?$/);
       const base = match[1];
       const ext = match[2] || '.bin';

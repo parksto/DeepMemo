@@ -398,14 +398,20 @@ node branch2pdf.js mon_export.dm output.pdf
 #### Structure générée
 
 ```
-Export_Mon_Projet/
-├── Mon_projet.md               # Nœud racine
-├── Tache_1/                    # Dossier pour enfants de Tache_1
-│   ├── index.md                # Contenu de Tache_1
-│   ├── Sous_tache.md           # Enfant 1.1
-│   └── screenshot__attach_123.png  # Attachment (à côté du .md)
-└── Tache_2.md                  # Enfant 2
+Export Mon Projet/
+├── Mon projet.md               # Nœud racine
+├── Tache 1/                    # Dossier pour enfants de Tache 1
+│   ├── index.md                # Contenu de Tache 1
+│   ├── Sous tache.md           # Enfant 1.1
+│   └── screenshot_attach_123.png  # Attachment (à côté du .md)
+└── Tache 2.md                  # Enfant 2
 ```
+
+**Note** : La sanitisation utilise la fonction unifiée `sanitizeFilename()` (`helpers.js`) avec différentes options selon le contexte :
+- **Export FS** : `{ preserveSpaces: true, maxLength: 200 }` → Espaces préservés, noms lisibles
+- **Export archives/PDF** : `{ maxLength: 50 }` → Tirets, compact, web-friendly
+
+Seuls les caractères interdits Windows (`/:*?"<>|`) et points en début de nom sont remplacés par `_` en mode FS.
 
 #### Format des fichiers Markdown
 

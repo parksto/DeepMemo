@@ -5,7 +5,7 @@
 
 import { data } from './data.js';
 import * as AttachmentsModule from './attachments.js';
-import { escapeHtml } from '../utils/helpers.js';
+import { escapeHtml, sanitizeFilename } from '../utils/helpers.js';
 import { t } from '../utils/i18n.js';
 import { showToast } from '../ui/toast.js';
 
@@ -540,7 +540,7 @@ export async function exportBranchPDF(branchRootId = null, options = {}) {
     // Save PDF
     const timestamp = Date.now();
     const filename = branchRootId && data.nodes[branchRootId]
-      ? `${data.nodes[branchRootId].title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.pdf`
+      ? `${sanitizeFilename(data.nodes[branchRootId].title)}.pdf`
       : `deepmemo-export-${timestamp}.pdf`;
 
     pdf.save(filename);

@@ -130,12 +130,12 @@ Quick reference of all features with links to detailed guides:
 ### File Formats
 
 #### .dm Archive Format
-🗜️ **[reference/file-formats/dm-archive.md](reference/file-formats/dm-archive.md)** - ZIP structure *(to be renamed)*
-
-Current location: `file-formats/ZIP-FORMAT.md`
+🗜️ **[reference/file-formats/DM-FORMAT.md](reference/file-formats/DM-FORMAT.md)** - ZIP structure specification
 - Archive structure (metadata.json, data.json, attachments/)
 - Version tracking
 - Import auto-detection (magic number)
+- ID generation and remapping
+- Compression and encoding
 
 #### JSON Interchange Format
 🔤 **[reference/file-formats/json-interchange.md](reference/file-formats/json-interchange.md)** - Simple JSON *(to be renamed)*

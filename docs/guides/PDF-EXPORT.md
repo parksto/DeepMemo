@@ -215,9 +215,11 @@ Si la génération réussit, le PDF est téléchargé automatiquement :
 
 ```javascript
 const blob = await response.blob();
-const filename = `${node.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+const filename = `${sanitizeFilename(node.title)}.pdf`;
 // Download trigger...
 ```
+
+**Note** : `sanitizeFilename()` normalise le titre pour créer un nom de fichier valide (espaces → tirets, suppression caractères spéciaux, fusion tirets multiples, max 50 caractères).
 
 📍 **Référence** : `app.js:1031-1033`
 

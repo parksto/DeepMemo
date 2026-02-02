@@ -3,7 +3,7 @@
  * Modular ES6 version
  */
 
-import { generateId, escapeHtml, downloadBlob } from './utils/helpers.js';
+import { generateId, escapeHtml, downloadBlob, sanitizeFilename } from './utils/helpers.js';
 import { setupKeyboardShortcuts } from './utils/keyboard.js';
 import * as RoutingModule from './utils/routing.js';
 import * as DataModule from './core/data.js';
@@ -1030,7 +1030,7 @@ const app = {
 
       const blob = await response.blob();
       const node = DataModule.data.nodes[rootId];
-      const filename = `${node.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      const filename = `${sanitizeFilename(node.title)}.pdf`;
       downloadBlob(blob, filename);
 
       const successMsg = type === 'global'

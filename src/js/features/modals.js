@@ -355,7 +355,7 @@ function createSymlink(nodeId, parentId, onSuccess) {
   }
 
   // Create symlink
-  const symlinkId = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  const symlinkId = 'symlink_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
   data.nodes[symlinkId] = {
     id: symlinkId,

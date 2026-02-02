@@ -42,7 +42,7 @@
     │
     ├── reference/              # Références techniques
     │   ├── file-formats/
-    │   │   ├── dm-archive.md   # Format .dm
+    │   │   ├── DM-FORMAT.md   # Format .dm
     │   │   ├── json-interchange.md
     │   │   └── validation.md   # JSON Schemas
     │   ├── storage-api.md      # API IndexedDB/Dexie (~200L)

@@ -6,6 +6,8 @@
 > **Mise à jour** : 2026-01-31
 >
 > 📍 **Sources** : `src/js/core/data.js` (lignes 523-1238), `schemas/v1.0/*.json`
+>
+> ⚠️ **Note sur les patterns d'IDs** : Ce document utilise les patterns des schémas JSON (`[a-z0-9_]+`) qui sont **plus permissifs** que ceux générés par le code (`[a-z0-9]{9}`). Le code génère toujours des IDs stricts sans underscores, mais le schéma accepte des IDs personnalisés avec underscores pour garantir l'interopérabilité. Voir section "Philosophie : Validation Permissive, Génération Stricte" pour détails.
 
 ---
 
@@ -335,7 +337,7 @@ Le schéma définit **deux variantes** (oneOf) :
 
 | Propriété | Type | Pattern/Contrainte | Description |
 |-----------|------|-------------------|-------------|
-| `id` | string | `^(node\|symlink)_\d+_[a-z0-9]+$` | Identifiant unique |
+| `id` | string | `^(node\|symlink)_\d+_[a-z0-9_]+$` | Identifiant unique |
 | `type` | enum | `"node"` ou `"symlink"` | Type de nœud |
 | `title` | string | minLength: 1 | Titre (peut inclure emojis) |
 | `parent` | string \| null | - | ID du parent (null pour racines) |
@@ -367,7 +369,7 @@ node_{timestamp}_{random}
 
 **Composants** :
 - `timestamp` : `Date.now()` (Unix milliseconds)
-- `random` : 9 caractères alphanumériques lowercase (`[a-z0-9]`)
+- `random` : 9 caractères alphanumériques lowercase (`[a-z0-9]`) générés par le code, ou format personnalisé (`[a-z0-9_]+`) accepté par le schéma
 
 **Exemple** :
 ```
@@ -395,7 +397,7 @@ symlink_{timestamp}_{random}
 
 **Composants** :
 - `timestamp` : `Date.now()` (Unix milliseconds)
-- `random` : 9 caractères alphanumériques lowercase (`[a-z0-9]`)
+- `random` : 9 caractères alphanumériques lowercase (`[a-z0-9]`) générés par le code, ou format personnalisé (`[a-z0-9_]+`) accepté par le schéma
 
 **Exemple** :
 ```
@@ -524,7 +526,7 @@ Chaque nœud peut avoir un tableau `attachments[]` contenant des **métadonnées
 
 | Propriété | Type | Pattern | Description |
 |-----------|------|---------|-------------|
-| `id` | string | `^attach_\d+_[a-z0-9]+$` | Identifiant unique |
+| `id` | string | `^attach_\d+_[a-z0-9_]+$` | Identifiant unique |
 | `name` | string | - | Nom original du fichier |
 | `type` | string | - | Type MIME (ex: `image/png`) |
 | `size` | integer | - | Taille en bytes |
@@ -775,7 +777,7 @@ JSON.stringify(data, null, 2)
 - **Format** : Binaire brut (pas de transformation)
 - **Stockage** : Blobs natifs du navigateur
 
-📍 **Référence** : `data.js:581, 660, 672` (JSON.stringify)
+📍 **Référence** : `data.js:581, 588, 660, 672` (JSON.stringify)
 
 ---
 
@@ -825,9 +827,9 @@ Pour valider une archive `.dm` :
 
 #### 5. IDs
 
-- ✅ **Nodes** : Pattern `^node_\d+_[a-z0-9]+$` (si `type === "node"`)
-- ✅ **Symlinks** : Pattern `^symlink_\d+_[a-z0-9]+$` (si `type === "symlink"`)
-- ✅ **Attachments** : Pattern `^attach_\d+_[a-z0-9]+$`
+- ✅ **Nodes** : Pattern `^node_\d+_[a-z0-9_]+$` (si `type === "node"`)
+- ✅ **Symlinks** : Pattern `^symlink_\d+_[a-z0-9_]+$` (si `type === "symlink"`)
+- ✅ **Attachments** : Pattern `^attach_\d+_[a-z0-9_]+$`
 - ✅ **Unicité** : Tous les IDs de nœuds sont uniques
 - ✅ **Unicité** : Tous les IDs d'attachments sont uniques
 - ✅ **Cohérence type/ID** : Le préfixe de l'ID doit correspondre au type
@@ -939,8 +941,8 @@ async function validateDM(filepath) {
 - `custom` : `[a-z0-9_]+` (accepté par le schéma, peut contenir des underscores)
 
 **Validation du schéma (v1.0)** :
-- **Pattern généré** : `^(node|symlink|attach)_\d+_[a-z0-9]+$` (strict, pas d'underscore dans random)
-- **Pattern accepté** : `^(node|symlink|attach)_\d+_[a-z0-9_]+$` (permissif, underscores autorisés)
+- **Pattern du schéma JSON** : `^(node|symlink|attach)_\d+_[a-z0-9_]+$` (permissif, underscores autorisés)
+- **Convention de génération (code)** : Le code génère toujours `[a-z0-9]{9}` (strict, sans underscore)
 - Les nœuds réguliers (`type: "node"`) **doivent** avoir un ID commençant par `node_`
 - Les symlinks (`type: "symlink"`) **doivent** avoir un ID commençant par `symlink_`
 - Cette contrainte est validée par le schéma JSON via règles conditionnelles

@@ -101,24 +101,35 @@ Un node est un objet JavaScript avec les propriétés suivantes :
 
 **Format** : `(node|symlink)_<timestamp>_<random>`
 
-**Pattern** : `^(node|symlink)_\d+_[a-z0-9]+$`
+**Pattern général** : `^(node|symlink)_\d+_[a-z0-9]+$`
+
+**Patterns spécifiques** :
+- Nœuds réguliers : `^node_\d+_[a-z0-9]+$`
+- Symlinks : `^symlink_\d+_[a-z0-9]+$`
 
 **Exemples** :
 ```javascript
-'node_1705000000000_abc123def'
-'symlink_1705100000000_xyz789ghi'
+'node_1705000000000_abc123def'      // Regular node
+'symlink_1705100000000_xyz789ghi'   // Symlink
 ```
 
 **Génération** :
 ```javascript
+// Pour les nœuds réguliers
 function generateId() {
   return 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
+
+// Pour les symlinks
+const symlinkId = 'symlink_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 ```
 
+**Validation stricte** : Le schéma JSON v1.0 valide que les nœuds de type `"node"` ont un ID commençant par `node_` et les nœuds de type `"symlink"` ont un ID commençant par `symlink_`.
+
 📍 **Référence** :
-- Génération : `src/js/utils/helpers.js:9-11`
-- Regex : `schemas/v1.0/deepmemo.json:87-88`
+- Génération nodes : `src/js/utils/helpers.js:9-11`
+- Génération symlinks : `src/js/features/modals.js:358`, `src/js/features/drag-drop.js:300`
+- Validation : `schemas/v1.0/deepmemo.json` (règles conditionnelles)
 
 #### type (string, required)
 
@@ -1198,7 +1209,7 @@ attachments/attach_1705000000002_abc123.pdf
 - [1-CONCEPTS.md](1-CONCEPTS.md) - Concepts fondamentaux (nodes, hiérarchie, symlinks)
 - [2-ARCHITECTURE.md](2-ARCHITECTURE.md) - Architecture technique (storage, modules)
 - [4-FEATURES.md](4-FEATURES.md) - Fonctionnalités complètes
-- [reference/file-formats/dm-archive.md](reference/file-formats/dm-archive.md) - Format .dm détaillé
+- [reference/file-formats/DM-FORMAT.md](reference/file-formats/DM-FORMAT.md) - Spécification complète du format .dm
 - [reference/file-formats/json-interchange.md](reference/file-formats/json-interchange.md) - Format JSON détaillé
 
 ---
