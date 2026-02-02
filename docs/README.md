@@ -79,7 +79,7 @@ Quick reference of all features with links to detailed guides:
 📦 **[guides/FILE-FORMATS.md](guides/FILE-FORMATS.md)** - Export/import formats
 - `.dm` archives (ZIP with metadata + attachments)
 - `.json` interchange format (LLM-friendly)
-- FreeMind `.mm` export (read-only)
+- FreeMind `.mm` export (read-only, see [MM-FORMAT.md](reference/file-formats/MM-FORMAT.md))
 - Import workflows (global vs branch)
 
 #### File System Sync
@@ -132,26 +132,35 @@ Quick reference of all features with links to detailed guides:
 #### .dm Archive Format
 🗜️ **[reference/file-formats/DM-FORMAT.md](reference/file-formats/DM-FORMAT.md)** - ZIP structure specification
 - Archive structure (metadata.json, data.json, attachments/)
-- Version tracking
+- Version tracking and metadata
 - Import auto-detection (magic number)
-- ID generation and remapping
+- ID generation and remapping (global vs branch)
 - Compression and encoding
 
 #### JSON Interchange Format
-🔤 **[reference/file-formats/json-interchange.md](reference/file-formats/json-interchange.md)** - Simple JSON *(to be renamed)*
-
-Current location: `file-formats/JSON-STRUCTURE.md`
+🔤 **[reference/file-formats/json-interchange.md](reference/file-formats/json-interchange.md)** - Portable JSON format
 - Structure for LLM generation
-- Minimal format (no attachments)
-- Import workflow
+- Minimal format (metadata only, no binary attachments)
+- Global export vs branch export
+- Import workflows (replace/merge, ID remapping)
+- Use cases (backup, migration, Git versioning)
+
+#### FreeMind Mind Map Format
+🧠 **[reference/file-formats/MM-FORMAT.md](reference/file-formats/MM-FORMAT.md)** - XML export for mind mapping
+- FreeMind/Freeplane/XMind compatible format
+- XML structure (1.0.1 standard)
+- Node conversion (titles, content as HTML notes)
+- Symlink visualization (arrows and styling)
+- Limitations (no tags, no attachments, no reimport)
+- Use cases (external visualization, collaboration)
 
 #### Schema Validation
-✅ **[reference/file-formats/validation.md](reference/file-formats/validation.md)** - JSON Schemas *(to be renamed)*
-
-Current location: `file-formats/SCHEMA-VALIDATION.md`
-- JSON Schema specs
-- Validation during import
-- Schema evolution
+✅ **[reference/file-formats/validation.md](reference/file-formats/validation.md)** - Format validation reference
+- JSON Schema specifications (v1.0)
+- Validation process (client-side with validation.js)
+- Manual validation tools (ajv-cli, online validators)
+- Common errors and solutions
+- Schema migration strategy
 
 ### Storage API
 💽 **[reference/storage-api.md](reference/storage-api.md)** - IndexedDB/Dexie operations

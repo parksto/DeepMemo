@@ -189,6 +189,8 @@ Exemple : `attach_1706123456789_abc123_screenshot.png`
 
 **Contenu** : Structure hiérarchique uniquement (titres des nœuds).
 
+> 📖 **Pour les détails techniques complets** : Voir [MM-FORMAT.md](../reference/file-formats/MM-FORMAT.md) (spécification XML, conversion, limitations)
+
 #### À quoi ça ressemble ?
 
 ```xml

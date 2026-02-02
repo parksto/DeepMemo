@@ -3,7 +3,7 @@
 > Spécification complète de la validation des formats DeepMemo
 >
 > **Version** : V0.10.5
-> **Mise à jour** : 2026-02-02 (ajout validation.js, correction références)
+> **Mise à jour** : 2026-02-02 (fact-check complet, correction validateMetadata et références lignes)
 >
 > 📍 **Sources** : `schemas/v1.0/*.json`, `src/js/core/validation.js`, `src/js/core/data.js`
 
@@ -236,7 +236,7 @@ DeepMemo utilise des **JSON Schemas** (Draft-07) pour définir la structure des 
 }
 ```
 
-📍 **Référence** : `schemas/v1.0/metadata.json` (77 lignes), `data.js` (fonction `generateMetadata`)
+📍 **Référence** : `schemas/v1.0/metadata.json` (77 lignes), `data.js:523` (fonction `generateMetadata`)
 
 ---
 
@@ -346,16 +346,15 @@ data.branchRootId: string (requis)
 
 ```javascript
 // Champs recommandés (warnings si absents)
-['version', 'exportDate', 'exportType', 'nodeCount']
+['version', 'exported', 'type', 'nodeCount']
 
-// Note : Cette fonction semble legacy (champs obsolètes)
-// Le schéma metadata.json utilise 'type' (pas 'exportType')
-// et 'global'/'branch' (pas 'full'/'branch')
+// Validation type si présent
+type ∈ ['global', 'branch']
 ```
 
 **Limite de sécurité** : Validation s'arrête après **50 erreurs** pour éviter surcharge UI.
 
-**Affichage des erreurs** : Fonction `showValidationErrors(validation)` dans `data.js`
+**Affichage des erreurs** : Fonction `showValidationErrors(validation)` dans `data.js:36`
 
 ```javascript
 function showValidationErrors(validation) {
@@ -380,7 +379,7 @@ function showValidationErrors(validation) {
 }
 ```
 
-**Support Legacy** : Fonction `normalizeLegacyTypes(imported)` dans `data.js`
+**Support Legacy** : Fonction `normalizeLegacyTypes(imported)` dans `data.js:62`
 
 ```javascript
 // Conversion automatique "note" → "node"
@@ -398,7 +397,7 @@ function normalizeLegacyTypes(imported) {
 
 ### Import Global (JSON)
 
-**Fonction** : `importFromJSONText()`
+**Fonction** : `importFromJSONText()` (`data.js:900`)
 
 **Validation effectuée** :
 
@@ -430,13 +429,13 @@ normalizeLegacyTypes(imported);
 - ✅ Détection cycles dans la hiérarchie
 - ⚠️ Max 50 erreurs affichées (early exit)
 
-📍 **Référence** : `data.js` (fonction `importFromJSONText`), `validation.js:167` (fonction `validateGlobalExport`)
+📍 **Référence** : `data.js:900` (fonction `importFromJSONText`), `validation.js:167` (fonction `validateGlobalExport`)
 
 ---
 
 ### Import Branch (JSON)
 
-**Fonction** : `importBranchFromJSONText()`
+**Fonction** : `importBranchFromJSONText()` (`data.js:1239`)
 
 **Validation effectuée** :
 
@@ -477,13 +476,13 @@ if (imported.type === 'deepmemo-branch' && imported.branchRootId) {
 - ✅ Détection cycles
 - ✅ Validation références (mêmes règles que global)
 
-📍 **Référence** : `data.js` (fonction `importBranchFromJSONText`), `validation.js:206` (fonction `validateBranchExport`)
+📍 **Référence** : `data.js:1239` (fonction `importBranchFromJSONText`), `validation.js:206` (fonction `validateBranchExport`)
 
 ---
 
 ### Import Archive (.dm)
 
-**Fonction** : `importFromArchive()`
+**Fonction** : `importFromArchive()` (`data.js:729`)
 
 **Validation effectuée** :
 
@@ -527,7 +526,7 @@ normalizeLegacyTypes(imported);
 - ⚠️ **metadata.json** : Validation **warnings** avec `validateMetadata()` (non bloquante)
 - ✅ Extraction et restauration attachments depuis dossier `attachments/`
 
-📍 **Référence** : `data.js` (fonction `importFromArchive`), `validation.js:252` (fonction `validateMetadata`)
+📍 **Référence** : `data.js:729` (fonction `importFromArchive`), `validation.js:252` (fonction `validateMetadata`)
 
 ---
 
@@ -542,7 +541,7 @@ const exportData = {
   ...data
 };
 ```
-📍 **Référence** : `data.js` (fonction `exportData`)
+📍 **Référence** : `data.js:566` (fonction `exportData`)
 
 **Export branch (JSON)** :
 ```javascript
@@ -557,7 +556,7 @@ const branchData = {
   nodes: branchNodes
 };
 ```
-📍 **Référence** : `data.js` (fonction `exportBranch`)
+📍 **Référence** : `data.js:603` (fonction `exportBranch`)
 
 **Métadonnées archive** :
 ```javascript
@@ -569,7 +568,7 @@ const metadata = {
   generator: 'DeepMemo v0.10.5'
 };
 ```
-📍 **Référence** : `data.js` (fonction `generateMetadata`)
+📍 **Référence** : `data.js:523` (fonction `generateMetadata`)
 
 ---
 
@@ -1170,12 +1169,12 @@ if (imported.version === '1.0') {
 
 | Opération | Fonction | Fichier | Validation |
 |-----------|----------|---------|------------|
-| **Import global JSON** | `importFromJSONText()` | `data.js` | `validateGlobalExport()` + normalization |
-| **Import branch JSON** | `importBranchFromJSONText()` | `data.js` | `validateBranchExport()` ou `validateGlobalExport()` |
-| **Import archive .dm** | `importFromArchive()` | `data.js` | `validateGlobalExport()` + `validateMetadata()` |
-| **Validation global** | `validateGlobalExport()` | `validation.js` | Schéma + références + cycles |
-| **Validation branch** | `validateBranchExport()` | `validation.js` | Schéma + références + cycles |
-| **Validation metadata** | `validateMetadata()` | `validation.js` | Warnings uniquement |
+| **Import global JSON** | `importFromJSONText()` | `data.js:900` | `validateGlobalExport()` + normalization |
+| **Import branch JSON** | `importBranchFromJSONText()` | `data.js:1239` | `validateBranchExport()` ou `validateGlobalExport()` |
+| **Import archive .dm** | `importFromArchive()` | `data.js:729` | `validateGlobalExport()` + `validateMetadata()` |
+| **Validation global** | `validateGlobalExport()` | `validation.js:167` | Schéma + références + cycles |
+| **Validation branch** | `validateBranchExport()` | `validation.js:206` | Schéma + références + cycles |
+| **Validation metadata** | `validateMetadata()` | `validation.js:252` | Warnings uniquement |
 
 ---
 
