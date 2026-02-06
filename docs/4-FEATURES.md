@@ -9,20 +9,20 @@
 ## Table des Matières
 
 1. [Vue d'ensemble](#vue-densemble)
-2. [Navigation & Tree](#navigation--tree)
+2. [Navigation et arborescence](#navigation-et-arborescence)
 3. [Branch Mode](#branch-mode)
 4. [Markdown](#markdown)
-5. [PDF Export](#pdf-export)
-6. [Attachments](#attachments)
+5. [Export PDF](#export-pdf)
+6. [Pièces jointes](#pièces-jointes)
 7. [Tags](#tags)
-8. [Search](#search)
+8. [Recherche](#recherche)
 9. [Drag & Drop](#drag--drop)
 10. [Export/Import](#exportimport)
 11. [File System Sync](#file-system-sync)
-12. [Internationalization (i18n)](#internationalization-i18n)
-13. [PWA & Offline](#pwa--offline)
-14. [Multi-tab Sync](#multi-tab-sync)
-15. [Keyboard Shortcuts](#keyboard-shortcuts)
+12. [Internationalisation (i18n)](#internationalisation-i18n)
+13. [PWA et mode hors ligne](#pwa-et-mode-hors-ligne)
+14. [Multi-Tab Sync](#multi-tab-sync)
+15. [Raccourcis clavier](#raccourcis-clavier)
 
 ---
 
@@ -31,30 +31,30 @@
 DeepMemo V0.10.5 propose **15 features principales** organisées en 4 catégories :
 
 ### 📁 Navigation & Organisation
-- **Tree Navigation** : Arborescence hiérarchique avec expand/collapse
+- **Navigation arborescence** : Arborescence hiérarchique avec déplier/replier
 - **Branch Mode** : Isolation de sous-arbres pour focus
-- **Symlinks** : Liens symboliques pour nodes multi-parents
+- **Symlinks** : Liens symboliques pour nœuds multi-parents
 
 ### ✍️ Contenu & Édition
-- **Markdown** : Syntaxe complète + live preview
-- **PDF Export** : Génération serveur avec TOC
-- **Attachments** : Upload inline avec preview
+- **Markdown** : Syntaxe complète + Live Preview
+- **Export PDF** : Génération serveur avec TOC
+- **Pièces jointes** : Téléversement intégré avec prévisualisation
 
 ### 🔍 Recherche & Organisation
-- **Tags** : Autocomplete + cloud + multi-entry index
-- **Search** : Full-text + scope branch + highlighting
+- **Tags** : Autocomplétion + cloud + index multi-entrées
+- **Recherche** : Texte intégral + portée branche + surbrillance
 
 ### 🔧 Avancé & Sync
-- **Drag & Drop** : Move/Copy/Link avec modifiers
+- **Drag & Drop** : Déplacer/Copier/Lier avec modificateurs
 - **Export/Import** : .dm (ZIP), JSON, branch
 - **FS Sync** : Bidirectionnel vers dossier local
 - **i18n** : FR/EN avec interpolation
-- **PWA** : Offline-first, installable
-- **Multi-tab Sync** : BroadcastChannel
+- **PWA** : Hors ligne d'abord, installable
+- **Multi-Tab Sync** : BroadcastChannel
 
 ---
 
-## Navigation & Tree
+## Navigation et arborescence
 
 ### Vue d'ensemble
 
@@ -63,9 +63,9 @@ DeepMemo V0.10.5 propose **15 features principales** organisées en 4 catégorie
 Le tree est le composant central qui affiche l'arborescence hiérarchique dans la sidebar gauche.
 
 **Features** :
-- Rendering récursif de tous les nodes visibles
-- Expand/collapse avec état persisté
-- Selection + focus (keyboard)
+- Rendu récursif de tous les nœuds visibles
+- Déplier/replier avec état persisté
+- Sélection + focus (clavier)
 - Instance keys pour gestion des symlinks
 - Extraction automatique d'emojis
 
@@ -170,7 +170,7 @@ Le tree affiche différemment chaque type de node :
 
 ---
 
-### Expand/Collapse
+### Déplier/Replier
 
 **Comportement** :
 - **Clic sur arrow (▶/▼)** : Expand/collapse **sans** sélectionner le node
@@ -189,7 +189,7 @@ Le tree affiche différemment chaque type de node :
 
 ---
 
-### Selection & Focus
+### Sélection et focus
 
 **Selection (Active)** :
 - Node actuellement chargé dans l'éditeur
@@ -397,7 +397,7 @@ updateBranchModeIndicator() {
 
 ---
 
-### Bookmark URLs
+### URLs de favoris
 
 > **Note** : DeepMemo est **LocalFirst** - les URLs fonctionnent uniquement sur le **même PC, même navigateur, même utilisateur**. Ce sont des bookmarks de navigation locale, pas des liens partageables entre utilisateurs.
 
@@ -548,7 +548,7 @@ DeepMemo supporte **Markdown complet** avec :
 
 ---
 
-### Live Preview (Split-Screen)
+### Live Preview (écran divisé)
 
 **Module** : `src/js/features/preview.js`
 
@@ -622,7 +622,7 @@ previewElement.scrollTop = scrollTarget;
 
 ---
 
-### Rendering Pipeline
+### Pipeline de rendu
 
 **View Mode** (`editor.js:897-934`) :
 ```
@@ -712,7 +712,7 @@ if (blob.type !== correctMimeType) {
 
 ---
 
-## PDF Export
+## Export PDF
 
 ### Vue d'ensemble
 
@@ -837,7 +837,7 @@ TTL: 24 hours (86400000 ms)
 
 ---
 
-## Attachments
+## Pièces jointes
 
 ### Vue d'ensemble
 
@@ -856,7 +856,7 @@ TTL: 24 hours (86400000 ms)
 
 ---
 
-### API Functions
+### Fonctions de l'API
 
 | Function | Params | Returns | Description |
 |----------|--------|---------|-------------|
@@ -896,7 +896,7 @@ TTL: 24 hours (86400000 ms)
 
 ---
 
-### Upload Workflow
+### Flux de téléversement
 
 **Trigger** :
 ```javascript
@@ -947,7 +947,7 @@ app.triggerFileUpload()
 
 ---
 
-### UI Components
+### Composants UI
 
 **Attachments Section** (`index.html:203-210`) :
 ```html
@@ -1015,7 +1015,7 @@ For each match:
 
 ---
 
-### Download Workflow
+### Flux de téléchargement
 
 **Handler** (`app.js:1470-1490`) :
 ```javascript
@@ -1041,7 +1041,7 @@ async downloadAttachment(attachId, filename) {
 
 ---
 
-### Cleanup Operations
+### Opérations de nettoyage
 
 **Orphaned Files** (`attachments.js:90-124`) :
 ```javascript
@@ -1074,7 +1074,7 @@ cleanOrphanedReferences(data) {
 
 ---
 
-### Storage Estimate
+### Estimation du stockage
 
 **Display** (Right panel, `editor.js:687-709`) :
 ```javascript
@@ -1114,7 +1114,7 @@ const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100))
 
 ---
 
-### API Functions
+### Fonctions de l'API
 
 | Fonction | Ligne | Description |
 |----------|-------|-------------|
@@ -1181,7 +1181,7 @@ return filtered.slice(0, 10);  // Max 10
 
 ---
 
-### Keyboard Navigation
+### Navigation clavier
 
 **Dans autocomplete dropdown** :
 
@@ -1253,7 +1253,7 @@ node.tags = ['work', 'urgent', 'project'];  // Array of strings
 
 ---
 
-### UI Components
+### Composants UI
 
 **Tags Container** (`index.html:170-181`) :
 ```html
@@ -1295,7 +1295,7 @@ node.tags = ['work', 'urgent', 'project'];  // Array of strings
 
 ---
 
-### Integration avec Search
+### Intégration avec recherche
 
 **Click on Tag** → Open Search with Tag :
 
@@ -1333,7 +1333,7 @@ openSearchWithTag(tag) {
 
 ---
 
-## Search
+## Recherche
 
 ### Vue d'ensemble
 
@@ -1354,7 +1354,7 @@ openSearchWithTag(tag) {
 
 ---
 
-### API Functions
+### Fonctions de l'API
 
 | Fonction | Ligne | Description |
 |----------|-------|-------------|
@@ -1373,7 +1373,7 @@ openSearchWithTag(tag) {
 
 ---
 
-### Search Algorithm
+### Recherche Algorithm
 
 **Portée** (`search.js:70-74`) :
 ```javascript
@@ -1444,7 +1444,7 @@ preview = node.content?.substring(0, 100) || '(No content)';
 
 ---
 
-### Keyboard Navigation
+### Navigation clavier
 
 **Dans search modal** :
 
@@ -1482,7 +1482,7 @@ handleSearchNavigation(e) {
 
 ---
 
-### UI Components
+### Composants UI
 
 **Modal HTML** (`index.html:252-272`) :
 ```html
@@ -2550,7 +2550,7 @@ async importFromFileSystem() {
 
 ---
 
-## Internationalization (i18n)
+## Internationalisation (i18n)
 
 ### Vue d'ensemble
 
@@ -2775,7 +2775,7 @@ export async function initI18n() {
 
 ---
 
-## PWA & Offline
+## PWA et mode hors ligne
 
 ### Vue d'ensemble
 
@@ -3225,7 +3225,7 @@ export async function saveData() {
 
 ---
 
-## Keyboard Shortcuts
+## Raccourcis clavier
 
 ### Vue d'ensemble
 
