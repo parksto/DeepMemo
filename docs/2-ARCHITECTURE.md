@@ -432,7 +432,7 @@ async init() {
 
 **Responsabilités** (`src/js/app.js:render()`) :
 1. Affiche/masque empty state
-2. Render tree (sidebar)
+2. Rendu de l'arborescence (sidebar)
 3. Render editor (si nœud sélectionné)
 4. Update page title
 5. Update node counter
@@ -1150,7 +1150,7 @@ function getTagSuggestions(prefix) {
 **Usage** : Sélectionner target node pour symlink
 
 **Features** :
-- Tree picker (arborescence complète)
+- Sélecteur d'arborescence (arborescence complète)
 - Search intégré
 - Détection de cycles
 
@@ -1647,7 +1647,7 @@ try {
 - ✅ IndexedDB indexes (queries rapides)
 
 **À améliorer** :
-- ⚠️ Tree render : Full rebuild à chaque change (pas de diffing)
+- ⚠️ Rendu arborescence : Reconstruction complète à chaque changement (pas de diffing)
 - ⚠️ Search : Scan tous les nodes (pas d'index full-text)
 
 ### Security

@@ -703,7 +703,7 @@ navigator.serviceWorker.getRegistration().then(reg => {
 
 **Problème : Tree rendering lent**
 ```
-1. Record pendant render tree
+1. Record pendant rendu de l'arborescence
 2. Chercher "renderTree" dans flamegraph
 3. Identifier fonctions lentes :
    - generateTreeHTML ?

@@ -150,7 +150,7 @@ DeepMemo/
 **CSS** :
 - **`base.css`** : Reset, variables CSS, typographie
 - **`layout.css`** : Structure layout (sidebar, main, panels)
-- **`components.css`** : Composants UI (buttons, modals, tree)
+- **`components.css`** : Composants UI (buttons, modals, arborescence)
 - **`utilities.css`** : Classes utilitaires (marges, padding)
 
 ---

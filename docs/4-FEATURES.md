@@ -60,7 +60,7 @@ DeepMemo V0.10.5 propose **15 features principales** organisées en 4 catégorie
 
 **Module** : `src/js/features/tree.js` (723 lignes)
 
-Le tree est le composant central qui affiche l'arborescence hiérarchique dans la sidebar gauche.
+L'arborescence est le composant central qui affiche la structure hiérarchique dans la sidebar gauche.
 
 **Features** :
 - Rendu récursif de tous les nœuds visibles
@@ -153,7 +153,7 @@ function extractEmojiFromTitle(title) {
 
 ### Types de Nodes
 
-Le tree affiche différemment chaque type de node :
+L'arborescence affiche différemment chaque type de nœud :
 
 | Type | Icon | Style | Draggable | Référence |
 |------|------|-------|-----------|-----------|
@@ -175,7 +175,7 @@ Le tree affiche différemment chaque type de node :
 **Comportement** :
 - **Clic sur arrow (▶/▼)** : Expand/collapse **sans** sélectionner le node
 - **Clic sur titre** : Sélectionne le node (charge dans editor)
-- **Auto-collapse** : Lors de la sélection via `setCurrentInstanceKey()`, le tree se replie puis reconstruit le path vers le node
+- **Auto-collapse** : Lors de la sélection via `setCurrentInstanceKey()`, l'arborescence se replie puis reconstruit le chemin vers le nœud
 
 **État** :
 - Stocké dans `expandedNodes` (Set d'instance keys)
@@ -220,7 +220,7 @@ Le tree affiche différemment chaque type de node :
 | **Enter** | Select | Select focused node → load in editor |
 
 **Notes** :
-- Fonctionne uniquement si tree a focus (pas dans input)
+- Fonctionne uniquement si l'arborescence a le focus (pas dans un champ de saisie)
 - Auto-focus premier node si aucun focus
 - Scrolls node into view automatiquement
 - External symlinks : sélectionnables (pour suppression) mais toast warning
@@ -365,7 +365,7 @@ Quand branch mode est actif :
 
 **Élément** : `<div class="branch-mode-indicator" id="branchModeIndicator">`
 
-**Location** : Sidebar, au-dessus du tree
+**Location** : Sidebar, au-dessus de l'arborescence
 
 **Contenu** :
 - Texte : "🌿 branch mode" (i18n : `labels.branchMode`)
@@ -1760,7 +1760,7 @@ else {
      modified: Date.now()
    };
 
-3. Add to tree:
+3. Ajout à l'arborescence :
    data.nodes[symlinkId] = symlink;
    if (parentId === null) {
      data.rootNodes.push(symlinkId);
@@ -3248,7 +3248,7 @@ DeepMemo propose des **raccourcis clavier globaux** pour actions courantes.
 | **Ctrl+K** | Cmd+K | Open search | `openSearch()` | Line 24-27 |
 | **Alt+H** | Opt+H | Markdown help | `openMarkdownHelp()` | Line 30-33 |
 | **Escape** | Esc | Close search / Go to parent | `goToParent()` | Line 36-43 |
-| **Arrow keys** | Same | Tree navigation | `handleTreeNavigation(e)` | Line 50-52 |
+| **Arrow keys** | Same | Navigation arborescence | `handleTreeNavigation(e)` | Line 50-52 |
 | **Enter** | Same | Activate node | `handleTreeNavigation(e)` | Line 50-52 |
 
 📍 **Référence** : `src/js/utils/keyboard.js:9-55`
@@ -3323,7 +3323,7 @@ const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.ta
 const isSearchVisible = handlers.isSearchVisible?.();
 
 if (!isInputFocused && !isSearchVisible) {
-  // Enable tree navigation
+  // Activer navigation arborescence
 }
 ```
 
