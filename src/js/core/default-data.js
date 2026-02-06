@@ -187,7 +187,7 @@ DeepMemo te permet d'**exporter ta structure** en mindmap pour la visualiser et 
 
 ## 📚 Pour aller plus loin
 
-Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.fr.md)
+Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.md)
 
 ---
 
@@ -1632,7 +1632,7 @@ DeepMemo lets you **export your structure** as a mindmap to visualize and share 
 
 ## 📚 To go further
 
-See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.md)
+See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.en.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.en.md)
 
 ---
 
