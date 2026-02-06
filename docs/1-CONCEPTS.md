@@ -1,357 +1,357 @@
-# Core Concepts
+# Concepts Fondamentaux
 
-**Understanding DeepMemo's fundamental building blocks**
+**Comprendre les briques de base de DeepMemo**
 
-This document explains the core concepts that make DeepMemo work. Start here if you're new to the project or need to understand how the pieces fit together.
+Ce document explique les concepts fondamentaux qui font fonctionner DeepMemo. Commencez ici si vous découvrez le projet ou avez besoin de comprendre comment les pièces s'assemblent.
 
 ---
 
-## 1. The Node: A Single Base Type
+## 1. Le Nœud : Un Type de Base Unique
 
-DeepMemo has **one fundamental unit**: the **node**.
+DeepMemo a **une unité fondamentale** : le **nœud**.
 
-A node is a container that can hold:
-- **Title**: Short description (e.g., "Project ideas", "Meeting notes")
-- **Content**: Markdown text (unlimited length)
-- **Children**: Other nodes (creating hierarchy)
-- **Tags**: Labels for categorization
-- **Attachments**: Files (images, PDFs, documents)
-- **Metadata**: Creation date, modification date, etc.
+Un nœud est un conteneur qui peut contenir :
+- **Titre** : Description courte (ex : "Idées de projet", "Notes de réunion")
+- **Contenu** : Texte Markdown (longueur illimitée)
+- **Enfants** : D'autres nœuds (créant la hiérarchie)
+- **Tags** : Labels pour catégorisation
+- **Pièces jointes** : Fichiers (images, PDFs, documents)
+- **Métadonnées** : Date de création, date de modification, etc.
 
 ```
 ┌─────────────────────────────┐
-│  📄 Node                    │
-│  ─────                      │
-│  Title: "My project"        │
-│  Content: "Some notes..."   │
-│  Children: [node1, node2]   │
-│  Tags: ["work", "urgent"]   │
-│  Attachments: [file.pdf]    │
+│  📄 Nœud                    │
+│  ────                       │
+│  Titre : "Mon projet"       │
+│  Contenu : "Des notes..."   │
+│  Enfants : [nœud1, nœud2]   │
+│  Tags : ["travail", "urgent"]│
+│  Pièces jointes : [file.pdf]│
 └─────────────────────────────┘
 ```
 
-**Key insight**: Everything is a node. There are no "folders", "documents", or "categories" as separate types. This simplicity enables powerful features like symlinks and flexible organization.
+**Idée clé** : Tout est un nœud. Il n'y a pas de "dossiers", "documents" ou "catégories" comme types séparés. Cette simplicité permet des fonctionnalités puissantes comme les symlinks et l'organisation flexible.
 
 ---
 
-## 2. Hierarchy: Parent-Child Relationships
+## 2. Hiérarchie : Relations Parent-Enfant
 
-Nodes organize themselves through **parent-child relationships**, forming a tree structure.
+Les nœuds s'organisent à travers des **relations parent-enfant**, formant une structure arborescente.
 
-### Basic Tree Structure
+### Structure Arborescente de Base
 
 ```
-Root Nodes (top level)
-├─ 📘 Work
-│  ├─ 📋 Project A
-│  │  ├─ 📝 Task 1
-│  │  └─ 📝 Task 2
-│  └─ 📋 Project B
-└─ 🏠 Personal
-   ├─ 📚 Books
-   └─ ✈️ Travel
+Nœuds Racine (niveau supérieur)
+├─ 📘 Travail
+│  ├─ 📋 Projet A
+│  │  ├─ 📝 Tâche 1
+│  │  └─ 📝 Tâche 2
+│  └─ 📋 Projet B
+└─ 🏠 Personnel
+   ├─ 📚 Livres
+   └─ ✈️ Voyages
 ```
 
-### Properties
+### Propriétés
 
-- **Multiple roots**: You can have several top-level nodes (not forced into a single root)
-- **Unlimited depth**: Nodes can nest infinitely (node → child → grandchild → ...)
-- **Single parent**: Each node has exactly one parent (except root nodes, which have `parent: null`)
-- **Ordered children**: Children maintain their order (can be rearranged via drag & drop)
+- **Racines multiples** : Vous pouvez avoir plusieurs nœuds de niveau supérieur (pas forcé dans une racine unique)
+- **Profondeur illimitée** : Les nœuds peuvent s'imbriquer infiniment (nœud → enfant → petit-enfant → ...)
+- **Parent unique** : Chaque nœud a exactement un parent (sauf les nœuds racine, qui ont `parent: null`)
+- **Enfants ordonnés** : Les enfants conservent leur ordre (peuvent être réorganisés par glisser-déposer)
 
 ### Navigation
 
-Users navigate the tree by:
-- **Expanding/collapsing** nodes (show/hide children)
-- **Selecting** a node (displays its content in the central panel)
-- **Breadcrumb** trail showing the path from root to current node
+Les utilisateurs naviguent dans l'arbre en :
+- **Dépliant/repliant** les nœuds (afficher/masquer les enfants)
+- **Sélectionnant** un nœud (affiche son contenu dans le panneau central)
+- **Fil d'Ariane** montrant le chemin de la racine au nœud actuel
 
-**Why hierarchy?** Human knowledge naturally organizes hierarchically. Projects have tasks, books have chapters, trips have destinations. DeepMemo mirrors this natural structure.
+**Pourquoi la hiérarchie ?** Les connaissances humaines s'organisent naturellement de façon hiérarchique. Les projets ont des tâches, les livres ont des chapitres, les voyages ont des destinations. DeepMemo reflète cette structure naturelle.
 
 ---
 
-## 3. Symlinks: From Tree to Network
+## 3. Symlinks : De l'Arbre au Réseau
 
-A pure hierarchy has a limitation: a node can only exist in one place. But real-world information often belongs in multiple contexts.
+Une hiérarchie pure a une limitation : un nœud ne peut exister qu'à un seul endroit. Mais l'information du monde réel appartient souvent à plusieurs contextes.
 
-**Symlinks** (symbolic links) solve this by allowing a node to appear in multiple locations.
+Les **Symlinks** (liens symboliques) résolvent cela en permettant à un nœud d'apparaître à plusieurs endroits.
 
-### How Symlinks Work
-
-```
-Work
-├─ 📋 Project A
-│  ├─ 📝 Task: Review design
-│  └─ 📝 Task: Test feature
-└─ 🔁 Team Meetings
-   ├─ 📅 2026-01-27 Meeting
-   └─ 🔗 Task: Review design  ← Symlink to node in Project A
-
-Personal
-└─ 📚 Learning
-   └─ 🔗 Task: Review design  ← Same symlink, different context
-```
-
-The "Review design" task physically exists under "Project A", but appears (via symlinks) in:
-- Team Meetings (discussed in a meeting)
-- Learning (something I learned from this task)
-
-### Symlink Properties
-
-**Renameable**: You can give the symlink a different title than the original node.
-```
-Original: "Technical specification document v2.3"
-Symlink in "Quick Reference": "Spec doc"
-Symlink in "Archive 2025": "Old spec (2025)"
-```
-
-**Content follows target**: The actual content (markdown, attachments, children) always comes from the target node. Editing a symlink edits the original.
-
-**Independent deletion**: Deleting a symlink doesn't delete the target node. It just removes that reference.
-
-### Reticular Structure
-
-With symlinks, the hierarchy becomes a **reticular structure** (network-like tree):
+### Comment Fonctionnent les Symlinks
 
 ```
-        Tree              +        Symlinks         =        Network
+Travail
+├─ 📋 Projet A
+│  ├─ 📝 Tâche : Réviser design
+│  └─ 📝 Tâche : Tester fonctionnalité
+└─ 🔁 Réunions Équipe
+   ├─ 📅 Réunion 2026-01-27
+   └─ 🔗 Tâche : Réviser design  ← Symlink vers nœud dans Projet A
+
+Personnel
+└─ 📚 Apprentissage
+   └─ 🔗 Tâche : Réviser design  ← Même symlink, contexte différent
+```
+
+La tâche "Réviser design" existe physiquement sous "Projet A", mais apparaît (via symlinks) dans :
+- Réunions Équipe (discutée en réunion)
+- Apprentissage (quelque chose que j'ai appris de cette tâche)
+
+### Propriétés des Symlinks
+
+**Renommables** : Vous pouvez donner au symlink un titre différent du nœud original.
+```
+Original : "Spécification technique document v2.3"
+Symlink dans "Référence Rapide" : "Doc spec"
+Symlink dans "Archive 2025" : "Vieille spec (2025)"
+```
+
+**Le contenu suit la cible** : Le contenu réel (markdown, pièces jointes, enfants) vient toujours du nœud cible. Éditer un symlink édite l'original.
+
+**Suppression indépendante** : Supprimer un symlink ne supprime pas le nœud cible. Cela retire juste cette référence.
+
+### Structure Réticulaire
+
+Avec les symlinks, la hiérarchie devient une **structure réticulaire** (arbre en réseau) :
+
+```
+        Arbre             +        Symlinks         =        Réseau
 
     A                                                      A
    / \                                                    / \
   B   C                                                  B═══C
                               C → B                       ║
                           (symlink)
-                                                    (B appears under both A and C)
+                                                    (B apparaît sous A et C)
 ```
 
-**Why symlinks?** Knowledge isn't purely hierarchical. A research paper can be relevant to multiple projects. A contact can belong to work and personal contexts. Symlinks let information exist where it's needed without duplication.
+**Pourquoi les symlinks ?** La connaissance n'est pas purement hiérarchique. Un article de recherche peut être pertinent pour plusieurs projets. Un contact peut appartenir aux contextes travail et personnel. Les symlinks permettent à l'information d'exister là où elle est nécessaire sans duplication.
 
 ---
 
-## 4. Instance Keys: Tracking Paths
+## 4. Clés d'Instance : Suivre les Chemins
 
-Here's a problem symlinks create: How do you uniquely identify a node when it appears multiple times in the tree?
+Voici un problème que créent les symlinks : Comment identifier de façon unique un nœud quand il apparaît plusieurs fois dans l'arbre ?
 
-### The Problem
+### Le Problème
 
 ```
-Root
-├─ Project A
-│  └─ Task X (id: "node_123")
+Racine
+├─ Projet A
+│  └─ Tâche X (id: "node_123")
 └─ Archive
-   └─ 🔗 Task X (also id: "node_123" - it's the same node!)
+   └─ 🔗 Tâche X (aussi id: "node_123" - c'est le même nœud !)
 ```
 
-Both instances have `id: "node_123"`, but they're in different places. How do we distinguish them?
+Les deux instances ont `id: "node_123"`, mais elles sont à des endroits différents. Comment les distinguer ?
 
-### The Solution: Instance Keys
+### La Solution : Clés d'Instance
 
-An **instance key** encodes the full path from the root to the node:
+Une **clé d'instance** encode le chemin complet de la racine au nœud :
 
 ```
-nodeId @ parent @ grandparent @ ... @ root
+nodeId @ parent @ grand-parent @ ... @ racine
 ```
 
-**Examples**:
-- Root node: `"node_123@root"`
-- Child: `"node_456@node_123@root"`
-- Grandchild: `"node_789@node_456@node_123@root"`
-- Via symlink: `"node_123@node_999@root"` (same node, different path)
+**Exemples** :
+- Nœud racine : `"node_123@root"`
+- Enfant : `"node_456@node_123@root"`
+- Petit-enfant : `"node_789@node_456@node_123@root"`
+- Via symlink : `"node_123@node_999@root"` (même nœud, chemin différent)
 
-### Why This Matters
+### Pourquoi C'est Important
 
-Instance keys enable:
-1. **Unique selection**: Know exactly which instance the user clicked
-2. **Cycle detection**: Prevent infinite loops (node containing itself via symlinks)
-3. **Context preservation**: Remember where you were in the tree across page refreshes
-4. **Branch isolation**: (see next section)
+Les clés d'instance permettent :
+1. **Sélection unique** : Savoir exactement quelle instance l'utilisateur a cliquée
+2. **Détection de cycles** : Empêcher les boucles infinies (nœud se contenant via symlinks)
+3. **Préservation du contexte** : Se souvenir où vous étiez dans l'arbre à travers les rafraîchissements de page
+4. **Isolation de branche** : (voir section suivante)
 
-**Implementation detail**: The function `getInstanceKey(nodeId, parentContext)` in `tree.js` generates these keys during tree rendering.
+**Détail d'implémentation** : La fonction `getInstanceKey(nodeId, parentContext)` dans `tree.js` génère ces clés pendant le rendu de l'arbre.
 
 ---
 
-## 5. Branch Mode: Isolated Subtrees
+## 5. Mode Branche : Sous-Arbres Isolés
 
-Sometimes you want to focus on just one part of your knowledge tree, ignoring everything else.
+Parfois vous voulez vous concentrer sur juste une partie de votre arbre de connaissances, en ignorant tout le reste.
 
-**Branch Mode** lets you isolate a subtree, displaying only a specific node and its descendants.
+Le **Mode Branche** vous permet d'isoler une sous-arborescence, affichant seulement un nœud spécifique et ses descendants.
 
-### Normal Mode vs Branch Mode
+### Mode Normal vs Mode Branche
 
-**Normal Mode** (default):
+**Mode Normal** (par défaut) :
 ```
-Root Nodes (all visible)
-├─ 📘 Work
-│  ├─ Project A
-│  └─ Project B
-├─ 🏠 Personal
+Nœuds Racine (tous visibles)
+├─ 📘 Travail
+│  ├─ Projet A
+│  └─ Projet B
+├─ 🏠 Personnel
 └─ 📚 Archive
 ```
 
-**Branch Mode** (isolate "Work"):
+**Mode Branche** (isoler "Travail") :
 ```
-Work (branch root)
-├─ Project A
-│  ├─ Task 1
-│  └─ Task 2
-└─ Project B
-   └─ Task 3
+Travail (racine de branche)
+├─ Projet A
+│  ├─ Tâche 1
+│  └─ Tâche 2
+└─ Projet B
+   └─ Tâche 3
 
-(Personal and Archive are hidden)
-```
-
-### How It Works
-
-1. **URL parameter**: `?branch=node_123` sets the branch root
-2. **Tree rendering**: Only renders descendants of `node_123`
-3. **Instance keys**: Stop at the branch root (e.g., `"node_456@node_123"` instead of continuing to global root)
-4. **Navigation**: Breadcrumb starts at branch root
-5. **Search**: Limited to nodes within the branch
-
-### External Symlinks
-
-What if a symlink points outside the branch?
-
-```
-Branch: Work
-├─ Project A
-└─ 🔗 Important Note  ← Points to a node in Personal (outside branch)
+(Personnel et Archive sont masqués)
 ```
 
-**Behavior**: External symlinks are **grayed out** in branch mode:
-- Grayed out appearance (opacity 0.4)
-- Badge "externe" / "external" (depending on language)
-- Icon: 🔗🚫
-- Clickable but shows warning toast (selection allowed for deletion purposes)
-- Not draggable
+### Comment Ça Marche
 
-**Why disabled for navigation?** Following an external symlink would break the branch isolation. The target node wouldn't be accessible in the current view. However, selection is allowed so you can delete external symlinks if needed.
+1. **Paramètre URL** : `?branch=node_123` définit la racine de branche
+2. **Rendu de l'arbre** : Rend seulement les descendants de `node_123`
+3. **Clés d'instance** : S'arrêtent à la racine de branche (ex : `"node_456@node_123"` au lieu de continuer jusqu'à la racine globale)
+4. **Navigation** : Le fil d'Ariane commence à la racine de branche
+5. **Recherche** : Limitée aux nœuds dans la branche
 
-### Use Cases
+### Symlinks Externes
 
-- **Sharing**: Export a specific project without your entire knowledge base
-- **Focus**: Work on one area without distractions
-- **Presentations**: Show a specific subtree during meetings
-- **Collaboration**: Share a branch via `.dm` export without exposing unrelated content
+Que se passe-t-il si un symlink pointe hors de la branche ?
 
-**URL format**: Branch mode uses query parameters + hash:
+```
+Branche : Travail
+├─ Projet A
+└─ 🔗 Note Importante  ← Pointe vers un nœud dans Personnel (hors branche)
+```
+
+**Comportement** : Les symlinks externes sont **grisés** en mode branche :
+- Apparence grisée (opacity 0.4)
+- Badge "externe" / "external" (selon la langue)
+- Icône : 🔗🚫
+- Cliquable mais affiche toast d'avertissement (sélection autorisée pour suppression)
+- Non déplaçable
+
+**Pourquoi désactivés pour la navigation ?** Suivre un symlink externe briserait l'isolation de branche. Le nœud cible ne serait pas accessible dans la vue actuelle. Cependant, la sélection est permise pour pouvoir supprimer les symlinks externes si nécessaire.
+
+### Cas d'Usage
+
+- **Partage** : Exporter un projet spécifique sans toute votre base de connaissances
+- **Concentration** : Travailler sur une zone sans distractions
+- **Présentations** : Montrer une sous-arborescence spécifique pendant les réunions
+- **Collaboration** : Partager une branche via export `.dm` sans exposer le contenu non lié
+
+**Format d'URL** : Le mode branche utilise paramètres de requête + hash :
 ```
 ?branch=node_123#/node/node_456
        ├─────────┘      └──────────┘
-   branch root ID    currently viewed node
+   ID racine branche    nœud actuellement affiché
 ```
 
-This design allows:
-- **Bookmarking** branches (query param persists)
-- **Browser navigation** (hash enables back/forward buttons)
+Cette conception permet :
+- **Marque-pages** de branches (paramètre de requête persiste)
+- **Navigation navigateur** (hash permet boutons précédent/suivant)
 
 ---
 
-## 6. Tags: Cross-Cutting Metadata
+## 6. Tags : Métadonnées Transversales
 
-While hierarchy organizes nodes vertically (parent → child), **tags** organize them horizontally across the tree.
+Alors que la hiérarchie organise les nœuds verticalement (parent → enfant), les **tags** les organisent horizontalement à travers l'arbre.
 
-### Basic Usage
+### Usage de Base
 
-Any node can have multiple tags:
+Tout nœud peut avoir plusieurs tags :
 ```
-Node: "React component architecture"
-Tags: ["react", "frontend", "tutorial", "video"]
+Nœud : "Architecture composant React"
+Tags : ["react", "frontend", "tutorial", "video"]
 ```
 
-Tags enable:
-- **Search by tag**: Find all nodes with "frontend" tag
-- **Tag cloud**: See all tags in current branch
-- **Autocomplete**: Suggests existing tags while typing
-- **Filtering**: (future feature)
+Les tags permettent :
+- **Recherche par tag** : Trouver tous les nœuds avec le tag "frontend"
+- **Nuage de tags** : Voir tous les tags dans la branche actuelle
+- **Auto-complétion** : Suggère les tags existants pendant la frappe
+- **Filtrage** : (fonctionnalité future)
 
-### Tag Scope
+### Portée des Tags
 
-Tags are **global** but search respects branch mode:
-- **Normal mode**: Search finds tagged nodes anywhere in the tree
-- **Branch mode**: Search finds tagged nodes only within the current branch
+Les tags sont **globaux** mais la recherche respecte le mode branche :
+- **Mode normal** : La recherche trouve les nœuds tagués n'importe où dans l'arbre
+- **Mode branche** : La recherche trouve les nœuds tagués seulement dans la branche actuelle
 
-### Tags vs Hierarchy
+### Tags vs Hiérarchie
 
-**When to use hierarchy**:
-- Clear parent-child relationship (Project → Tasks)
-- Sequential or nested structure (Book → Chapters → Sections)
-- One primary categorization
+**Quand utiliser la hiérarchie** :
+- Relation parent-enfant claire (Projet → Tâches)
+- Structure séquentielle ou imbriquée (Livre → Chapitres → Sections)
+- Une catégorisation primaire
 
-**When to use tags**:
-- Multiple categorizations (a note can be both "tutorial" and "advanced")
-- Cross-project themes (all nodes related to "security")
-- Status markers ("todo", "review", "done")
-- Temporal markers ("2025", "Q1")
+**Quand utiliser les tags** :
+- Catégorisations multiples (une note peut être à la fois "tutorial" et "avancé")
+- Thèmes inter-projets (tous les nœuds liés à "sécurité")
+- Marqueurs de statut ("todo", "review", "done")
+- Marqueurs temporels ("2025", "Q1")
 
-**Best practice**: Use both. Hierarchy for structure, tags for flexible cross-referencing.
+**Bonne pratique** : Utiliser les deux. Hiérarchie pour la structure, tags pour les références croisées flexibles.
 
 ```
-Work (hierarchy)
-├─ Project A [tags: security, backend]
-│  └─ Task 1 [tags: security, urgent]
-└─ Project B [tags: frontend]
-   └─ Task 2 [tags: security]
+Travail (hiérarchie)
+├─ Projet A [tags: sécurité, backend]
+│  └─ Tâche 1 [tags: sécurité, urgent]
+└─ Projet B [tags: frontend]
+   └─ Tâche 2 [tags: sécurité]
 
-Search for "security" → finds Project A, Task 1, Task 2
+Recherche "sécurité" → trouve Projet A, Tâche 1, Tâche 2
 ```
 
 ---
 
-## Putting It All Together
+## Tout Assembler
 
-DeepMemo's power comes from combining these concepts:
+La puissance de DeepMemo vient de la combinaison de ces concepts :
 
-1. **Nodes** provide a single, flexible unit
-2. **Hierarchy** creates natural organization
-3. **Symlinks** connect related information across contexts
-4. **Instance keys** track unique paths through the network
-5. **Branch mode** enables focused views and safe sharing
-6. **Tags** add orthogonal categorization
+1. Les **Nœuds** fournissent une unité unique et flexible
+2. La **Hiérarchie** crée une organisation naturelle
+3. Les **Symlinks** connectent l'information liée à travers les contextes
+4. Les **Clés d'instance** suivent les chemins uniques à travers le réseau
+5. Le **Mode branche** permet des vues concentrées et un partage sécurisé
+6. Les **Tags** ajoutent une catégorisation orthogonale
 
-**Example workflow**:
+**Exemple de workflow** :
 
 ```
-1. Create hierarchical structure
-   Work
-   └─ Project A
+1. Créer une structure hiérarchique
+   Travail
+   └─ Projet A
       ├─ Design
-      └─ Implementation
+      └─ Implémentation
 
-2. Add symlinks for cross-references
-   Work
-   └─ Project A
+2. Ajouter des symlinks pour références croisées
+   Travail
+   └─ Projet A
       ├─ Design
-      │  └─ 🔗 UI mockups (from Design Resources)
-      └─ Implementation
+      │  └─ 🔗 Maquettes UI (depuis Ressources Design)
+      └─ Implémentation
 
-3. Add tags for themes
-   Design [tags: ui, priority-high]
-   Implementation [tags: backend, api]
+3. Ajouter des tags pour les thèmes
+   Design [tags: ui, priorité-haute]
+   Implémentation [tags: backend, api]
 
-4. Use branch mode to share
-   Export "Project A" branch as .dm
-   → Only Project A content included
-   → External symlinks preserved but marked
+4. Utiliser le mode branche pour partager
+   Exporter branche "Projet A" en .dm
+   → Seulement le contenu Projet A inclus
+   → Symlinks externes préservés mais marqués
 
-5. Search and navigate
-   Search "ui" → finds Design + any tagged nodes
-   Navigate via tree or breadcrumb
-   Follow symlinks to explore connections
+5. Rechercher et naviguer
+   Recherche "ui" → trouve Design + nœuds tagués
+   Naviguer via arbre ou fil d'Ariane
+   Suivre symlinks pour explorer les connexions
 ```
 
-This design naturally supports DeepMemo's advanced features like PDF export (hierarchy → document structure), File System Sync (nodes → files/folders), and collaborative sharing (branch exports).
+Cette conception supporte naturellement les fonctionnalités avancées de DeepMemo comme l'export PDF (hiérarchie → structure de document), File System Sync (nœuds → fichiers/dossiers), et le partage collaboratif (exports de branches).
 
 ---
 
-## Next Steps
+## Prochaines Étapes
 
-Now that you understand the core concepts, explore:
+Maintenant que vous comprenez les concepts fondamentaux, explorez :
 
-- **[2-ARCHITECTURE.md](2-ARCHITECTURE.md)** - How these concepts are implemented
-- **[3-DATA-MODEL.md](3-DATA-MODEL.md)** - The actual data structure in IndexedDB
-- **[4-FEATURES.md](4-FEATURES.md)** - What you can do with DeepMemo
+- **[2-ARCHITECTURE.md](2-ARCHITECTURE.md)** - Comment ces concepts sont implémentés
+- **[3-DATA-MODEL.md](3-DATA-MODEL.md)** - La structure de données réelle dans IndexedDB
+- **[4-FEATURES.md](4-FEATURES.md)** - Ce que vous pouvez faire avec DeepMemo
 
-Or dive into specific guides:
-- **[guides/FILE-FORMATS.md](guides/FILE-FORMATS.md)** - Export/import with `.dm` archives
-- **[guides/FS-SYNC.md](guides/FS-SYNC.md)** - Sync with local filesystem
+Ou plongez dans des guides spécifiques :
+- **[guides/FILE-FORMATS.md](guides/FILE-FORMATS.md)** - Export/import avec archives `.dm`
+- **[guides/FS-SYNC.md](guides/FS-SYNC.md)** - Sync avec système de fichiers local

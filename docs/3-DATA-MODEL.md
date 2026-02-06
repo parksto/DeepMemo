@@ -1,8 +1,8 @@
 # 3. Data Model
 
 > **Version** : V0.10.5
-> **Dernière mise à jour** : 2026-01-28
-> **Sources vérifiées** : Toutes les structures référencent le code et les schémas JSON
+> **Dernière mise à jour** : 2026-02-03
+> **Sources vérifiées** : Toutes les structures référencent le code et les schémas JSON (fact-checked 2026-02-03)
 
 ---
 
@@ -101,11 +101,11 @@ Un node est un objet JavaScript avec les propriétés suivantes :
 
 **Format** : `(node|symlink)_<timestamp>_<random>`
 
-**Pattern général** : `^(node|symlink)_\d+_[a-z0-9]+$`
+**Pattern général** : `^(node|symlink)_\d+_[a-z0-9_]+$`
 
 **Patterns spécifiques** :
-- Nœuds réguliers : `^node_\d+_[a-z0-9]+$`
-- Symlinks : `^symlink_\d+_[a-z0-9]+$`
+- Nœuds réguliers : `^node_\d+_[a-z0-9_]+$`
+- Symlinks : `^symlink_\d+_[a-z0-9_]+$`
 
 **Exemples** :
 ```javascript
@@ -168,7 +168,7 @@ Le module `tree.js` extrait automatiquement l'emoji du début du titre pour affi
 
 📍 **Référence** :
 - Schema : `schemas/v1.0/deepmemo.json:90-93`
-- Extraction : `src/js/features/tree.js:24-71` (extractEmojiFromTitle)
+- Extraction : `src/js/features/tree.js:27-60` (extractEmojiFromTitle)
 
 #### content (string, optional)
 
@@ -188,13 +188,13 @@ Le module `tree.js` extrait automatiquement l'emoji du début du titre pour affi
 
 📍 **Référence** :
 - Schema : `schemas/v1.0/deepmemo.json:95-98`
-- Rendering : `src/js/features/editor.js:402-451` (renderMarkdownWithAttachments)
+- Rendering : `src/js/features/editor.js:48-105` (processAttachmentUrls)
 
 #### parent (string | null, required)
 
 **Description** : ID du nœud parent, ou `null` pour root nodes
 
-**Pattern** : `^(node|symlink)_\d+_[a-z0-9]+$` (si non-null)
+**Pattern** : `^(node|symlink)_\d+_[a-z0-9_]+$` (si non-null)
 
 **Exemples** :
 ```javascript
@@ -214,7 +214,7 @@ null                           // Root node
 
 **Default** : `[]` (empty array)
 
-**Pattern items** : `^(node|symlink)_\d+_[a-z0-9]+$`
+**Pattern items** : `^(node|symlink)_\d+_[a-z0-9_]+$`
 
 **Ordre** : L'ordre dans le array définit l'ordre d'affichage
 
@@ -250,7 +250,7 @@ null                           // Root node
 
 📍 **Référence** :
 - Schema : `schemas/v1.0/deepmemo.json:122-129`
-- Autocomplete : `src/js/features/tags.js:78-118`
+- Autocomplete : `src/js/features/tags.js:197-220` (handleTagAutocomplete) et `src/js/features/tags.js:294-299` (showTagAutocomplete)
 - Search : `src/js/features/search.js` (match par tags)
 
 #### attachments (Attachment[], optional)
@@ -274,7 +274,7 @@ null                           // Root node
 📍 **Référence** :
 - Schema : `schemas/v1.0/deepmemo.json:130-136, 177-204`
 - Storage : `src/js/core/attachments.js`
-- Inline images : `src/js/features/editor.js:402-451`
+- Inline images : `src/js/features/editor.js:48-105` (processAttachmentUrls)
 
 #### created (number, required)
 
@@ -316,7 +316,7 @@ null                           // Root node
 
 **Description** : ID du nœud cible (pour symlinks seulement)
 
-**Pattern** : `^(node|symlink)_\d+_[a-z0-9]+$`
+**Pattern** : `^(node|symlink)_\d+_[a-z0-9_]+$`
 
 **Contrainte** : **Required** si `type='symlink'`, **forbidden** si `type='node'`
 
@@ -591,7 +591,7 @@ node_123@node_root
 ```
 
 📍 **Référence** :
-- Génération : `src/js/features/tree.js:79-94` (buildInstanceKey)
+- Génération : `src/js/features/tree.js:65-67` (getInstanceKey) et `src/js/features/tree.js:72-111` (setCurrentInstanceKey pour construction du path)
 - Concept : `docs/1-CONCEPTS.md` (section Instance Keys)
 
 ### Cycle Detection
@@ -608,7 +608,7 @@ node_123@node_root
 - Continue remontée jusqu'à root ou cycle
 
 📍 **Référence** :
-- Implémentation : `src/js/core/data.js:280-323`
+- Implémentation : `src/js/core/data.js:458-515` (wouldCreateCycle et wouldCreateCycleWithMove)
 - Documentation : `docs/2-ARCHITECTURE.md` (section Détection de cycles)
 
 ---
@@ -656,7 +656,7 @@ db.version(1).stores({
 3. Filtre par préfixe (case-insensitive)
 4. Limite à 10 suggestions
 
-📍 **Référence** : `src/js/features/tags.js:78-118` (showTagSuggestions)
+📍 **Référence** : `src/js/features/tags.js:197-220` (handleTagAutocomplete)
 
 ### Scope
 
@@ -716,10 +716,10 @@ db.version(1).stores({
 **Limite** : 50MB par fichier (hardcoded)
 
 ```javascript
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 ```
 
-📍 **Référence** : `src/js/app.js:1402` (vérification dans uploadAttachment)
+📍 **Référence** : `src/js/app.js:1402` (constante MAX_SIZE dans handleAttachmentUpload)
 
 ### Storage
 
@@ -767,7 +767,7 @@ const blobUrl = URL.createObjectURL(blob);
 <img src="blob:http://localhost:8000/abc-def-ghi" alt="My Image">
 ```
 
-📍 **Référence** : `src/js/features/editor.js:402-451` (renderMarkdownWithAttachments)
+📍 **Référence** : `src/js/features/editor.js:48-105` (processAttachmentUrls)
 
 ### Cleanup
 
@@ -1043,7 +1043,7 @@ A
 Move A sous C → FORBIDDEN (créerait cycle A → B → C → A)
 ```
 
-📍 **Référence** : `src/js/core/data.js:280-323`
+📍 **Référence** : `src/js/core/data.js:458-515`
 
 #### 2. Unique IDs
 
@@ -1072,13 +1072,14 @@ Move A sous C → FORBIDDEN (créerait cycle A → B → C → A)
 **Validation** : Avant upload
 
 ```javascript
-if (file.size > 50 * 1024 * 1024) {
+const MAX_SIZE = 50 * 1024 * 1024;
+if (file.size > MAX_SIZE) {
   alert('File too large (max 50MB)');
   return;
 }
 ```
 
-📍 **Référence** : `src/js/app.js:1402`
+📍 **Référence** : `src/js/app.js:1402` (constante MAX_SIZE)
 
 #### 6. Symlink Target Existence
 
@@ -1120,7 +1121,7 @@ if (file.size > 50 * 1024 * 1024) {
 2. Delete `symlinkedIn` property
 3. Sauvegarde
 
-📍 **Référence** : `src/js/core/data.js:126-177` (migrateSymlinks)
+📍 **Référence** : `src/js/core/data.js:173-220` (migrateSymlinks)
 
 ---
 

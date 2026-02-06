@@ -804,7 +804,7 @@ self.addEventListener('fetch', (event) => {
 
 ## Voir Aussi
 
-- [Guide Internationalisation](I18N.md) - Manifests bilingues détaillés
+- [Guide Internationalisation](./I18N.md) - Manifests bilingues détaillés
 - [Architecture](../2-ARCHITECTURE.md#service-worker) - Service Worker dans l'architecture globale
 - [Data Model](../3-DATA-MODEL.md#indexeddb-schema) - Stockage local IndexedDB
 

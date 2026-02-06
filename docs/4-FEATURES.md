@@ -719,19 +719,14 @@ if (blob.type !== correctMimeType) {
 **PDF Export** génère un document PDF hiérarchique avec :
 - Table of Contents (TOC) auto-générée
 - Numérotation hiérarchique (1, 1.1, 1.1.1)
-- Markdown parsing direct (sans Marked.js)
 - Support images (base64)
 - Gestion symlinks (full content OU citations)
-
-**Module** : `src/js/core/pdf-export-new.js` (557 lignes)
 
 **Processus** :
 1. Client prépare data (resolve symlinks, convert images to base64)
 2. Send to Worker endpoint (POST `/api/pdf-export`)
 3. Worker génère PDF avec jsPDF
 4. Client download blob
-
-📍 **Référence** : `src/js/core/pdf-export-new.js:1-557`
 
 ---
 
@@ -788,85 +783,21 @@ if (blob.type !== correctMimeType) {
 
 ---
 
-### PDF Markdown Parsing
+### PDF Generation Details
 
-**Stratégie** : Utilise **Marked.js** dans le Worker pour convertir markdown → HTML, puis génère le PDF
+**Stratégie** : Utilise **Marked.js** pour convertir markdown → HTML, puis génère le PDF
 
-📍 **Marked.js dans Worker** :
+📍 **Marked.js dans Worker et CLI** :
+- `cloudflare-worker/worker.js` : Parsing markdown pour PDF online
 - `bin/branch2pdf.js:2` : `const { marked } = require("marked");`
 - `bin/branch2pdf.js:15` : `const html = marked.parse(markdown);`
 
-**Blocks Parsed** (`pdf-export-new.js:18-150`) :
-
-| Block | Pattern | Action |
-|-------|---------|--------|
-| **Headings** | `^#{1,6}\s+` | Level offset by nodeDepth |
-| **Code blocks** | ` ```...``` ` | Monospace font, background |
-| **Unordered lists** | `^[\s]*[-*+]\s+` | Bullets with indentation |
-| **Ordered lists** | `^[\s]*\d+\.\s+` | Numbered with indentation |
-| **Blockquotes** | `^>` | Italic + indented |
-| **Images** | `!\[([^\]]*)\]\(([^)]+)\)` | Embed base64 or skip |
-| **Horizontal rules** | `^[-*_]{3,}$` | Line separator |
-| **Paragraphs** | Consecutive lines | Normal text blocks |
-
-**Markdown Stripping** (`pdf-export-new.js:155-166`) :
-```javascript
-Strip inline formatting:
-  **bold** → bold
-  *italic* → italic
-  ~~strikethrough~~ → strikethrough
-  `code` → code
-  [link](url) → link (text only)
-  ![alt](url) → alt (text only)
-```
-
-📍 **Référence** : `src/js/core/pdf-export-new.js:18-166`
-
----
-
-### PDF Structure Features
-
-**Table of Contents** (`pdf-export-new.js:429-447`) :
-- Auto-generated from hierarchy
-- **Plain text list** (non cliquable)
-- Hierarchical numbering (1, 1.1, 1.1.1)
-
-**Hierarchical Numbering** (`pdf-export-new.js:189-191`) :
-```javascript
-function buildNumberingPrefix(depth, index) {
-  // Depth 0: "1"
-  // Depth 1: "1.1"
-  // Depth 2: "1.1.1"
-  return numberingPath.join('.');
-}
-```
-
-**Page Breaks** :
-- Auto-inserted quand contenu dépasse page height
-- Check avant chaque block : `if (y > pageHeight - margin) { addPage(); }`
-
-📍 **Références** :
-- TOC : `pdf-export-new.js:429-447`
-- Numbering : `pdf-export-new.js:189-191`
-- Page breaks : `pdf-export-new.js:291-295`, `341-344`
-
-**Font Sizing** (`pdf-export-new.js:287`) :
-```javascript
-const fontSize = Math.max(10, 14 - (depth * 2));
-// Depth 0: 14pt
-// Depth 1: 12pt
-// Depth 2: 10pt
-// Depth 3+: 10pt (minimum)
-```
-
-**Images** (`pdf-export-new.js:393-400`) :
-- Format : Base64-encoded
-- Max width : 150mm
-- Supported : PNG, JPG, JPEG
-
-**Symlink Handling** (`pdf-export-new.js:300-319`) :
-- **Full mode** : Include target content recursively
-- **Citations mode** : Just show "See: [Title]" reference
+**Features** :
+- Table of Contents auto-générée
+- Numérotation hiérarchique (1, 1.1, 1.1.1)
+- Page breaks automatiques
+- Support images base64
+- Symlink handling (full content OU citations)
 
 ---
 

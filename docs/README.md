@@ -2,6 +2,10 @@
 
 **Complete technical documentation for developers and contributors**
 
+*[Version française](README.fr.md)*
+
+---
+
 Welcome to DeepMemo's documentation. This guide is organized like a technical book: start at the beginning if you're new, or jump to specific sections if you know what you're looking for.
 
 ---
@@ -184,8 +188,6 @@ Quick reference of all features with links to detailed guides:
 
 ### Contribution Guide
 🤝 **[development/CONTRIBUTING.md](development/CONTRIBUTING.md)** - How to contribute
-
-Current location: `CONTRIBUTING.md`
 - Code style guidelines
 - Pull request process
 - Testing requirements
@@ -193,8 +195,6 @@ Current location: `CONTRIBUTING.md`
 
 ### Roadmap
 🗺️ **[development/ROADMAP.md](development/ROADMAP.md)** - Development plan
-
-Current location: `ROADMAP.md`
 - Planned features
 - Version milestones
 - Long-term vision

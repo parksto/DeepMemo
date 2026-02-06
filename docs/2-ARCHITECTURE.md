@@ -1,8 +1,8 @@
 # 2. Architecture
 
 > **Version** : V0.10.5
-> **Dernière mise à jour** : 2026-01-28
-> **Sources vérifiées** : Toutes les affirmations référencent le code source
+> **Dernière mise à jour** : 2026-02-03
+> **Sources vérifiées** : Toutes les affirmations référencent le code source (fact-checked 2026-02-03)
 
 ---
 
@@ -12,6 +12,7 @@
 2. [Point d'entrée](#point-dentrée)
 3. [Organisation des modules](#organisation-des-modules)
 4. [Modules Core](#modules-core)
+   - data.js - storage.js - attachments.js - migration.js - validation.js - default-data.js
 5. [Modules Features](#modules-features)
 6. [Modules UI](#modules-ui)
 7. [Modules Utils](#modules-utils)
@@ -67,8 +68,8 @@ export function saveData() { ... }
 ```
 
 📍 **Référence** :
-- `src/js/core/data.js:34-37` - Export de l'état data
-- `src/js/core/data.js:43-50` - Export fonction saveData
+- `src/js/core/data.js:81-84` - Export de l'état data
+- `src/js/core/data.js:90-98` - Export fonction saveData
 - `src/js/app.js:6-23` - Imports de tous les modules
 
 **Avantages** :
@@ -125,8 +126,8 @@ setupSyncListener(() => {
 ```
 
 📍 **Référence** :
-- `src/js/utils/sync.js:1-70` - Implémentation complète
-- `src/js/core/data.js:50` - `notifyDataChanged()` après saveData
+- `src/js/utils/sync.js` - Implémentation complète (86 lignes)
+- `src/js/utils/sync.js:40` - `notifyDataChanged()` après saveData
 - `src/js/app.js:95-105` - Setup listener au init
 
 **Event Listeners** :
@@ -156,9 +157,9 @@ setupSyncListener(() => {
 │    ├─> Module métier modifie data.nodes[id]                 │
 │    │   📍 src/js/features/editor.js:updateNodeContent()     │
 │    ├─> saveData()              [async → IndexedDB]          │
-│    │   📍 src/js/core/data.js:43-53                         │
+│    │   📍 src/js/core/data.js:90-98                         │
 │    ├─> notifyDataChanged()    [BroadcastChannel]            │
-│    │   📍 src/js/utils/sync.js:53-58                        │
+│    │   📍 src/js/utils/sync.js:40                           │
 │    └─> render()                [Rebuild DOM]                │
 │        📍 src/js/app.js:render()                            │
 └─────────────────────────────────────────────────────────────┘
@@ -178,7 +179,7 @@ setupSyncListener(() => {
 
 #### État en Mémoire
 
-**data object** (`src/js/core/data.js:34-37`) :
+**data object** (`src/js/core/data.js:81-84`) :
 ```javascript
 export const data = {
   nodes: {},      // { [nodeId]: Node }
@@ -186,12 +187,11 @@ export const data = {
 };
 ```
 
-**app object** (`src/js/app.js:30-35`) :
+**app object** (`src/js/app.js:30-34`) :
 ```javascript
 const app = {
   data: DataModule.data,           // Référence à data
   currentNodeId: null,             // ID nœud sélectionné
-  expandedNodes: DataModule.expandedNodes, // Set<instanceKey>
   exportType: null,                // 'global' | 'branch'
   exportBranchId: null             // ID branche à exporter
 };
@@ -203,7 +203,7 @@ let currentInstanceKey = null;    // Instance key sélectionnée
 let focusedInstanceKey = null;    // Instance key focus clavier
 let branchMode = false;           // Mode branche actif
 let branchRootId = null;          // ID racine de la branche
-let expandedNodes = new Set();    // Set des nœuds expansés
+let expandedNodes = new Set();    // Set des nœuds expansés (état local, non persisté)
 ```
 
 **editor.js state** (`src/js/features/editor.js:18`) :
@@ -243,7 +243,7 @@ let activeBlobUrls = [];          // URLs blob attachments (cleanup)
 
 **Page unique** (SPA) contenant toute la structure DOM.
 
-📍 **Fichier** : `index.html` (474 lignes)
+📍 **Fichier** : `index.html` (473 lignes)
 
 #### Structure principale
 
@@ -454,8 +454,8 @@ src/js/
 │   ├── storage.js           # IndexedDB wrapper (366 lignes)
 │   ├── attachments.js       # Gestion fichiers (244 lignes)
 │   ├── migration.js         # Migration localStorage (211 lignes)
-│   ├── default-data.js      # Contenu démo (2610 lignes)
-│   └── pdf-export-new.js    # Export PDF obsolète? (557 lignes)
+│   ├── validation.js        # Validation JSON Schema (278 lignes)
+│   └── default-data.js      # Contenu démo (2610 lignes)
 │
 ├── features/                 # Fonctionnalités utilisateur
 │   ├── tree.js              # Arborescence sidebar (686 lignes)
@@ -484,12 +484,14 @@ src/js/
     └── en.js                # English (348 lignes)
 ```
 
-**Total** : ~12,300 lignes de JavaScript
+**Total** : ~12,000 lignes de JavaScript
 
 📍 **Vérification** :
-- Core : 5955 lignes
+- Core : 6233 lignes (avec validation.js)
 - Features : 4840 lignes
 - Utils : 693 lignes
+- App.js : 1629 lignes
+- Locales : 696 lignes
 
 ### Conventions de nommage
 
@@ -521,7 +523,7 @@ function i18nAlert(key, params = {}) { ... }
 
 ### data.js - Gestion des Données
 
-**Fichier** : `src/js/core/data.js` (1493 lignes)
+**Fichier** : `src/js/core/data.js` (1694 lignes)
 
 **Responsabilités** :
 - Gestion de l'état central (`data` object)
@@ -537,74 +539,72 @@ export const data = {
   nodes: {},      // { [nodeId]: Node }
   rootNodes: []   // [nodeId1, nodeId2, ...]
 };
-
-export const expandedNodes = new Set(); // instanceKeys expansés
 ```
 
-📍 **Référence** : `src/js/core/data.js:34-41`
+📍 **Référence** : `src/js/core/data.js:81-84`
+
+**Note** : `expandedNodes` est géré localement dans `src/js/features/tree.js:18` comme variable privée (non exportée, non persistée). C'est un état UI transitoire qui se reconstruit automatiquement lors de la navigation.
 
 #### Fonctions principales
 
 | Fonction | Ligne | Description |
 |----------|-------|-------------|
-| `saveData()` | 43 | Sauvegarde vers IndexedDB (async) |
-| `loadData()` | 66 | Charge depuis IndexedDB (avec migration) |
-| `addNode(parentId, title, type, targetId)` | 123 | Crée un nouveau nœud |
-| `deleteNode(nodeId)` | 171 | Supprime nœud (récursif) |
-| `updateNode(nodeId, updates)` | 246 | Met à jour propriétés nœud |
-| `wouldCreateCycle(nodeId, newParentId)` | 280 | Détecte cycles potentiels |
-| `exportFullData()` | 445 | Export complet (.dm ou .json) |
-| `exportBranchData(branchRootId)` | 525 | Export branche seulement |
-| `importFromFile(file)` | 690 | Import depuis .dm ou .json |
+| `saveData()` | 90 | Sauvegarde vers IndexedDB (async) |
+| `loadData()` | 110 | Charge depuis IndexedDB (avec migration) |
+| `exportData()` | 229 | Export JSON simple (global) |
+| `importData(event, onSuccess)` | 250 | Import JSON simple |
+| `exportBranch(nodeId)` | 310 | Export branche en JSON |
+| `importBranch(event, parentId, onSuccess)` | 348 | Import branche JSON |
+| `wouldCreateCycle(targetId, parentId)` | 458 | Détecte cycles potentiels |
+| `wouldCreateCycleWithMove(nodeId, newParentId)` | 478 | Détecte cycles pour déplacement |
+| `exportDataZIP()` | 558 | Export complet en .dm (ZIP) |
+| `exportBranchZIP(nodeId)` | 626 | Export branche en .dm |
+| `importDataZIP(event, onSuccess)` | 713 | Import depuis .dm |
+| `importBranchZIP(event, parentId, onSuccess)` | 974 | Import branche depuis .dm |
 
 #### Détection de cycles
 
-**Algorithme** (`src/js/core/data.js:280-323`) :
+**Algorithme** (`src/js/core/data.js:458-540`) :
 
-Vérifie si déplacer `nodeId` vers `newParentId` créerait un cycle en remontant la chaîne des parents.
+Vérifie si un symlink vers `targetId` avec `parentId` créerait un cycle en remontant la chaîne des parents.
 
 ```javascript
-function wouldCreateCycle(nodeId, newParentId) {
+function wouldCreateCycle(targetId, parentId) {
   // 1. Cas simples
-  if (!newParentId) return false;
-  if (nodeId === newParentId) return true;
+  if (!parentId) return false;
+  if (targetId === parentId) return true;
 
-  // 2. Si newParent est un symlink, on vérifie le target
-  const newParent = data.nodes[newParentId];
-  if (newParent.type === 'symlink') {
-    const target = data.nodes[newParent.targetId];
-    if (!target) return false;
-    newParentId = target.id;
-  }
+  // 2. Remonte la chaîne des parents depuis parentId
+  let current = parentId;
+  const visited = new Set();
 
-  // 3. Remonte la chaîne des parents
-  let current = newParentId;
   while (current) {
-    if (current === nodeId) return true;
+    if (visited.has(current)) return true; // Cycle détecté
+    visited.add(current);
+
     const node = data.nodes[current];
     if (!node) break;
 
-    // Si symlink, suit le target
-    if (node.type === 'symlink') {
-      const target = data.nodes[node.targetId];
-      if (!target) break;
-      current = target.parent;
-    } else {
-      current = node.parent;
-    }
+    // Si on atteint le targetId, il y a un cycle
+    if (current === targetId) return true;
+
+    // Remonte au parent
+    current = node.parent;
   }
 
   return false;
 }
 ```
 
-📍 **Référence** : `src/js/core/data.js:280-323`
+📍 **Référence** : `src/js/core/data.js:458-540`
+
+**Note** : `wouldCreateCycleWithMove()` (ligne 478) est une variante pour déplacements de nœuds.
 
 ---
 
 ### storage.js - IndexedDB Wrapper
 
-**Fichier** : `src/js/core/storage.js` (366 lignes)
+**Fichier** : `src/js/core/storage.js` (407 lignes)
 
 **Responsabilités** :
 - Initialisation Dexie.js
@@ -662,7 +662,7 @@ Si IndexedDB échoue → Fallback localStorage automatique dans `data.js:loadDat
 
 ### attachments.js - Gestion des Fichiers
 
-**Fichier** : `src/js/core/attachments.js` (244 lignes)
+**Fichier** : `src/js/core/attachments.js` (265 lignes)
 
 **Responsabilités** :
 - Upload de fichiers (max 50MB)
@@ -683,31 +683,29 @@ Si IndexedDB échoue → Fallback localStorage automatique dans `data.js:loadDat
 
 #### Limite de taille
 
-```javascript
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-```
+La limite de taille des attachments est de **50MB** par fichier.
 
 📍 **Référence** :
-- `src/js/core/attachments.js` (constante MAX_FILE_SIZE)
-- `src/js/app.js:1402` (vérification dans app.uploadAttachment)
+- Limite appliquée dans `src/js/app.js` (méthode uploadAttachment)
+- Contrainte IndexedDB navigateur : 500MB-1GB total
 
 #### Inline images
 
 **Syntax markdown** : `![alt](attachment:attach_id)`
 
-**Conversion** : `src/js/features/editor.js:renderMarkdownWithAttachments()`
+**Conversion** : `src/js/features/editor.js:processAttachmentUrls()`
 1. Parse markdown avec Marked.js
 2. Détecte liens `attachment:*`
 3. Génère blob URLs
 4. Remplace dans HTML
 
-📍 **Référence** : `src/js/features/editor.js:402-451`
+📍 **Référence** : `src/js/features/editor.js:48-140`
 
 ---
 
 ### migration.js - Migration localStorage
 
-**Fichier** : `src/js/core/migration.js` (211 lignes)
+**Fichier** : `src/js/core/migration.js` (208 lignes)
 
 **Responsabilités** :
 - Migration automatique localStorage → IndexedDB
@@ -720,7 +718,7 @@ Appelé automatiquement dans `data.loadData()` si :
 - IndexedDB vide
 - localStorage contient `deepmemo_nodes`
 
-📍 **Référence** : `src/js/core/data.js:66-108` (loadData avec migration)
+📍 **Référence** : `src/js/core/data.js:110-160` (loadData avec migration)
 
 #### Processus
 
@@ -749,6 +747,46 @@ async function completeMigration() {
 ```
 
 📍 **Référence** : `src/js/core/migration.js:22-82`
+
+---
+
+### validation.js - Validation JSON Schema
+
+**Fichier** : `src/js/core/validation.js` (278 lignes)
+
+**Responsabilités** :
+- Validation JSON Schema pour imports
+- Validation des formats .dm et JSON
+- Support legacy (type "note" accepté)
+- Messages d'erreur contextuels
+
+#### API publique
+
+| Fonction | Ligne | Description |
+|----------|-------|-------------|
+| `validateGlobalExport(data)` | ~60 | Valide export global |
+| `validateBranchExport(data)` | ~120 | Valide export branche |
+| `validateMetadata(metadata)` | ~180 | Valide metadata.json |
+| `validateNode(node, ...)` | 15 | Valide un nœud individuel |
+
+#### Validation des nœuds
+
+```javascript
+// Required fields pour chaque nœud
+const requiredFields = ['id', 'type', 'parent', 'children', 'created', 'modified'];
+
+// Types valides (avec support legacy)
+const validTypes = ['node', 'note', 'symlink']; // 'note' = legacy alias pour 'node'
+
+// Validation symlink
+if (node.type === 'symlink' && !node.targetId) {
+  errors.push('Symlink missing targetId');
+}
+```
+
+📍 **Référence** : `src/js/core/validation.js:15-50`
+
+**Utilisation** : Appelé lors des imports (JSON, .dm) pour détecter formats invalides et prévenir corruption des données.
 
 ---
 
@@ -783,19 +821,7 @@ export function getDefaultData(language = 'fr') {
 
 **Chargement** : Automatique si aucune donnée dans IndexedDB
 
-📍 **Référence** : `src/js/core/data.js:91-102` (loadData crée démo si vide)
-
----
-
-### pdf-export-new.js - Export PDF (obsolète?)
-
-**Fichier** : `src/js/core/pdf-export-new.js` (557 lignes)
-
-**Statut** : Semble obsolète, fonctionnalité déplacée vers :
-- CloudFlare Worker : `cloudflare-worker/src/index.js`
-- CLI : `bin/branch2pdf.js`
-
-📍 **À vérifier** : Ce fichier est-il encore utilisé dans app.js ?
+📍 **Référence** : `src/js/core/data.js:136-145` (loadData crée démo si vide)
 
 ---
 
@@ -803,7 +829,7 @@ export function getDefaultData(language = 'fr') {
 
 ### tree.js - Arborescence Sidebar
 
-**Fichier** : `src/js/features/tree.js` (686 lignes)
+**Fichier** : `src/js/features/tree.js` (723 lignes)
 
 **Responsabilités** :
 - Render sidebar (arborescence)
@@ -828,7 +854,7 @@ Work@node_root
 - Tracking du path pour breadcrumb
 - Détection de cycles
 
-📍 **Référence** : `src/js/features/tree.js:79-94` (fonction buildInstanceKey)
+📍 **Référence** : `src/js/features/tree.js:80-95` (fonction buildInstanceKey)
 
 #### Branch Mode
 
@@ -841,8 +867,8 @@ Work@node_root
 - "New Root Node" désactivé
 
 📍 **Référence** :
-- `src/js/features/tree.js:182-204` (détection branch mode)
-- `src/js/features/tree.js:449-467` (renderBranchModeIndicator)
+- `src/js/features/tree.js:183-205` (détection branch mode)
+- `src/js/features/tree.js:584-602` (renderBranchModeIndicator)
 
 #### Extraction emojis
 
@@ -863,13 +889,13 @@ function extractEmojiFromTitle(title) {
 }
 ```
 
-📍 **Référence** : `src/js/features/tree.js:24-71`
+📍 **Référence** : `src/js/features/tree.js:27-70`
 
 ---
 
 ### editor.js - Édition des Nœuds
 
-**Fichier** : `src/js/features/editor.js` (1107 lignes)
+**Fichier** : `src/js/features/editor.js` (1049 lignes)
 
 **Responsabilités** :
 - Modes vue/édition
@@ -888,17 +914,17 @@ function extractEmojiFromTitle(title) {
 
 📍 **Référence** :
 - `src/js/features/editor.js:18` - Variable viewMode
-- `src/js/features/editor.js:26-31` - initViewMode (lecture localStorage)
-- `src/js/features/editor.js:1031-1042` - toggleViewMode()
+- `src/js/features/editor.js:26-35` - initViewMode (lecture localStorage)
+- `src/js/features/editor.js:861-900` - toggleViewMode()
 
 #### Breadcrumb
 
-**Génération** (`src/js/features/editor.js:generateBreadcrumb()`) :
+**Génération** (`src/js/features/editor.js:updateBreadcrumb()`) :
 
 Remonte la chaîne des parents depuis le nœud courant jusqu'à la racine (ou branch root).
 
 ```javascript
-function generateBreadcrumb(nodeId) {
+function updateBreadcrumb(nodeId) {
   const crumbs = [];
   let current = data.nodes[nodeId];
 
@@ -927,7 +953,7 @@ function generateBreadcrumb(nodeId) {
 }
 ```
 
-📍 **Référence** : `src/js/features/editor.js:45-84`
+📍 **Référence** : `src/js/features/editor.js:306-385`
 
 #### Right Panel
 
@@ -938,7 +964,7 @@ function generateBreadcrumb(nodeId) {
 4. **Storage** : Usage + cleanup orphans
 5. **Actions** : Duplicate, Move, Link, Delete
 
-📍 **Référence** : `src/js/features/editor.js:665-876` (renderRightPanel)
+📍 **Référence** : `src/js/features/editor.js:574` (updateRightPanel)
 
 #### Markdown avec Attachments
 
@@ -949,34 +975,38 @@ function generateBreadcrumb(nodeId) {
 4. Remplace dans HTML
 
 ```javascript
-async function renderMarkdownWithAttachments(markdown, nodeId) {
-  // 1. Parse markdown
-  let html = marked.parse(markdown);
+async function processAttachmentUrls(html, node) {
+  // Find all attachment:ID references
+  const attachmentPattern = /attachment:([a-zA-Z0-9_]+)/g;
+  const matches = [...html.matchAll(attachmentPattern)];
 
-  // 2. Détecte attachments
-  const attachmentRegex = /src="attachment:([^"]+)"/g;
-  const matches = [...html.matchAll(attachmentRegex)];
+  if (matches.length === 0) return html;
 
-  // 3. Remplace par blob URLs
+  let processedHtml = html;
+
+  // Process each attachment reference
   for (const match of matches) {
     const attachmentId = match[1];
-    const blobUrl = await AttachmentsModule.getAttachmentBlobUrl(attachmentId);
-    if (blobUrl) {
-      html = html.replace(match[0], `src="${blobUrl}"`);
+    const blob = await AttachmentsModule.getAttachment(attachmentId);
+
+    if (blob) {
+      // Create blob URL and replace
+      const blobUrl = URL.createObjectURL(blob);
+      processedHtml = processedHtml.replace(match[0], blobUrl);
     }
   }
 
-  return html;
+  return processedHtml;
 }
 ```
 
-📍 **Référence** : `src/js/features/editor.js:402-451`
+📍 **Référence** : `src/js/features/editor.js:48-140`
 
 ---
 
 ### search.js - Recherche Globale
 
-**Fichier** : `src/js/features/search.js` (215 lignes)
+**Fichier** : `src/js/features/search.js` (257 lignes)
 
 **Responsabilités** :
 - Recherche dans title, content, tags
@@ -1042,13 +1072,13 @@ function performSearch(query) {
 }
 ```
 
-📍 **Référence** : `src/js/features/search.js:42-128`
+📍 **Référence** : `src/js/features/search.js:58-205`
 
 ---
 
 ### tags.js - Gestion des Tags
 
-**Fichier** : `src/js/features/tags.js` (281 lignes)
+**Fichier** : `src/js/features/tags.js` (352 lignes)
 
 **Responsabilités** :
 - Ajout/suppression tags
@@ -1094,7 +1124,7 @@ function getTagSuggestions(prefix) {
 
 ### modals.js - Modales
 
-**Fichier** : `src/js/features/modals.js` (624 lignes)
+**Fichier** : `src/js/features/modals.js` (646 lignes)
 
 **Responsabilités** :
 - Action Modal (Move/Link/Duplicate/Delete)
@@ -1113,7 +1143,7 @@ function getTagSuggestions(prefix) {
 
 📍 **Référence** :
 - `index.html:296-349` - Structure HTML modal
-- `src/js/features/modals.js:15-85` - openActionModal()
+- `src/js/features/modals.js:23-145` - openActionModal()
 
 #### Symlink Modal
 
@@ -1126,13 +1156,13 @@ function getTagSuggestions(prefix) {
 
 📍 **Référence** :
 - `index.html:352-398` - Structure HTML
-- `src/js/features/modals.js:248-385` - openSymlinkModal()
+- `src/js/features/modals.js:513-645` - openSymlinkModal()
 
 ---
 
 ### drag-drop.js - Drag & Drop
 
-**Fichier** : `src/js/features/drag-drop.js` (381 lignes)
+**Fichier** : `src/js/features/drag-drop.js` (447 lignes)
 
 **Responsabilités** :
 - HTML5 Drag & Drop API
@@ -1149,19 +1179,19 @@ function getTagSuggestions(prefix) {
 | `Alt`/`Opt` | **Duplicate** | Copie récursive |
 | (même parent) | **Reorder** | Réordonne enfants |
 
-📍 **Référence** : `src/js/features/drag-drop.js:59-120` (handleDrop)
+📍 **Référence** : `src/js/features/drag-drop.js:146-285` (handleDrop)
 
 #### Détection de cycles
 
 Avant move/link → Appelle `wouldCreateCycle()` de `data.js`
 
-📍 **Référence** : `src/js/features/drag-drop.js:95` (vérification cycle)
+📍 **Référence** : `src/js/features/drag-drop.js:195-210` (vérification cycle)
 
 ---
 
 ### fs-sync.js - File System Sync
 
-**Fichier** : `src/js/features/fs-sync.js` (808 lignes)
+**Fichier** : `src/js/features/fs-sync.js` (822 lignes)
 
 **Responsabilités** :
 - Export vers dossier local (hiérarchie de fichiers)
@@ -1196,7 +1226,7 @@ Avant move/link → Appelle `wouldCreateCycle()` de `data.js`
 
 ### preview.js - Live Preview
 
-**Fichier** : `src/js/features/preview.js` (458 lignes)
+**Fichier** : `src/js/features/preview.js` (525 lignes)
 
 **Responsabilités** :
 - Split screen (editor + preview)
@@ -1207,7 +1237,7 @@ Avant move/link → Appelle `wouldCreateCycle()` de `data.js`
 
 **UI** : Bouton "Split View" dans right panel (en mode édition)
 
-📍 **Référence** : `src/js/features/preview.js:18-45` (initPreview)
+📍 **Référence** : `src/js/features/preview.js:24-85` (initPreview)
 
 #### Sync Scroll
 
@@ -1231,7 +1261,7 @@ function syncScroll(sourceElement, targetElement) {
 
 ### panels.js - Gestion Panels
 
-**Fichier** : `src/js/ui/panels.js` (104 lignes)
+**Fichier** : `src/js/ui/panels.js` (132 lignes)
 
 **Responsabilités** :
 - Sidebar resizer (drag horizontal)
@@ -1245,7 +1275,7 @@ function syncScroll(sourceElement, targetElement) {
 2. Mousemove → Update largeur sidebar
 3. Mouseup → Save préférence
 
-📍 **Référence** : `src/js/ui/panels.js:17-78` (initSidebarResizer)
+📍 **Référence** : `src/js/ui/panels.js:34-105` (initSidebarResizer)
 
 **Limites** :
 - Min : 200px
@@ -1255,7 +1285,7 @@ function syncScroll(sourceElement, targetElement) {
 
 ### toast.js - Notifications
 
-**Fichier** : `src/js/ui/toast.js` (22 lignes)
+**Fichier** : `src/js/ui/toast.js` (28 lignes)
 
 **Responsabilités** :
 - Afficher notifications temporaires
@@ -1274,7 +1304,7 @@ showToast('Node saved', 'success');
 showToast('Error loading data', 'error');
 ```
 
-📍 **Référence** : `src/js/ui/toast.js:7-22`
+📍 **Référence** : `src/js/ui/toast.js:13-28`
 
 **Implémentation** : Crée/détruit éléments DOM dynamiquement.
 
@@ -1439,14 +1469,14 @@ function setupSyncListener(callback) {
 
 📍 **Référence** :
 - `src/js/utils/sync.js:12-24` - initSync()
-- `src/js/utils/sync.js:29-47` - setupSyncListener()
-- `src/js/utils/sync.js:53-58` - notifyDataChanged()
+- `src/js/utils/sync.js:62` - setupSyncListener()
+- `src/js/utils/sync.js:40` - notifyDataChanged()
 
 ---
 
 ### frontmatter.js - Parse YAML
 
-**Fichier** : `src/js/utils/frontmatter.js` (55 lignes)
+**Fichier** : `src/js/utils/frontmatter.js` (60 lignes)
 
 **Responsabilités** :
 - Parse frontmatter YAML en début de markdown

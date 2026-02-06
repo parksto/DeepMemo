@@ -30,7 +30,6 @@ const app = {
   // State
   data: DataModule.data,
   currentNodeId: null,
-  expandedNodes: DataModule.expandedNodes,
   exportType: null, // 'global' or 'branch'
   exportBranchId: null, // ID of branch to export (null for global)
 
