@@ -20,7 +20,7 @@ Avant toute action, consulter la documentation complète :
 
 ## ⚡ Infos Rapides
 
-**Version** : V0.10.5
+**Version** : V0.11.0
 **License** : MIT
 **Author** : Fabien
 

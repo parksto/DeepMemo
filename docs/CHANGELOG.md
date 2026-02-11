@@ -9,13 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.11.0] - 2026-02-15
+
+### Added
+- **JSON Schema Validation** - Complete schema validation for imports/exports
+  - `schemas/v1.0/deepmemo.json` - Full archive validation schema
+  - `schemas/v1.0/metadata.json` - Metadata validation schema
+  - Import validation with error reporting and legacy format support
+  - Tests added in `tests/validation/`
+
+### Changed
+- **Documentation Structure** - Complete reorganization and cleanup
+  - Removed 23 legacy/duplicate documentation files
+  - Consolidated structure: main docs (1-CONCEPTS to 4-FEATURES), guides/, reference/, development/
+  - Updated all internal links to point to new locations
+  - Francized all documentation with consistent terminology
+- **Vocabulary Harmonization** - Standardized terminology throughout codebase
+  - "share" → "url" (reflects actual usage for bookmarks/multi-tab)
+  - "tree" → "arborescence" (French localization)
+  - Updated UI strings and documentation
+
 ### Fixed
 - **Symlink ID Generation Consistency** - Standardized symlink ID generation to always use `symlink_` prefix instead of inconsistent `node_` prefix
   - **Impact**: All new symlinks will have IDs matching pattern `symlink_{timestamp}_{random}`
   - **Code**: Fixed `src/js/features/modals.js:358` to use `symlink_` prefix
   - **Schema**: Updated `schemas/v1.0/deepmemo.json` with strict validation rules enforcing type/ID correspondence
   - **Migration**: Existing symlinks with `node_` prefix will continue to work (backward compatible), but are technically invalid per schema v1.0
-  - **Documentation**: Updated all references in `docs/reference/file-formats/DM-FORMAT.md` and `docs/3-DATA-MODEL.md`
+- **ID Pattern Validation** - Corrected documentation to match actual ID generation patterns
+- **Metadata Format** - Updated `validateMetadata()` to correspond to current v1.0 format
+- **Code References** - Fixed 100+ broken or outdated code references in documentation
+
+### Documentation
+- Complete fact-check of all documentation against source code
+- All code references verified and updated (`file:line` format)
+- Removed duplicate and obsolete documentation files
+- Added comprehensive examples and test cases
 
 ---
 
@@ -90,17 +120,17 @@ DeepMemo follows [Semantic Versioning](https://semver.org/):
 - **MINOR** version: Backward-compatible functionality additions
 - **PATCH** version: Backward-compatible bug fixes
 
-**Current Version**: 0.10.5 (pre-1.0 development)
+**Current Version**: 0.11.0 (pre-1.0 development)
 
 ---
 
 ## Links
 
-- [Project Repository](https://github.com/deepmemo/deepmemo)
+- [Project Repository](https://github.com/parksto/DeepMemo)
 - [Documentation](https://deepmemo.org/docs)
 - [Website](https://deepmemo.org/)
-- [Report Issues](https://github.com/deepmemo/deepmemo/issues)
+- [Report Issues](https://github.com/parksto/DeepMemo/issues)
 
 ---
 
-**Last Updated**: 2026-01-31
+**Last Updated**: 2026-02-15

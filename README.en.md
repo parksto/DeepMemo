@@ -18,7 +18,7 @@ DeepMemo is a knowledge management system built on a **hierarchical network** of
 
 From the neurons in your brain to the syntax of language, from evolutionary trees to mind maps, **hierarchical and networked structures appear everywhere**. DeepMemo embraces this universal pattern to help you organize knowledge the way your mind already works.
 
-→ Read more: [Why hierarchical structures are universal](docs/HIERARCHICAL_STRUCTURES.md)
+→ Read more: [Why hierarchical structures are universal](docs/1-CONCEPTS.md)
 
 ---
 
@@ -99,13 +99,13 @@ python -m http.server 8000
 
 **For users**:
 - [Complete usage guide](docs/README.md)
-- [Why hierarchical structures?](docs/HIERARCHICAL_STRUCTURES.md)
+- [Why hierarchical structures?](docs/1-CONCEPTS.md)
 
 **For developers**:
-- [Technical architecture](docs/ARCHITECTURE.md)
-- [Development guide](docs/CONTRIBUTING.md)
-- [History and roadmap](docs/ROADMAP.md)
-- [Internationalization (i18n)](docs/I18N.md)
+- [Technical architecture](docs/2-ARCHITECTURE.md)
+- [Development guide](docs/development/CONTRIBUTING.md)
+- [History and roadmap](docs/development/ROADMAP.md)
+- [Internationalization (i18n)](docs/guides/I18N.md)
 
 ---
 
@@ -125,18 +125,18 @@ python -m http.server 8000
 
 ## 📝 Current Version
 
-**V0.10.5** (January 2026) - Stable and feature-complete
+**V0.11.0** (February 2026) - Documentation refactoring and fixes
 
-Latest additions:
-- IndexedDB storage with Dexie.js (500MB-1GB capacity)
-- .dm archive format (ZIP-based with metadata)
-- PDF export (online via CloudFlare Worker or offline CLI)
-- Import improvements (replace/merge choice, global export support in branch import)
-- Inline images in PDFs, symlink scope awareness
+This version brings a complete documentation overhaul:
+- Restructured and verified documentation (1-CONCEPTS, 2-ARCHITECTURE, 3-DATA-MODEL, 4-FEATURES)
+- JSON schemas for import/export validation
+- Bug fixes and vocabulary harmonization
+- Validation tests added
+- Complete French localization of documentation
 
-Implemented features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, multi-format export/import (.dm, .json, FreeMind, Mermaid, PDF), attachments with IndexedDB, installable PWA, bilingual interface.
+Core features: infinite hierarchy, renameable symlinks, intelligent tags, real-time search, branch mode, drag & drop, multi-format export/import (.dm, .json, FreeMind, PDF), attachments with IndexedDB, file system sync (Phase 1), installable PWA, bilingual interface.
 
-[→ See ROADMAP.md for complete history](docs/ROADMAP.md)
+[→ See ROADMAP.md for complete history](docs/development/ROADMAP.md)
 
 ---
 
@@ -149,7 +149,7 @@ We welcome contributions! Whether it's:
 - 📝 Documentation improvements
 - 💻 Code contributions
 
-Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+Please read [CONTRIBUTING.md](docs/development/CONTRIBUTING.md) for guidelines.
 
 ---
 

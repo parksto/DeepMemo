@@ -18,7 +18,7 @@ DeepMemo est un système de gestion des connaissances basé sur un **réseau hi�
 
 Des neurones de votre cerveau à la syntaxe du langage, des arbres évolutifs aux cartes mentales, **les structures hiérarchiques et en réseau apparaissent partout**. DeepMemo adopte ce modèle universel pour vous aider à organiser vos connaissances comme votre esprit le fait déjà.
 
-→ En savoir plus : [Pourquoi les structures hiérarchiques sont universelles](docs/HIERARCHICAL_STRUCTURES.md)
+→ En savoir plus : [Concepts fondamentaux](docs/1-CONCEPTS.md)
 
 ---
 
@@ -99,7 +99,7 @@ python -m http.server 8000
 
 **Pour les utilisateurs** :
 - [Guide d'utilisation complet](docs/README.md)
-- [Pourquoi les structures hiérarchiques ?](docs/HIERARCHICAL_STRUCTURES.md)
+- [Concepts fondamentaux](docs/1-CONCEPTS.md)
 
 **Pour les développeurs** :
 - [Architecture technique](docs/2-ARCHITECTURE.md)
@@ -125,16 +125,16 @@ python -m http.server 8000
 
 ## 📝 Version Actuelle
 
-**V0.10.5** (Janvier 2026) - Stable et complet
+**V0.11.0** (Février 2026) - Documentation refactorée et corrections
 
-Derniers ajouts :
-- Stockage IndexedDB avec Dexie.js (capacité 500MB-1GB)
-- Format d'archive .dm (basé sur ZIP avec métadonnées)
-- Export PDF (en ligne via CloudFlare Worker ou CLI hors ligne)
-- Améliorations import (choix remplacer/fusionner, support export global dans import branche)
-- Images inline dans PDFs, gestion de la portée des symlinks
+Cette version apporte une refonte complète de la documentation :
+- Documentation restructurée et vérifiée (1-CONCEPTS, 2-ARCHITECTURE, 3-DATA-MODEL, 4-FEATURES)
+- Schémas JSON pour validation des imports/exports
+- Corrections de bugs et harmonisation du vocabulaire
+- Tests de validation ajoutés
+- Francisation complète de la documentation
 
-Fonctionnalités implémentées : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, glisser-déposer, export/import multi-formats (.dm, .json, FreeMind, Mermaid, PDF), pièces jointes avec IndexedDB, PWA installable, interface bilingue.
+Fonctionnalités principales : hiérarchie infinie, symlinks renommables, tags intelligents, recherche temps réel, mode branche, glisser-déposer, export/import multi-formats (.dm, .json, FreeMind, PDF), pièces jointes avec IndexedDB, synchronisation système de fichiers (Phase 1), PWA installable, interface bilingue.
 
 [→ Voir ROADMAP.md pour l'historique complet](docs/development/ROADMAP.md)
 
