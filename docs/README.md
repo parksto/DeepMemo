@@ -1,298 +1,250 @@
-# 📖 DeepMemo - Complete Documentation
+# Documentation DeepMemo
 
-> **Concepts, architecture, and detailed features**
+**Documentation technique complète pour développeurs et contributeurs**
 
-*[Version française](README.fr.md)*
-
----
-
-## 📚 Documentation Index
-
-> **Central index of all DeepMemo documentation**. Use this list when updating documentation to ensure nothing is forgotten.
-
-### 🎯 Core Documentation (Bilingual)
-
-**General**
-- [`README.md`](README.md) / [`README.fr.md`](README.fr.md) - Main overview (V0.10.4)
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) / [`ARCHITECTURE.fr.md`](ARCHITECTURE.fr.md) - Technical architecture
-- [`VISION.md`](VISION.md) / [`VISION.fr.md`](VISION.fr.md) - Project vision and philosophy
-- [`ROADMAP.md`](ROADMAP.md) / [`ROADMAP.fr.md`](ROADMAP.fr.md) - Development roadmap
-
-**Technical Specs**
-- [`FILE-FORMATS.md`](FILE-FORMATS.md) / [`FORMATS-FICHIERS.md`](FORMATS-FICHIERS.md) - Export/import formats (⚠️ EN: v2.0, FR: v1.0)
-- [`SPEC-ATTACHMENTS.md`](SPEC-ATTACHMENTS.md) / [`SPEC-ATTACHMENTS.fr.md`](SPEC-ATTACHMENTS.fr.md) - Attachment system
-- [`STORAGE.md`](STORAGE.md) / [`STORAGE.fr.md`](STORAGE.fr.md) - IndexedDB storage
-- [`I18N.md`](I18N.md) / [`I18N.fr.md`](I18N.fr.md) - Internationalization
-- [`PWA.md`](PWA.md) / [`PWA.fr.md`](PWA.fr.md) - Progressive Web App
-
-**Detailed Topics**
-- [`HIERARCHICAL_STRUCTURES.md`](HIERARCHICAL_STRUCTURES.md) / [`HIERARCHICAL_STRUCTURES.fr.md`](HIERARCHICAL_STRUCTURES.fr.md) - Hierarchical structures
-- [`TODO.md`](TODO.md) / [`TODO.fr.md`](TODO.fr.md) - Development tasks
-
-**Contributing**
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) / [`CONTRIBUTING.fr.md`](CONTRIBUTING.fr.md) - Contribution guide
-
-### 📄 File Format Details
-
-- [`file-formats/JSON-STRUCTURE.md`](file-formats/JSON-STRUCTURE.md) - JSON interchange format
-- [`file-formats/ZIP-FORMAT.md`](file-formats/ZIP-FORMAT.md) - .dm archive format
-- [`file-formats/SCHEMA-VALIDATION.md`](file-formats/SCHEMA-VALIDATION.md) - JSON Schema validation
-
-### 🔮 Prospective (Future Vision)
-
-- [`Prospective/1-FUTURE-VISION.md`](Prospective/1-FUTURE-VISION.md) - Long-term vision
-- [`Prospective/2-DEEPMEMO-ACTIVE-NODES.md`](Prospective/2-DEEPMEMO-ACTIVE-NODES.md) - Active nodes concept
-- [`Prospective/3-USE-CASES.md`](Prospective/3-USE-CASES.md) - Future use cases
-- [`Prospective/4-PARADOX.md`](Prospective/4-PARADOX.md) - Philosophical paradoxes
-- [`Prospective/5-ACTION.md`](Prospective/5-ACTION.md) - Action plans
-
-### 🛠️ Development
-
-- [`CONTEXT-CLAUDE-PROJECTS.md`](CONTEXT-CLAUDE-PROJECTS.md) - Context for Claude Code (⚠️ Should be CLAUDE.md at root)
-- [`../cloudflare-worker/README.md`](../cloudflare-worker/README.md) - PDF export worker
-- [`../cloudflare-worker/PRIVACY-NOTICE.md`](../cloudflare-worker/PRIVACY-NOTICE.md) - PDF privacy notice
-
-### 📋 Update Checklist
-
-When making significant changes to DeepMemo, ensure you update:
-1. ✅ Both language versions (EN + FR) of affected files
-2. ✅ Version numbers in README files
-3. ✅ ROADMAP for new features or completed items
-4. ✅ ARCHITECTURE for structural changes
-5. ✅ FILE-FORMATS / FORMATS-FICHIERS for data format changes
-6. ✅ SPEC-ATTACHMENTS for attachment-related changes
-7. ✅ Relevant file-formats/ subdirectory files
-8. ✅ This index if new documentation is added
+*[English version](README.en.md)*
 
 ---
 
-DeepMemo is a personal knowledge management system based on a **hierarchical network** of recursive, interconnected, and active nodes. Everything (notes, projects, contacts, files, ideas) is a node that can contain other nodes infinitely.
-
-## 🎯 Core Concept
-
-**A single base type: the Node**
-
-Each node has:
-- A title
-- Content (text, markdown)
-- Children (other nodes)
-- Links to other nodes
-- Tags
-- Customizable properties
-
-## ✨ Main Features
-
-### 🌳 Flexible Hierarchy
-- Breadcrumb navigation
-- Expand/collapse tree
-- Persistent state between sessions
-
-### 🔗 Link System
-- **Reticular tree structure**: The hierarchical tree becomes a meshed network thanks to symlinks
-- **Symbolic links**: A node can appear in multiple places (like `ln -s` on Linux), independently renameable
-- **Backlinks**: Automatically see all nodes that point to the current node
-
-### 🏷️ Tags
-- Dedicated tag system
-- Intelligent auto-completion (branch tags + global tags)
-- Per-branch tag cloud
-- Tag-based search
-
-### 🔍 Global Search
-- Real-time search (Ctrl+K)
-- Search in titles, content, and tags
-- Keyboard navigation
-- Result highlights
-
-### 🔗 Dynamic URLs (V0.8)
-- **Bookmarkable URLs**: `#/node/nodeId`
-- **Persistence after refresh**: Stay on the active node
-- **Isolated branch mode**: `?branch=nodeId` to display only a subtree
-- **Easy sharing**: Icons 🔗 (node) and 🌳 (branch)
-- **Browser navigation**: Support for back/forward buttons
-
-### 📦 Branch Export/Import (V0.8)
-- **Local export**: Export a node + all its descendants
-- **Non-destructive import**: Import as children of the current node
-- **ID regeneration**: Avoids conflicts with existing nodes
-- **Symlink preservation**: Relationships preserved in the imported branch
-- **Collaborative sharing**: First step towards multi-user usage
-
-### 🌍 Internationalization (V0.9)
-- **Bilingual interface**: Full French/English support
-- **Automatic detection**: Language detected from browser settings
-- **Manual switcher**: Toggle FR/EN in the right panel
-- **Bilingual demo content**: 26 educational nodes in both languages
-- **PWA manifests**: Localized app names and descriptions
-- **Offline compatible**: All dictionaries pre-cached
-
-### 📘 Demo Content (V0.8)
-- **Interactive tutorial**: 26 educational nodes on first launch
-- **Progressive structure**: Discovery through tree exploration
-- **Current features**: Nodes, symlinks, tags, branch, export/import, shortcuts
-- **Future vision**: Active types, multi-node triggers, external API, multi-user
-- **Educational format**: [Feature → What it enables → Concrete example]
-- **Deletable**: Instructions to remove demo content included
-
-### 📄 Display and Rendering (V0.7+)
-- **Markdown rendering**: Formatted content display
-- **View mode by default**: Reading prioritized over editing (V0.8)
-- **View/edit toggle**: [View]/[Edit] button + Alt+E shortcut
-- **Resizable sidebar**: Mouse-adjustable
-- **Auto-collapse**: Tree collapsed except active path
-- **Scroll reset**: Return to top of content on each navigation (V0.8)
-- **Right panel hidden**: Clean interface by default, open via [i] (V0.8)
-- **Font choice**: Toggle Sto (custom) vs system (V0.8)
-
-### 🎨 Drag & Drop (V0.8 - Complete)
-- **Move**: Drag-and-drop to change parent or reorganize
-- **Duplicate**: Ctrl + drag to copy with descendants
-- **Link**: Ctrl+Alt + drag to create a symbolic link
-- **Precise zones**: Visual indicators before/after/inside
-- **Cycle prevention**: Automatic detection of circular references
-- **Full support**: Works in tree AND children list
-
-### 📱 Progressive Web App (V0.8)
-- **Native installation**: Installable as a real app on desktop/mobile
-- **Offline mode**: Works without internet (smart cache)
-- **Service Worker**: Automatic caching of all static files
-- **Standalone opening**: Launches in dedicated window (no address bar)
-- **Adaptive icons**: Icon generator (used once, deleted after generation)
-- **HTTPS deployment**: Compatible with GitHub Pages, Netlify, Vercel, etc.
-- **Complete documentation**: Installation and testing guide in `docs/PWA.md`
-
-### 📎 File Attachments (V0.8)
-- **File upload**: Attach files (images, PDFs, documents) to any node
-- **IndexedDB storage**: ~500 MB limit depending on browser (vs localStorage limited to ~5-10 MB)
-- **Inline display**: Images displayed directly with markdown syntax `![](attachment:ID)`
-- **Download links**: Other files downloadable with `[name](attachment:ID)`
-- **ZIP Export/Import**: Systematic ZIP format including files + JSON data
-- **Complete management**: Upload, download, delete, copy syntax, garbage collection
-- **Storage indicator**: Real-time progress bar in right panel
-- **Supported types**: Images, PDFs, videos, audio, documents (50 MB max per file)
-- **Documentation**: Complete spec in `docs/SPEC-ATTACHMENTS.md`
-
-### 💾 IndexedDB Storage (V0.10)
-- **Scalable storage**: Migration from localStorage to IndexedDB with Dexie.js
-- **Increased capacity**: 500 MB - 1 GB storage (vs ~5-10 MB with localStorage)
-- **Performance**: Better handling of large datasets and attachments
-- **Automatic migration**: Seamless upgrade from V0.9 preserving all data
-- **Backup support**: Original localStorage data preserved after migration
-
-### 📦 .dm Archive Format (V0.10)
-- **Standard export format**: `.dm` files (ZIP archives with custom extension)
-- **Complete packaging**: Includes metadata.json, data.json, and attachments folder
-- **Version tracking**: Export metadata with version, date, node count, generator info
-- **Backward compatible**: Still supports .json and legacy ZIP formats
-- **LLM-friendly**: .json interchange format still available for AI generation
-- **Documentation**: Full spec in `docs/FILE-FORMATS.md`
-
-### 📄 PDF Export (V0.10)
-- **Document generation**: Export branches as formatted PDF documents
-- **Symlink resolution**: Automatically includes linked content
-- **Inline images**: Attachments converted to base64 for embedding
-- **Table of contents**: Hierarchical TOC for navigation
-- **Two implementations**:
-  - **CloudFlare Worker**: Online generation with rate limiting (code ready, not yet deployed)
-  - **CLI tool**: 100% offline with `bin/branch2pdf.js` (Node.js + Puppeteer)
-- **Privacy-focused**: IP hashing (SHA-256) for online version
-- **Documentation**: `cloudflare-worker/README.md`
-
-### ⌨️ Keyboard Shortcuts
-- `Alt+N`: New node (child if a node is selected, root otherwise)
-- `Alt+E`: Switch to edit mode (with automatic focus)
-- `Ctrl+K`: Global search
-- `Escape`: Go up to parent
-- `↑↓←→`: Navigation in the tree
-
-## 🏗️ Current Architecture (V0.10 - Modular ES6)
-
-### Format
-- **Modular multifile**: HTML + CSS + ES6 modules JS
-- `index.html`: Minimal HTML structure
-- `src/css/`: Organized styles (base, layout, components, utilities, mobile)
-- `src/js/app.js`: Main entry point
-- `src/js/core/`: Data management (data, storage, migration, attachments, default-data)
-- `src/js/features/`: Functional modules (tree, editor, search, tags, drag-drop, modals)
-- `src/js/ui/`: UI components (toast, panels, mobile-tabs)
-- `src/js/utils/`: Utilities (routing, keyboard, helpers, i18n, sync)
-- **100% Vanilla** JavaScript ES6+ (no framework)
-- CSS Variables for theming
-- **IndexedDB with Dexie.js** for persistence (V0.10)
-
-### Data Structure
-```javascript
-{
-  nodes: {
-    "node_xxx": {
-      id: "node_xxx",
-      type: "node",  // "node" (normal) or "symlink" (V0.8)
-      title: "Title",
-      content: "Markdown content",
-      children: ["node_yyy", "node_zzz"],
-      parent: "node_parent" | null,
-      created: timestamp,
-      modified: timestamp,
-      links: ["Linked node title"],
-      backlinks: ["node_pointing_here"],
-      tags: ["tag1", "tag2"],
-      attachments: ["attach_123_abc"],  // IndexedDB IDs (V0.8)
-      targetId: "node_target"  // If type === "symlink" (V0.8)
-    }
-  },
-  rootNodes: ["node_aaa", "node_bbb"]
-}
-```
-
-## 🎨 Interface
-
-- **Left sidebar**: Complete tree
-- **Central zone**: Current node editor + children as cards
-- **Right panel**: Metadata, links, backlinks, tag cloud
-- **Dark theme** by default
-
-## 🚀 Next Steps (V1.0)
-
-### Features to Implement
-- [ ] Navigation via clickable `[[title]]` links
-- [ ] Nested list view (children = main content)
-- [ ] External format Export/Import (Markdown, Notion, Obsidian)
-- [ ] Customizable themes
-- [ ] Multi-user permissions (chmod-style)
-- [ ] Active node types (with scripts)
-
-## 💡 Long-term Vision
-
-To discover explored directions (active nodes, automation, decentralized collaboration), check the **"🔮 Explored Directions"** section in the app's demo content.
-
-**Humble and open tone**: These ideas are exploratory tracks, not promises. DeepMemo is Open Source (MIT), contributions welcome!
-
-## 🛠️ Development
-
-### Local Server
-```bash
-cd DeepMemo
-python3 -m http.server 8000
-# Then open http://localhost:8000
-```
-
-### Technologies
-- HTML5
-- CSS3 (Variables, Flexbox, Grid)
-- JavaScript ES6+ (Classes, Modules)
-- IndexedDB with Dexie.js (V0.10)
-- Service Worker (PWA)
-
-## 👤 Author
-
-**Fabien** - Passionate developer working on DeepMemo for 5 years (mental conception), now in active development.
-
-## 📄 License
-
-**MIT** - Free and open source software.
-
-You can use, modify, and distribute DeepMemo freely. Your data belongs to you, stored locally in your browser.
+Bienvenue dans la documentation de DeepMemo. Ce guide est organisé comme un livre technique : commencez au début si vous découvrez le projet, ou allez directement aux sections qui vous intéressent.
 
 ---
 
-**DeepMemo V0.10.4** - January 2026
+## 📖 Comment Lire Cette Documentation
+
+Cette documentation suit une **structure narrative**, progressant des concepts fondamentaux aux détails d'implémentation avancés :
+
+1. **Comprendre DeepMemo** (Partie 1) - Commencez ici pour découvrir ce qu'est DeepMemo et comment il fonctionne
+2. **Fonctionnalités** (Partie 2) - Découvrez ce que vous pouvez faire avec DeepMemo
+3. **Référence Technique** (Partie 3) - Spécifications détaillées pour développeurs
+4. **Contribuer** (Partie 4) - Rejoindre le développement
+
+**Nouveau sur DeepMemo ?** Lisez [1-CONCEPTS.md](1-CONCEPTS.md) en premier. Il explique les idées fondamentales qui donnent du sens à tout le reste.
+
+**Vous cherchez quelque chose de précis ?** Utilisez l'index ci-dessous pour accéder directement à ce dont vous avez besoin.
+
+---
+
+## Partie 1 : Comprendre DeepMemo
+
+**Commencez ici si vous découvrez DeepMemo ou souhaitez comprendre la philosophie de conception.**
+
+### Concepts Fondamentaux
+📘 **[1-CONCEPTS.md](1-CONCEPTS.md)** - Les fondamentaux
+
+Apprenez :
+- **Nœuds** : Le type de base unique qui permet tout
+- **Hiérarchie** : Comment les relations parent-enfant créent la structure
+- **Symlinks** : Transformer un arbre en réseau réticulaire
+- **Clés d'Instance** : Suivre les chemins à travers le réseau
+- **Mode Branche** : Sous-arbres isolés pour concentration et partage
+- **Tags** : Métadonnées transversales
+
+*Lisez ceci en premier. Tout le reste s'appuie sur ces concepts.*
+
+### Architecture
+🏗️ **[2-ARCHITECTURE.md](2-ARCHITECTURE.md)** - Conception technique
+
+Découvrez :
+- Architecture modulaire ES6
+- Patterns de communication entre modules
+- Système de navigation (URLs, routing, navigation navigateur avant/arrière)
+- Rendu de l'arbre (pliage vs activation, auto-collapse)
+- Approche de gestion d'état
+
+### Modèle de Données
+🗄️ **[3-DATA-MODEL.md](3-DATA-MODEL.md)** - Structure et stockage
+
+Comprenez :
+- Structure des nœuds (schéma JSON complet)
+- Types : `node` vs `symlink`
+- Relations : parent, children, targetId
+- Métadonnées : timestamps, tags, pièces jointes
+- Stockage IndexedDB avec Dexie.js
+
+---
+
+## Partie 2 : Fonctionnalités
+
+**Découvrez ce que DeepMemo peut faire.**
+
+### Vue d'Ensemble des Fonctionnalités
+✨ **[4-FEATURES.md](4-FEATURES.md)** - Liste complète des fonctionnalités
+
+Référence rapide de toutes les fonctionnalités avec liens vers guides détaillés :
+- Navigation (arbre, mode branche, fil d'Ariane, URLs)
+- Contenu (markdown, aperçu en direct, pièces jointes, tags)
+- Export/Import (archives .dm, FS Sync, PDF)
+- Avancé (glisser-déposer, sync multi-onglets, PWA, i18n)
+
+### Guides Thématiques
+
+#### Export et Import
+📦 **[guides/FILE-FORMATS.md](guides/FILE-FORMATS.md)** - Formats d'export/import
+- Archives `.dm` (ZIP avec métadonnées + pièces jointes)
+- Format d'échange `.json` (compatible LLM)
+- Export FreeMind `.mm` (lecture seule, voir [MM-FORMAT.md](reference/file-formats/MM-FORMAT.md))
+- Workflows d'import (global vs branche)
+
+#### Synchronisation Système de Fichiers
+💾 **[guides/FS-SYNC.md](guides/FS-SYNC.md)** - Sync avec système de fichiers local
+- Phase 1 (✅ implémenté) : Export vers dossier local + import avec régénération d'ID
+- Phase 2 (📋 planifié) : Sync bidirectionnel avec détection de changements
+- Phase 3 (🔮 futur) : Mode watch automatique avec sync temps réel
+- Structure de fichiers : `index.md`, `.dmlink`, frontmatter YAML
+- Chrome/Edge uniquement (File System Access API)
+- Import gracieux depuis dossiers externes (Obsidian, Notion)
+
+#### Export PDF
+📄 **[guides/PDF-EXPORT.md](guides/PDF-EXPORT.md)** - Générer des documents PDF
+- Pourquoi ça marche naturellement (hiérarchie → structure de document)
+- Version en ligne (CloudFlare Worker, non déployé)
+- CLI hors ligne (`bin/branch2pdf.js`)
+- Résolution des symlinks (scope-aware en mode branche)
+- Intégration d'images (base64)
+
+#### Pièces Jointes
+📎 **[guides/ATTACHMENTS.md](guides/ATTACHMENTS.md)** - Système de pièces jointes
+- Stockage dans IndexedDB
+- Images inline (`![](attachment:ID)`)
+- Workflows upload/download/suppression
+- Export/import avec archives `.dm`
+- Limites de taille et quotas
+
+#### Internationalisation
+🌍 **[guides/I18N.md](guides/I18N.md)** - Support multi-langues
+- FR/EN avec auto-détection
+- Ajouter de nouvelles traductions
+- Contenu de démo bilingue
+- Manifestes PWA par langue
+
+#### Progressive Web App
+📱 **[guides/PWA.md](guides/PWA.md)** - Hors ligne et installable
+- Stratégie de cache du Service Worker
+- Installation sur desktop/mobile
+- Mode hors ligne
+- Configuration du manifest
+
+---
+
+## Partie 3 : Référence Technique
+
+**Spécifications détaillées pour développeurs implémentant des fonctionnalités ou déboguant.**
+
+### Formats de Fichiers
+
+#### Format d'Archive .dm
+🗜️ **[reference/file-formats/DM-FORMAT.md](reference/file-formats/DM-FORMAT.md)** - Spécification structure ZIP
+- Structure d'archive (metadata.json, data.json, attachments/)
+- Suivi de version et métadonnées
+- Auto-détection import (magic number)
+- Génération et remapping d'ID (global vs branche)
+- Compression et encodage
+
+#### Format d'Échange JSON
+🔤 **[reference/file-formats/json-interchange.md](reference/file-formats/json-interchange.md)** - Format JSON portable
+- Structure pour génération LLM
+- Format minimal (métadonnées uniquement, pas de pièces jointes binaires)
+- Export global vs export branche
+- Workflows d'import (remplacer/fusionner, remapping d'ID)
+- Cas d'usage (backup, migration, versioning Git)
+
+#### Format Mind Map FreeMind
+🧠 **[reference/file-formats/MM-FORMAT.md](reference/file-formats/MM-FORMAT.md)** - Export XML pour mind mapping
+- Format compatible FreeMind/Freeplane/XMind
+- Structure XML (standard 1.0.1)
+- Conversion des nœuds (titres, contenu en notes HTML)
+- Visualisation des symlinks (flèches et styling)
+- Limitations (pas de tags, pas de pièces jointes, pas de réimport)
+- Cas d'usage (visualisation externe, collaboration)
+
+#### Validation de Schéma
+✅ **[reference/file-formats/validation.md](reference/file-formats/validation.md)** - Référence validation de formats
+- Spécifications JSON Schema (v1.0)
+- Processus de validation (côté client avec validation.js)
+- Outils de validation manuelle (ajv-cli, validateurs en ligne)
+- Erreurs courantes et solutions
+- Stratégie de migration de schémas
+
+### API de Stockage
+💽 **[reference/storage-api.md](reference/storage-api.md)** - Opérations IndexedDB/Dexie
+- Opérations CRUD
+- Référence API Dexie.js
+- Commandes console de debug
+- Stats et quotas
+
+### Raccourcis Clavier
+⌨️ **[reference/keyboard-shortcuts.md](reference/keyboard-shortcuts.md)** - Liste complète des raccourcis
+- Raccourcis de navigation
+- Raccourcis d'édition
+- Raccourcis de recherche
+- Raccourcis contextuels
+
+---
+
+## Partie 4 : Contribuer
+
+**Rejoignez le développement de DeepMemo.**
+
+### Guide de Contribution
+🤝 **[development/CONTRIBUTING.md](development/CONTRIBUTING.md)** - Comment contribuer
+- Directives de style de code
+- Processus de pull request
+- Exigences de tests
+- Canaux de communication
+
+### Feuille de Route
+🗺️ **[development/ROADMAP.md](development/ROADMAP.md)** - Plan de développement
+- Fonctionnalités planifiées
+- Jalons de versions
+- Vision long terme
+
+### Guide de Débogage
+🔧 **[development/debugging.md](development/debugging.md)** - Dépannage
+- Bugs courants et solutions
+- Commandes console
+- Inspection IndexedDB
+- Rechargement forcé et nettoyage du cache
+
+### Changelog
+📅 **[CHANGELOG.md](CHANGELOG.md)** - Historique des versions
+- Notes de version par version
+- Breaking changes
+- Corrections de bugs et améliorations
+
+---
+
+## Ressources Supplémentaires
+
+
+### CloudFlare Worker
+☁️ **[../cloudflare-worker/README.md](../cloudflare-worker/README.md)** - Worker de génération PDF
+- Guide de déploiement
+- Documentation API
+- Détails de limitation de débit
+
+☁️ **[../cloudflare-worker/PRIVACY-NOTICE.md](../cloudflare-worker/PRIVACY-NOTICE.md)** - Politique de confidentialité
+- Hachage IP (SHA-256)
+- Gestion des données
+- Notice utilisateur
+
+---
+
+## Philosophie
+
+Cette documentation suit ces principes :
+
+1. **Pas de suspense** : Chaque section commence par vous dire ce que vous allez apprendre
+2. **Pas de redondance** : Chaque information existe à un seul endroit
+3. **Trouvable** : Hiérarchie claire et références croisées
+4. **Clarté cognitive** : Comme l'export PDF de DeepMemo, la structure découle naturellement du contenu
+
+**Inspiré par** : La façon dont la structure hiérarchique de DeepMemo devient naturellement une structure de document dans l'export PDF. La documentation reflète cette clarté cognitive.
+
+---
+
+**DeepMemo V0.10.5** - Open Source (Licence MIT)
+
+Construit avec : Vanilla JavaScript ES6+, IndexedDB (Dexie.js), Service Workers
+
+Auteur : Fabien | Site web : https://deepmemo.org/

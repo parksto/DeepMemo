@@ -72,12 +72,12 @@ export function setupHashListener(onHashChange) {
 }
 
 /**
- * Get shareable URL for a node
+ * Get URL for a node
  * @param {string} nodeId - Node ID
  * @param {string|null} currentBranchRootId - Current branch root ID (null if not in branch mode)
  * @returns {string} Full URL
  */
-export function getShareableUrl(nodeId, currentBranchRootId = null) {
+export function getNodeUrl(nodeId, currentBranchRootId = null) {
   const baseUrl = `${window.location.origin}${window.location.pathname}`;
   const search = currentBranchRootId ? `?branch=${currentBranchRootId}` : '';
   const hash = `#/node/${nodeId}`;
@@ -85,11 +85,11 @@ export function getShareableUrl(nodeId, currentBranchRootId = null) {
 }
 
 /**
- * Get shareable URL for a branch (always creates isolated branch)
+ * Get URL for a branch (always creates isolated branch)
  * @param {string} branchRootId - Branch root ID
  * @returns {string} Full URL
  */
-export function getShareableBranchUrl(branchRootId) {
+export function getBranchUrl(branchRootId) {
   const baseUrl = `${window.location.origin}${window.location.pathname}`;
   return `${baseUrl}?branch=${branchRootId}#/node/${branchRootId}`;
 }

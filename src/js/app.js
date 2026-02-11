@@ -1,9 +1,9 @@
 /**
- * DeepMemo V0.10.3 - Main Application Entry Point
+ * DeepMemo V0.10.5 - Main Application Entry Point
  * Modular ES6 version
  */
 
-import { generateId, escapeHtml, downloadBlob } from './utils/helpers.js';
+import { generateId, escapeHtml, downloadBlob, sanitizeFilename } from './utils/helpers.js';
 import { setupKeyboardShortcuts } from './utils/keyboard.js';
 import * as RoutingModule from './utils/routing.js';
 import * as DataModule from './core/data.js';
@@ -30,7 +30,6 @@ const app = {
   // State
   data: DataModule.data,
   currentNodeId: null,
-  expandedNodes: DataModule.expandedNodes,
   exportType: null, // 'global' or 'branch'
   exportBranchId: null, // ID of branch to export (null for global)
 
@@ -38,7 +37,7 @@ const app = {
    * Initialize the application
    */
   async init() {
-    console.log('🚀 DeepMemo V0.10.3 - Initialisation...');
+    console.log('🚀 DeepMemo V0.10.5 - Initialisation...');
 
     // Initialize i18n system
     await initI18n();
@@ -1030,7 +1029,7 @@ const app = {
 
       const blob = await response.blob();
       const node = DataModule.data.nodes[rootId];
-      const filename = `${node.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      const filename = `${sanitizeFilename(node.title)}.pdf`;
       downloadBlob(blob, filename);
 
       const successMsg = type === 'global'
@@ -1128,10 +1127,10 @@ const app = {
   },
 
   /**
-   * Share current node (copy URL to clipboard on left-click)
+   * Copy current node URL to clipboard (left-click)
    * Preserves current context (branch or global)
    */
-  shareNode(event) {
+  copyNodeUrl(event) {
     if (!this.currentNodeId) {
       showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
@@ -1141,8 +1140,9 @@ const app = {
     // Allow middle-click (button 1) and right-click (button 2) to work normally
     if (event && event.button === 0) {
       event.preventDefault();
-      // URL to copy: always without branch (global mode)
-      const urlToCopy = RoutingModule.getShareableUrl(this.currentNodeId, null);
+      // URL to copy: preserve current context (branch mode if active)
+      const branchRootId = TreeModule.isBranchMode() ? TreeModule.getBranchRootId() : null;
+      const urlToCopy = RoutingModule.getNodeUrl(this.currentNodeId, branchRootId);
 
       // Ctrl+Click or Cmd+Click: copy markdown format [Title](URL)
       if (event.ctrlKey || event.metaKey) {
@@ -1154,7 +1154,7 @@ const app = {
           showToast(t('toast.copyError'), '⚠️');
         });
       } else {
-        // Normal click: copy URL only (global mode, no branch param)
+        // Normal click: copy URL only (preserves branch context)
         navigator.clipboard.writeText(urlToCopy).then(() => {
           showToast(t('toast.linkCopied'), '🔗');
         }).catch(() => {
@@ -1165,10 +1165,10 @@ const app = {
   },
 
   /**
-   * Share current branch (copy URL to clipboard on left-click)
+   * Copy current branch URL to clipboard (left-click)
    * Always creates an isolated branch URL
    */
-  shareBranch(event) {
+  copyBranchUrl(event) {
     if (!this.currentNodeId) {
       showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
@@ -1178,7 +1178,7 @@ const app = {
     // Allow middle-click (button 1) and right-click (button 2) to work normally
     if (event && event.button === 0) {
       event.preventDefault();
-      const url = RoutingModule.getShareableBranchUrl(this.currentNodeId);
+      const url = RoutingModule.getBranchUrl(this.currentNodeId);
       navigator.clipboard.writeText(url).then(() => {
         showToast(t('toast.branchLinkCopied'), '🌿');
       }).catch(() => {
@@ -1535,10 +1535,10 @@ const app = {
     if (!confirm(t('confirms.cleanOrphans'))) return;
 
     try {
-      const deletedCount = await AttachmentsModule.cleanOrphans(DataModule.data);
+      const result = await AttachmentsModule.cleanOrphans(DataModule.data);
 
-      if (deletedCount > 0) {
-        showToast(t('toast.orphansCleaned', { count: deletedCount }), '🧹');
+      if (result.deleted > 0) {
+        showToast(t('toast.orphansCleaned', { count: result.deleted }), '🧹');
       } else {
         showToast(t('toast.noOrphans'), '🧹');
       }

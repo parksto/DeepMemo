@@ -5,7 +5,7 @@
  */
 
 import { data, saveData } from '../core/data.js';
-import { generateId } from '../utils/helpers.js';
+import { generateId, sanitizeFilename } from '../utils/helpers.js';
 import * as AttachmentsModule from '../core/attachments.js';
 import * as TreeModule from './tree.js';
 import { showToast } from '../ui/toast.js';
@@ -28,23 +28,8 @@ export function isFileSystemSyncSupported() {
 // SECTION 2: Sanitization & Collisions
 // ============================================================================
 
-/**
- * Sanitize un nom de fichier pour être compatible cross-platform
- * @param {string} title - Titre du nœud
- * @returns {string} Nom de fichier sanitizé
- */
-function sanitizeFilename(title) {
-  if (!title || typeof title !== 'string') {
-    return 'Untitled';
-  }
-
-  return title
-    .replace(/[/:*?"<>|]/g, '_')     // Caractères interdits Windows
-    .replace(/^\.+/, '_')             // Pas de points au début
-    .replace(/\s+/g, ' ')             // Collapse espaces multiples
-    .substring(0, 200)                // Limite longueur (sécurité)
-    .trim() || 'Untitled';
-}
+// Note: sanitizeFilename() is now imported from helpers.js
+// It's used with { preserveSpaces: true, maxLength: 200 } for filesystem compatibility
 
 /**
  * Enlève TOUS les suffixes accumulés " (N)" d'un nom de fichier
@@ -197,7 +182,7 @@ async function exportNodeRecursive(
     progressCallback({ current: stats.nodes, message: `Exporting: ${node.title}` });
   }
 
-  const baseName = sanitizeFilename(node.title);
+  const baseName = sanitizeFilename(node.title, { preserveSpaces: true, maxLength: 200 });
 
   // CAS 1: SYMLINKS → fichier .dmlink
   if (node.type === 'symlink') {
@@ -318,7 +303,7 @@ async function exportAttachments(node, dirHandle) {
       }
 
       // Sanitize le nom et extraire extension
-      const sanitizedName = sanitizeFilename(attachment.name) || `attachment`;
+      const sanitizedName = sanitizeFilename(attachment.name, { preserveSpaces: true, maxLength: 200 }) || `attachment`;
       const match = sanitizedName.match(/^(.+?)(\.[^.]+)?$/);
       const base = match[1];
       const ext = match[2] || '.bin';
@@ -376,7 +361,7 @@ function remapAllIds(importedNodes, rootChildIds) {
     const remappedNode = {
       ...node,
       id: newId,
-      parent: node.parent, // Sera remappé à l'insertion dans le parent
+      parent: nodeIdMapping[node.parent] || node.parent, // Remapper le parent si importé, sinon garder
       children: node.children.map(childId => nodeIdMapping[childId] || childId),
       attachments: []
     };
@@ -487,32 +472,47 @@ export async function importBranchFromFS(parentId, progressCallback) {
     throw new Error(t('fsSync.permissionDenied'));
   }
 
-  // 3. Parser récursivement (avec IDs originaux du frontmatter)
-  const importedNodes = {};
-  const rootChildIds = await parseDirectoryRecursive(
+  // 3. Créer un nœud pour le répertoire racine choisi
+  const rootNode = await parseFolderNode(dirHandle, parentId);
+  if (!rootNode) {
+    throw new Error('Failed to parse root directory');
+  }
+
+  // Import attachments pour le nœud racine
+  await importAttachmentsForNode(rootNode, dirHandle);
+
+  // 4. Parser récursivement les enfants du répertoire
+  const importedNodes = { [rootNode.id]: rootNode };
+  const childIds = await parseDirectoryRecursive(
     dirHandle,
-    parentId,
+    rootNode.id, // Les enfants ont pour parent le nœud racine
     importedNodes,
     progressCallback
   );
+  rootNode.children = childIds;
 
-  // 4. Régénérer tous les IDs pour éviter les collisions
-  const { remappedNodes, nodeIdMapping, attachmentIdMapping } = remapAllIds(importedNodes, rootChildIds);
+  // 5. Régénérer tous les IDs pour éviter les collisions
+  const { remappedNodes, nodeIdMapping, attachmentIdMapping } = remapAllIds(importedNodes, [rootNode.id]);
 
-  // 5. Remapper les références dans le contenu et les symlinks
+  // 6. Remapper les références dans le contenu et les symlinks
   remapReferences(remappedNodes, nodeIdMapping, attachmentIdMapping);
 
-  // 6. Fusionner dans data.nodes
+  // 7. Fusionner dans data.nodes
   Object.assign(data.nodes, remappedNodes);
 
-  // 7. Attacher au parent (avec IDs remappés)
+  // 8. Attacher au parent (le nœud racine importé)
   const parentNode = data.nodes[parentId];
   if (parentNode) {
-    const remappedRootIds = rootChildIds.map(id => nodeIdMapping[id] || id);
-    parentNode.children.push(...remappedRootIds);
+    const remappedRootId = nodeIdMapping[rootNode.id];
+    const finalRootNode = remappedNodes[remappedRootId];
+    if (finalRootNode) {
+      // Le parent a déjà été remappé dans remapAllIds, mais on s'assure qu'il pointe vers parentId
+      finalRootNode.parent = parentId;
+      parentNode.children.push(remappedRootId);
+    }
   }
 
-  // 8. Sauvegarder
+  // 9. Sauvegarder
   await saveData();
 
   return { count: Object.keys(remappedNodes).length };
@@ -599,7 +599,7 @@ async function parseMarkdownFile(fileHandle, parentId) {
       // Frontmatter valide → utiliser les métadonnées
       return {
         id: frontmatter.id,
-        type: 'note',
+        type: 'node',
         title: frontmatter.title,
         content,
         tags: frontmatter.tags || [],
@@ -613,7 +613,7 @@ async function parseMarkdownFile(fileHandle, parentId) {
       // Fallback : générer nouveau nœud
       return {
         id: generateId(),
-        type: 'note',
+        type: 'node',
         title: fileHandle.name.replace('.md', ''),
         content,
         tags: [],
@@ -645,7 +645,7 @@ async function parseFolderNode(dirHandle, parentId) {
     // Pas d'index.md → créer nœud avec titre = nom du dossier
     return {
       id: generateId(),
-      type: 'note',
+      type: 'node',
       title: dirHandle.name,
       content: '',
       tags: [],

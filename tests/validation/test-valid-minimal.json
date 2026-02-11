@@ -1,0 +1,19 @@
+{
+  "nodes": {
+    "node-1": {
+      "id": "node-1",
+      "type": "node",
+      "title": "Test Node",
+      "content": "This is a test node",
+      "parent": null,
+      "children": [],
+      "tags": [],
+      "attachments": [],
+      "links": [],
+      "backlinks": [],
+      "created": 1609459200000,
+      "modified": 1609459200000
+    }
+  },
+  "rootNodes": ["node-1"]
+}

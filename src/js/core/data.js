@@ -4,18 +4,19 @@
  * V0.10: Migrated from localStorage to IndexedDB
  */
 
-import { generateId, downloadBlob } from '../utils/helpers.js';
+import { generateId, downloadBlob, sanitizeFilename } from '../utils/helpers.js';
 import { getDefaultData } from './default-data.js';
 import * as AttachmentsModule from './attachments.js';
 import * as Storage from './storage.js';
 import * as Migration from './migration.js';
 import { t } from '../utils/i18n.js';
 import { notifyDataChanged } from '../utils/sync.js';
+import { validateGlobalExport, validateBranchExport, validateMetadata } from './validation.js';
 
 /**
  * Documentation URL for export format
  */
-const EXPORT_FORMAT_DOC_URL = 'https://raw.githubusercontent.com/parksto/DeepMemo/refs/heads/main/docs/file-formats/JSON-STRUCTURE.md';
+const EXPORT_FORMAT_DOC_URL = 'https://raw.githubusercontent.com/parksto/DeepMemo/refs/heads/main/docs/reference/file-formats/json-interchange.md';
 
 /**
  * i18n wrappers for alerts and confirms
@@ -26,6 +27,52 @@ function i18nAlert(key, params = {}) {
 
 function i18nConfirm(key, params = {}) {
   return confirm(t(`confirms.${key}`, params));
+}
+
+/**
+ * Display validation errors to user
+ * @param {Object} validation - Validation result
+ */
+function showValidationErrors(validation) {
+  const { errors, warnings } = validation;
+
+  // Show errors
+  if (errors.length > 0) {
+    const summary =
+      `❌ Import validation failed\n\n` +
+      `Found ${errors.length} error(s):\n\n` +
+      errors.slice(0, 3).map((e, i) => `${i + 1}. ${e}`).join('\n') +
+      (errors.length > 3 ? `\n\n... and ${errors.length - 3} more` : '') +
+      `\n\nCheck browser console for details.`;
+
+    alert(summary);
+    console.error('[Import] Validation errors:', errors);
+  }
+
+  // Log warnings
+  if (warnings.length > 0) {
+    console.warn('[Import] Validation warnings:', warnings);
+  }
+}
+
+/**
+ * Normalize legacy node types ("note" -> "node")
+ * @param {Object} imported - Imported data with nodes object
+ */
+function normalizeLegacyTypes(imported) {
+  if (!imported.nodes) return;
+
+  let normalized = 0;
+  Object.values(imported.nodes).forEach(node => {
+    if (node.type === 'note') {
+      node.type = 'node';
+      normalized++;
+    }
+  });
+
+  if (normalized > 0) {
+    console.log(`[Import] Normalized ${normalized} legacy "note" types to "node"`);
+  }
 }
 
 /**
@@ -286,7 +333,7 @@ export function exportBranch(nodeId) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `deepmemo-branch-${node.title.replace(/[^a-z0-9]/gi, '_')}-${Date.now()}.json`;
+  a.download = `deepmemo-branch-${sanitizeFilename(node.title)}-${Date.now()}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -479,7 +526,7 @@ function generateMetadata(type, options = {}) {
     version: '1.0',
     type,
     exported: Date.now(),
-    generator: 'DeepMemo v0.10.4'
+    generator: 'DeepMemo v0.10.5'
   };
 
   if (options.title) {
@@ -647,7 +694,7 @@ export async function exportBranchZIP(nodeId) {
 
     // Generate and download .dm archive
     const dmBlob = await zip.generateAsync({ type: 'blob' });
-    const sanitizedTitle = node.title.replace(/[^a-z0-9]/gi, '_');
+    const sanitizedTitle = sanitizeFilename(node.title);
     downloadBlob(dmBlob, `deepmemo-branch-${sanitizedTitle}-${Date.now()}.dm`);
 
     console.log(`[Export] Branch .dm archive created with ${nodeCount} nodes and ${attachmentIds.size} attachments`);
@@ -725,15 +772,25 @@ async function importFromArchive(zip, filename, onSuccess) {
     const metadataStr = await metadataJsonFile.async('string');
     const metadata = JSON.parse(metadataStr);
     console.log(`[Import] Loading .dm archive (v${metadata.version}, type: ${metadata.type})`);
+
+    // Validate metadata (warnings only)
+    const metaValidation = validateMetadata(metadata);
+    if (metaValidation.warnings.length > 0) {
+      console.warn('[Import] Metadata warnings:', metaValidation.warnings);
+    }
   } else {
     console.log(`[Import] Loading legacy .zip archive (no metadata.json)`);
   }
 
-  // Validate structure
-  if (!imported.nodes || !imported.rootNodes) {
-    alert('Fichier JSON invalide');
+  // VALIDATION
+  const validation = validateGlobalExport(imported);
+  if (!validation.valid) {
+    showValidationErrors(validation);
     return;
   }
+
+  // Normalize legacy types ("note" -> "node")
+  normalizeLegacyTypes(imported);
 
   const nodeCount = Object.keys(imported.nodes).length;
 
@@ -843,11 +900,15 @@ async function importFromArchive(zip, filename, onSuccess) {
 async function importFromJSONText(text, onSuccess) {
   const imported = JSON.parse(text);
 
-  // Validate structure
-  if (!imported.nodes || !imported.rootNodes) {
-    alert('Fichier JSON invalide');
+  // VALIDATION
+  const validation = validateGlobalExport(imported);
+  if (!validation.valid) {
+    showValidationErrors(validation);
     return;
   }
+
+  // Normalize legacy types ("note" -> "node")
+  normalizeLegacyTypes(imported);
 
   const nodeCount = Object.keys(imported.nodes).length;
 
@@ -972,6 +1033,12 @@ async function importBranchFromArchive(zip, filename, parentId, onSuccess) {
     const metadataStr = await metadataJsonFile.async('string');
     const metadata = JSON.parse(metadataStr);
     console.log(`[Import Branch] Loading .dm archive (v${metadata.version}, type: ${metadata.type})`);
+
+    // Validate metadata (warnings only)
+    const metaValidation = validateMetadata(metadata);
+    if (metaValidation.warnings.length > 0) {
+      console.warn('[Import Branch] Metadata warnings:', metaValidation.warnings);
+    }
   } else {
     console.log(`[Import Branch] Loading legacy .zip archive (no metadata.json)`);
   }
@@ -982,9 +1049,21 @@ async function importBranchFromArchive(zip, filename, parentId, onSuccess) {
 
   if (imported.type === 'deepmemo-branch' && imported.branchRootId) {
     // Standard branch export
+    // VALIDATION
+    const validation = validateBranchExport(imported);
+    if (!validation.valid) {
+      showValidationErrors(validation);
+      return;
+    }
     branchRootId = imported.branchRootId;
   } else if (imported.rootNodes && imported.nodes) {
     // Global export - create a container node if multiple roots
+    // VALIDATION
+    const validation = validateGlobalExport(imported);
+    if (!validation.valid) {
+      showValidationErrors(validation);
+      return;
+    }
     isGlobalExport = true;
 
     if (imported.rootNodes.length === 0) {
@@ -1002,7 +1081,7 @@ async function importBranchFromArchive(zip, filename, parentId, onSuccess) {
       // Create container node with children = rootNodes
       imported.nodes[containerId] = {
         id: containerId,
-        type: 'note',
+        type: 'node',
         title: containerTitle,
         content: `Imported from ${filename}`,
         children: imported.rootNodes,
@@ -1027,6 +1106,9 @@ async function importBranchFromArchive(zip, filename, parentId, onSuccess) {
     alert('Fichier invalide. Format non reconnu.');
     return;
   }
+
+  // Normalize legacy types ("note" -> "node")
+  normalizeLegacyTypes(imported);
 
   const nodeCount = Object.keys(imported.nodes).length;
 
@@ -1170,9 +1252,21 @@ async function importBranchFromJSONText(text, parentId, onSuccess) {
 
   if (imported.type === 'deepmemo-branch' && imported.branchRootId) {
     // Standard branch export
+    // VALIDATION
+    const validation = validateBranchExport(imported);
+    if (!validation.valid) {
+      showValidationErrors(validation);
+      return;
+    }
     branchRootId = imported.branchRootId;
   } else if (imported.rootNodes && imported.nodes) {
     // Global export - create a container node if multiple roots
+    // VALIDATION
+    const validation = validateGlobalExport(imported);
+    if (!validation.valid) {
+      showValidationErrors(validation);
+      return;
+    }
     isGlobalExport = true;
 
     if (imported.rootNodes.length === 0) {
@@ -1190,7 +1284,7 @@ async function importBranchFromJSONText(text, parentId, onSuccess) {
       // Create container node with children = rootNodes
       imported.nodes[containerId] = {
         id: containerId,
-        type: 'note',
+        type: 'node',
         title: containerTitle,
         content: `Imported from JSON file`,
         children: imported.rootNodes,
@@ -1215,6 +1309,9 @@ async function importBranchFromJSONText(text, parentId, onSuccess) {
     alert('Fichier invalide. Format non reconnu.');
     return;
   }
+
+  // Normalize legacy types ("note" -> "node")
+  normalizeLegacyTypes(imported);
 
   const nodeCount = Object.keys(imported.nodes).length;
 
@@ -1453,7 +1550,7 @@ export function exportFreeMindMM(branchRootId = null) {
   // Create filename
   const timestamp = Date.now();
   const filename = branchRootId && data.nodes[branchRootId]
-    ? `deepmemo-${data.nodes[branchRootId].title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}-${timestamp}.mm`
+    ? `deepmemo-${sanitizeFilename(data.nodes[branchRootId].title)}-${timestamp}.mm`
     : `deepmemo-export-${timestamp}.mm`;
 
   // Download file
@@ -1577,7 +1674,7 @@ export async function exportMermaidSVG(branchRootId = null) {
     // Create filename
     const timestamp = Date.now();
     const filename = branchRootId && data.nodes[branchRootId]
-      ? `deepmemo-${data.nodes[branchRootId].title.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}-${timestamp}.svg`
+      ? `deepmemo-${sanitizeFilename(data.nodes[branchRootId].title)}-${timestamp}.svg`
       : `deepmemo-export-${timestamp}.svg`;
 
     // Download file

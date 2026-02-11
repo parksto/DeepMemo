@@ -343,7 +343,7 @@ function duplicateNode(nodeId, newParentId) {
     // Create duplicate (don't duplicate symlinks as symlinks, duplicate the content)
     const duplicate = {
       id: duplicateId,
-      type: 'note',
+      type: 'node',
       title: original.title + ' (copie)',
       content: original.type === 'symlink' ? data.nodes[original.targetId]?.content || '' : original.content,
       parent: parentId,
@@ -401,7 +401,7 @@ function duplicateNodeAt(draggedId, targetId, position) {
 
     const duplicate = {
       id: duplicateId,
-      type: 'note',
+      type: 'node',
       title: original.title + ' (copie)',
       content: original.type === 'symlink' ? data.nodes[original.targetId]?.content || '' : original.content,
       parent: newParentId,

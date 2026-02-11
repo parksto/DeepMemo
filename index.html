@@ -24,7 +24,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://deepmemo.org/">
   <meta property="og:title" data-i18n-content="meta.ogTitle" content="DeepMemo - Your second brain">
-  <meta property="og:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
+  <meta property="og:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs et interconnectés">
   <meta property="og:image" content="https://deepmemo.org/icons/og-image.png">
   <meta property="og:locale" content="en_US">
   <meta property="og:locale:alternate" content="fr_FR">
@@ -33,7 +33,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://deepmemo.org/">
   <meta name="twitter:title" data-i18n-content="meta.ogTitle" content="DeepMemo - Your second brain">
-  <meta name="twitter:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs">
+  <meta name="twitter:description" data-i18n-content="meta.description" content="DeepMemo - Système de gestion de connaissances basé sur des nœuds récursifs et interconnectés">
   <meta name="twitter:image" content="https://deepmemo.org/icons/twitter-card.png">
 
   <!-- Structured Data (JSON-LD) -->
@@ -69,7 +69,7 @@
       "Keyboard shortcuts"
     ],
     "screenshot": "https://deepmemo.org/icons/screenshot.png",
-    "softwareVersion": "0.10.3",
+    "softwareVersion": "0.10.5",
     "releaseNotes": "https://deepmemo.org/docs/ROADMAP.md",
     "inLanguage": ["en", "fr"]
   }
@@ -77,7 +77,7 @@
   <script>
     // Load correct manifest and update lang attribute based on language preference
     (function() {
-      const savedLang = localStorage.getItem('deepmemo_language');
+      const savedLang = localStorage.getItem('deepmemo_lang');
       const browserLang = navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en';
       const lang = savedLang || browserLang;
       const manifestHref = lang === 'en' ? 'manifest-en.json' : 'manifest-fr.json';
@@ -152,18 +152,18 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <input type="text" class="content-title-input user-content" id="nodeTitle"
                    data-i18n-placeholder="placeholders.nodeTitle" placeholder="Titre du nœud" onchange="app.saveCurrentNode()">
-            <a href="#" id="shareLink" data-i18n-title="tooltips.shareNode" title="Copier l'URL de ce nœud (préserve le contexte actuel)"
+            <a href="#" id="shareLink" data-i18n-title="tooltips.copyNodeUrl" title="Copier l'URL de ce nœud (préserve le contexte actuel)"
                aria-label="Copier l'URL de ce nœud"
                style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
                onmouseover="this.style.opacity='1'"
                onmouseout="this.style.opacity='0.6'"
-               onclick="app.shareNode(event)">🔗</a>
-            <a href="#" id="shareBranchLink" data-i18n-title="tooltips.shareBranch" title="Copier l'URL en mode branche isolée (vue focus)"
+               onclick="app.copyNodeUrl(event)">🔗</a>
+            <a href="#" id="shareBranchLink" data-i18n-title="tooltips.copyBranchUrl" title="Copier l'URL en mode branche isolée (vue focus)"
                aria-label="Copier l'URL en mode branche"
                style="font-size: 20px; text-decoration: none; cursor: pointer; opacity: 0.6; transition: opacity 0.2s;"
                onmouseover="this.style.opacity='1'"
                onmouseout="this.style.opacity='0.6'"
-               onclick="app.shareBranch(event)">🌿</a>
+               onclick="app.copyBranchUrl(event)">🌿</a>
           </div>
           <div class="content-meta"><span id="nodeMeta"></span></div>
 

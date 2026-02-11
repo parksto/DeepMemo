@@ -8,7 +8,7 @@ import { showToast } from '../ui/toast.js';
 import { escapeHtml } from '../utils/helpers.js';
 import * as TagsModule from './tags.js';
 import { isBranchMode, isNodeInBranch, getBranchRootId, updatePageTitle } from './tree.js';
-import { getShareableUrl, getShareableBranchUrl } from '../utils/routing.js';
+import { getNodeUrl, getBranchUrl } from '../utils/routing.js';
 import { initDragDrop } from './drag-drop.js';
 import * as AttachmentsModule from '../core/attachments.js';
 import { t, getCurrentLanguage } from '../utils/i18n.js';
@@ -493,7 +493,9 @@ function getAttachmentIcon(mimeType) {
   if (mimeType.includes('word') || mimeType.includes('document')) return '📝';
   if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊';
   if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📽️';
-  if (mimeType.includes('zip') || mimeType.includes('archive')) return '📦';
+  if (mimeType.includes('zip') || mimeType.includes('archive') ||
+      mimeType.includes('gzip') || mimeType.includes('x-tar') ||
+      mimeType.includes('rar') || mimeType.includes('7z')) return '📦';
   if (mimeType.includes('text/')) return '📃';
 
   return '📎';
@@ -799,8 +801,6 @@ export function createRootNode(onSuccess) {
     children: [],
     parent: null,
     tags: [],
-    links: [],
-    backlinks: [],
     created: Date.now(),
     modified: Date.now()
   };
@@ -843,8 +843,6 @@ export function createChildNode(parentId, onSuccess) {
     children: [],
     parent: actualParentId,
     tags: [],
-    links: [],
-    backlinks: [],
     created: Date.now(),
     modified: Date.now()
   };
@@ -961,7 +959,7 @@ export async function updateViewMode() {
 }
 
 /**
- * Update share links href attributes
+ * Update URL links href attributes
  * @param {string} currentNodeId - Current node ID
  */
 function updateShareLinks(currentNodeId) {
@@ -976,8 +974,8 @@ function updateShareLinks(currentNodeId) {
 
   // Build proper URLs for middle-click and right-click
   const branchRootId = isBranchMode() ? getBranchRootId() : null;
-  shareLink.href = getShareableUrl(currentNodeId, branchRootId);
-  shareBranchLink.href = getShareableBranchUrl(currentNodeId);
+  shareLink.href = getNodeUrl(currentNodeId, branchRootId);
+  shareBranchLink.href = getBranchUrl(currentNodeId);
 }
 
 /**

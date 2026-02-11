@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.10.0'; // V0.10.4 - Mixed typography + UX improvements (Jan 2026)
+const CACHE_VERSION = 'v1.10.5'; // V0.10.5 - Mixed typography + UX improvements (Jan 2026)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)

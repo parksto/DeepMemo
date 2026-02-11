@@ -135,7 +135,13 @@ export default {
     importError: "Erreur lors de l'import : {message}",
     exportError: "Erreur lors de l'export : {message}",
     mermaidNotAvailable: "Mermaid.js n'est pas chargé. Impossible d'exporter en SVG.",
-    brokenSymlink: "⚠️ Lien symbolique cassé : le nœud cible n'existe plus."
+    brokenSymlink: "⚠️ Lien symbolique cassé : le nœud cible n'existe plus.",
+    validationFailed: "Échec de validation de l'import",
+    missingRequiredField: "Champ obligatoire manquant : {field}",
+    invalidNodeType: "Type de nœud invalide dans {nodeId} : {type}",
+    brokenReference: "Référence cassée : {nodeId} → {refId}",
+    symlinkMissingTarget: "Symlink {nodeId} sans targetId",
+    cycleDetected: "Cycle détecté dans la hiérarchie impliquant {nodeId}"
   },
 
   // Confirmation dialogs
@@ -343,8 +349,8 @@ export default {
 
   // Tooltips
   tooltips: {
-    shareNode: "Copier l'URL de ce nœud (préserve le contexte actuel)",
-    shareBranch: "Copier l'URL en mode branche isolée (vue focus)",
+    copyNodeUrl: "Copier l'URL de ce nœud (préserve le contexte actuel)",
+    copyBranchUrl: "Copier l'URL en mode branche isolée (vue focus)",
     goToParent: "Remonter au parent",
     goToRoot: "Retour à la racine",
     togglePreview: "Activer/désactiver la prévisualisation en temps réel (écran partagé)",

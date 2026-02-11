@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://deepmemo.org/schemas/v1.0/deepmemo.json",
+  "title": "DeepMemo Data Structure",
+  "description": "JSON Schema for DeepMemo data format (v1.0)",
+  "oneOf": [
+    { "$ref": "#/definitions/globalExport" },
+    { "$ref": "#/definitions/branchExport" }
+  ],
+  "definitions": {
+    "globalExport": {
+      "type": "object",
+      "description": "Global export containing all data",
+      "required": ["nodes", "rootNodes"],
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "JSON Schema reference URL"
+        },
+        "nodes": {
+          "type": "object",
+          "description": "Dictionary of all nodes, keyed by node ID",
+          "patternProperties": {
+            "^(node|symlink)_\\d+_[a-z0-9_]+$": {
+              "$ref": "#/definitions/node"
+            }
+          },
+          "additionalProperties": false
+        },
+        "rootNodes": {
+          "type": "array",
+          "description": "Array of root-level node IDs",
+          "items": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "branchExport": {
+      "type": "object",
+      "description": "Branch export containing a subtree",
+      "required": ["type", "version", "branchRootId", "exported", "nodeCount", "nodes"],
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "JSON Schema reference URL"
+        },
+        "type": {
+          "type": "string",
+          "const": "deepmemo-branch",
+          "description": "Format type identifier"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "Format version (e.g., '1.0')"
+        },
+        "branchRootId": {
+          "type": "string",
+          "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+          "description": "ID of the root node of this branch"
+        },
+        "exported": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Export timestamp (Unix milliseconds)"
+        },
+        "nodeCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of nodes in this branch"
+        },
+        "nodes": {
+          "type": "object",
+          "description": "Dictionary of branch nodes, keyed by node ID",
+          "patternProperties": {
+            "^(node|symlink)_\\d+_[a-z0-9_]+$": {
+              "$ref": "#/definitions/node"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "type": "object",
+      "description": "A DeepMemo node (note or symlink)",
+      "required": ["id", "title", "type", "parent", "children", "created", "modified"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+          "description": "Unique node identifier: 'node_timestamp_random' for regular nodes, 'symlink_timestamp_random' for symlinks"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node title/name (can include emojis)"
+        },
+        "content": {
+          "type": "string",
+          "description": "Markdown content (optional, empty string if none)"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["node", "symlink"],
+          "description": "Node type: 'node' for regular nodes, 'symlink' for links to other nodes"
+        },
+        "parent": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "string",
+              "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
+            }
+          ],
+          "description": "Parent node ID, or null for root nodes"
+        },
+        "children": {
+          "type": "array",
+          "description": "Array of child node IDs",
+          "items": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Array of tag strings (optional)",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "attachments": {
+          "type": "array",
+          "description": "Array of attachment metadata objects (optional)",
+          "items": {
+            "$ref": "#/definitions/attachment"
+          }
+        },
+        "links": {
+          "type": "array",
+          "description": "Array of outgoing link node IDs (optional)",
+          "items": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
+          }
+        },
+        "backlinks": {
+          "type": "array",
+          "description": "Array of incoming link node IDs (optional)",
+          "items": {
+            "type": "string",
+            "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$"
+          }
+        },
+        "created": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Creation timestamp (Unix milliseconds)"
+        },
+        "modified": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Last modification timestamp (Unix milliseconds)"
+        },
+        "targetId": {
+          "type": "string",
+          "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+          "description": "Target node ID (required for symlinks only)"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "symlink" } }
+          },
+          "then": {
+            "required": ["targetId"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^symlink_\\d+_[a-z0-9_]+$",
+                "description": "Symlink IDs must start with 'symlink_'"
+              },
+              "targetId": {
+                "type": "string",
+                "pattern": "^(node|symlink)_\\d+_[a-z0-9_]+$",
+                "description": "Target node ID (required for symlinks)"
+              }
+            },
+            "description": "Symlinks must have a targetId and ID starting with 'symlink_'"
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "node" } }
+          },
+          "then": {
+            "not": {
+              "required": ["targetId"]
+            },
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^node_\\d+_[a-z0-9_]+$",
+                "description": "Regular node IDs must start with 'node_'"
+              }
+            },
+            "description": "Regular nodes cannot have a targetId and ID must start with 'node_'"
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "attachment": {
+      "type": "object",
+      "description": "Attachment metadata (actual file stored in attachments/ folder)",
+      "required": ["id", "name", "type", "size"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^attach_\\d+_[a-z0-9_]+$",
+          "description": "Unique attachment identifier (standard format: attach_timestamp_random, but custom IDs with underscores accepted)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Original filename with extension"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MIME type (e.g., 'image/png', 'application/pdf')"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "File size in bytes"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

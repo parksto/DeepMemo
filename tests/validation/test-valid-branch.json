@@ -1,0 +1,28 @@
+{
+  "type": "deepmemo-branch",
+  "branchRootId": "branch-root",
+  "nodes": {
+    "branch-root": {
+      "id": "branch-root",
+      "type": "node",
+      "title": "Branch Root",
+      "content": "This is a branch export",
+      "parent": null,
+      "children": ["child-1"],
+      "tags": [],
+      "created": 1609459200000,
+      "modified": 1609459200000
+    },
+    "child-1": {
+      "id": "child-1",
+      "type": "node",
+      "title": "Child of Branch",
+      "content": "A child node",
+      "parent": "branch-root",
+      "children": [],
+      "tags": [],
+      "created": 1609459200000,
+      "modified": 1609459200000
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "DeepMemo - Ton second cerveau",
   "short_name": "DeepMemo",
-  "description": "Système de gestion de connaissances basé sur des nœuds récursifs, interconnectés et actifs",
+  "description": "Système de gestion de connaissances basé sur des nœuds récursifs et interconnectés",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

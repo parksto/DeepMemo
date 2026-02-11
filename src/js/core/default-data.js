@@ -51,16 +51,10 @@ function getDefaultDataFR() {
     exportExample: `node_${now + 18}_export_ex`,
     keyboard: `node_${now + 19}_keyboard`,
     future: `node_${now + 20}_future`,
-    activeNodes: `node_${now + 21}_active_nodes`,
-    activeNodesExample: `node_${now + 22}_active_nodes_ex`,
-    triggers: `node_${now + 23}_triggers`,
-    triggersExample: `node_${now + 24}_triggers_ex`,
-    triggersVoiceExample: `node_${now + 25}_triggers_voice_ex`,
-    multiUser: `node_${now + 26}_multi_user`,
-    multiUserExample: `node_${now + 27}_multi_user_ex`,
-    attachments: `node_${now + 28}_attachments`,
-    attachmentsExample: `node_${now + 29}_attachments_ex`,
-    firstSteps: `node_${now + 30}_first_steps`,
+    multiUser: `node_${now + 21}_multi_user`,
+    attachments: `node_${now + 22}_attachments`,
+    attachmentsExample: `node_${now + 23}_attachments_ex`,
+    firstSteps: `node_${now + 24}_first_steps`,
   };
 
   return {
@@ -103,8 +97,6 @@ Chaque nœud t'explique un aspect de DeepMemo avec des exemples concrets.
         children: [ids.privacy, ids.whyHierarchy, ids.interface, ids.features, ids.future, ids.firstSteps],
         parent: null,
         tags: ["bienvenue", "guide"],
-        links: [],
-        backlinks: [],
         created: now,
         modified: now
       },
@@ -148,8 +140,6 @@ DeepMemo est un outil **100% local**. Voici ce que ça signifie :
         children: [],
         parent: ids.root,
         tags: ["vie-privée", "sécurité", "local"],
-        links: [],
-        backlinks: [],
         created: now + 1,
         modified: now + 1
       },
@@ -197,7 +187,7 @@ DeepMemo te permet d'**exporter ta structure** en mindmap pour la visualiser et 
 
 ## 📚 Pour aller plus loin
 
-Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.fr.md)
+Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.md)
 
 ---
 
@@ -205,8 +195,6 @@ Voir le document complet sur GitHub : [docs/HIERARCHICAL_STRUCTURES.fr.md](https
         children: [],
         parent: ids.root,
         tags: ["concept", "cognition", "philosophie"],
-        links: [],
-        backlinks: [],
         attachments: [],
         created: now + 2,
         modified: now + 2
@@ -257,8 +245,6 @@ Affiche des informations contextuelles.
         children: [ids.tree, ids.center, ids.right],
         parent: ids.root,
         tags: ["interface", "guide"],
-        links: [],
-        backlinks: [],
         created: now + 2,
         modified: now + 2
       },
@@ -304,8 +290,6 @@ Mais si tu **déplis manuellement** (clic sur triangle ou →), l'état est pré
         children: [],
         parent: ids.interface,
         tags: ["navigation", "arbre"],
-        links: [],
-        backlinks: [],
         created: now + 3,
         modified: now + 3
       },
@@ -358,8 +342,6 @@ Le Markdown ajoute du **formatage** (titres, listes, liens, images) mais reste *
         children: [],
         parent: ids.interface,
         tags: ["édition", "contenu"],
-        links: [],
-        backlinks: [],
         created: now + 4,
         modified: now + 4
       },
@@ -412,8 +394,6 @@ Un rappel des **raccourcis** disponibles :
         children: [],
         parent: ids.interface,
         tags: ["tags", "raccourcis"],
-        links: [],
-        backlinks: [],
         created: now + 5,
         modified: now + 5
       },
@@ -425,7 +405,7 @@ Un rappel des **raccourcis** disponibles :
         title: "✨ Fonctionnalités actuelles",
         content: `# Ce que DeepMemo peut déjà faire
 
-DeepMemo **V0.8** inclut toutes ces fonctionnalités :
+DeepMemo **V0.10.5** inclut toutes ces fonctionnalités :
 
 ## 📂 Nœuds et hiérarchie
 Organise tes idées en arborescence infinie.
@@ -454,8 +434,6 @@ Navigue rapidement sans utiliser la souris.
         children: [ids.nodes, ids.symlinks, ids.tags, ids.branch, ids.attachments, ids.export, ids.keyboard],
         parent: ids.root,
         tags: ["fonctionnalités", "guide"],
-        links: [],
-        backlinks: [],
         created: now + 6,
         modified: now + 6
       },
@@ -504,8 +482,6 @@ Les nœuds s'organisent en **arborescence** :
         children: [ids.nodesExample1, ids.nodesExample2],
         parent: ids.features,
         tags: ["nœuds", "hiérarchie"],
-        links: [],
-        backlinks: [],
         created: now + 7,
         modified: now + 7
       },
@@ -553,8 +529,6 @@ Imagine que tu veux organiser un projet de site web.
         children: [],
         parent: ids.nodes,
         tags: ["exemple", "projet", "organisation"],
-        links: [],
-        backlinks: [],
         created: now + 8,
         modified: now + 8
       },
@@ -601,8 +575,6 @@ Les nœuds hiérarchiques sont parfaits pour structurer des notes de cours.
         children: [],
         parent: ids.nodes,
         tags: ["exemple", "cours", "étudiant"],
-        links: [],
-        backlinks: [],
         created: now + 9,
         modified: now + 9
       },
@@ -654,8 +626,6 @@ DeepMemo détecte les **références circulaires** (A → B → A) et les empêc
         children: [ids.symlinksExample],
         parent: ids.features,
         tags: ["symlinks", "liens"],
-        links: [],
-        backlinks: [],
         created: now + 10,
         modified: now + 10
       },
@@ -705,8 +675,6 @@ Imagine que tu as une recette de "Cookies au chocolat" qui est **sans gluten**.
         children: [],
         parent: ids.symlinks,
         tags: ["exemple", "recette", "organisation"],
-        links: [],
-        backlinks: [],
         created: now + 11,
         modified: now + 11
       },
@@ -757,8 +725,6 @@ DeepMemo inclut un **système de tags** et une **recherche globale** puissante.
         children: [ids.tagsExample],
         parent: ids.features,
         tags: ["tags", "recherche"],
-        links: [],
-        backlinks: [],
         created: now + 12,
         modified: now + 12
       },
@@ -807,8 +773,6 @@ Le **panneau droit** affiche tous les tags de la branche avec leur nombre d'occu
         children: [],
         parent: ids.tags,
         tags: ["exemple", "recette", "efficacité"],
-        links: [],
-        backlinks: [],
         created: now + 13,
         modified: now + 13
       },
@@ -860,8 +824,6 @@ Le mode branche génère une **URL que tu peux bookmarker** :
         children: [ids.branchExample],
         parent: ids.features,
         tags: ["branche", "isolation"],
-        links: [],
-        backlinks: [],
         created: now + 14,
         modified: now + 14
       },
@@ -925,8 +887,6 @@ Pour **vraiment partager les données** avec un ami :
         children: [],
         parent: ids.branch,
         tags: ["exemple", "partage", "collaboration"],
-        links: [],
-        backlinks: [],
         created: now + 15,
         modified: now + 15
       },
@@ -1030,8 +990,6 @@ En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta st
         children: [ids.exportExample],
         parent: ids.features,
         tags: ["export", "import", "sauvegarde"],
-        links: [],
-        backlinks: [],
         attachments: [],
         created: now + 16,
         modified: now + 16
@@ -1091,8 +1049,6 @@ Si tu modifies une recette, tu peux :
         children: [],
         parent: ids.export,
         tags: ["exemple", "collaboration", "partage"],
-        links: [],
-        backlinks: [],
         created: now + 17,
         modified: now + 17
       },
@@ -1139,8 +1095,6 @@ DeepMemo est **optimisé pour le clavier**. Voici les principaux raccourcis.
         children: [],
         parent: ids.features,
         tags: ["raccourcis", "productivité"],
-        links: [],
-        backlinks: [],
         created: now + 18,
         modified: now + 18
       },
@@ -1211,10 +1165,8 @@ Si tu supprimes un nœud avec des attachments, les fichiers peuvent rester dans 
         children: [ids.attachmentsExample],
         parent: ids.features,
         tags: ["fichiers", "attachments", "images"],
-        links: [],
-        backlinks: [],
-        created: now + 27,
-        modified: now + 27
+        created: now + 22,
+        modified: now + 22
       },
 
       // Exemple : Fichiers joints
@@ -1269,10 +1221,8 @@ Quand tu passes en **mode Affichage** (👁️), l'image s'affiche directement !
         children: [],
         parent: ids.attachments,
         tags: ["exemple", "attachments"],
-        links: [],
-        backlinks: [],
-        created: now + 28,
-        modified: now + 28
+        created: now + 23,
+        modified: now + 23
       },
 
       // 🔮 Idées pour la suite
@@ -1282,16 +1232,16 @@ Quand tu passes en **mode Affichage** (👁️), l'image s'affiche directement !
         title: "🔮 Directions explorées",
         content: `# Directions explorées
 
-DeepMemo est **un projet open-source** qui avance à son rythme, sans promesses ni calendrier.
+DeepMemo est un **projet open-source** qui avance à son rythme, sans promesses ni calendrier.
 
-## 👥 Collaboration & Partage
+Certaines pistes sont explorées pour enrichir l'expérience, toujours avec les mêmes principes :
+- **Privacy-first** : tes données te appartiennent
+- **Simple & fiable** : pas de complexité inutile
+- **Offline-first** : fonctionne sans réseau
 
-**Actuellement** : L'export/import de branches (\`.dm\`) permet déjà une collaboration de base :
-- Tu exportes une branche → tu l'envoies à quelqu'un → il l'importe chez lui
-- Collaboration offline, via fichiers (email, Git, USB, etc.)
-- Contrôle total : chacun décide ce qu'il partage
+## 🧭 Axes d'exploration
 
-**Explorations futures** : Des pistes de synchronisation sont à l'étude, mais rien de concret pour l'instant. L'idée serait de permettre une collaboration temps réel tout en gardant la souveraineté des données (pas de plateforme centrale).
+**👉 Explore le sous-nœud** pour découvrir les pistes de partage et collaboration avancée.
 
 ## 🌱 Open Source
 
@@ -1304,48 +1254,134 @@ Pas de pression, pas de roadmap stricte. On publie ce qu'on a quand c'est prêt.
         children: [ids.multiUser],
         parent: ids.root,
         tags: ["futur", "collaboration", "open-source"],
-        links: [],
-        backlinks: [],
         created: now + 19,
         modified: now + 19
       },
 
-      // Futur : Collaboration & Partage
+      // Futur : Partage de branches
       [ids.multiUser]: {
         id: ids.multiUser,
         type: "node",
-        title: "👥 Collaboration & Partage",
-        content: `# Collaboration & Partage
+        title: "🔗 Partage de branches",
+        content: `# Partage de branches
 
-## 📦 Actuellement : Partage de fichiers .dm
+## 📦 Actuellement : Export/Import .dm
 
-DeepMemo permet déjà de **collaborer de manière asynchrone** grâce à l'export/import de branches :
+DeepMemo permet déjà de **collaborer de manière asynchrone** :
 
 **Workflow actuel** :
-1. Tu exportes une branche en fichier \`.dm\` (archive complète avec pièces jointes)
-2. Tu partages le fichier (email, cloud, USB...)
+1. Tu exportes une branche en \`.dm\` (archive ZIP avec pièces jointes)
+2. Tu partages le fichier (email, Git, USB, cloud...)
 3. Ton collaborateur l'importe dans son DeepMemo
-4. Il modifie, ajoute des nœuds, puis te renvoie une nouvelle version
+4. Il modifie, puis te renvoie une nouvelle version
 5. Tu importes la mise à jour (fusion intelligente)
 
 **Avantages** :
-- 100% offline et décentralisé
-- Aucun serveur tiers requis
-- Contrôle total sur tes données
-- Format ouvert et documenté
+- ✅ 100% offline et décentralisé
+- ✅ Aucun serveur tiers requis
+- ✅ Contrôle total sur les données
+- ✅ Format ouvert (JSON + blobs)
 
-## 🔄 Explorations futures
+---
 
-Des **pistes de synchronisation** sont à l'étude pour permettre une collaboration en temps réel, mais le projet avance à son rythme. L'important est de garder une approche **simple, fiable et respectueuse de la vie privée**.
+## 🔮 Vision explorée : Partage par lien
 
-Pour l'instant, l'export/import fonctionne bien et répond à la plupart des besoins de collaboration.`,
+Une piste intéressante serait de permettre le **partage direct par lien**, tout en gardant la philosophie privacy-first.
+
+### 🌐 Niveaux de visibilité
+
+| Type | Description |
+|------|-------------|
+| **👤 Utilisateur** | Partage avec une personne spécifique |
+| **👥 Groupe** | Partage avec plusieurs personnes |
+| **🌍 Public** | Accessible à tous via le lien |
+
+### 🔒 Permissions
+
+| Permission | Capacités |
+|------------|-----------|
+| **🔍 Lecture seule (R)** | Consulter la branche, l'exporter en local |
+| **✏️ Lecture/écriture (RW)** | Consulter + éditer + ajouter des nœuds |
+
+---
+
+## 🎯 Cas d'usage concrets
+
+### 1. **Partage de recettes en lecture seule**
+> *"Je partage mon recueil de recettes avec ma famille. Ils peuvent lire et exporter les recettes chez eux, mais ne peuvent pas modifier l'original."*
+
+**Configuration** : Public + Lecture seule (R)
+
+**Résultat** :
+- ✅ N'importe qui avec le lien peut consulter
+- ❌ Personne ne peut modifier ta branche originale
+- ✅ Chacun peut l'importer localement et l'adapter
+
+---
+
+### 2. **Collaboration sur un projet**
+> *"Mon équipe travaille sur la doc d'un projet. On partage une branche commune en lecture/écriture."*
+
+**Configuration** : Groupe + Lecture/écriture (RW)
+
+**Résultat** :
+- ✅ Les membres du groupe peuvent éditer
+- ✅ Les modifications sont visibles par tous
+- ✅ Fusion intelligente des conflits
+- ❌ Les personnes hors du groupe ne voient rien
+
+---
+
+### 3. **Publication de notes de cours**
+> *"Un prof partage ses notes de cours avec ses étudiants. Les étudiants peuvent consulter et prendre des notes personnelles à côté."*
+
+**Configuration** : Public + Lecture seule (R)
+
+**Résultat** :
+- ✅ Les étudiants consultent en ligne
+- ✅ Ils peuvent importer la branche localement
+- ✅ Une fois importée, ils ajoutent leurs propres annotations
+- ❌ Leurs modifications restent privées (sauf s'ils exportent)
+
+---
+
+### 4. **Base de connaissances d'entreprise**
+> *"Une équipe maintient un wiki interne. Tout le monde peut lire, seuls les admins peuvent modifier."*
+
+**Configuration** : Groupe + Permissions mixtes (R pour tous, RW pour admins)
+
+**Résultat** :
+- ✅ Tous les membres lisent la documentation
+- ✅ Seuls les admins peuvent éditer
+- ✅ Historique des modifications conservé
+- ✅ Chacun peut exporter en local pour usage offline
+
+---
+
+## ⚖️ Principes respectés
+
+Même avec le partage par lien, DeepMemo garde ses valeurs :
+
+| Principe | Garantie |
+|----------|----------|
+| **Privacy** | Tu choisis explicitement ce que tu partages |
+| **Ownership** | Tes données restent chez toi (sauf ce que tu partages) |
+| **Offline-first** | Le partage par lien est une **option**, pas une obligation |
+| **Open format** | Les branches partagées restent exportables en \`.dm\` |
+| **No vendor lock-in** | Tu peux toujours tout exporter et partir |
+
+---
+
+## 📅 État actuel
+
+Cette fonctionnalité est **explorée mais pas encore implémentée**. L'export/import de fichiers \`.dm\` répond déjà à la plupart des besoins de collaboration.
+
+Si tu as des cas d'usage concrets, n'hésite pas à les partager sur [GitHub](https://github.com/parksto/DeepMemo/discussions) !`,
         children: [],
         parent: ids.future,
         tags: ["futur", "collaboration", "décentralisation"],
-        links: [],
-        backlinks: [],
-        created: now + 25,
-        modified: now + 25
+        created: now + 21,
+        modified: now + 21
       },
 
       // 🚀 Premiers pas
@@ -1423,10 +1459,8 @@ Quand tu seras à l'aise avec DeepMemo, tu pourras **supprimer** ce nœud "Bienv
         children: [],
         parent: ids.root,
         tags: ["guide", "démarrage"],
-        links: [],
-        backlinks: [],
-        created: now + 29,
-        modified: now + 29
+        created: now + 24,
+        modified: now + 24
       }
     },
     rootNodes: [ids.root]
@@ -1462,16 +1496,10 @@ function getDefaultDataEN() {
     exportExample: `node_${now + 18}_export_ex`,
     keyboard: `node_${now + 19}_keyboard`,
     future: `node_${now + 20}_future`,
-    activeNodes: `node_${now + 21}_active_nodes`,
-    activeNodesExample: `node_${now + 22}_active_nodes_ex`,
-    triggers: `node_${now + 23}_triggers`,
-    triggersExample: `node_${now + 24}_triggers_ex`,
-    triggersVoiceExample: `node_${now + 25}_triggers_voice_ex`,
-    multiUser: `node_${now + 26}_multi_user`,
-    multiUserExample: `node_${now + 27}_multi_user_ex`,
-    attachments: `node_${now + 28}_attachments`,
-    attachmentsExample: `node_${now + 29}_attachments_ex`,
-    firstSteps: `node_${now + 30}_first_steps`,
+    multiUser: `node_${now + 21}_multi_user`,
+    attachments: `node_${now + 22}_attachments`,
+    attachmentsExample: `node_${now + 23}_attachments_ex`,
+    firstSteps: `node_${now + 24}_first_steps`,
   };
 
   return {
@@ -1514,8 +1542,6 @@ Each node explains an aspect of DeepMemo with concrete examples.
         children: [ids.privacy, ids.whyHierarchy, ids.interface, ids.features, ids.future, ids.firstSteps],
         parent: null,
         tags: ["welcome", "guide"],
-        links: [],
-        backlinks: [],
         created: now,
         modified: now
       },
@@ -1559,8 +1585,6 @@ In the future, DeepMemo will be able to **optionally** sync across multiple devi
         children: [],
         parent: ids.root,
         tags: ["privacy", "security", "local"],
-        links: [],
-        backlinks: [],
         created: now + 1,
         modified: now + 1
       },
@@ -1608,7 +1632,7 @@ DeepMemo lets you **export your structure** as a mindmap to visualize and share 
 
 ## 📚 To go further
 
-See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.md)
+See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.en.md](https://github.com/parksto/DeepMemo/blob/main/docs/HIERARCHICAL_STRUCTURES.en.md)
 
 ---
 
@@ -1616,8 +1640,6 @@ See the complete document on GitHub: [docs/HIERARCHICAL_STRUCTURES.md](https://g
         children: [],
         parent: ids.root,
         tags: ["concept", "cognition", "philosophy"],
-        links: [],
-        backlinks: [],
         attachments: [],
         created: now + 2,
         modified: now + 2
@@ -1668,8 +1690,6 @@ Displays contextual information.
         children: [ids.tree, ids.center, ids.right],
         parent: ids.root,
         tags: ["interface", "guide"],
-        links: [],
-        backlinks: [],
         created: now + 2,
         modified: now + 2
       },
@@ -1715,8 +1735,6 @@ But if you **manually expand** (click on triangle or →), the state is preserve
         children: [],
         parent: ids.interface,
         tags: ["navigation", "tree"],
-        links: [],
-        backlinks: [],
         created: now + 3,
         modified: now + 3
       },
@@ -1769,8 +1787,6 @@ Markdown adds **formatting** (headings, lists, links, images) but remains **100%
         children: [],
         parent: ids.interface,
         tags: ["editing", "content"],
-        links: [],
-        backlinks: [],
         created: now + 4,
         modified: now + 4
       },
@@ -1823,8 +1839,6 @@ A reminder of available **shortcuts**:
         children: [],
         parent: ids.interface,
         tags: ["tags", "shortcuts"],
-        links: [],
-        backlinks: [],
         created: now + 5,
         modified: now + 5
       },
@@ -1836,7 +1850,7 @@ A reminder of available **shortcuts**:
         title: "✨ Current features",
         content: `# What DeepMemo can already do
 
-DeepMemo **V0.8** includes all these features:
+DeepMemo **V0.10.5** includes all these features:
 
 ## 📂 Nodes and hierarchy
 Organize your ideas in an infinite tree.
@@ -1865,8 +1879,6 @@ Navigate quickly without using the mouse.
         children: [ids.nodes, ids.symlinks, ids.tags, ids.branch, ids.attachments, ids.export, ids.keyboard],
         parent: ids.root,
         tags: ["features", "guide"],
-        links: [],
-        backlinks: [],
         created: now + 6,
         modified: now + 6
       },
@@ -1915,8 +1927,6 @@ Nodes are organized in a **tree**:
         children: [ids.nodesExample1, ids.nodesExample2],
         parent: ids.features,
         tags: ["nodes", "hierarchy"],
-        links: [],
-        backlinks: [],
         created: now + 7,
         modified: now + 7
       },
@@ -1964,8 +1974,6 @@ Imagine you want to organize a website project.
         children: [],
         parent: ids.nodes,
         tags: ["example", "project", "organization"],
-        links: [],
-        backlinks: [],
         created: now + 8,
         modified: now + 8
       },
@@ -2012,8 +2020,6 @@ Hierarchical nodes are perfect for structuring class notes.
         children: [],
         parent: ids.nodes,
         tags: ["example", "class", "student"],
-        links: [],
-        backlinks: [],
         created: now + 9,
         modified: now + 9
       },
@@ -2065,8 +2071,6 @@ DeepMemo detects **circular references** (A → B → A) and prevents them autom
         children: [ids.symlinksExample],
         parent: ids.features,
         tags: ["symlinks", "links"],
-        links: [],
-        backlinks: [],
         created: now + 10,
         modified: now + 10
       },
@@ -2116,8 +2120,6 @@ Imagine you have a "Chocolate Chip Cookies" recipe that is **gluten-free**.
         children: [],
         parent: ids.symlinks,
         tags: ["example", "recipe", "organization"],
-        links: [],
-        backlinks: [],
         created: now + 11,
         modified: now + 11
       },
@@ -2168,8 +2170,6 @@ DeepMemo includes a **tag system** and a **powerful global search**.
         children: [ids.tagsExample],
         parent: ids.features,
         tags: ["tags", "search"],
-        links: [],
-        backlinks: [],
         created: now + 12,
         modified: now + 12
       },
@@ -2218,8 +2218,6 @@ The **right panel** displays all branch tags with their occurrence count.
         children: [],
         parent: ids.tags,
         tags: ["example", "recipe", "efficiency"],
-        links: [],
-        backlinks: [],
         created: now + 13,
         modified: now + 13
       },
@@ -2271,8 +2269,6 @@ Branch mode generates a **URL you can bookmark**:
         children: [ids.branchExample],
         parent: ids.features,
         tags: ["branch", "isolation"],
-        links: [],
-        backlinks: [],
         created: now + 14,
         modified: now + 14
       },
@@ -2336,8 +2332,6 @@ To **actually share data** with a friend:
         children: [],
         parent: ids.branch,
         tags: ["example", "sharing", "collaboration"],
-        links: [],
-        backlinks: [],
         created: now + 15,
         modified: now + 15
       },
@@ -2441,8 +2435,6 @@ In addition to ZIP, you can export as a **mindmap** to visualize and edit your s
         children: [ids.exportExample],
         parent: ids.features,
         tags: ["export", "import", "backup"],
-        links: [],
-        backlinks: [],
         attachments: [],
         created: now + 16,
         modified: now + 16
@@ -2502,8 +2494,6 @@ If you modify a recipe, you can:
         children: [],
         parent: ids.export,
         tags: ["example", "collaboration", "sharing"],
-        links: [],
-        backlinks: [],
         created: now + 17,
         modified: now + 17
       },
@@ -2550,8 +2540,6 @@ DeepMemo is **optimized for keyboard**. Here are the main shortcuts.
         children: [],
         parent: ids.features,
         tags: ["shortcuts", "productivity"],
-        links: [],
-        backlinks: [],
         created: now + 18,
         modified: now + 18
       },
@@ -2622,10 +2610,8 @@ If you delete a node with attachments, the files may remain in storage.
         children: [ids.attachmentsExample],
         parent: ids.features,
         tags: ["files", "attachments", "images"],
-        links: [],
-        backlinks: [],
-        created: now + 27,
-        modified: now + 27
+        created: now + 22,
+        modified: now + 22
       },
 
       // Example: Attached files
@@ -2680,10 +2666,8 @@ When you switch to **View mode** (👁️), the image displays directly!
         children: [],
         parent: ids.attachments,
         tags: ["example", "attachments"],
-        links: [],
-        backlinks: [],
-        created: now + 28,
-        modified: now + 28
+        created: now + 23,
+        modified: now + 23
       },
 
       // 🔮 Future directions
@@ -2693,16 +2677,16 @@ When you switch to **View mode** (👁️), the image displays directly!
         title: "🔮 Explored directions",
         content: `# Explored directions
 
-DeepMemo is **an open-source project** that progresses at its own pace, with no promises or strict timeline.
+DeepMemo is an **open-source project** that progresses at its own pace, with no promises or strict timeline.
 
-## 👥 Collaboration & Sharing
+Certain avenues are being explored to enrich the experience, always with the same principles:
+- **Privacy-first**: your data belongs to you
+- **Simple & reliable**: no unnecessary complexity
+- **Offline-first**: works without network
 
-**Currently**: Branch export/import (\`.dm\`) already enables basic collaboration:
-- You export a branch → send it to someone → they import it
-- Offline collaboration via files (email, Git, USB, etc.)
-- Total control: everyone decides what they share
+## 🧭 Exploration areas
 
-**Future explorations**: Synchronization approaches are being explored, but nothing concrete yet. The idea would be to enable real-time collaboration while maintaining data sovereignty (no central platform).
+**👉 Explore the sub-node** to discover advanced sharing and collaboration ideas.
 
 ## 🌱 Open Source
 
@@ -2715,48 +2699,134 @@ No pressure, no strict roadmap. We publish what we have when it's ready.`,
         children: [ids.multiUser],
         parent: ids.root,
         tags: ["future", "exploration", "open-source"],
-        links: [],
-        backlinks: [],
         created: now + 19,
         modified: now + 19
       },
 
-      // Future: Collaboration & Sharing
+      // Future: Branch sharing
       [ids.multiUser]: {
         id: ids.multiUser,
         type: "node",
-        title: "👥 Collaboration & Sharing",
-        content: `# Collaboration & Sharing
+        title: "🔗 Branch sharing",
+        content: `# Branch sharing
 
-## 📦 Currently: .dm file sharing
+## 📦 Currently: Export/Import .dm
 
-DeepMemo already allows **asynchronous collaboration** through branch export/import:
+DeepMemo already allows **asynchronous collaboration**:
 
 **Current workflow**:
-1. You export a branch as a \`.dm\` file (complete archive with attachments)
-2. You share the file (email, cloud, USB...)
+1. You export a branch as \`.dm\` (ZIP archive with attachments)
+2. You share the file (email, Git, USB, cloud...)
 3. Your collaborator imports it into their DeepMemo
-4. They modify, add nodes, then send you back a new version
+4. They modify, then send you back a new version
 5. You import the update (smart merge)
 
 **Advantages**:
-- 100% offline and decentralized
-- No third-party server required
-- Total control over your data
-- Open and documented format
+- ✅ 100% offline and decentralized
+- ✅ No third-party server required
+- ✅ Total control over data
+- ✅ Open format (JSON + blobs)
 
-## 🔄 Future explorations
+---
 
-**Synchronization approaches** are being explored to enable real-time collaboration, but the project moves at its own pace. The important thing is to maintain a **simple, reliable, and privacy-respecting** approach.
+## 🔮 Explored vision: Link-based sharing
 
-For now, export/import works well and meets most collaboration needs.`,
+An interesting avenue would be to enable **direct sharing via link**, while keeping the privacy-first philosophy.
+
+### 🌐 Visibility levels
+
+| Type | Description |
+|------|-------------|
+| **👤 User** | Share with a specific person |
+| **👥 Group** | Share with multiple people |
+| **🌍 Public** | Accessible to anyone with the link |
+
+### 🔒 Permissions
+
+| Permission | Capabilities |
+|------------|--------------|
+| **🔍 Read-only (R)** | View the branch, export it locally |
+| **✏️ Read-write (RW)** | View + edit + add nodes |
+
+---
+
+## 🎯 Concrete use cases
+
+### 1. **Recipe sharing (read-only)**
+> *"I share my recipe collection with my family. They can read and export recipes locally, but cannot modify the original."*
+
+**Configuration**: Public + Read-only (R)
+
+**Result**:
+- ✅ Anyone with the link can view
+- ❌ No one can modify your original branch
+- ✅ Everyone can import it locally and adapt it
+
+---
+
+### 2. **Project collaboration**
+> *"My team works on project documentation. We share a common branch with read-write access."*
+
+**Configuration**: Group + Read-write (RW)
+
+**Result**:
+- ✅ Group members can edit
+- ✅ Changes are visible to all
+- ✅ Smart conflict resolution
+- ❌ People outside the group see nothing
+
+---
+
+### 3. **Course notes publication**
+> *"A teacher shares course notes with students. Students can view and add personal notes alongside."*
+
+**Configuration**: Public + Read-only (R)
+
+**Result**:
+- ✅ Students view online
+- ✅ They can import the branch locally
+- ✅ Once imported, they add their own annotations
+- ❌ Their changes stay private (unless they export)
+
+---
+
+### 4. **Company knowledge base**
+> *"A team maintains an internal wiki. Everyone can read, only admins can modify."*
+
+**Configuration**: Group + Mixed permissions (R for all, RW for admins)
+
+**Result**:
+- ✅ All members read the documentation
+- ✅ Only admins can edit
+- ✅ Modification history preserved
+- ✅ Everyone can export locally for offline use
+
+---
+
+## ⚖️ Preserved principles
+
+Even with link-based sharing, DeepMemo keeps its values:
+
+| Principle | Guarantee |
+|-----------|-----------|
+| **Privacy** | You explicitly choose what you share |
+| **Ownership** | Your data stays with you (except what you share) |
+| **Offline-first** | Link-based sharing is an **option**, not an obligation |
+| **Open format** | Shared branches remain exportable as \`.dm\` |
+| **No vendor lock-in** | You can always export everything and leave |
+
+---
+
+## 📅 Current status
+
+This feature is **being explored but not yet implemented**. Export/import of \`.dm\` files already meets most collaboration needs.
+
+If you have concrete use cases, feel free to share them on [GitHub](https://github.com/parksto/DeepMemo/discussions)!`,
         children: [],
         parent: ids.future,
         tags: ["future", "collaboration", "decentralization"],
-        links: [],
-        backlinks: [],
-        created: now + 25,
-        modified: now + 25
+        created: now + 21,
+        modified: now + 21
       },
 
       // 🚀 First steps
@@ -2834,10 +2904,8 @@ When you're comfortable with DeepMemo, you can **delete** this "Welcome" node an
         children: [],
         parent: ids.root,
         tags: ["guide", "getting-started"],
-        links: [],
-        backlinks: [],
-        created: now + 29,
-        modified: now + 29
+        created: now + 24,
+        modified: now + 24
       }
     },
     rootNodes: [ids.root]

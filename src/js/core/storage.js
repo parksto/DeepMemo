@@ -383,7 +383,7 @@ export async function getStats() {
 
   // Calculate total size (approximate for attachments)
   const attachments = await db.attachments.toArray();
-  const totalAttachmentsSize = attachments.reduce((sum, a) => sum + (a.size || 0), 0);
+  const totalAttachmentsSize = attachments.reduce((sum, a) => sum + (a.blob?.size || 0), 0);
 
   return {
     nodes: nodesCount,

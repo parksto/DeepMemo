@@ -1,0 +1,55 @@
+app.js:40 🚀 DeepMemo V0.10.5 - Initialisation...
+i18n.js:43 [i18n] Dictionary loaded: fr
+i18n.js:123 [i18n] Initialized with language: fr
+sw.js:49 [SW] Installation...
+sw.js:53 [SW] Précache des fichiers...
+(index):462 [PWA] Service Worker enregistré: https://deepmemo.ydns.eu/
+storage.js:42 [Storage] IndexedDB initialized (version 1)
+migration.js:30 [Migration] No localStorage data found (first-time user or clean state)
+migration.js:66 [Migration] Checking for old attachments database...
+migration.js:82 [Migration] Old database exists but no attachments store found
+migration.js:201 [Migration] Database stats: Object
+storage.js:136 [Storage] Loaded 0 nodes from IndexedDB
+data.js:137 📘 Bienvenue dans DeepMemo ! Chargement du contenu de démonstration...
+inject-root-bundle.js:1 RSS_Basic_Detect.js: Expected contentType string
+Zn @ inject-root-bundle.js:1
+storage.js:119 [Storage] Saved 25 nodes to IndexedDB
+attachments.js:210 [Attachments] Loading default demo files...
+app.js:49 [App] Data loaded from IndexedDB
+app.js:708 [App] Initialized PDF rate limits with full quota
+sync.js:26 [Sync] BroadcastChannel initialized
+sw.js:62 [SW] Activation...
+attachments.js:71 [Attachments] Total size: 0 bytes
+attachments.js:61 [Attachments] Listed: 0 files
+attachments.js:29 [Attachments] Saved: demo_mindmap_svg (45667 bytes)
+attachments.js:242 [Attachments] Loaded demo file: demo_mindmap_svg (44.6 KB)
+attachments.js:256 [Attachments] Added metadata to node: 🧠 Pourquoi une structure en arbre ?
+attachments.js:29 [Attachments] Saved: demo_freeplane_screenshot (104105 bytes)
+attachments.js:242 [Attachments] Loaded demo file: demo_freeplane_screenshot (101.7 KB)
+attachments.js:256 [Attachments] Added metadata to node: ⬇️ Export / Import
+attachments.js:264 [Attachments] Default demo files loaded successfully
+storage.js:119 [Storage] Saved 25 nodes to IndexedDB
+storage.js:119 [Storage] Saved 26 nodes to IndexedDB
+attachments.js:71 [Attachments] Total size: 149772 bytes
+storage.js:119 [Storage] Saved 26 nodes to IndexedDB
+attachments.js:61 [Attachments] Listed: 2 files
+fs-sync.js:808 [FS Import] Progress: 1 nodes imported
+fs-sync.js:808 [FS Import] Progress: 2 nodes imported
+fs-sync.js:808 [FS Import] Progress: 3 nodes imported
+fs-sync.js:808 [FS Import] Progress: 4 nodes imported
+fs-sync.js:808 [FS Import] Progress: 5 nodes imported
+attachments.js:29 [Attachments] Saved: attach_1770563168341_srgoy2dur (32624 bytes)
+attachments.js:29 [Attachments] Saved: attach_1770563168343_nitvmu1jo (27229 bytes)
+attachments.js:29 [Attachments] Saved: attach_1770563168349_ljvrku9fi (32624 bytes)
+attachments.js:29 [Attachments] Saved: attach_1770563168350_3qm9ds469 (27229 bytes)
+fs-sync.js:808 [FS Import] Progress: 6 nodes imported
+attachments.js:29 [Attachments] Saved: attach_1770563168354_sq0hdoudi (32624 bytes)
+attachments.js:29 [Attachments] Saved: attach_1770563168356_f3yko51xt (27229 bytes)
+fs-sync.js:808 [FS Import] Progress: 7 nodes imported
+attachments.js:29 [Attachments] Saved: attach_1770563168359_n25po37to (32624 bytes)
+attachments.js:29 [Attachments] Saved: attach_1770563168360_0wuvrvya4 (27229 bytes)
+fs-sync.js:808 [FS Import] Progress: 8 nodes imported
+fs-sync.js:808 [FS Import] Progress: 9 nodes imported
+fs-sync.js:808 [FS Import] Progress: 10 nodes imported
+fs-sync.js:808 [FS Import] Progress: 11 nodes imported
+storage.js:119 [Storage] Saved 37 nodes to IndexedDB

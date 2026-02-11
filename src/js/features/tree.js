@@ -382,7 +382,9 @@ export function renderTree(onNodeClick) {
     if (isSymlink) {
       const badge = document.createElement('span');
       badge.className = 'symlink-badge';
-      badge.textContent = isExternalSymlink ? 'externe' : 'lien';
+      badge.textContent = isExternalSymlink
+        ? t('nodeTypes.badge.external')
+        : t('nodeTypes.badge.link');
       if (isExternalSymlink) {
         badge.style.opacity = '0.5';
       }

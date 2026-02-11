@@ -127,7 +127,13 @@ export default {
     importError: "Import error: {message}",
     exportError: "Export error: {message}",
     mermaidNotAvailable: "Mermaid.js is not loaded. Cannot export to SVG.",
-    brokenSymlink: "⚠️ Broken symlink: target node no longer exists."
+    brokenSymlink: "⚠️ Broken symlink: target node no longer exists.",
+    validationFailed: "Import validation failed",
+    missingRequiredField: "Missing required field: {field}",
+    invalidNodeType: "Invalid node type in {nodeId}: {type}",
+    brokenReference: "Broken reference: {nodeId} → {refId}",
+    symlinkMissingTarget: "Symlink {nodeId} missing targetId",
+    cycleDetected: "Cycle detected in hierarchy involving {nodeId}"
   },
 
   // Confirmation dialogs
@@ -330,8 +336,8 @@ export default {
 
   // Tooltips
   tooltips: {
-    shareNode: "Copy URL of this node (preserves current context)",
-    shareBranch: "Copy URL in isolated branch mode (focus view)",
+    copyNodeUrl: "Copy URL of this node (preserves current context)",
+    copyBranchUrl: "Copy URL in isolated branch mode (focus view)",
     goToParent: "Go to parent",
     goToRoot: "Back to root",
     togglePreview: "Enable/disable live preview (split-screen)",
