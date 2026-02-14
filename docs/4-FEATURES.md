@@ -730,18 +730,38 @@ if (blob.type !== correctMimeType) {
 
 ---
 
-### Export Options
+### Export/Import Modal (Modale unifiée)
 
-**UI Modal** : `index.html:342-393`
+**UI Modal** : `index.html:349-456`
 
-| Format | Extension | Gestionnaire | Description |
-|--------|-----------|---------|-------------|
-| **ZIP** | `.dm` | `confirmExportZIP()` | Archive complète avec pièces jointes |
-| **FreeMind** | `.mm` | `confirmExportFreeMind()` | Format XML de carte mentale |
-| **Mermaid** | `.svg` | `confirmExportMermaid()` | Visualisation de diagramme |
-| **PDF** | `.pdf` | `confirmExportPDF()` | Document hiérarchique |
+La modale unifiée **Import/Export** propose 2 onglets (Export/Import) avec tous les formats disponibles.
 
-📍 **Référence** : `src/js/app.js:613-651` (handlers)
+**Accès** :
+- **Actions globales** : Boutons dans le right panel (panneau ℹ️) → Import/Export directs (ZIP uniquement)
+- **Actions branche** : Bouton `📤 Import & Export` en bas à droite d'un nœud → Ouvre la modale avec tous les formats
+
+#### Onglet Export
+
+| Format | Extension | Gestionnaire | Disponible | Description |
+|--------|-----------|---------|------------|-------------|
+| **ZIP** | `.dm` | `confirmExportZIP()` | Global + Branche | Archive complète avec pièces jointes |
+| **FreeMind** | `.mm` | `confirmExportFreeMind()` | Branche | Format XML de carte mentale |
+| **Mermaid** | `.svg` | `confirmExportMermaid()` | Branche | Visualisation de diagramme |
+| **PDF** | `.pdf` | `confirmExportPDF()` | Branche | Document hiérarchique |
+| **File System** | dossier | `confirmExportFS()` | Branche | Export vers système de fichiers local |
+
+#### Onglet Import
+
+| Format | Input | Gestionnaire | Disponible | Description |
+|--------|-------|---------|------------|-------------|
+| **ZIP/DM/JSON** | fichier | `handleImportExportFile()` | Global + Branche | Import depuis fichier `.dm`, `.zip` ou `.json` |
+| **File System** | dossier | `confirmImportFS()` | Branche | Import depuis système de fichiers local |
+
+**Système de tabs** :
+- `selectImportExportTab('export')` : Affiche l'onglet Export
+- `selectImportExportTab('import')` : Affiche l'onglet Import
+
+📍 **Référence** : `src/js/app.js:542-657` (modale), `src/js/app.js:659-725` (handlers export), `src/js/app.js:1147-1195` (handlers FS)
 
 ---
 
@@ -1912,6 +1932,50 @@ DeepMemo propose **4 formats d'export** :
 **Module** : `src/js/core/data.js`
 
 📍 **Référence** : `src/js/core/data.js:182-949`
+
+---
+
+### Interface Utilisateur
+
+DeepMemo propose **2 niveaux d'actions** Import/Export :
+
+#### Actions Globales (Right Panel)
+
+**Emplacement** : Panneau d'information (bouton ℹ️) → Section "Actions globales"
+
+**Boutons** :
+- **📂 Importer** : Import global direct (formats : `.dm`, `.zip`, `.json`)
+  - Fonction : `importData(event)` → `DataModule.importDataZIP()`
+  - Détection automatique du format (ZIP ou JSON)
+  - Remplace toutes les données de l'application
+- **💾 Exporter** : Export global direct (format : ZIP uniquement)
+  - Fonction : `exportGlobalZIP()` → `DataModule.exportDataZIP()`
+  - Génère un fichier `.dm` avec tous les nœuds et pièces jointes
+
+**Justification** : Les actions globales ne concernent que le format DeepMemo (ZIP/DM/JSON), donc pas besoin de modale de sélection.
+
+📍 **Référence** : `src/js/features/editor.js:575-595` (UI), `src/js/app.js:677-685` (exportGlobalZIP)
+
+#### Actions Branche (Content Actions)
+
+**Emplacement** : En bas à droite d'un nœud → Bouton `📤 Import & Export`
+
+**Comportement** :
+- Ouvre la **modale unifiée Import/Export**
+- 2 onglets : Export et Import
+- Tous les formats disponibles (ZIP, FreeMind, Mermaid, PDF, File System)
+- Scope : nœud courant et ses descendants (branche)
+
+**Formats disponibles** :
+
+| Onglet | Formats |
+|--------|---------|
+| **Export** | ZIP, FreeMind (`.mm`), Mermaid (`.svg`), PDF, File System |
+| **Import** | ZIP/DM/JSON, File System |
+
+**Justification** : Les actions branche offrent plusieurs formats d'export (visualisation, partage), donc une modale est pertinente.
+
+📍 **Référence** : `index.html:227` (bouton), `src/js/app.js:542-657` (modale)
 
 ---
 

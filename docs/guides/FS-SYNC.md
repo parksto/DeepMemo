@@ -62,13 +62,15 @@
 ### Comment exporter une branche ?
 
 1. **Sélectionner le nœud** que vous souhaitez exporter (racine de la branche)
-2. Cliquer sur **"💾 Export FS"** (en bas à droite de l'éditeur)
-3. Une fenêtre s'ouvre : choisir le **dossier de destination**
-4. Autoriser l'accès au système de fichiers
-5. L'export démarre automatiquement
+2. Cliquer sur **"📤 Import & Export"** (en bas à droite de l'éditeur)
+3. Dans la modale, aller sur l'onglet **Export**
+4. Cliquer sur **"💾 Dossier local (File System)"**
+5. Une fenêtre s'ouvre : choisir le **dossier de destination**
+6. Autoriser l'accès au système de fichiers
+7. L'export démarre automatiquement
 
-📍 **Référence UI** : `index.html:226` (bouton "💾 Export FS")
-📍 **Référence code** : `fs-sync.js:135-169` (fonction `exportBranchToFS`)
+📍 **Référence UI** : `index.html:227` (bouton), `index.html:406-413` (option FS)
+📍 **Référence code** : `src/js/app.js:1147-1160` (confirmExportFS), `fs-sync.js:135-169` (exportBranchToFS)
 
 **Toast de confirmation** : ✅ "Exporté X nœuds (Y fichiers)"
 
@@ -131,13 +133,15 @@ Si un fichier/dossier avec le même nom existe déjà, DeepMemo ajoute automatiq
 ### Comment importer un dossier ?
 
 1. **Sélectionner le nœud parent** où vous souhaitez importer (les nœuds importés seront ajoutés comme enfants)
-2. Cliquer sur **"📂 Import FS"** (en bas à droite de l'éditeur)
-3. Une fenêtre s'ouvre : choisir le **dossier à importer**
-4. Autoriser l'accès au système de fichiers
-5. L'import démarre automatiquement
+2. Cliquer sur **"📤 Import & Export"** (en bas à droite de l'éditeur)
+3. Dans la modale, aller sur l'onglet **Import**
+4. Cliquer sur **"📂 Dossier local (File System)"**
+5. Une fenêtre s'ouvre : choisir le **dossier à importer**
+6. Autoriser l'accès au système de fichiers
+7. L'import démarre automatiquement
 
-📍 **Référence UI** : `index.html:229` (bouton "📂 Import FS")
-📍 **Référence code** : `fs-sync.js:473-519` (fonction `importBranchFromFS`)
+📍 **Référence UI** : `index.html:227` (bouton), `index.html:424-431` (option FS)
+📍 **Référence code** : `src/js/app.js:1166-1181` (confirmImportFS), `fs-sync.js:473-519` (importBranchFromFS)
 
 **Toast de confirmation** : ✅ "Importé X nœuds"
 

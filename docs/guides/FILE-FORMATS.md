@@ -206,8 +206,8 @@ Exemple : `attach_1706123456789_abc123_screenshot.png`
 
 #### Comment exporter ?
 
-1. Ouvrir la modale d'export (bouton "⬇️ Export" ou "⬇️ Export branche")
-2. Choisir "🧠 Fichier Mind Map (.mm)"
+1. **Export global** : Panneau ℹ️ → "Actions globales" → "💾 Exporter" (ZIP uniquement)
+2. **Export branche** : Bouton "📤 Import & Export" → Onglet "Export" → "🧠 Mindmap FreeMind"
 3. Le fichier `.mm` se télécharge
 
 #### Ouvrir le fichier
@@ -272,8 +272,8 @@ L'export génère une image vectorielle représentant votre arborescence sous fo
 
 #### Comment exporter ?
 
-1. Ouvrir la modale d'export
-2. Choisir "📊 Image Mind map (.svg)"
+1. Bouton "📤 Import & Export" → Onglet "Export"
+2. Choisir "📊 Diagramme Mermaid"
 3. L'image SVG se télécharge
 
 **Note** : Nécessite que la bibliothèque Mermaid soit chargée (disponible par défaut dans DeepMemo).

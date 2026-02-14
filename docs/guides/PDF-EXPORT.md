@@ -38,13 +38,15 @@ DeepMemo propose **deux méthodes** pour exporter vos branches en PDF :
 ### Comment utiliser l'export Online ?
 
 1. **Sélectionner le nœud** à exporter (racine de la branche)
-2. Cliquer sur **"📄 Document PDF"** dans la modal d'export
-3. La **modal de confidentialité** s'affiche (première utilisation uniquement)
-4. Cliquer sur **"✓ Compris, générer"**
-5. Le PDF est généré et téléchargé automatiquement
+2. Cliquer sur **"📤 Import & Export"** (en bas à droite)
+3. Dans la modale, aller sur l'onglet **Export**
+4. Cliquer sur **"📄 Document PDF"**
+5. La **modale de confidentialité** s'affiche (première utilisation uniquement)
+6. Cliquer sur **"✓ Compris, générer"**
+7. Le PDF est généré et téléchargé automatiquement
 
-📍 **Référence UI** : `index.html:379-386` (bouton export PDF modal)
-📍 **Référence code** : `app.js:738-756` (fonction `confirmExportPDF`)
+📍 **Référence UI** : `index.html:227` (bouton), `index.html:396-403` (option PDF dans modale)
+📍 **Référence code** : `src/js/app.js:795-813` (confirmExportPDF)
 
 ---
 
