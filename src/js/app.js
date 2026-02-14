@@ -677,6 +677,20 @@ const app = {
   },
 
   /**
+   * Export global data directly (ZIP format)
+   * Used by global export button in right panel
+   */
+  async exportGlobalZIP() {
+    try {
+      await DataModule.exportDataZIP();
+      showToast(t('toast.dataExported'), '💾');
+    } catch (error) {
+      console.error('[App] Global ZIP export failed:', error);
+      showToast(t('toast.exportError'), '⚠️');
+    }
+  },
+
+  /**
    * Confirm FreeMind export (global or branch)
    */
   confirmExportFreeMind() {

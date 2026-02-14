@@ -586,9 +586,13 @@ export async function updateRightPanel(currentNodeId) {
   let html = `
     <div class="info-section" style="border-bottom: 2px solid var(--border); padding-bottom: 16px;">
       <h3>🌐 ${t('labels.globalActions')}</h3>
-      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
-        <button class="btn btn-secondary btn-small" onclick="app.openImportExportModal('global')" style="width: 100%; justify-content: center;">
-          📤 ${t('actions.importExportGlobal')}
+      <div style="display: flex; gap: 8px; margin-top: 12px;">
+        <input type="file" id="globalImportFile" accept=".dm,.zip,.json" onchange="app.importData(event)" style="display: none;">
+        <label for="globalImportFile" class="btn btn-secondary btn-small" style="flex: 1; margin: 0; cursor: pointer; text-align: center;">
+          📂 ${t('actions.import')}
+        </label>
+        <button class="btn btn-secondary btn-small" onclick="app.exportGlobalZIP()" style="flex: 1;">
+          💾 ${t('actions.export')}
         </button>
       </div>
     </div>
