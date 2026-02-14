@@ -582,7 +582,19 @@ export async function updateRightPanel(currentNodeId) {
     return;
   }
 
-  let html = `<div class="info-section"><h3>${t('labels.structure')}</h3>`;
+  // Global actions section
+  let html = `
+    <div class="info-section" style="border-bottom: 2px solid var(--border); padding-bottom: 16px;">
+      <h3>🌐 ${t('labels.globalActions')}</h3>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+        <button class="btn btn-secondary btn-small" onclick="app.openImportExportModal('global')" style="width: 100%; justify-content: center;">
+          📤 ${t('actions.importExportGlobal')}
+        </button>
+      </div>
+    </div>
+  `;
+
+  html += `<div class="info-section"><h3>${t('labels.structure')}</h3>`;
   const childCount = displayNode.children.length;
   html += `<div class="info-item"><div class="info-label">${t('labels.children')}</div>${t('app.nodeCounter', {count: childCount})}</div>`;
 

@@ -16,6 +16,8 @@ export default {
     newNode: "New node",
     import: "Import",
     export: "Export",
+    importExport: "📤 Import & Export",
+    importExportGlobal: "Global Import & Export",
     exportBranch: "⬇️ Export branch",
     exportFS: "💾 Export FS",
     importBranch: "⬆️ Import branch",
@@ -229,6 +231,16 @@ export default {
         }
       }
     },
+    importExport: {
+      title: "Import & Export",
+      subtitle: "Choose action:",
+      subtitleBranch: "Import/Export branch \"{branch}\":",
+      cancel: "Cancel",
+      tabs: {
+        export: "Export",
+        import: "Import"
+      }
+    },
     export: {
       title: "Export",
       subtitle: "Choose export format:",
@@ -249,6 +261,20 @@ export default {
       pdf: {
         title: "PDF Document",
         desc: "PDF document with hierarchical table of contents and images"
+      },
+      fs: {
+        title: "Local folder (File System)",
+        desc: "Export to a folder on your computer (Chrome/Edge)"
+      }
+    },
+    import: {
+      zip: {
+        title: "ZIP/DM/JSON Archive",
+        desc: "Import a .dm, .zip or .json file"
+      },
+      fs: {
+        title: "Local folder (File System)",
+        desc: "Import from a folder on your computer (Chrome/Edge)"
       }
     },
     pdfPrivacy: {
@@ -306,7 +332,8 @@ export default {
     pdfQuotaHour: "Remaining (hour)",
     pdfQuotaDay: "Remaining (day)",
     pdfQuotaUpdated: "Updated {minutes} min ago",
-    preview: "📖 Preview"
+    preview: "📖 Preview",
+    globalActions: "Global Actions"
   },
 
   // Node types and badges
@@ -344,6 +371,7 @@ export default {
     goToParent: "Go to parent",
     goToRoot: "Back to root",
     togglePreview: "Enable/disable live preview (split-screen)",
+    importExport: "Import or export this node and its descendants",
     exportBranch: "Export this node and its descendants",
     exportFS: "Export to local file system (Chrome/Edge only)",
     importBranch: "Import a branch as children",

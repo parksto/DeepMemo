@@ -1152,6 +1152,24 @@ body.custom-font .content-editor {
   justify-content: flex-end;
 }
 
+/* Import/Export Modal Tabs */
+.import-export-tab {
+  flex: 1;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.import-export-tab.active {
+  opacity: 1;
+  background: var(--primary) !important;
+  color: var(--bg-primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.import-export-tab:hover:not(.active) {
+  opacity: 0.8;
+}
+
 .node-selector {
   max-height: 300px;
   overflow-y: auto;

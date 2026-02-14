@@ -130,11 +130,6 @@
 
       <div class="sidebar-actions">
         <button id="newRootNodeBtn" class="btn" data-i18n="actions.newNode" onclick="app.createRootNode()">➕ Nouveau nœud</button>
-        <div class="import-export-zone">
-          <input type="file" id="importFile" accept=".dm,.zip,.json" onchange="app.importData(event)">
-          <label for="importFile" class="btn-import" data-i18n="actions.import">📂 Importer</label>
-          <button class="btn-import" data-i18n="actions.export" onclick="app.openExportModal('global')">💾 Exporter</button>
-        </div>
       </div>
 
       <div class="branch-mode-indicator" id="branchModeIndicator" style="display: none;">
@@ -229,12 +224,8 @@
           <button class="btn btn-secondary btn-small" id="togglePreview" data-i18n="actions.togglePreview" data-i18n-title="tooltips.togglePreview" title="Enable/disable live preview (split-screen)" onclick="app.togglePreview()">📖 Preview</button>
           <button class="btn btn-secondary btn-small" data-i18n="actions.addChild" onclick="app.createChildNode()">➕ Ajouter un enfant</button>
           <button class="btn btn-secondary btn-small" data-i18n="actions.openActions" onclick="app.openActionModal()">⚙️ Actions...</button>
-          <div style="margin-left: auto; display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-small" data-i18n="actions.exportBranch" data-i18n-title="tooltips.exportBranch" onclick="app.openExportModal('branch')" title="Exporter ce nœud et ses descendants">⬇️ Export branche</button>
-            <button class="btn btn-secondary btn-small" data-i18n="actions.exportFS" data-i18n-title="tooltips.exportFS" onclick="app.exportToFileSystem()" title="Exporter vers dossier local">💾 Export FS</button>
-            <input type="file" id="importBranchFile" accept=".dm,.zip,.json" onchange="app.importBranch(event)" style="display: none;">
-            <label for="importBranchFile" class="btn btn-secondary btn-small" data-i18n="actions.importBranch" data-i18n-title="tooltips.importBranch" style="margin: 0; cursor: pointer;" title="Importer une branche comme enfants">⬆️ Import branche</label>
-            <button class="btn btn-secondary btn-small" data-i18n="actions.importFS" data-i18n-title="tooltips.importFS" onclick="app.importFromFileSystem()" title="Importer depuis dossier local">📂 Import FS</button>
+          <div style="margin-left: auto;">
+            <button class="btn btn-secondary btn-small" data-i18n="actions.importExport" data-i18n-title="tooltips.importExport" onclick="app.openImportExportModal('branch')" title="Importer ou exporter ce nœud et ses descendants">📤 Import & Export</button>
           </div>
         </div>
 
@@ -346,17 +337,31 @@
     </div>
   </div>
 
-  <!-- Modal Export Choice -->
-  <div class="modal-overlay" id="exportModal">
-    <div class="modal">
-      <h2>📤 <span data-i18n="modals.export.title">Export</span></h2>
+  <!-- Modal Import/Export Unifiée -->
+  <div class="modal-overlay" id="importExportModal">
+    <div class="modal" style="max-width: 600px;">
+      <h2 id="importExportModalTitle">📤 <span data-i18n="modals.importExport.title">Import & Export</span></h2>
       <div class="modal-body">
-        <p id="exportModalSubtitle" style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.export.subtitle">
-          Choisir le format d'export :
+        <p id="importExportModalSubtitle" style="color: var(--text-secondary); margin-bottom: 16px;" data-i18n="modals.importExport.subtitle">
+          Choisir l'action à effectuer :
         </p>
 
-        <!-- Choix du format d'export -->
-        <div style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Tabs Export / Import -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border);">
+          <button class="btn btn-secondary btn-small import-export-tab active" id="exportTab"
+                  onclick="app.selectImportExportTab('export')"
+                  style="border-radius: 8px 8px 0 0; border-bottom: none;">
+            📤 <span data-i18n="modals.importExport.tabs.export">Export</span>
+          </button>
+          <button class="btn btn-secondary btn-small import-export-tab" id="importTab"
+                  onclick="app.selectImportExportTab('import')"
+                  style="border-radius: 8px 8px 0 0; border-bottom: none;">
+            📥 <span data-i18n="modals.importExport.tabs.import">Import</span>
+          </button>
+        </div>
+
+        <!-- Section Export -->
+        <div id="exportSection" style="display: flex; flex-direction: column; gap: 12px;">
           <button class="btn btn-secondary" onclick="app.confirmExportZIP()" style="justify-content: flex-start; padding: 16px;">
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
               <div style="font-size: 16px;">📦 <span data-i18n="modals.export.zip.title">Archive ZIP</span></div>
@@ -392,10 +397,41 @@
               </div>
             </div>
           </button>
+
+          <button class="btn btn-secondary" onclick="app.confirmExportFS()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">💾 <span data-i18n="modals.export.fs.title">Dossier local (File System)</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.export.fs.desc">
+                Exporter vers un dossier sur votre ordinateur (Chrome/Edge)
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Section Import -->
+        <div id="importSection" style="display: none; flex-direction: column; gap: 12px;">
+          <button class="btn btn-secondary" onclick="document.getElementById('importExportFile').click()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📦 <span data-i18n="modals.import.zip.title">Archive ZIP/DM/JSON</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.import.zip.desc">
+                Importer un fichier .dm, .zip ou .json
+              </div>
+            </div>
+          </button>
+          <input type="file" id="importExportFile" accept=".dm,.zip,.json" onchange="app.handleImportExportFile(event)" style="display: none;">
+
+          <button class="btn btn-secondary" onclick="app.confirmImportFS()" style="justify-content: flex-start; padding: 16px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 16px;">📂 <span data-i18n="modals.import.fs.title">Dossier local (File System)</span></div>
+              <div style="font-size: 13px; color: var(--text-secondary);" data-i18n="modals.import.fs.desc">
+                Importer depuis un dossier sur votre ordinateur (Chrome/Edge)
+              </div>
+            </div>
+          </button>
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary btn-small" data-i18n="modals.export.cancel" onclick="app.closeExportModal()">Annuler</button>
+        <button class="btn btn-secondary btn-small" data-i18n="modals.importExport.cancel" onclick="app.closeImportExportModal()">Annuler</button>
       </div>
     </div>
   </div>

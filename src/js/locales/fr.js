@@ -24,6 +24,8 @@ export default {
     newNode: "Nouveau nœud",
     import: "Importer",
     export: "Exporter",
+    importExport: "📤 Import & Export",
+    importExportGlobal: "Import & Export global",
     exportBranch: "⬇️ Export branche",
     exportFS: "💾 Export FS",
     importBranch: "⬆️ Import branche",
@@ -237,6 +239,16 @@ export default {
         }
       }
     },
+    importExport: {
+      title: "Import & Export",
+      subtitle: "Choisir l'action à effectuer :",
+      subtitleBranch: "Import/Export de la branche « {branch} » :",
+      cancel: "Annuler",
+      tabs: {
+        export: "Export",
+        import: "Import"
+      }
+    },
     export: {
       title: "Export",
       subtitle: "Choisir le format d'export :",
@@ -257,6 +269,20 @@ export default {
       pdf: {
         title: "Document PDF",
         desc: "Document PDF avec sommaire hiérarchique et images"
+      },
+      fs: {
+        title: "Dossier local (File System)",
+        desc: "Exporter vers un dossier sur votre ordinateur (Chrome/Edge)"
+      }
+    },
+    import: {
+      zip: {
+        title: "Archive ZIP/DM/JSON",
+        desc: "Importer un fichier .dm, .zip ou .json"
+      },
+      fs: {
+        title: "Dossier local (File System)",
+        desc: "Importer depuis un dossier sur votre ordinateur (Chrome/Edge)"
       }
     },
     pdfPrivacy: {
@@ -314,7 +340,8 @@ export default {
     pdfQuotaHour: "Restant (heure)",
     pdfQuotaDay: "Restant (jour)",
     pdfQuotaUpdated: "Mis à jour il y a {minutes} min",
-    preview: "📖 Prévisualisation"
+    preview: "📖 Prévisualisation",
+    globalActions: "Actions globales"
   },
 
   // Node types and badges
@@ -357,6 +384,7 @@ export default {
     goToParent: "Remonter au parent",
     goToRoot: "Retour à la racine",
     togglePreview: "Activer/désactiver la prévisualisation en temps réel (écran partagé)",
+    importExport: "Importer ou exporter ce nœud et ses descendants",
     exportBranch: "Exporter ce nœud et ses descendants",
     exportFS: "Exporter vers le système de fichiers local (Chrome/Edge uniquement)",
     importBranch: "Importer une branche comme enfants",

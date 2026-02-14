@@ -540,59 +540,117 @@ const app = {
   },
 
   /**
-   * Open export modal
-   * @param {string} type - 'global' or 'branch'
+   * Open import/export modal (unified)
+   * @param {string} scope - 'global' or 'branch'
    */
-  openExportModal(type) {
-    if (type === 'branch' && !this.currentNodeId) {
+  openImportExportModal(scope) {
+    if (scope === 'branch' && !this.currentNodeId) {
       showToast(t('toast.selectNodeFirst'), 'ℹ️');
       return;
     }
 
-    // In branch mode, "global" export should export the current branch
-    if (type === 'global' && TreeModule.isBranchMode()) {
+    // In branch mode, "global" scope should target the current branch
+    if (scope === 'global' && TreeModule.isBranchMode()) {
       const branchRootId = TreeModule.getBranchRootId();
-      this.exportType = 'branch';
-      this.exportBranchId = branchRootId;
+      this.importExportScope = 'branch';
+      this.importExportBranchId = branchRootId;
 
-      // Update modal subtitle to indicate branch export
+      // Update modal subtitle to indicate branch scope
       const branchNode = this.data.nodes[branchRootId];
       const branchTitle = branchNode ? branchNode.title : '';
-      const subtitle = document.getElementById('exportModalSubtitle');
+      const subtitle = document.getElementById('importExportModalSubtitle');
       if (subtitle) {
-        subtitle.textContent = t('modals.export.subtitleBranch', { branch: branchTitle });
+        subtitle.textContent = t('modals.importExport.subtitleBranch', { branch: branchTitle });
       }
-    } else if (type === 'branch') {
-      this.exportType = 'branch';
-      this.exportBranchId = this.currentNodeId;
+    } else if (scope === 'branch') {
+      this.importExportScope = 'branch';
+      this.importExportBranchId = this.currentNodeId;
 
-      // Update modal subtitle for specific node export
+      // Update modal subtitle for specific node
       const nodeTitle = this.data.nodes[this.currentNodeId]?.title || '';
-      const subtitle = document.getElementById('exportModalSubtitle');
+      const subtitle = document.getElementById('importExportModalSubtitle');
       if (subtitle) {
-        subtitle.textContent = t('modals.export.subtitleBranch', { branch: nodeTitle });
+        subtitle.textContent = t('modals.importExport.subtitleBranch', { branch: nodeTitle });
       }
     } else {
-      this.exportType = 'global';
-      this.exportBranchId = null;
+      this.importExportScope = 'global';
+      this.importExportBranchId = null;
 
-      // Reset to default subtitle for global export
-      const subtitle = document.getElementById('exportModalSubtitle');
+      // Reset to default subtitle for global scope
+      const subtitle = document.getElementById('importExportModalSubtitle');
       if (subtitle) {
-        subtitle.textContent = t('modals.export.subtitle');
+        subtitle.textContent = t('modals.importExport.subtitle');
       }
     }
 
-    document.getElementById('exportModal').style.display = 'flex';
+    // Show modal with export tab by default
+    this.selectImportExportTab('export');
+    document.getElementById('importExportModal').classList.add('active');
   },
 
   /**
-   * Close export modal
+   * Close import/export modal
+   */
+  closeImportExportModal() {
+    document.getElementById('importExportModal').classList.remove('active');
+    this.importExportScope = null;
+    this.importExportBranchId = null;
+  },
+
+  /**
+   * Select tab in import/export modal
+   * @param {string} tab - 'export' or 'import'
+   */
+  selectImportExportTab(tab) {
+    // Update tab buttons
+    const exportTab = document.getElementById('exportTab');
+    const importTab = document.getElementById('importTab');
+    const exportSection = document.getElementById('exportSection');
+    const importSection = document.getElementById('importSection');
+
+    if (tab === 'export') {
+      exportTab.classList.add('active');
+      importTab.classList.remove('active');
+      exportSection.style.display = 'flex';
+      importSection.style.display = 'none';
+    } else {
+      exportTab.classList.remove('active');
+      importTab.classList.add('active');
+      exportSection.style.display = 'none';
+      importSection.style.display = 'flex';
+    }
+  },
+
+  /**
+   * Handle file import from unified modal
+   * @param {Event} event - File input event
+   */
+  async handleImportExportFile(event) {
+    const scope = this.importExportScope;
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
+
+    if (scope === 'global') {
+      await this.importData(event);
+    } else if (scope === 'branch') {
+      await this.importBranch(event);
+    }
+  },
+
+  /**
+   * Legacy function for compatibility
+   * @deprecated Use openImportExportModal instead
+   */
+  openExportModal(type) {
+    this.openImportExportModal(type);
+  },
+
+  /**
+   * Legacy function for compatibility
+   * @deprecated Use closeImportExportModal instead
    */
   closeExportModal() {
-    document.getElementById('exportModal').style.display = 'none';
-    this.exportType = null;
-    this.exportBranchId = null;
+    this.closeImportExportModal();
   },
 
   /**
@@ -600,9 +658,9 @@ const app = {
    */
   async confirmExportZIP() {
     // Save export info before closing modal (which resets it to null)
-    const type = this.exportType;
-    const branchId = this.exportBranchId;
-    this.closeExportModal();
+    const type = this.importExportScope;
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
 
     try {
       if (type === 'global') {
@@ -623,9 +681,9 @@ const app = {
    */
   confirmExportFreeMind() {
     // Save export info before closing modal (which resets it to null)
-    const type = this.exportType;
-    const branchId = this.exportBranchId;
-    this.closeExportModal();
+    const type = this.importExportScope;
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
 
     try {
       if (type === 'global') {
@@ -646,9 +704,9 @@ const app = {
    */
   async confirmExportMermaid() {
     // Save export info before closing modal (which resets it to null)
-    const type = this.exportType;
-    const branchId = this.exportBranchId;
-    this.closeExportModal();
+    const type = this.importExportScope;
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
 
     try {
       if (type === 'global') {
@@ -736,9 +794,9 @@ const app = {
    */
   async confirmExportPDF() {
     // Save export info before closing modal
-    const type = this.exportType;
-    const branchId = this.exportBranchId;
-    this.closeExportModal();
+    const type = this.importExportScope;
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
 
     // Check if user has accepted privacy notice
     const privacyAccepted = localStorage.getItem('deepmemo_pdf_privacy_accepted');
@@ -1083,6 +1141,38 @@ const app = {
     } catch (error) {
       console.error('[App] Branch import failed:', error);
       showToast(t('toast.importError'), '⚠️');
+    }
+  },
+
+  /**
+   * Confirm File System export from unified modal
+   */
+  async confirmExportFS() {
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
+
+    if (branchId) {
+      await FSSyncModule.showExportDialog(branchId);
+    } else {
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
+    }
+  },
+
+  /**
+   * Confirm File System import from unified modal
+   */
+  async confirmImportFS() {
+    const branchId = this.importExportBranchId;
+    this.closeImportExportModal();
+
+    if (branchId) {
+      const result = await FSSyncModule.showImportDialog(branchId);
+      if (result) {
+        this.render();
+        this.updateNodeCounter();
+      }
+    } else {
+      showToast(t('toast.selectNodeFirst'), 'ℹ️');
     }
   },
 
