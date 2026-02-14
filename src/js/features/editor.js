@@ -583,15 +583,20 @@ export async function updateRightPanel(currentNodeId) {
   }
 
   // Global actions section
+  const inBranchMode = isBranchMode();
+  const disabledAttr = inBranchMode ? 'disabled' : '';
+  const disabledStyle = inBranchMode ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor: pointer;';
+  const disabledTitle = inBranchMode ? t('tooltips.globalActionsDisabledInBranchMode') : '';
+
   let html = `
     <div class="info-section" style="border-bottom: 2px solid var(--border); padding-bottom: 16px;">
       <h3>🌐 ${t('labels.globalActions')}</h3>
       <div style="display: flex; gap: 8px; margin-top: 12px;">
-        <input type="file" id="globalImportFile" accept=".dm,.zip,.json" onchange="app.importData(event)" style="display: none;">
-        <label for="globalImportFile" class="btn btn-secondary btn-small" style="flex: 1; margin: 0; cursor: pointer; text-align: center;">
+        <input type="file" id="globalImportFile" accept=".dm,.zip,.json" onchange="app.importData(event)" style="display: none;" ${disabledAttr}>
+        <label for="globalImportFile" class="btn btn-secondary btn-small" style="flex: 1; margin: 0; ${disabledStyle} text-align: center;" title="${disabledTitle}" ${disabledAttr ? 'aria-disabled="true"' : ''}>
           📂 ${t('actions.import')}
         </label>
-        <button class="btn btn-secondary btn-small" onclick="app.exportGlobalZIP()" style="flex: 1;">
+        <button class="btn btn-secondary btn-small" onclick="app.exportGlobalZIP()" style="flex: 1; ${disabledStyle}" ${disabledAttr} title="${disabledTitle}">
           💾 ${t('actions.export')}
         </button>
       </div>

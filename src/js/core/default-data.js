@@ -950,7 +950,7 @@ DeepMemo propose **deux niveaux d'export/import** (global ou branche), avec plus
 - Pas de conflit avec les nœuds existants
 - La branche est **fusionnée** comme enfants du nœud actuel
 
-## 🗺️ Export mindmap (nouveau !)
+## 🗺️ Export mindmap
 
 En plus du ZIP, tu peux exporter en **mindmap** pour visualiser et éditer ta structure :
 
@@ -2404,7 +2404,7 @@ DeepMemo offers **two levels of export/import** (global or branch), with multipl
 - No conflict with existing nodes
 - The branch is **merged** as children of the current node
 
-## 🗺️ Mindmap export (new!)
+## 🗺️ Mindmap export
 
 In addition to ZIP, you can export as a **mindmap** to visualize and edit your structure:
 

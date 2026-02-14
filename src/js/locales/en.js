@@ -376,6 +376,7 @@ export default {
     exportFS: "Export to local file system (Chrome/Edge only)",
     importBranch: "Import a branch as children",
     importFS: "Import from local file system (Chrome/Edge only)",
+    globalActionsDisabledInBranchMode: "Global actions disabled in branch mode (return to root to use them)",
     attachmentId: "Attachment ID",
     copyMarkdown: "Copy markdown syntax",
     download: "Download",
