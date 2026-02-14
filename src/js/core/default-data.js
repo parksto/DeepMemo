@@ -898,13 +898,17 @@ Pour **vraiment partager les données** avec un ami :
         title: "⬇️ Export / Import",
         content: `# Export et Import : Sauvegarde et partage
 
-DeepMemo propose **deux types d'export/import** (global ou branche), chacun disponible dans **3 formats différents** !
+DeepMemo propose **deux niveaux d'export/import** (global ou branche), avec plusieurs formats disponibles !
 
-## 💾 Deux types d'export/import
+## 💾 Deux niveaux d'export/import
 
 ### 1. Export/Import **global**
 
-**Boutons** : Dans la sidebar gauche
+**Accès** : Panneau d'information (bouton ℹ️) → Section "Actions globales"
+
+**Boutons** :
+- 📂 **Importer** : Import global direct (formats .dm, .zip, .json)
+- 💾 **Exporter** : Export global direct (format ZIP uniquement)
 
 **Ce qui est exporté** :
 - **Tout** l'arbre (tous les nœuds racines)
@@ -922,18 +926,23 @@ DeepMemo propose **deux types d'export/import** (global ou branche), chacun disp
 
 ### 2. Export/Import **de branche**
 
-**Boutons** : Dans le panneau central, sous le contenu du nœud
+**Accès** : Bouton **📤 Import & Export** (en bas à droite du nœud)
+
+**Interface** : Modale unifiée avec 2 onglets :
+- **Export** : ZIP, FreeMind (.mm), Mermaid (SVG), PDF, File System
+- **Import** : ZIP/DM/JSON, File System
 
 **Ce qui est exporté** :
 - Le nœud actuel + **tous ses descendants**
 - Les relations internes (symlinks, enfants)
 - **Les fichiers attachés** de tous les nœuds de la branche
 
-**Format** : Fichier ZIP contenant \`data.json\` + dossier \`attachments/\`
+**Formats disponibles** : ZIP, FreeMind, Mermaid, PDF, File System (selon onglet)
 
 **Utilité** :
 - Partager une branche spécifique (ex: recettes avec photos)
 - Collaborer sans tout partager
+- Visualiser en mindmap ou PDF
 - Réutiliser une structure ailleurs
 
 ✅ **Bonus** : L'import de branche est **non-destructif** :
@@ -2343,13 +2352,17 @@ To **actually share data** with a friend:
         title: "⬇️ Export / Import",
         content: `# Export and Import: Save and share
 
-DeepMemo offers **two types of export/import** (global or branch), each available in **3 different formats**!
+DeepMemo offers **two levels of export/import** (global or branch), with multiple formats available!
 
-## 💾 Two types of export/import
+## 💾 Two levels of export/import
 
 ### 1. **Global** Export/Import
 
-**Buttons**: In the left sidebar
+**Access**: Information panel (ℹ️ button) → "Global Actions" section
+
+**Buttons**:
+- 📂 **Import**: Direct global import (.dm, .zip, .json formats)
+- 💾 **Export**: Direct global export (ZIP format only)
 
 **What is exported**:
 - **All** the tree (all root nodes)
@@ -2367,18 +2380,23 @@ DeepMemo offers **two types of export/import** (global or branch), each availabl
 
 ### 2. **Branch** Export/Import
 
-**Buttons**: In the central panel, below the node content
+**Access**: **📤 Import & Export** button (bottom right of node)
+
+**Interface**: Unified modal with 2 tabs:
+- **Export**: ZIP, FreeMind (.mm), Mermaid (SVG), PDF, File System
+- **Import**: ZIP/DM/JSON, File System
 
 **What is exported**:
 - The current node + **all its descendants**
 - Internal relationships (symlinks, children)
 - **Attached files** of all nodes in the branch
 
-**Format**: ZIP file containing \`data.json\` + \`attachments/\` folder
+**Available formats**: ZIP, FreeMind, Mermaid, PDF, File System (depending on tab)
 
 **Usefulness**:
 - Share a specific branch (e.g., recipes with photos)
 - Collaborate without sharing everything
+- Visualize as mindmap or PDF
 - Reuse a structure elsewhere
 
 ✅ **Bonus**: Branch import is **non-destructive**:

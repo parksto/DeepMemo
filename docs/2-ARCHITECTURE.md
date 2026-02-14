@@ -105,10 +105,10 @@ window.app = app;
 
 **Pourquoi global ?**
 Nécessaire pour les handlers `onclick` dans le HTML :
-- `index.html:107` - `onclick="app.closeMobileWarning()"`
-- `index.html:124` - `onclick="app.createRootNode()"`
-- `index.html:126` - `onchange="app.importData(event)"`
-- `index.html:128` - `onclick="app.openExportModal('global')"`
+- `index.html:115` - `onclick="app.closeMobileWarning()"`
+- `index.html:132` - `onclick="app.createRootNode()"`
+- `index.html:228` - `onclick="app.openImportExportModal('branch')"`
+- `src/js/features/editor.js:586-590` - Boutons globaux Import/Export générés dynamiquement
 
 #### 3. Observer Pattern
 
@@ -192,8 +192,8 @@ export const data = {
 const app = {
   data: DataModule.data,           // Référence à data
   currentNodeId: null,             // ID nœud sélectionné
-  exportType: null,                // 'global' | 'branch'
-  exportBranchId: null             // ID branche à exporter
+  importExportScope: null,         // 'global' | 'branch'
+  importExportBranchId: null       // ID branche pour import/export
 };
 ```
 
@@ -284,8 +284,10 @@ let activeBlobUrls = [];          // URLs blob attachments (cleanup)
   <!-- Modals (generated dynamically in JS) -->
   <div id="actionModal" class="modal">...</div>
   <div id="symlinkModal" class="modal">...</div>
-  <div id="exportModal" class="modal">...</div>
+  <div id="importExportModal" class="modal">...</div>
+  <div id="pdfPrivacyModal" class="modal">...</div>
   <div id="searchModal" class="modal">...</div>
+  <div id="markdownHelpModal" class="modal">...</div>
 
   <!-- Footer -->
   <footer>...</footer>
@@ -293,11 +295,11 @@ let activeBlobUrls = [];          // URLs blob attachments (cleanup)
 ```
 
 📍 **Références clés** :
-- `index.html:100-109` - Mobile warning banner
-- `index.html:113-138` - Sidebar structure
-- `index.html:141-179` - Main content (editor)
-- `index.html:181-293` - Right panel
-- `index.html:296-439` - Modals (action, symlink, export, search)
+- `index.html:108-117` - Mobile warning banner
+- `index.html:122-130` - Sidebar structure
+- `index.html:149-243` - Main content (editor)
+- `index.html:246-253` - Right panel
+- `index.html:282-455` - Modals (action, symlink, import/export, PDF privacy, search, markdown help)
 
 #### Attributs i18n
 
@@ -372,8 +374,14 @@ const app = {
   deleteNode(nodeId) { ... },
 
   // Export/Import
-  exportData() { ... },
   importData(event) { ... },
+  exportGlobalZIP() { ... },
+  openImportExportModal(scope) { ... },
+  closeImportExportModal() { ... },
+  selectImportExportTab(tab) { ... },
+  confirmExportZIP() { ... },
+  confirmExportFS() { ... },
+  confirmImportFS() { ... },
 
   // UI handlers
   toggleRightPanel() { ... },
