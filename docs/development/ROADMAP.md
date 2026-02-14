@@ -2,7 +2,7 @@
 
 > 🚧 **Documentation en cours de rédaction**
 >
-> **Version** : V0.10.5
+> **Version** : V0.11.0
 > **Statut** : Stub créé le 2026-01-28
 
 ## Contenu Prévu

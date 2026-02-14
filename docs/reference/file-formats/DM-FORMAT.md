@@ -2,8 +2,8 @@
 
 > Spécification complète du format d'archive DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-31
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 >
 > 📍 **Sources** : `src/js/core/data.js` (lignes 523-1238), `schemas/v1.0/*.json`
 >
@@ -972,8 +972,8 @@ async function validateDM(filepath) {
 
 **Documentation vérifiée ligne par ligne** ✅
 
-Toutes les références au code source ont été vérifiées dans DeepMemo V0.10.5 et sont exactes.
+Toutes les références au code source ont été vérifiées dans DeepMemo V0.11.0 et sont exactes.
 
 ---
 
-**Dernière mise à jour** : 2026-01-31 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

@@ -2,8 +2,8 @@
 
 > Spécification complète de la validation des formats DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-02-02 (fact-check complet, correction validateMetadata et références lignes)
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13 (fact-check complet, correction validateMetadata et références lignes)
 >
 > 📍 **Sources** : `schemas/v1.0/*.json`, `src/js/core/validation.js`, `src/js/core/data.js`
 
@@ -1226,4 +1226,4 @@ node scripts/validate-export.js deepmemo-export-*.json
 
 ---
 
-**Dernière mise à jour** : 2026-02-02 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

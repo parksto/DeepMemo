@@ -344,7 +344,10 @@ export default {
     emptyPreview: "Vide",
     brokenSymlink: "⚠️ Ce lien symbolique pointe vers un nœud qui n'existe plus.\n\nVous pouvez supprimer ce lien cassé.",
     externalSymlink: "⚠️ Ce lien symbolique pointe vers un nœud en dehors de la branche actuelle.\n\nEn mode branche, les liens externes ne sont pas accessibles. Vous pouvez supprimer ce lien ou quitter le mode branche pour accéder au nœud cible.",
-    newNodeTitle: "Nouveau nœud"
+    newNodeTitle: "Nouveau nœud",
+    pdfRequiresOnline: "L'export PDF nécessite une connexion internet",
+    pdfRateLimitExceeded: "Limite d'export PDF atteinte. Essayez plus tard.",
+    pdfWorkerUnavailable: "Serveur PDF inaccessible. Vérifiez votre connexion ou utilisez l'outil CLI offline."
   },
 
   // Tooltips

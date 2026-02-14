@@ -2,8 +2,8 @@
 
 > Guide complet de l'application web progressive DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-29
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 >
 > ⚠️ **Ce guide concerne principalement l'utilisation Desktop**. L'interface mobile n'est pas encore optimisée.
 
@@ -410,7 +410,7 @@ console.log('[Version] Cache actuel :', CACHE_VERSION);
 
 Vous verrez : `[Version] Cache actuel : v1.10.5`
 
-Ou regardez le bandeau en haut de la page d'accueil : **DeepMemo V0.10.5**
+Ou regardez le bandeau en haut de la page d'accueil : **DeepMemo V0.11.0**
 
 ---
 
@@ -810,4 +810,4 @@ self.addEventListener('fetch', (event) => {
 
 ---
 
-**Dernière mise à jour** : 2026-01-29 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

@@ -1,7 +1,7 @@
 # 4. Features
 
-> **Version** : V0.10.5
-> **Dernière mise à jour** : 2026-01-29
+> **Version** : V0.11.0
+> **Dernière mise à jour** : 2026-02-13
 > **Sources vérifiées** : Toutes les features référencent le code source
 
 ---
@@ -28,7 +28,7 @@
 
 ## Vue d'ensemble
 
-DeepMemo V0.10.5 propose **15 features principales** organisées en 4 catégories :
+DeepMemo V0.11.0 propose **15 features principales** organisées en 4 catégories :
 
 ### 📁 Navigation & Organisation
 - **Navigation arborescence** : Arborescence hiérarchique avec déplier/replier
@@ -77,13 +77,13 @@ L'arborescence est le composant central qui affiche la structure hiérarchique d
 
 | Fonction | Ligne | Description |
 |----------|-------|-------------|
-| `renderTree(onNodeClick)` | 220 | Render complet de l'arbre visible |
-| `setCurrentInstanceKey(key)` | 72 | Sélectionne node + auto-collapse/expand path |
-| `setFocusedInstanceKey(key)` | 116 | Focus keyboard sans sélection |
+| `renderTree(onNodeClick)` | 220 | Rendu complet de l'arbre visible |
+| `setCurrentInstanceKey(key)` | 72 | Sélectionne le nœud + auto-repli/extension du chemin |
+| `setFocusedInstanceKey(key)` | 116 | Focus clavier sans sélection |
 | `getInstanceKey(nodeId, parentContext)` | 65 | Génère instance key unique |
 | `findInstanceKeyForNode(targetNodeId)` | 462 | Construit instance key par remontée |
-| `expandTreeNode(instanceKey)` | 446 | Expand node pour afficher children |
-| `collapseTreeNode(instanceKey)` | 453 | Collapse node |
+| `expandTreeNode(instanceKey)` | 446 | Étendre le nœud pour afficher les enfants |
+| `collapseTreeNode(instanceKey)` | 453 | Replier le nœud |
 | `handleTreeNavigation(e, callback)` | 617 | Navigation clavier (↑↓←→ Enter) |
 | `updateTreeFocus()` | 578 | Met à jour classes `.focused`/`.active` |
 
@@ -91,16 +91,16 @@ L'arborescence est le composant central qui affiche la structure hiérarchique d
 
 ### Instance Keys
 
-**Concept** : Identifiant unique d'une **occurrence** de node dans l'arbre.
+**Concept** : Identifiant unique d'une **occurrence** de nœud dans l'arbre.
 
-**Pourquoi** : Un node peut apparaître plusieurs fois via symlinks → chaque occurrence doit être distinguable.
+**Pourquoi** : Un nœud peut apparaître plusieurs fois via symlinks → chaque occurrence doit être distinguable.
 
 **Format** : `nodeId@parentInstanceKey@...@root`
 
 **Exemples** :
 ```
-node_root@root                                   // Root node
-node_child@node_root@root                        // Child direct
+node_root@root                                   // Nœud racine
+node_child@node_root@root                        // Enfant direct
 symlink_ref@node_child@node_root@root            // Symlink
 node_target@symlink_ref@node_child@node_root@root // Via symlink (récursif)
 ```
@@ -173,9 +173,9 @@ L'arborescence affiche différemment chaque type de nœud :
 ### Déplier/Replier
 
 **Comportement** :
-- **Clic sur arrow (▶/▼)** : Expand/collapse **sans** sélectionner le node
-- **Clic sur titre** : Sélectionne le node (charge dans editor)
-- **Auto-collapse** : Lors de la sélection via `setCurrentInstanceKey()`, l'arborescence se replie puis reconstruit le chemin vers le nœud
+- **Clic sur flèche (▶/▼)** : Étendre/replier **sans** sélectionner le nœud
+- **Clic sur titre** : Sélectionne le nœud (charge dans l'éditeur)
+- **Auto-repli** : Lors de la sélection via `setCurrentInstanceKey()`, l'arborescence se replie puis reconstruit le chemin vers le nœud
 
 **État** :
 - Stocké dans `expandedNodes` (Set d'instance keys)
@@ -185,25 +185,25 @@ L'arborescence affiche différemment chaque type de nœud :
 - `.tree-node.expanded` : Affiche `.tree-node-children`
 - `.tree-node-toggle` : Arrow qui change de ▶ à ▼
 
-📍 **Référence** : `src/js/features/tree.js:315-335` (toggle onclick), `tree.js:72-111` (auto-collapse)
+📍 **Référence** : `src/js/features/tree.js:315-335` (basculement au clic), `tree.js:72-111` (auto-repli)
 
 ---
 
 ### Sélection et focus
 
-**Selection (Active)** :
-- Node actuellement chargé dans l'éditeur
+**Sélection (Active)** :
+- Nœud actuellement chargé dans l'éditeur
 - Classe : `.tree-node-content.active`
-- Background accent + highlight
+- Fond accentué + surbrillance
 
-**Focus (Keyboard)** :
-- Node actuellement ciblé par navigation clavier
+**Focus (Clavier)** :
+- Nœud actuellement ciblé par navigation clavier
 - Classe : `.tree-node-content.focused`
-- Outline border
+- Bordure de contour
 
 **Distinction** :
-- Un node peut être focused sans être active (navigation sans sélection)
-- Un node peut être active ET focused (après Enter sur focused node)
+- Un nœud peut avoir le focus sans être actif (navigation sans sélection)
+- Un nœud peut être actif ET avoir le focus (après Enter sur nœud ciblé)
 
 📍 **Référence** : `src/js/features/tree.js:578-602` (updateTreeFocus)
 
@@ -213,17 +213,17 @@ L'arborescence affiche différemment chaque type de nœud :
 
 | Touche | Action | Comportement |
 |--------|--------|--------------|
-| **↓** (ArrowDown) | Move down | Focus next visible node |
-| **↑** (ArrowUp) | Move up | Focus previous visible node |
-| **→** (ArrowRight) | Expand | Expand focused node → show children |
-| **←** (ArrowLeft) | Collapse/Parent | If expanded: collapse; else: go to parent |
-| **Enter** | Select | Select focused node → load in editor |
+| **↓** (ArrowDown) | Descendre | Cibler le nœud visible suivant |
+| **↑** (ArrowUp) | Monter | Cibler le nœud visible précédent |
+| **→** (ArrowRight) | Étendre | Étendre le nœud ciblé → afficher les enfants |
+| **←** (ArrowLeft) | Replier/Parent | Si étendu : replier ; sinon : aller au parent |
+| **Enter** | Sélectionner | Sélectionner le nœud ciblé → charger dans l'éditeur |
 
 **Notes** :
 - Fonctionne uniquement si l'arborescence a le focus (pas dans un champ de saisie)
-- Auto-focus premier node si aucun focus
-- Scrolls node into view automatiquement
-- External symlinks : sélectionnables (pour suppression) mais toast warning
+- Focus automatique sur le premier nœud si aucun focus
+- Défilement automatique pour rendre le nœud visible
+- Symlinks externes : sélectionnables (pour suppression) mais avertissement toast
 
 📍 **Référence** : `src/js/features/tree.js:617-723` (handleTreeNavigation)
 
@@ -231,7 +231,7 @@ L'arborescence affiche différemment chaque type de nœud :
 
 ### Structure HTML
 
-**Par node** (`tree.js:220-441`) :
+**Par nœud** (`tree.js:220-441`) :
 ```html
 <div class="tree-node [expanded]" data-instance-key="node_123@root">
   <div class="tree-node-content [active|focused]">
@@ -247,13 +247,13 @@ L'arborescence affiche différemment chaque type de nœud :
 ```
 
 **Classes CSS** :
-- `.tree-node` : Container principal
-- `.tree-node.expanded` : Affiche children
-- `.tree-node-content` : Row cliquable
-- `.tree-node-content.active` : Node sélectionné
+- `.tree-node` : Conteneur principal
+- `.tree-node.expanded` : Affiche les enfants
+- `.tree-node-content` : Ligne cliquable
+- `.tree-node-content.active` : Nœud sélectionné
 - `.tree-node-content.focused` : Focus clavier
-- `.tree-node-content.dragging` : En cours de drag
-- `.tree-node-content.drag-over` : Hover pendant drag
+- `.tree-node-content.dragging` : En cours de glisser-déposer
+- `.tree-node-content.drag-over` : Survol pendant glisser-déposer
 
 📍 **CSS** : `src/css/components.css:254-357`, `src/css/components.css:892-909`
 
@@ -263,7 +263,7 @@ L'arborescence affiche différemment chaque type de nœud :
 
 ### Vue d'ensemble
 
-**Branch Mode** permet d'**isoler une sous-arbre** pour travailler sur une branche spécifique sans distraction.
+**Branch Mode** permet d'**isoler un sous-arbre** pour travailler sur une branche spécifique sans distraction.
 
 **Activation** :
 - URL : `?branch=node_123#/node/node_456`
@@ -271,10 +271,10 @@ L'arborescence affiche différemment chaque type de nœud :
 
 **Effets** :
 - Sidebar affiche **uniquement** les descendants de `branchRootId`
-- Breadcrumb commence à `branchRootId` (pas root global)
-- Search scope limité à la branche
-- "New Root Node" button disabled
-- Page title : `"DeepMemo - [Branch Name]"`
+- Breadcrumb commence à `branchRootId` (pas racine globale)
+- Portée de recherche limitée à la branche
+- Bouton "New Root Node" désactivé
+- Titre de page : `"DeepMemo - [Branch Name]"`
 
 📍 **Référence** : `src/js/features/tree.js:136-162` (enable/disable)
 
@@ -288,7 +288,7 @@ export function enableBranchMode(nodeId) {
   branchMode = true;
   branchRootId = nodeId;
   const instanceKey = getInstanceKey(nodeId, null);
-  expandedNodes.add(instanceKey);  // Auto-expand branch root
+  expandedNodes.add(instanceKey);  // Extension automatique de la racine de branche
   updatePageTitle();
   return true;
 }
@@ -313,25 +313,25 @@ export function getBranchRootId() { return branchRootId; }
 
 ### Activation depuis URL
 
-**Flow** (`routing.js` → `app.js` → `tree.js`) :
+**Flux** (`routing.js` → `app.js` → `tree.js`) :
 
-1. User visite : `https://deepmemo.org/?branch=node_123#/node/node_456`
-2. **`routing.js:12-33`** : Parse URL
+1. L'utilisateur visite : `https://deepmemo.org/?branch=node_123#/node/node_456`
+2. **`routing.js:12-33`** : Analyser l'URL
    ```javascript
    parseHash() {
      const urlParams = new URLSearchParams(window.location.search);
      const branchRootId = urlParams.get('branch');
-     // Returns: { mode: 'branch', branchRootId, nodeId }
+     // Retourne: { mode: 'branch', branchRootId, nodeId }
    }
    ```
-3. **`app.js:187-204`** : Navigate to hash
+3. **`app.js:187-204`** : Naviguer vers le hash
    ```javascript
    if (route.mode === 'branch' && route.branchRootId) {
      TreeModule.enableBranchMode(route.branchRootId);
    }
    ```
-4. **`tree.js:435`** : Render only branch descendants
-5. **`editor.js:310`** : Breadcrumb stops at branch root
+4. **`tree.js:435`** : Rendu uniquement des descendants de la branche
+5. **`editor.js:310`** : Breadcrumb s'arrête à la racine de branche
 
 📍 **Références** :
 - `src/js/utils/routing.js:12-33`
@@ -344,14 +344,14 @@ export function getBranchRootId() { return branchRootId; }
 
 Quand branch mode est actif :
 
-| Feature | Comportement Normal | Comportement Branch |
+| Fonctionnalité | Comportement Normal | Comportement Branch |
 |---------|---------------------|---------------------|
-| **Sidebar** | Tous les root nodes | Uniquement `branchRootId` + descendants |
-| **"New Root Node"** | Enabled | **Disabled** (can only add children) |
-| **Search** | Global | **Scoped** to branch descendants |
-| **Breadcrumb** | Root → ... → Node | **Branch Root → ... → Node** |
-| **Page Title** | "DeepMemo" | "DeepMemo - [Branch Name]" |
-| **Copy URLs** | Preserve context | Preserve `?branch=` param |
+| **Sidebar** | Tous les nœuds racines | Uniquement `branchRootId` + descendants |
+| **"New Root Node"** | Activé | **Désactivé** (peut seulement ajouter des enfants) |
+| **Recherche** | Globale | **Limitée** aux descendants de la branche |
+| **Breadcrumb** | Racine → ... → Nœud | **Racine de branche → ... → Nœud** |
+| **Titre de page** | "DeepMemo" | "DeepMemo - [Nom de branche]" |
+| **Copie URLs** | Préserve le contexte | Préserve le paramètre `?branch=` |
 
 📍 **Références** :
 - Disable new root : `app.js:261-264`
@@ -365,15 +365,15 @@ Quand branch mode est actif :
 
 **Élément** : `<div class="branch-mode-indicator" id="branchModeIndicator">`
 
-**Location** : Sidebar, au-dessus de l'arborescence
+**Emplacement** : Sidebar, au-dessus de l'arborescence
 
 **Contenu** :
 - Texte : "🌿 branch mode" (i18n : `labels.branchMode`)
-- Bouton exit : "⤴️" link vers `#/node/{branchRootId}` (sort du branch mode)
+- Bouton sortie : "⤴️" lien vers `#/node/{branchRootId}` (sort du branch mode)
 
 **Affichage** :
-- Hidden par défaut : `display: none`
-- Shown en branch mode : `display: flex`
+- Masqué par défaut : `display: none`
+- Affiché en branch mode : `display: flex`
 
 **Update Logic** (`app.js:365-378`) :
 ```javascript
@@ -401,21 +401,21 @@ updateBranchModeIndicator() {
 
 > **Note** : DeepMemo est **LocalFirst** - les URLs fonctionnent uniquement sur le **même PC, même navigateur, même utilisateur**. Ce sont des bookmarks de navigation locale, pas des liens partageables entre utilisateurs.
 
-**Current Node URL** (preserve branch context) :
+**URL du nœud courant** (préserve le contexte de branche) :
 ```javascript
 getNodeUrl(nodeId, branchRootId)
 // → https://deepmemo.org/?branch=node_123#/node/node_456
 ```
 
-**Branch Isolation URL** (always creates branch) :
+**URL d'isolation de branche** (crée toujours une branche) :
 ```javascript
 getBranchUrl(branchRootId)
 // → https://deepmemo.org/?branch=node_456#/node/node_456
 ```
 
-**UI Buttons** (Right panel) :
-- 🔗 "Copy node URL" : Preserve context (si branch mode, inclut `?branch=`)
-- 🌿 "Copy branch URL" : Force branch mode sur le node courant
+**Boutons UI** (Panneau droit) :
+- 🔗 "Copy node URL" : Préserve le contexte (si branch mode, inclut `?branch=`)
+- 🌿 "Copy branch URL" : Force le mode branche sur le nœud courant
 
 📍 **Références** :
 - `src/js/utils/routing.js:80-95`
@@ -426,7 +426,7 @@ getBranchUrl(branchRootId)
 
 ### External Symlinks
 
-**Définition** : Symlink dont le `targetId` pointe vers un node **hors de la branche actuelle**.
+**Définition** : Symlink dont le `targetId` pointe vers un nœud **hors de la branche actuelle**.
 
 **Conditions** :
 - Branch mode actif
@@ -455,18 +455,18 @@ Project B (outside branch)
 | Badge opacity | 0.5 |
 
 **Comportement** :
-- ✅ **Clickable** (sélectionnable pour suppression)
-- ❌ **Non-draggable** (pas de drag-drop)
-- ⚠️ **Toast warning** : "External link to branch (not accessible)"
-- ❌ **No children** (agit comme dead leaf, `hasChildren = false`)
-- ❌ **Non-navigable** (target hors de vue)
+- ✅ **Cliquable** (sélectionnable pour suppression)
+- ❌ **Non-déplaçable** (pas de glisser-déposer)
+- ⚠️ **Avertissement toast** : "External link to branch (not accessible)"
+- ❌ **Pas d'enfants** (agit comme feuille morte, `hasChildren = false`)
+- ❌ **Non-navigable** (cible hors de vue)
 
 **Raison** : Suivre le lien briserait l'isolation de la branche.
 
 📍 **Références** :
 - Détection : `tree.js:262-272`
-- Pas de children : `tree.js:301-302`
-- Pas de drag-drop : `tree.js:406-414`
+- Pas d'enfants : `tree.js:301-302`
+- Pas de glisser-déposer : `tree.js:406-414`
 - Toast : `tree.js:400-404`
 
 ---
@@ -475,27 +475,27 @@ Project B (outside branch)
 
 #### Workflow : Entrer en Branch Mode
 
-1. User clique sur "Copy Branch URL" (🌿) dans right panel
-2. Génère URL : `?branch=node_123#/node/node_123`
-3. Copie dans clipboard
-4. User colle URL dans nouvelle tab (même navigateur)
+1. L'utilisateur clique sur "Copy Branch URL" (🌿) dans le panneau droit
+2. Génère l'URL : `?branch=node_123#/node/node_123`
+3. Copie dans le presse-papiers
+4. L'utilisateur colle l'URL dans un nouvel onglet (même navigateur)
 5. Nouvelle session :
-   - `routing.js` parse `?branch=` param
+   - `routing.js` analyse le paramètre `?branch=`
    - `app.js` appelle `enableBranchMode(node_123)`
-   - Sidebar re-render avec uniquement descendants
-   - Indicator "🌿 branch mode" affiché
+   - Nouveau rendu de la sidebar avec uniquement les descendants
+   - Indicateur "🌿 branch mode" affiché
    - Breadcrumb commence à node_123
-   - Search scope limité
+   - Portée de recherche limitée
 
 #### Workflow : Sortir de Branch Mode
 
-1. User clique sur "⤴️" dans branch indicator
-2. Navigate vers `#/node/{branchRootId}` (sans `?branch=`)
-3. `routing.js` détecte absence de `?branch=` param
+1. L'utilisateur clique sur "⤴️" dans l'indicateur de branche
+2. Navigation vers `#/node/{branchRootId}` (sans `?branch=`)
+3. `routing.js` détecte l'absence du paramètre `?branch=`
 4. `app.js` appelle `disableBranchMode()`
-5. Sidebar re-render avec tous les root nodes
-6. Indicator caché
-7. Breadcrumb jusqu'au root global
+5. Nouveau rendu de la sidebar avec tous les nœuds racines
+6. Indicateur masqué
+7. Breadcrumb jusqu'à la racine globale
 
 ---
 
@@ -504,15 +504,15 @@ Project B (outside branch)
 ### Vue d'ensemble
 
 DeepMemo supporte **Markdown complet** avec :
-- Live preview split-screen (optionnel)
-- Rendering via Marked.js (CDN)
-- Support inline images (attachments)
-- Syntax highlighting pour code blocks
+- Prévisualisation en direct en écran divisé (optionnel)
+- Rendu via Marked.js (CDN)
+- Support des images inline (pièces jointes)
+- Coloration syntaxique pour les blocs de code
 
 **Modules** :
-- `src/js/features/editor.js` : Rendering en view mode
-- `src/js/features/preview.js` : Live preview split-screen
-- `src/js/features/modals.js` : Markdown help modal
+- `src/js/features/editor.js` : Rendu en mode visualisation
+- `src/js/features/preview.js` : Prévisualisation en direct en écran divisé
+- `src/js/features/modals.js` : Fenêtre modale d'aide Markdown
 
 📍 **Référence** : Library Marked.js chargée via `index.html:93`
 
@@ -548,32 +548,32 @@ DeepMemo supporte **Markdown complet** avec :
 
 ---
 
-### Live Preview (écran divisé)
+### Prévisualisation en Direct (écran divisé)
 
 **Module** : `src/js/features/preview.js`
 
-**Features** :
-- Split-screen : Editor (left) + Preview (right)
-- Debounced updates (300ms) pour performance
-- Scroll sync : Cursor position → Preview scroll
-- Line mapping : Markdown lines → HTML elements
-- ResizeObserver : Auto-adjust heights
+**Fonctionnalités** :
+- Écran divisé : Éditeur (gauche) + Prévisualisation (droite)
+- Mises à jour différées (300ms) pour la performance
+- Synchronisation du défilement : Position du curseur → Défilement de la prévisualisation
+- Correspondance des lignes : Lignes Markdown → Éléments HTML
+- ResizeObserver : Ajustement automatique des hauteurs
 
 **Activation** :
-- Button : `#togglePreview` (`index.html:221`)
-- State : Persisté dans `localStorage.deepmemo_previewEnabled`
+- Bouton : `#togglePreview` (`index.html:221`)
+- État : Persisté dans `localStorage.deepmemo_previewEnabled`
 
-**Mobile** : Disabled automatiquement sur écrans < 768px
+**Mobile** : Désactivé automatiquement sur écrans < 768px
 
 📍 **Référence** : `src/js/features/preview.js:103-507`
 
 ---
 
-#### Debounced Updates
+#### Mises à Jour Différées
 
-**Problème** : Re-render preview à chaque frappe → lag
+**Problème** : Nouveau rendu de la prévisualisation à chaque frappe → latence
 
-**Solution** : Debounce 300ms (`preview.js:359-367`)
+**Solution** : Différer de 300ms (`preview.js:359-367`)
 ```javascript
 let debounceTimer = null;
 
@@ -582,23 +582,23 @@ function schedulePreviewUpdate() {
 
   debounceTimer = setTimeout(() => {
     updatePreview();
-  }, 300);  // 300ms delay
+  }, 300);  // Délai de 300ms
 }
 ```
 
-**Résultat** : Preview update seulement après 300ms d'inactivité
+**Résultat** : Mise à jour de la prévisualisation seulement après 300ms d'inactivité
 
 ---
 
-#### Scroll Sync
+#### Synchronisation du Défilement
 
-**Objectif** : Synchroniser scroll de preview avec position du curseur dans editor
+**Objectif** : Synchroniser le défilement de la prévisualisation avec la position du curseur dans l'éditeur
 
 **Algorithme** (`preview.js:387-476`) :
-1. Detecter cursor position (ligne courante dans textarea)
-2. Mapper ligne markdown → élément HTML dans preview
-3. Calculer position proportionnelle (cursor / total lines)
-4. Scroll preview à la position équivalente
+1. Détecter la position du curseur (ligne courante dans la zone de texte)
+2. Associer la ligne markdown → élément HTML dans la prévisualisation
+3. Calculer la position proportionnelle (curseur / total de lignes)
+4. Défilement de la prévisualisation à la position équivalente
 
 **Line Mapping** (`preview.js:216-276`) :
 ```javascript
@@ -624,46 +624,46 @@ previewElement.scrollTop = scrollTarget;
 
 ### Pipeline de rendu
 
-**View Mode** (`editor.js:897-934`) :
+**Mode Visualisation** (`editor.js:897-934`) :
 ```
-1. Get node.content (markdown)
-2. Call window.marked.parse(content)
+1. Récupérer node.content (markdown)
+2. Appeler window.marked.parse(content)
 3. processAttachmentUrls(html, node)
-   → Replace attachment:ID with blob URLs
-4. Render into .markdown-content div
+   → Remplacer attachment:ID par des blob URLs
+4. Rendu dans la div .markdown-content
 ```
 
-**Attachment URL Processing** (`editor.js:48-105`) :
+**Traitement des URL de Pièces Jointes** (`editor.js:48-105`) :
 ```javascript
 Pattern: /attachment:([a-zA-Z0-9_]+)/g
 
-For each match:
-  1. Extract attachment ID
-  2. Fetch blob from IndexedDB
-  3. Get MIME type from node.attachments metadata
-  4. Recreate blob with correct type (critical for SVG)
-  5. Create blob URL: URL.createObjectURL(blob)
-  6. Replace "attachment:ID" → blob URL
-  7. Track in activeBlobUrls[] for cleanup
+Pour chaque correspondance :
+  1. Extraire l'ID de la pièce jointe
+  2. Récupérer le blob depuis IndexedDB
+  3. Obtenir le type MIME depuis les métadonnées node.attachments
+  4. Recréer le blob avec le type correct (critique pour SVG)
+  5. Créer l'URL blob : URL.createObjectURL(blob)
+  6. Remplacer "attachment:ID" → URL blob
+  7. Suivre dans activeBlobUrls[] pour le nettoyage
 ```
 
-**Memory Management** :
+**Gestion de la Mémoire** :
 - Blob URLs créés avec `URL.createObjectURL()`
-- Tracked dans `activeBlobUrls` array
-- Cleanup avec `URL.revokeObjectURL()` quand node change
+- Suivis dans le tableau `activeBlobUrls`
+- Nettoyage avec `URL.revokeObjectURL()` quand le nœud change
 
 📍 **Référence** : `src/js/features/editor.js:48-105`
 
 ---
 
-### Markdown Help Modal
+### Fenêtre Modale d'Aide Markdown
 
-**Trigger** :
-- Keyboard : `Alt+H`
-- UI : Settings panel (à vérifier)
+**Déclenchement** :
+- Clavier : `Alt+H`
+- UI : Panneau de paramètres (à vérifier)
 - Code : `app.openMarkdownHelp()` → `ModalsModule.openMarkdownHelp()`
 
-**Content** : Généré dynamiquement via i18n (`modals.js:560-646`)
+**Contenu** : Généré dynamiquement via i18n (`modals.js:560-646`)
 
 **Sections** :
 - Headings
@@ -723,10 +723,10 @@ if (blob.type !== correctMimeType) {
 - Gestion symlinks (full content OU citations)
 
 **Processus** :
-1. Client prépare data (resolve symlinks, convert images to base64)
-2. Send to Worker endpoint (POST `/api/pdf-export`)
-3. Worker génère PDF avec jsPDF
-4. Client download blob
+1. Le client prépare les données (résoudre les symlinks, convertir les images en base64)
+2. Envoyer au point de terminaison Worker (POST `/api/pdf-export`)
+3. Le Worker génère le PDF avec jsPDF
+4. Le client télécharge le blob
 
 ---
 
@@ -734,12 +734,12 @@ if (blob.type !== correctMimeType) {
 
 **UI Modal** : `index.html:342-393`
 
-| Format | Extension | Handler | Description |
+| Format | Extension | Gestionnaire | Description |
 |--------|-----------|---------|-------------|
-| **ZIP** | `.dm` | `confirmExportZIP()` | Complete archive with attachments |
-| **FreeMind** | `.mm` | `confirmExportFreeMind()` | Mindmap XML format |
-| **Mermaid** | `.svg` | `confirmExportMermaid()` | Diagram visualization |
-| **PDF** | `.pdf` | `confirmExportPDF()` | Hierarchical document |
+| **ZIP** | `.dm` | `confirmExportZIP()` | Archive complète avec pièces jointes |
+| **FreeMind** | `.mm` | `confirmExportFreeMind()` | Format XML de carte mentale |
+| **Mermaid** | `.svg` | `confirmExportMermaid()` | Visualisation de diagramme |
+| **PDF** | `.pdf` | `confirmExportPDF()` | Document hiérarchique |
 
 📍 **Référence** : `src/js/app.js:613-651` (handlers)
 
@@ -747,34 +747,34 @@ if (blob.type !== correctMimeType) {
 
 ### PDF Generation Pipeline
 
-**Flow** (`app.js:983-1055`) :
+**Flux** (`app.js:983-1055`) :
 ```
-1. Check online status (line 985)
-   → If offline: showToast("PDF export requires internet")
+1. Vérifier le statut en ligne (ligne 985)
+   → Si hors ligne : showToast("PDF export requires internet")
 
-2. Prepare PDF data (line 997):
+2. Préparer les données PDF (ligne 997) :
    executePdfExport() {
-     - Resolve symlinks to target nodes
-     - Convert attachment images to base64
-     - Detect external symlinks (branch mode)
+     - Résoudre les symlinks vers les nœuds cibles
+     - Convertir les images de pièces jointes en base64
+     - Détecter les symlinks externes (mode branche)
    }
 
-3. Send to Worker (line 1004):
+3. Envoyer au Worker (ligne 1004) :
    POST ${workerURL}/api/pdf-export
    Body: { nodes, rootId, type: 'branch' }
 
-4. Handle rate limit (lines 1015-1019):
-   Read headers:
+4. Gérer la limitation de débit (lignes 1015-1019) :
+   Lire les en-têtes :
    - X-RateLimit-Remaining-Hour
    - X-RateLimit-Remaining-Day
 
-5. Download blob (line 1031):
+5. Télécharger le blob (ligne 1031) :
    const blob = await response.blob();
    downloadBlob(blob, filename);
 
-6. Update UI (lines 1036-1044):
-   - Save rate limits to localStorage
-   - Show success toast
+6. Mettre à jour l'UI (lignes 1036-1044) :
+   - Sauvegarder les limites de débit dans localStorage
+   - Afficher le message de succès
 ```
 
 **Worker URL** : Auto-detected (`app.getWorkerURL()`)
@@ -803,7 +803,7 @@ if (blob.type !== correctMimeType) {
 
 ### Rate Limiting
 
-**Purpose** : Prevent abuse du service PDF génération
+**Objectif** : Prévenir l'abus du service de génération PDF
 
 **Quotas** :
 - **5 exports / hour**
@@ -820,16 +820,16 @@ localStorage: 'deepmemo_pdf_rate_limits'
 TTL: 24 hours (86400000 ms)
 ```
 
-**Server-Side** (Privacy Notice, `index.html:400-434`) :
-- IP hashed avec SHA-256
-- Stored 24h maximum
-- No document data saved
-- Rate limit headers returned
+**Côté Serveur** (Notice de confidentialité, `index.html:400-434`) :
+- IP haché avec SHA-256
+- Stocké 24h maximum
+- Aucune donnée de document sauvegardée
+- En-têtes de limitation de débit retournés
 
-**Privacy Modal** (`index.html:395-447`) :
-- Shown on first PDF export attempt
-- "Don't show again" checkbox
-- Dismissal flag : `localStorage.deepmemo_pdf_privacy_accepted`
+**Fenêtre Modale de Confidentialité** (`index.html:395-447`) :
+- Affichée lors de la première tentative d'export PDF
+- Case à cocher "Ne plus afficher"
+- Indicateur de rejet : `localStorage.deepmemo_pdf_privacy_accepted`
 
 📍 **Références** :
 - Client rate limit : `src/js/app.js:687-732`
@@ -841,14 +841,14 @@ TTL: 24 hours (86400000 ms)
 
 ### Vue d'ensemble
 
-**Attachments** permet d'uploader des fichiers et de les intégrer dans le contenu markdown.
+**Pièces jointes** permet de téléverser des fichiers et de les intégrer dans le contenu markdown.
 
-**Features** :
-- Upload n'importe quel type de fichier
+**Fonctionnalités** :
+- Téléversement de n'importe quel type de fichier
 - Limite : **50 MB par fichier**
-- Storage : IndexedDB (blobs séparés)
-- Inline images : `![alt](attachment:ID)`
-- Download/delete UI
+- Stockage : IndexedDB (blobs séparés)
+- Images inline : `![alt](attachment:ID)`
+- UI de téléchargement/suppression
 
 **Module** : `src/js/core/attachments.js`
 
@@ -858,17 +858,17 @@ TTL: 24 hours (86400000 ms)
 
 ### Fonctions de l'API
 
-| Function | Params | Returns | Description |
+| Fonction | Paramètres | Retour | Description |
 |----------|--------|---------|-------------|
-| `generateAttachmentId()` | none | `string` | Generate `attach_{timestamp}_{random}` |
-| `saveAttachment(id, blob)` | id, blob | `Promise<void>` | Save blob to IndexedDB |
-| `getAttachment(id)` | id | `Promise<Blob\|null>` | Retrieve blob |
-| `deleteAttachment(id)` | id | `Promise<void>` | Delete blob |
-| `listAttachments()` | none | `Promise<string[]>` | Get all IDs |
-| `getTotalSize()` | none | `Promise<number>` | Total bytes used |
-| `cleanOrphans(data)` | data | `{deleted, freed}` | Remove unreferenced files |
-| `cleanOrphanedReferences(data)` | data | `{cleaned, nodes}` | Remove invalid refs |
-| `formatFileSize(bytes)` | bytes | `string` | Format "1.2 MB" |
+| `generateAttachmentId()` | aucun | `string` | Générer `attach_{timestamp}_{random}` |
+| `saveAttachment(id, blob)` | id, blob | `Promise<void>` | Sauvegarder le blob dans IndexedDB |
+| `getAttachment(id)` | id | `Promise<Blob\|null>` | Récupérer le blob |
+| `deleteAttachment(id)` | id | `Promise<void>` | Supprimer le blob |
+| `listAttachments()` | aucun | `Promise<string[]>` | Obtenir tous les IDs |
+| `getTotalSize()` | aucun | `Promise<number>` | Total d'octets utilisés |
+| `cleanOrphans(data)` | data | `{deleted, freed}` | Supprimer les fichiers non référencés |
+| `cleanOrphanedReferences(data)` | data | `{cleaned, nodes}` | Supprimer les références invalides |
+| `formatFileSize(bytes)` | bytes | `string` | Formater "1.2 MB" |
 
 📍 **Référence** : `src/js/core/attachments.js:27-193`
 
@@ -888,9 +888,9 @@ TTL: 24 hours (86400000 ms)
 }
 ```
 
-**Storage** :
-- **Metadata** : Dans `node.attachments` array (IndexedDB table `nodes`)
-- **Blob** : Dans IndexedDB table `attachments` (key-value: `id → Blob`)
+**Stockage** :
+- **Métadonnées** : Dans le tableau `node.attachments` (table IndexedDB `nodes`)
+- **Blob** : Dans la table IndexedDB `attachments` (clé-valeur : `id → Blob`)
 
 📍 **Référence** : `src/js/core/storage.js:26-36` (schema)
 
@@ -898,29 +898,29 @@ TTL: 24 hours (86400000 ms)
 
 ### Flux de téléversement
 
-**Trigger** :
+**Déclenchement** :
 ```javascript
 app.triggerFileUpload()
-  → Click hidden input: #attachmentFileInput
+  → Clic sur l'input caché : #attachmentFileInput
 ```
 
-**Handler** (`app.js:1397-1453`) :
+**Gestionnaire** (`app.js:1397-1453`) :
 ```javascript
-1. Get file from input.files[0]
+1. Récupérer le fichier depuis input.files[0]
 
-2. Check size:
+2. Vérifier la taille :
    if (file.size > 50 * 1024 * 1024) {
      showToast('File too large (max 50MB)');
      return;
    }
 
-3. Generate attachment ID:
+3. Générer l'ID de pièce jointe :
    const attachId = AttachmentsModule.generateAttachmentId();
 
-4. Save to IndexedDB:
+4. Sauvegarder dans IndexedDB :
    await AttachmentsModule.saveAttachment(attachId, file);
 
-5. Add metadata to node:
+5. Ajouter les métadonnées au nœud :
    node.attachments.push({
      id: attachId,
      name: file.name,
@@ -930,16 +930,16 @@ app.triggerFileUpload()
      modified: Date.now()
    });
 
-6. Save node:
+6. Sauvegarder le nœud :
    await saveData();
 
-7. Re-render editor:
+7. Nouveau rendu de l'éditeur :
    EditorModule.displayNode(currentNodeId);
 
-8. Show toast:
+8. Afficher le message :
    showToast(`File attached: ${file.name}`);
 
-9. Reset input:
+9. Réinitialiser l'input :
    event.target.value = '';
 ```
 
@@ -989,27 +989,27 @@ Images: ![Screenshot](attachment:attach_123_abc)
 Links:  [Download PDF](attachment:attach_456_def)
 ```
 
-**Rendering** (`editor.js:48-105`) :
+**Rendu** (`editor.js:48-105`) :
 ```javascript
 Pattern: /attachment:([a-zA-Z0-9_]+)/g
 
-For each match:
-  1. Extract attachment ID
-  2. Fetch blob from IndexedDB: getAttachment(attachId)
-  3. Get MIME type from node.attachments metadata
-  4. Recreate blob with correct MIME (important for SVG):
+Pour chaque correspondance :
+  1. Extraire l'ID de pièce jointe
+  2. Récupérer le blob depuis IndexedDB : getAttachment(attachId)
+  3. Obtenir le type MIME depuis les métadonnées node.attachments
+  4. Recréer le blob avec le MIME correct (important pour SVG) :
      if (blob.type !== correctMime) {
        blob = new Blob([blob], { type: correctMime });
      }
-  5. Create blob URL: URL.createObjectURL(blob)
-  6. Replace in HTML: attachment:ID → blob:http://...
-  7. Track in activeBlobUrls[] for cleanup
+  5. Créer l'URL blob : URL.createObjectURL(blob)
+  6. Remplacer dans le HTML : attachment:ID → blob:http://...
+  7. Suivre dans activeBlobUrls[] pour le nettoyage
 ```
 
-**Memory Management** :
-- **activeBlobUrls[]** : Track all blob URLs created
-- **cleanupBlobUrls()** : Revoke all URLs when switching nodes
-- **Auto-cleanup** : Called on node switch to prevent memory leaks
+**Gestion de la Mémoire** :
+- **activeBlobUrls[]** : Suivre toutes les URL blob créées
+- **cleanupBlobUrls()** : Révoquer toutes les URLs lors du changement de nœud
+- **Nettoyage automatique** : Appelé lors du changement de nœud pour prévenir les fuites mémoire
 
 📍 **Référence** : `src/js/features/editor.js:48-105`
 
@@ -1017,23 +1017,23 @@ For each match:
 
 ### Flux de téléchargement
 
-**Handler** (`app.js:1470-1490`) :
+**Gestionnaire** (`app.js:1470-1490`) :
 ```javascript
 async downloadAttachment(attachId, filename) {
-  1. Fetch blob: const blob = await AttachmentsModule.getAttachment(attachId);
+  1. Récupérer le blob : const blob = await AttachmentsModule.getAttachment(attachId);
 
-  2. Create blob URL: const blobUrl = URL.createObjectURL(blob);
+  2. Créer l'URL blob : const blobUrl = URL.createObjectURL(blob);
 
-  3. Create <a> element:
+  3. Créer l'élément <a> :
      const a = document.createElement('a');
      a.href = blobUrl;
      a.download = filename;
 
-  4. Trigger download: a.click();
+  4. Déclencher le téléchargement : a.click();
 
-  5. Cleanup: URL.revokeObjectURL(blobUrl);
+  5. Nettoyage : URL.revokeObjectURL(blobUrl);
 
-  6. Toast: showToast('Download started');
+  6. Message : showToast('Download started');
 }
 ```
 
@@ -1043,26 +1043,26 @@ async downloadAttachment(attachId, filename) {
 
 ### Opérations de nettoyage
 
-**Orphaned Files** (`attachments.js:90-124`) :
+**Fichiers Orphelins** (`attachments.js:90-124`) :
 ```javascript
 cleanOrphans(data) {
-  1. List all attachment IDs in IndexedDB
-  2. List all attachment IDs referenced in nodes
-  3. Find diff: orphans = dbIds - referencedIds
-  4. Delete each orphan from IndexedDB
-  5. Return: { deleted: count, freed: bytes }
+  1. Lister tous les IDs de pièces jointes dans IndexedDB
+  2. Lister tous les IDs de pièces jointes référencés dans les nœuds
+  3. Trouver la différence : orphelins = dbIds - referencedIds
+  4. Supprimer chaque orphelin d'IndexedDB
+  5. Retourner : { deleted: count, freed: bytes }
 }
 ```
 
-**Orphaned References** (`attachments.js:132-162`) :
+**Références Orphelines** (`attachments.js:132-162`) :
 ```javascript
 cleanOrphanedReferences(data) {
-  1. List all attachment IDs in IndexedDB
-  2. For each node.attachments[]:
+  1. Lister tous les IDs de pièces jointes dans IndexedDB
+  2. Pour chaque node.attachments[] :
      if (!dbIds.includes(attachment.id)) {
-       Remove from node.attachments
+       Supprimer de node.attachments
      }
-  3. Return: { cleaned: count, nodes: [nodeIds] }
+  3. Retourner : { cleaned: count, nodes: [nodeIds] }
 }
 ```
 
@@ -1099,14 +1099,14 @@ const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100))
 
 ### Vue d'ensemble
 
-**Tags** permet d'organiser les nodes avec des mots-clés.
+**Tags** permet d'organiser les nœuds avec des mots-clés.
 
-**Features** :
-- Autocomplete (max 10 suggestions)
-- Tag cloud (right panel)
-- Multi-entry IndexedDB index pour search rapide
-- Scope : global OU branch
-- Case-insensitive storage and search (normalized to lowercase)
+**Fonctionnalités** :
+- Autocomplétion (max 10 suggestions)
+- Nuage de tags (panneau droit)
+- Index multi-entrées IndexedDB pour recherche rapide
+- Portée : globale OU branche
+- Stockage et recherche insensibles à la casse (normalisé en minuscules)
 
 **Module** : `src/js/features/tags.js` (352 lignes)
 
@@ -1118,17 +1118,17 @@ const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100))
 
 | Fonction | Ligne | Description |
 |----------|-------|-------------|
-| `setCurrentNodeId(nodeId)` | 19-21 | Définit node courant |
-| `renderTags()` | 26-93 | Render tags + input |
-| `addTag(tag)` | 98-133 | Ajoute tag au node |
-| `removeTag(tag)` | 138-150 | Supprime tag |
-| `handleTagInput(e)` | 155-192 | Gère Enter/Arrows/Escape |
-| `handleTagAutocomplete(e)` | 197-220 | Filtre suggestions |
+| `setCurrentNodeId(nodeId)` | 19-21 | Définit le nœud courant |
+| `renderTags()` | 26-93 | Rendu des tags + input |
+| `addTag(tag)` | 98-133 | Ajoute le tag au nœud |
+| `removeTag(tag)` | 138-150 | Supprime le tag |
+| `handleTagInput(e)` | 155-192 | Gère Enter/Flèches/Échap |
+| `handleTagAutocomplete(e)` | 197-220 | Filtre les suggestions |
 | `collectAllTagsForAutocomplete()` | 225-243 | Collecte tous les tags (global) |
-| `collectBranchTags()` | 320-352 | Collecte tags branche + descendants |
-| `renderTagAutocomplete()` | 248-263 | Render dropdown |
+| `collectBranchTags()` | 320-352 | Collecte les tags de la branche + descendants |
+| `renderTagAutocomplete()` | 248-263 | Rendu du menu déroulant |
 | `navigateTagAutocomplete(direction)` | 268-276 | Navigation ↑↓ |
-| `selectTagSuggestion(index)` | 281-289 | Sélectionne suggestion |
+| `selectTagSuggestion(index)` | 281-289 | Sélectionne la suggestion |
 
 📍 **Référence** : `src/js/features/tags.js`
 
@@ -1138,25 +1138,25 @@ const percentage = Math.min(100, Math.round((totalSize / estimatedLimit) * 100))
 
 **Workflow** :
 ```
-1. User focus #tagInput
-2. Type "pro"
-3. handleTagAutocomplete() triggers:
+1. L'utilisateur donne le focus à #tagInput
+2. Tape "pro"
+3. handleTagAutocomplete() se déclenche :
    → collectAllTagsForAutocomplete()
-   → Filter by "pro" (case-insensitive)
-   → Sort by frequency (most used first)
+   → Filtrer par "pro" (insensible à la casse)
+   → Trier par fréquence (plus utilisés en premier)
    → Max 10 suggestions
-4. renderTagAutocomplete() shows dropdown
-5. User presses Enter OR clicks suggestion
-   → addTag(tag) executes
+4. renderTagAutocomplete() affiche le menu déroulant
+5. L'utilisateur appuie sur Enter OU clique sur une suggestion
+   → addTag(tag) s'exécute
    → node.tags.push(tag)
    → saveData()
-   → renderTags() refresh
-   → updateRightPanel() refresh tag cloud
+   → renderTags() rafraîchissement
+   → updateRightPanel() rafraîchissement du nuage de tags
 ```
 
 **Priorité Suggestions** (`tags.js:225-243`) :
 ```javascript
-// Count tag occurrences across all nodes
+// Compter les occurrences de tags dans tous les nœuds
 const tagCounts = new Map();
 Object.values(data.nodes).forEach(node => {
   node.tags?.forEach(tag => {
@@ -1164,12 +1164,12 @@ Object.values(data.nodes).forEach(node => {
   });
 });
 
-// Sort by count descending
+// Trier par nombre décroissant
 const sortedTags = [...tagCounts.entries()]
   .sort((a, b) => b[1] - a[1])
   .map(([tag]) => tag);
 
-// Filter by query
+// Filtrer par requête
 const filtered = sortedTags.filter(tag =>
   tag.toLowerCase().includes(query.toLowerCase())
 );
@@ -1187,12 +1187,12 @@ return filtered.slice(0, 10);  // Max 10
 
 | Touche | Action |
 |--------|--------|
-| **↓** (ArrowDown) | Select next suggestion |
-| **↑** (ArrowUp) | Select previous suggestion |
-| **Enter** | Add selected tag OU add typed text |
-| **Escape** | Close autocomplete |
+| **↓** (ArrowDown) | Sélectionner la suggestion suivante |
+| **↑** (ArrowUp) | Sélectionner la suggestion précédente |
+| **Enter** | Ajouter le tag sélectionné OU ajouter le texte tapé |
+| **Échap** | Fermer l'autocomplétion |
 
-**Logic** (`tags.js:155-192`) :
+**Logique** (`tags.js:155-192`) :
 ```javascript
 handleTagInput(e) {
   if (e.key === 'Enter') {
@@ -1202,10 +1202,10 @@ handleTagInput(e) {
     if (tagToAdd) addTag(tagToAdd);
   }
   else if (e.key === 'ArrowDown') {
-    navigateTagAutocomplete(1);  // Next
+    navigateTagAutocomplete(1);  // Suivant
   }
   else if (e.key === 'ArrowUp') {
-    navigateTagAutocomplete(-1);  // Previous
+    navigateTagAutocomplete(-1);  // Précédent
   }
   else if (e.key === 'Escape') {
     hideTagAutocomplete();
@@ -1217,13 +1217,13 @@ handleTagInput(e) {
 
 ---
 
-### Scope
+### Portée
 
-**Autocomplete** : **Global** (tous les nodes)
-- Collecte tags de tous les nodes
-- Sort by frequency
+**Autocomplétion** : **Globale** (tous les nœuds)
+- Collecte les tags de tous les nœuds
+- Trier par fréquence
 
-**Tag Cloud (Right Panel)** : **Branch** (node courant + descendants)
+**Nuage de Tags (Panneau Droit)** : **Branche** (nœud courant + descendants)
 - Si branch mode : descendants de branchRootId
 - Sinon : descendants de currentNodeId
 - Fonction : `collectBranchTags()`
@@ -1232,22 +1232,22 @@ handleTagInput(e) {
 
 ---
 
-### Storage
+### Stockage
 
-**Dans Node** :
+**Dans le Nœud** :
 ```javascript
-node.tags = ['work', 'urgent', 'project'];  // Array of strings
+node.tags = ['work', 'urgent', 'project'];  // Tableau de chaînes
 ```
 
 **IndexedDB** :
 - Table : `nodes`
-- Index : `*tags` (multi-entry index)
-- Query exemple : `db.nodes.where('tags').equals('work')`
+- Index : `*tags` (index multi-entrées)
+- Requête exemple : `db.nodes.where('tags').equals('work')`
 
-**Pourquoi multi-entry** :
-- Un node peut avoir plusieurs tags
-- Index multi-entry crée une entrée par tag
-- Permet queries rapides par tag
+**Pourquoi multi-entrées** :
+- Un nœud peut avoir plusieurs tags
+- L'index multi-entrées crée une entrée par tag
+- Permet des requêtes rapides par tag
 
 📍 **Référence** : `src/js/core/storage.js:28` (schema definition)
 
@@ -1284,12 +1284,12 @@ node.tags = ['work', 'urgent', 'project'];  // Array of strings
 </div>
 ```
 
-**CSS Classes** :
-- `.tag` : Tag element
-- `.tag-remove` : Remove button (×)
-- `.tag-autocomplete` : Dropdown (absolute positioned)
+**Classes CSS** :
+- `.tag` : Élément tag
+- `.tag-remove` : Bouton de suppression (×)
+- `.tag-autocomplete` : Menu déroulant (positionné en absolu)
 - `.tag-autocomplete-item` : Suggestion
-- `.tag-autocomplete-item.selected` : Navigation highlight
+- `.tag-autocomplete-item.selected` : Surbrillance de navigation
 
 📍 **CSS** : `src/css/components.css` (tags styles)
 
@@ -1297,7 +1297,7 @@ node.tags = ['work', 'urgent', 'project'];  // Array of strings
 
 ### Intégration avec recherche
 
-**Click on Tag** → Open Search with Tag :
+**Clic sur Tag** → Ouvrir la Recherche avec Tag :
 
 ```javascript
 // tags.js:43-50
@@ -1337,18 +1337,18 @@ openSearchWithTag(tag) {
 
 ### Vue d'ensemble
 
-**Search** propose une recherche full-text dans tous les nodes.
+**Recherche** propose une recherche en texte intégral dans tous les nœuds.
 
-**Features** :
-- Full-text search (title + content + tags)
-- Scope branch mode (nodes dans branche uniquement)
-- Highlighting des matches
-- Navigation keyboard (↑↓ Enter)
-- Preview snippets avec contexte
+**Fonctionnalités** :
+- Recherche en texte intégral (titre + contenu + tags)
+- Portée mode branche (nœuds dans la branche uniquement)
+- Surbrillance des correspondances
+- Navigation clavier (↑↓ Enter)
+- Aperçus d'extraits avec contexte
 
 **Module** : `src/js/features/search.js` (257 lignes)
 
-**Trigger** : `Ctrl+K` (keyboard shortcut)
+**Déclenchement** : `Ctrl+K` (raccourci clavier)
 
 📍 **Référence** : `src/js/features/search.js:1-257`
 
@@ -1358,32 +1358,32 @@ openSearchWithTag(tag) {
 
 | Fonction | Ligne | Description |
 |----------|-------|-------------|
-| `openSearch(prefillText)` | 20-39 | Ouvre modal + autofocus |
-| `closeSearch()` | 44-52 | Ferme modal + reset state |
-| `performSearch(query)` | 58-110 | Effectue recherche |
-| `getNodePath(nodeId)` | 117-128 | Breadcrumb path (parent › node) |
-| `renderSearchResults(query)` | 134-163 | Render résultats avec highlight |
-| `handleSearchNavigation(e)` | 169-191 | Keyboard navigation |
-| `selectSearchResult(index)` | 197-207 | Sélectionne et navigue vers node |
-| `scrollSearchResultIntoView()` | 212-217 | Smooth scroll selected |
-| `setupSearchInput()` | 222-250 | Setup event handlers |
-| `isSearchVisible()` | 255-257 | Getter state |
+| `openSearch(prefillText)` | 20-39 | Ouvre la modale + focus automatique |
+| `closeSearch()` | 44-52 | Ferme la modale + réinitialise l'état |
+| `performSearch(query)` | 58-110 | Effectue la recherche |
+| `getNodePath(nodeId)` | 117-128 | Chemin breadcrumb (parent › nœud) |
+| `renderSearchResults(query)` | 134-163 | Rendu des résultats avec surbrillance |
+| `handleSearchNavigation(e)` | 169-191 | Navigation clavier |
+| `selectSearchResult(index)` | 197-207 | Sélectionne et navigue vers le nœud |
+| `scrollSearchResultIntoView()` | 212-217 | Défilement fluide vers la sélection |
+| `setupSearchInput()` | 222-250 | Configuration des gestionnaires d'événements |
+| `isSearchVisible()` | 255-257 | Obtenir l'état |
 
 📍 **Référence** : `src/js/features/search.js`
 
 ---
 
-### Recherche Algorithm
+### Algorithme de Recherche
 
 **Portée** (`search.js:70-74`) :
 ```javascript
 Object.values(data.nodes).forEach(node => {
-  // Branch mode: skip nodes outside branch
+  // Mode branche : ignorer les nœuds hors de la branche
   if (!isNodeInBranch(node.id)) {
     return;
   }
 
-  // ... search logic
+  // ... logique de recherche
 });
 ```
 
@@ -1422,10 +1422,10 @@ if (tagsMatch && !titleMatch && !contentMatch) {
 }
 ```
 
-**Content Match** (`search.js:88-94`) :
+**Correspondance de Contenu** (`search.js:88-94`) :
 ```javascript
 if (contentMatch) {
-  // Extract 50 chars before/after match
+  // Extraire 50 caractères avant/après la correspondance
   const index = node.content.toLowerCase().indexOf(queryLower);
   const start = Math.max(0, index - 50);
   const end = Math.min(node.content.length, index + query.length + 50);
@@ -1450,10 +1450,10 @@ preview = node.content?.substring(0, 100) || '(No content)';
 
 | Touche | Action | Référence |
 |--------|--------|-----------|
-| **↓** | Select next result | `search.js:175-179` |
-| **↑** | Select previous result | `search.js:181-185` |
-| **Enter** | Open selected node → close search | `search.js:187-190` |
-| **Escape** | Close search | Global handler |
+| **↓** | Sélectionner le résultat suivant | `search.js:175-179` |
+| **↑** | Sélectionner le résultat précédent | `search.js:181-185` |
+| **Enter** | Ouvrir le nœud sélectionné → fermer la recherche | `search.js:187-190` |
+| **Échap** | Fermer la recherche | Gestionnaire global |
 
 **Logic** (`search.js:169-191`) :
 ```javascript
@@ -1497,7 +1497,7 @@ handleSearchNavigation(e) {
     </div>
 
     <div class="search-results" id="searchResults">
-      <!-- Results rendered dynamically -->
+      <!-- Résultats rendus dynamiquement -->
     </div>
 
     <div class="search-footer">
@@ -1518,14 +1518,14 @@ handleSearchNavigation(e) {
 </div>
 ```
 
-**CSS Classes** :
-- `.search-modal` : Modal overlay
-- `.search-modal.active` : Visible state
-- `.search-result` : Result item
-- `.search-result.selected` : Navigation highlight
-- `.search-result-title` : Node title
+**Classes CSS** :
+- `.search-modal` : Superposition modale
+- `.search-modal.active` : État visible
+- `.search-result` : Élément de résultat
+- `.search-result.selected` : Surbrillance de navigation
+- `.search-result-title` : Titre du nœud
 - `.search-result-path` : Breadcrumb
-- `.search-result-preview` : Content snippet
+- `.search-result-preview` : Extrait de contenu
 
 📍 **CSS** : `src/css/components.css` (search styles)
 
@@ -1569,17 +1569,17 @@ Node <mark>title</mark> with highlight
 
 ### Vue d'ensemble
 
-**Drag & Drop** permet de réorganiser les nodes via glisser-déposer.
+**Drag & Drop** permet de réorganiser les nœuds via glisser-déposer.
 
 **Opérations** :
-- **Move** (défaut) : Change parent
-- **Copy** (Ctrl) : Duplicate recursively
-- **Link** (Ctrl+Alt) : Create symlink
+- **Déplacer** (défaut) : Changer le parent
+- **Copier** (Ctrl) : Dupliquer récursivement
+- **Lier** (Ctrl+Alt) : Créer un symlink
 
-**Zones de drop** :
-- **Before** : Insert avant le target
-- **After** : Insert après le target
-- **Inside** : Change parent (ou action spéciale selon modifiers)
+**Zones de dépôt** :
+- **Avant** : Insérer avant la cible
+- **Après** : Insérer après la cible
+- **Intérieur** : Changer le parent (ou action spéciale selon les modificateurs)
 
 **Module** : `src/js/features/drag-drop.js` (447 lignes)
 
@@ -1589,14 +1589,14 @@ Node <mark>title</mark> with highlight
 
 ### Opérations
 
-| Action | Modifiers | Zone Drop | Effet | Référence |
+| Action | Modificateurs | Zone de Dépôt | Effet | Référence |
 |--------|-----------|-----------|-------|-----------|
-| **Move** | None | Inside | Change parent | `drag-drop.js:270-291` |
-| **Move** | None | Before/After | Reorder siblings | `drag-drop.js:229-265` |
-| **Copy** | Ctrl | Inside | Duplicate node | `drag-drop.js:329-382` |
-| **Copy** | Ctrl | Before/After | Duplicate + insert | `drag-drop.js:387-425` |
-| **Link** | Ctrl+Alt | Inside | Create symlink | `drag-drop.js:296-324` |
-| **Link** | Ctrl+Alt | Before/After | Move (ignored) | N/A |
+| **Déplacer** | Aucun | Intérieur | Changer le parent | `drag-drop.js:270-291` |
+| **Déplacer** | Aucun | Avant/Après | Réordonner les frères et sœurs | `drag-drop.js:229-265` |
+| **Copier** | Ctrl | Intérieur | Dupliquer le nœud | `drag-drop.js:329-382` |
+| **Copier** | Ctrl | Avant/Après | Dupliquer + insérer | `drag-drop.js:387-425` |
+| **Lier** | Ctrl+Alt | Intérieur | Créer un symlink | `drag-drop.js:296-324` |
+| **Lier** | Ctrl+Alt | Avant/Après | Déplacer (ignoré) | N/A |
 
 📍 **Référence** : `src/js/features/drag-drop.js`
 
@@ -1648,30 +1648,30 @@ else {
 
 ### Indicateurs Visuels
 
-**During Drag** :
-- **Source element** : `.dragging` class (opacity 0.5)
-- **Drop zones** : `.drop-indicator.top/.bottom/.left/.right` (line 3px)
-- **Hover target** : `.drag-over` class (dashed border)
-- **Cursor** : `dropEffect` change selon modifiers
+**Pendant le Glisser-Déposer** :
+- **Élément source** : classe `.dragging` (opacité 0.5)
+- **Zones de dépôt** : `.drop-indicator.top/.bottom/.left/.right` (ligne 3px)
+- **Cible survolée** : classe `.drag-over` (bordure pointillée)
+- **Curseur** : `dropEffect` change selon les modificateurs
 
-**Drop Effect** (`drag-drop.js:68-75`) :
+**Effet de Dépôt** (`drag-drop.js:68-75`) :
 ```javascript
 if (dragModifiers.ctrl && dragModifiers.alt) {
-  e.dataTransfer.dropEffect = 'link';  // Cursor: alias
+  e.dataTransfer.dropEffect = 'link';  // Curseur : alias
 }
 else if (dragModifiers.ctrl) {
-  e.dataTransfer.dropEffect = 'copy';  // Cursor: copy
+  e.dataTransfer.dropEffect = 'copy';  // Curseur : copie
 }
 else {
-  e.dataTransfer.dropEffect = 'move';  // Cursor: move
+  e.dataTransfer.dropEffect = 'move';  // Curseur : déplacement
 }
 ```
 
-**CSS Classes** :
-- `.dragging` : Source node being dragged
-- `.drag-over` : Target node hover
-- `.drop-indicator` : Line showing insert position
-- `.drop-indicator.top/.bottom/.left/.right` : Position variants
+**Classes CSS** :
+- `.dragging` : Nœud source en cours de glissement
+- `.drag-over` : Survol du nœud cible
+- `.drop-indicator` : Ligne indiquant la position d'insertion
+- `.drop-indicator.top/.bottom/.left/.right` : Variantes de position
 
 📍 **CSS** : `src/css/components.css` (drag-drop styles)
 
@@ -1681,16 +1681,16 @@ else {
 
 **Function** : `moveNode(nodeId, newParentId)`
 
-**Algorithm** (`drag-drop.js:270-291`) :
+**Algorithme** (`drag-drop.js:270-291`) :
 ```javascript
-1. Remove from old parent:
+1. Retirer de l'ancien parent :
    if (oldParent === null) {
      data.rootNodes = data.rootNodes.filter(id => id !== nodeId);
    } else {
      data.nodes[oldParent].children = data.nodes[oldParent].children.filter(id => id !== nodeId);
    }
 
-2. Add to new parent:
+2. Ajouter au nouveau parent :
    node.parent = newParentId;
    if (newParentId === null) {
      data.rootNodes.push(nodeId);
@@ -1698,7 +1698,7 @@ else {
      data.nodes[newParentId].children.push(nodeId);
    }
 
-3. Save & notify:
+3. Sauvegarder & notifier :
    saveData();
    showToast('📦 Node moved');
 ```
@@ -1711,25 +1711,25 @@ else {
 
 **Function** : `reorderNodes(draggedId, targetId, position)`
 
-**Algorithm** (`drag-drop.js:229-265`) :
+**Algorithme** (`drag-drop.js:229-265`) :
 ```javascript
-1. Both nodes must have same parent (siblings)
+1. Les deux nœuds doivent avoir le même parent (frères et sœurs)
 
-2. Remove dragged from children array
+2. Retirer le nœud glissé du tableau des enfants
 
-3. Find target position in array
+3. Trouver la position cible dans le tableau
 
-4. Insert based on position:
+4. Insérer selon la position :
    if (position === 'before') {
      childrenArray.splice(targetIndex, 0, draggedId);
    } else {  // 'after'
      childrenArray.splice(targetIndex + 1, 0, draggedId);
    }
 
-5. Update parent reference:
+5. Mettre à jour la référence parent :
    draggedNode.parent = newParentId;
 
-6. Save & notify:
+6. Sauvegarder & notifier :
    saveData();
    showToast('🔄 Order modified');
 ```
@@ -1742,17 +1742,17 @@ else {
 
 **Function** : `createSymlinkTo(targetNodeId, parentId)`
 
-**Algorithm** (`drag-drop.js:296-324`) :
+**Algorithme** (`drag-drop.js:296-324`) :
 ```javascript
-1. Generate symlink ID:
+1. Générer l'ID du symlink :
    const symlinkId = 'symlink_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-2. Create symlink object:
+2. Créer l'objet symlink :
    const symlink = {
      id: symlinkId,
      type: 'symlink',
      targetId: targetNodeId,
-     title: targetNode.title,  // Initial = target title
+     title: targetNode.title,  // Initial = titre de la cible
      parent: parentId,
      children: [],
      tags: [],
@@ -1768,7 +1768,7 @@ else {
      data.nodes[parentId].children.push(symlinkId);
    }
 
-4. Save & notify:
+4. Sauvegarder & notifier :
    saveData();
    showToast('🔗 Symlink created');
 ```
@@ -1781,21 +1781,21 @@ else {
 
 **Function** : `duplicateNode(originalId, parentId)`
 
-**Algorithm** (`drag-drop.js:329-382`) :
+**Algorithme** (`drag-drop.js:329-382`) :
 ```javascript
-// Recursive copy of full subtree
+// Copie récursive du sous-arbre complet
 const duplicateRecursive = (originalId, parentId) => {
   const original = data.nodes[originalId];
 
-  // Generate new ID
+  // Générer un nouvel ID
   const duplicateId = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-  // Create duplicate (always type='node', never symlink)
+  // Créer le duplicata (toujours type='node', jamais symlink)
   const duplicate = {
     id: duplicateId,
     type: 'node',
     title: original.title + ' (copie)',
-    content: original.content || '',  // Or target content if symlink
+    content: original.content || '',  // Ou contenu cible si symlink
     parent: parentId,
     children: [],
     tags: [...(original.tags || [])],
@@ -1805,7 +1805,7 @@ const duplicateRecursive = (originalId, parentId) => {
 
   data.nodes[duplicateId] = duplicate;
 
-  // Recursively duplicate children
+  // Dupliquer récursivement les enfants
   if (original.children && original.children.length > 0) {
     original.children.forEach(childId => {
       const duplicatedChildId = duplicateRecursive(childId, duplicateId);
@@ -1816,7 +1816,7 @@ const duplicateRecursive = (originalId, parentId) => {
   return duplicateId;
 };
 
-// Start recursion
+// Démarrer la récursion
 const newId = duplicateRecursive(originalId, parentId);
 saveData();
 showToast('📋 Node duplicated');
@@ -1842,14 +1842,14 @@ function isDescendantOf(targetId, nodeId) {
 
   if (target.parent === nodeId) return true;
 
-  // Recursive check
+  // Vérification récursive
   return isDescendantOf(target.parent, nodeId);
 }
 ```
 
 **Usage** (`drag-drop.js:158-162`) :
 ```javascript
-// Don't allow dropping on descendants
+// Ne pas autoriser le dépôt sur les descendants
 if (isDescendantOf(targetNodeId, draggedId)) {
   showToast('⚠️ Impossible: invalid destination');
   return;
@@ -1862,19 +1862,19 @@ if (isDescendantOf(targetNodeId, draggedId)) {
 
 ### Modifier Behavior
 
-**Capture Real-Time** (`drag-drop.js:62-66`) :
+**Capture en Temps Réel** (`drag-drop.js:62-66`) :
 ```javascript
-// dragModifiers updated during dragover (not just dragstart)
+// dragModifiers mis à jour pendant dragover (pas seulement dragstart)
 dragModifiers = {
-  ctrl: e.ctrlKey || e.metaKey,  // Cmd on macOS
+  ctrl: e.ctrlKey || e.metaKey,  // Cmd sur macOS
   alt: e.altKey
 };
 ```
 
-**Pourquoi real-time** :
-- User peut presser/relâcher modifiers pendant drag
-- dropEffect doit update en temps réel
-- Visual feedback immédiat
+**Pourquoi en temps réel** :
+- L'utilisateur peut appuyer/relâcher les modificateurs pendant le glisser-déposer
+- dropEffect doit être mis à jour en temps réel
+- Retour visuel immédiat
 
 📍 **Référence** : `src/js/features/drag-drop.js:62-66`
 
@@ -1882,14 +1882,14 @@ dragModifiers = {
 
 ### i18n Messages
 
-| Message | i18n Key | Contexte |
+| Message | Clé i18n | Contexte |
 |---------|----------|----------|
-| "🔄 Order modified" | `toast.orderModified` | Reorder siblings |
-| "📦 Node moved" | `toast.nodeMoved` | Move parent |
-| "🔗 Symlink created" | `toast.symlinkCreated` | Ctrl+Alt inside |
-| "📋 Node duplicated" | `toast.nodeDuplicated` | Copy inside |
-| "📋 Node duplicated and inserted" | `toast.nodeDuplicatedInserted` | Copy before/after |
-| "⚠️ Impossible: invalid destination" | `toast.invalidDestination` | Cycle prevention |
+| "🔄 Order modified" | `toast.orderModified` | Réordonner les frères et sœurs |
+| "📦 Node moved" | `toast.nodeMoved` | Déplacer le parent |
+| "🔗 Symlink created" | `toast.symlinkCreated` | Ctrl+Alt intérieur |
+| "📋 Node duplicated" | `toast.nodeDuplicated` | Copier intérieur |
+| "📋 Node duplicated and inserted" | `toast.nodeDuplicatedInserted` | Copier avant/après |
+| "⚠️ Impossible: invalid destination" | `toast.invalidDestination` | Prévention de cycle |
 
 📍 **Référence** : `src/js/locales/en.js` (toast.*)
 
@@ -1901,13 +1901,13 @@ dragModifiers = {
 
 DeepMemo propose **4 formats d'export** :
 
-| Format | Extension | Type | Attachments | Use Case |
+| Format | Extension | Type | Pièces jointes | Cas d'usage |
 |--------|-----------|------|-------------|----------|
-| **.dm (ZIP)** | `.dm` | Binary | ✅ Included | Export complet avec fichiers |
-| **JSON Global** | `.json` | Text | ❌ Metadata only | Export simple, LLM-friendly |
-| **JSON Branch** | `.json` | Text | ❌ Metadata only | Export sous-arbre |
-| **FreeMind** | `.mm` | XML | ❌ | Mindmap (Freeplane/XMind) |
-| **Mermaid** | `.svg` | SVG | ❌ | Diagram visualization |
+| **.dm (ZIP)** | `.dm` | Binaire | ✅ Incluses | Export complet avec fichiers |
+| **JSON Global** | `.json` | Texte | ❌ Métadonnées seulement | Export simple, compatible LLM |
+| **JSON Branch** | `.json` | Texte | ❌ Métadonnées seulement | Export sous-arbre |
+| **FreeMind** | `.mm` | XML | ❌ | Carte mentale (Freeplane/XMind) |
+| **Mermaid** | `.svg` | SVG | ❌ | Visualisation de diagramme |
 
 **Module** : `src/js/core/data.js`
 
@@ -1984,24 +1984,24 @@ attachments/attach_1706123456790_def456_document.pdf
 **Export Global ZIP** (`data.js`) :
 ```javascript
 exportDataZIP()
-  → Creates .dm with all nodes + attachments
-  → Filename: deepmemo-export-{timestamp}.dm
+  → Crée un .dm avec tous les nœuds + pièces jointes
+  → Nom de fichier : deepmemo-export-{timestamp}.dm
 ```
 
 **Export Branch ZIP** (`data.js:579-658`) :
 ```javascript
 exportBranchZIP(nodeId, progressCallback)
-  → Creates .dm with branch subtree + attachments
-  → Filename: deepmemo-branch-{title}-{timestamp}.dm
-  → Progress: callback({ current, message })
+  → Crée un .dm avec le sous-arbre de la branche + pièces jointes
+  → Nom de fichier : deepmemo-branch-{title}-{timestamp}.dm
+  → Progression : callback({ current, message })
 ```
 
 **Export JSON** (`data.js:182-195`) :
 ```javascript
 exportData()
-  → Simple JSON with $schema field
-  → Filename: deepmemo-export-{timestamp}.json
-  → No attachments
+  → JSON simple avec champ $schema
+  → Nom de fichier : deepmemo-export-{timestamp}.json
+  → Pas de pièces jointes
 ```
 
 📍 **Référence** : `src/js/core/data.js:182-658`
@@ -2010,17 +2010,17 @@ exportData()
 
 ### Import Workflow
 
-**Auto-detect** (`data.js:666-703`) :
+**Détection Automatique** (`data.js:666-703`) :
 ```javascript
 importDataZIP(event, onSuccess) {
-  1. Get file from input
+  1. Récupérer le fichier depuis l'input
 
-  2. Detect format:
+  2. Détecter le format :
      const arrayBuffer = await file.arrayBuffer();
      const magic = new Uint8Array(arrayBuffer.slice(0, 2));
-     const isZIP = (magic[0] === 0x50 && magic[1] === 0x4B);  // "PK" header
+     const isZIP = (magic[0] === 0x50 && magic[1] === 0x4B);  // En-tête "PK"
 
-  3. Route:
+  3. Router :
      if (isZIP) {
        importFromArchive(file, onSuccess);
      } else {
@@ -2030,8 +2030,8 @@ importDataZIP(event, onSuccess) {
 ```
 
 **Modes** :
-- **Replace** (OK button) : Overwrite all current data + rootNodes
-- **Merge** (Cancel button) : Add to current roots
+- **Remplacer** (bouton OK) : Écraser toutes les données actuelles + rootNodes
+- **Fusionner** (bouton Annuler) : Ajouter aux racines actuelles
 
 **Confirmation** :
 - `confirms.importData` : "Replace all your data?"
@@ -2047,24 +2047,24 @@ importDataZIP(event, onSuccess) {
 
 **Workflow** (`data.js:913-949`) :
 ```javascript
-1. Auto-detect format (.dm / .zip / .json)
+1. Détection automatique du format (.dm / .zip / .json)
 
-2. Extract data:
+2. Extraire les données :
    if (isZIP) {
-     - Extract metadata.json
-     - Extract data.json
-     - Extract attachments/
+     - Extraire metadata.json
+     - Extraire data.json
+     - Extraire attachments/
    } else {
-     - Parse JSON directly
+     - Analyser le JSON directement
    }
 
-3. Handle global vs branch export:
+3. Gérer l'export global vs branche :
    if (export.type === 'deepmemo-global') {
      if (export.rootNodes.length === 1) {
-       // Single root: add as child
+       // Racine unique : ajouter comme enfant
        importedRootId = export.rootNodes[0];
      } else {
-       // Multiple roots: create container node
+       // Racines multiples : créer un nœud conteneur
        containerNode = {
          title: 'Imported: ' + filename,
          children: export.rootNodes
@@ -2072,14 +2072,14 @@ importDataZIP(event, onSuccess) {
      }
    }
 
-4. ID remapping:
+4. Remappage d'ID :
    remapAllIds(nodes, rootId)
-   → Generate new IDs to avoid collisions
+   → Générer de nouveaux IDs pour éviter les collisions
 
-5. Attach to parent:
+5. Attacher au parent :
    parent.children.push(importedRootId);
 
-6. Save & notify:
+6. Sauvegarder & notifier :
    saveData();
    onSuccess(nodeCount, importedRootId);
 ```
@@ -2094,16 +2094,16 @@ importDataZIP(event, onSuccess) {
 
 **Solution** : Régénérer tous les IDs (`fs-sync.js:359-436`)
 
-**Algorithm** :
+**Algorithme** :
 ```javascript
-1. Phase 1: Generate new IDs for all nodes
+1. Phase 1 : Générer de nouveaux IDs pour tous les nœuds
    const idMapping = new Map();
    Object.keys(nodes).forEach(oldId => {
      const newId = generateId();
      idMapping.set(oldId, newId);
    });
 
-2. Phase 2: Create remapped nodes
+2. Phase 2 : Créer les nœuds remappés
    const remappedNodes = {};
    Object.entries(nodes).forEach(([oldId, node]) => {
      const newId = idMapping.get(oldId);
@@ -2115,15 +2115,15 @@ importDataZIP(event, onSuccess) {
      };
    });
 
-3. Phase 3: Remap references in content
+3. Phase 3 : Remapper les références dans le contenu
    Object.values(remappedNodes).forEach(node => {
-     // Replace attachment:oldId → attachment:newId
+     // Remplacer attachment:oldId → attachment:newId
      node.content = node.content.replace(/attachment:(\w+)/g, (match, oldId) => {
        return 'attachment:' + (idMapping.get(oldId) || oldId);
      });
    });
 
-4. Phase 4: Update symlink targetId
+4. Phase 4 : Mettre à jour le targetId des symlinks
    Object.values(remappedNodes).forEach(node => {
      if (node.type === 'symlink') {
        node.targetId = idMapping.get(node.targetId);
@@ -2137,15 +2137,15 @@ importDataZIP(event, onSuccess) {
 
 ### Attachment Handling
 
-**During Export** (`data.js:628-646`) :
+**Pendant l'Export** (`data.js:628-646`) :
 ```javascript
-// Collect all attachments
+// Collecter toutes les pièces jointes
 const allAttachments = new Set();
 Object.values(nodes).forEach(node => {
   node.attachments?.forEach(att => allAttachments.add(att.id));
 });
 
-// Add to ZIP
+// Ajouter au ZIP
 for (const attachId of allAttachments) {
   const blob = await AttachmentsModule.getAttachment(attachId);
   const attachment = findAttachmentMetadata(attachId);
@@ -2154,23 +2154,23 @@ for (const attachId of allAttachments) {
 }
 ```
 
-**During Import** (`fs-sync.js:700-765`) :
+**Pendant l'Import** (`fs-sync.js:700-765`) :
 ```javascript
-// Parse filename: {name}__{oldId}{ext}
+// Analyser le nom de fichier : {name}__{oldId}{ext}
 const pattern = /^(.+)__([^.]+)(\.[^.]+)?$/;
 const match = filename.match(pattern);
 
 if (match) {
   const displayName = match[1];
-  const originalId = match[2];  // For remapping
+  const originalId = match[2];  // Pour le remappage
 
-  // Generate new attachment ID
+  // Générer un nouvel ID de pièce jointe
   const newId = AttachmentsModule.generateAttachmentId();
 
-  // Save to IndexedDB
+  // Sauvegarder dans IndexedDB
   await AttachmentsModule.saveAttachment(newId, blob);
 
-  // Add metadata with _originalId for remapping
+  // Ajouter les métadonnées avec _originalId pour le remappage
   attachment = {
     id: newId,
     name: displayName,
@@ -2191,10 +2191,10 @@ if (match) {
 
 **FS Sync** permet de synchroniser DeepMemo avec un **dossier local** sur le disque.
 
-**Features** :
-- Export vers dossier (structure markdown + attachments)
-- Import depuis dossier (auto-parse .md files)
-- Frontmatter YAML pour metadata
+**Fonctionnalités** :
+- Export vers dossier (structure markdown + pièces jointes)
+- Import depuis dossier (analyse auto des fichiers .md)
+- Frontmatter YAML pour métadonnées
 - Bidirectionnel : Export ↔ Import
 
 **API** : **File System Access API** (Chrome/Edge uniquement)
@@ -2218,7 +2218,7 @@ export function isFileSystemSyncSupported() {
 - ❌ Firefox, Safari
 - ❌ iOS
 
-**Fallback** : Toast message "Feature not supported in your browser"
+**Fallback** : Message toast "Feature not supported in your browser"
 
 📍 **Référence** : `src/js/features/fs-sync.js:24-26`
 
@@ -2228,14 +2228,14 @@ export function isFileSystemSyncSupported() {
 
 **Function** : `exportBranchToFS(branchId, progressCallback)`
 
-**Workflow** (`fs-sync.js:135-169`) :
+**Flux** (`fs-sync.js:135-169`) :
 ```javascript
-1. User picks export folder:
+1. L'utilisateur choisit le dossier d'export :
    const dirHandle = await window.showDirectoryPicker({
      mode: 'readwrite'
    });
 
-2. Export recursively with structure:
+2. Exporter récursivement avec la structure :
    exportNodeRecursive(node, dirHandle, depth)
 
 3. Structure:
@@ -2247,7 +2247,7 @@ export function isFileSystemSyncSupported() {
        ├── index.md
        └── ...
 
-4. Progress callback:
+4. Callback de progression :
    progressCallback({ current: nodeCount, message: "Exporting: Node Title" });
 ```
 
@@ -2257,21 +2257,21 @@ export function isFileSystemSyncSupported() {
 
 ### File Organization
 
-**Branches (Nodes with children)** :
+**Branches (Nœuds avec enfants)** :
 - Folder avec `index.md`
-- Children exportés récursivement dans subfolder
+- Enfants exportés récursivement dans sous-dossier
 
-**Leaves (Nodes without children)** :
-- `.md` file dans parent directory
-- Filename : `{title}.md` (sanitized)
+**Feuilles (Nœuds sans enfants)** :
+- Fichier `.md` dans répertoire parent
+- Nom de fichier : `{title}.md` (nettoyé)
 
 **Symlinks** :
 - `.dmlink` file avec YAML metadata
 - Content : `targetId`, `title`
 
 **Attachments** :
-- Same directory as parent node
-- Filename : `{name}__{attachId}{ext}`
+- Même répertoire que le nœud parent
+- Nom de fichier : `{name}__{attachId}{ext}`
 
 **Example** :
 ```
@@ -2324,12 +2324,12 @@ This is the node content...
 
 ### Collision Resolution
 
-**Problème** : Filename collisions (multiple nodes avec même titre)
+**Problème** : Collisions de noms de fichiers (plusieurs nœuds avec même titre)
 
 **Algorithm** (`fs-sync.js:55-88`) :
 ```javascript
 function getAvailableFilename(dirHandle, baseName) {
-  // Remove accumulated suffixes: "doc (2) (2)" → "doc"
+  // Retirer les suffixes accumulés : "doc (2) (2)" → "doc"
   const cleanName = baseName.replace(/\s*\(\d+\)\s*/g, '').trim();
 
   // Try: doc.md
@@ -2358,27 +2358,27 @@ function getAvailableFilename(dirHandle, baseName) {
 
 **Function** : `importBranchFromFS(parentId, progressCallback)`
 
-**Workflow** (`fs-sync.js:473-519`) :
+**Flux** (`fs-sync.js:473-519`) :
 ```javascript
-1. User picks import folder:
+1. L'utilisateur choisit le dossier d'import :
    const dirHandle = await window.showDirectoryPicker({
      mode: 'read'
    });
 
-2. Parse directory recursively:
+2. Analyser le répertoire récursivement :
    parseDirectoryRecursive(dirHandle, parentId)
 
-3. Detect files:
-   - .md files → Parse as nodes (extract frontmatter)
-   - index.md in folder → Folder becomes branch
-   - .dmlink files → Parse as symlinks
-   - Other files → Import as attachments
-   - Skip: .* files, Thumbs.db, desktop.ini
+3. Détecter les fichiers :
+   - Fichiers .md → Analyser comme nœuds (extraire le frontmatter)
+   - index.md dans dossier → Le dossier devient une branche
+   - Fichiers .dmlink → Analyser comme symlinks
+   - Autres fichiers → Importer comme pièces jointes
+   - Ignorer : fichiers .*, Thumbs.db, desktop.ini
 
-4. ID remapping:
+4. ID remapping :
    remapAllIds(nodes, rootId)
 
-5. Return:
+5. Retourner :
    { count: numberOfImportedNodes }
 ```
 
@@ -2392,23 +2392,23 @@ function getAvailableFilename(dirHandle, baseName) {
 
 **Algorithm** (`fs-sync.js:591-631`) :
 ```javascript
-1. Read file content as text
+1. Lire le contenu du fichier en texte
 
-2. Detect frontmatter:
+2. Détecter le frontmatter :
    Pattern: /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
 
-3. If frontmatter exists:
-   - Parse YAML
-   - Validate schema: FrontmatterModule.validateFrontmatter(frontmatter, 'node')
-   - Use id, title, created, modified from YAML
-   - Extract tags array
+3. Si le frontmatter existe :
+   - Analyser le YAML
+   - Valider le schéma : FrontmatterModule.validateFrontmatter(frontmatter, 'node')
+   - Utiliser id, title, created, modified depuis le YAML
+   - Extraire le tableau tags
 
-4. Else (no frontmatter):
-   - Generate new node
-   - title = filename (without .md)
+4. Sinon (pas de frontmatter) :
+   - Générer un nouveau nœud
+   - title = nom de fichier (sans .md)
    - created/modified = Date.now()
 
-5. Return:
+5. Retourner :
    {
      id, type, title, content,
      created, modified, tags,
@@ -2423,38 +2423,38 @@ function getAvailableFilename(dirHandle, baseName) {
 
 ### Attachment Import
 
-**Detection** : Files not `.md` or `.dmlink`
+**Détection** : Fichiers autres que `.md` ou `.dmlink`
 
 **Parsing** (`fs-sync.js:705-765`) :
 ```javascript
-// Filename format: {name}__{oldId}{ext}
+// Format du nom de fichier : {name}__{oldId}{ext}
 const pattern = /^(.+)__([^.]+)(\.[^.]+)?$/;
 const match = filename.match(pattern);
 
 if (match) {
-  const displayName = match[1];       // User-facing name
-  const originalId = match[2];        // For remapping
+  const displayName = match[1];       // Nom affiché à l'utilisateur
+  const originalId = match[2];        // Pour le remapping
   const ext = match[3] || '';
 
-  // Generate new ID
+  // Générer un nouvel ID
   const newId = AttachmentsModule.generateAttachmentId();
 
-  // Save blob to IndexedDB
+  // Sauvegarder le blob dans IndexedDB
   const blob = await handle.getFile();
   await AttachmentsModule.saveAttachment(newId, blob);
 
-  // Metadata with _originalId for remapping
+  // Métadonnées avec _originalId pour le remapping
   return {
     id: newId,
     name: displayName + ext,
     type: blob.type,
     size: blob.size,
-    _originalId: originalId  // Will be remapped
+    _originalId: originalId  // Sera remappé
   };
 }
 ```
 
-**Size Limit** : 50 MB per file (same as UI upload)
+**Limite de taille** : 50 Mo par fichier (identique à l'upload UI)
 
 📍 **Référence** : `src/js/features/fs-sync.js:700-765`
 
@@ -2462,25 +2462,25 @@ if (match) {
 
 ### ID Remapping Strategy
 
-**Why** : Imported IDs may collide with existing data
+**Pourquoi** : Les IDs importés peuvent entrer en collision avec les données existantes
 
 **Solution** : `remapAllIds(nodes, rootId)`
 
 **Phases** (`fs-sync.js:359-436`) :
 ```
-Phase 1: Generate new IDs
+Phase 1 : Générer de nouveaux IDs
   oldId → newId mapping
 
-Phase 2: Remap node structure
+Phase 2 : Remapper la structure des nœuds
   parent, children, id fields
 
-Phase 3: Remap content references
+Phase 3 : Remapper les références de contenu
   attachment:oldId → attachment:newId
 
-Phase 4: Remap symlink targets
+Phase 4 : Remapper les cibles de symlinks
   targetId: oldId → targetId: newId
 
-Phase 5: Remap attachment IDs
+Phase 5 : Remapper les IDs de pièces jointes
   _originalId → new attachment ID
 ```
 
@@ -2493,25 +2493,25 @@ Phase 5: Remap attachment IDs
 **Export Dialog** (`fs-sync.js:775-807`) :
 ```javascript
 async function showExportDialog(branchId) {
-  // Check browser support
+  // Vérifier le support du navigateur
   if (!isFileSystemSyncSupported()) {
     showToast(t('fsSync.notSupported'), '⚠️');
     return;
   }
 
-  // Call export with progress
+  // Appeler l'export avec progression
   await exportBranchToFS(branchId, (progress) => {
     console.log(`Exporting ${progress.current}: ${progress.message}`);
   });
 
-  // Success toast
+  // Toast de succès
   showToast(t('fsSync.exportSuccess', { count, files }), '✅');
 }
 ```
 
 **Import Dialog** (`fs-sync.js:813-837`) :
-- Similar pattern
-- Success : Toast with imported node count
+- Modèle similaire
+- Succès : Toast avec le nombre de nœuds importés
 
 **App Integration** (`app.js:1094-1108`) :
 ```javascript
@@ -2522,7 +2522,7 @@ async exportToFileSystem() {
 async importFromFileSystem() {
   const result = await FSSyncModule.showImportDialog(this.currentNodeId);
   if (result) {
-    this.renderTree();  // Re-render after import
+    this.renderTree();  // Re-rendu après import
   }
 }
 ```
@@ -2538,13 +2538,13 @@ async importFromFileSystem() {
 | Message | i18n Key | Contexte |
 |---------|----------|----------|
 | "Feature not supported" | `fsSync.notSupported` | Browser sans File System Access API |
-| "Exporting nodes..." | `fsSync.exporting` | Progress message |
-| "Importing nodes..." | `fsSync.importing` | Progress message |
-| "Export success: {count} nodes, {files} files" | `fsSync.exportSuccess` | Success toast |
-| "Import success: {count} nodes" | `fsSync.importSuccess` | Success toast |
-| "Export error" | `fsSync.exportError` | Error toast |
-| "Import error" | `fsSync.importError` | Error toast |
-| "Permission denied" | `fsSync.permissionDenied` | User cancelled folder picker |
+| "Exporting nodes..." | `fsSync.exporting` | Message de progression |
+| "Importing nodes..." | `fsSync.importing` | Message de progression |
+| "Export success: {count} nodes, {files} files" | `fsSync.exportSuccess` | Toast de succès |
+| "Import success: {count} nodes" | `fsSync.importSuccess` | Toast de succès |
+| "Export error" | `fsSync.exportError` | Toast d'erreur |
+| "Import error" | `fsSync.importError` | Toast d'erreur |
+| "Permission denied" | `fsSync.permissionDenied` | L'utilisateur a annulé le sélecteur de dossier |
 
 📍 **Référence** : `src/js/locales/en.js:408-419`
 
@@ -2556,14 +2556,14 @@ async importFromFileSystem() {
 
 **i18n** gère le support multilingue de DeepMemo.
 
-**Languages** : FR (Français), EN (English)
+**Langues** : FR (Français), EN (English)
 
-**Features** :
+**Fonctionnalités** :
 - Dictionnaires séparés (FR, EN)
 - Interpolation avec variables
 - Expressions conditionnelles (pluralization)
 - Auto-détection langue navigateur
-- Switch dynamique sans reload
+- Changement dynamique sans rechargement
 
 **Module** : `src/js/utils/i18n.js` (262 lignes)
 
@@ -2575,13 +2575,13 @@ async importFromFileSystem() {
 
 | Function | Ligne | Description |
 |----------|-------|-------------|
-| `initI18n()` | 106-124 | Initialize + load dict + translate DOM |
-| `t(key, params)` | 137-156 | Get translation with interpolation |
-| `setLanguage(lang)` | 167-201 | Change language + persist + re-render |
-| `getCurrentLanguage()` | 207-209 | Get active language |
-| `getAvailableLanguages()` | 215-217 | List supported langs (FR/EN) |
-| `translateDOM()` | 229-261 | Update DOM attributes with translations |
-| `loadDictionary(lang)` | 37-54 | Lazy load locale module |
+| `initI18n()` | 106-124 | Initialiser + charger dict + traduire le DOM |
+| `t(key, params)` | 137-156 | Obtenir la traduction avec interpolation |
+| `setLanguage(lang)` | 167-201 | Changer la langue + persister + re-rendu |
+| `getCurrentLanguage()` | 207-209 | Obtenir la langue active |
+| `getAvailableLanguages()` | 215-217 | Lister les langues supportées (FR/EN) |
+| `translateDOM()` | 229-261 | Mettre à jour les attributs DOM avec les traductions |
+| `loadDictionary(lang)` | 37-54 | Charger le module locale en lazy loading |
 
 📍 **Référence** : `src/js/utils/i18n.js`
 
@@ -2613,12 +2613,12 @@ Example:
 **Implementation** (`i18n.js:86-95`) :
 ```javascript
 function interpolate(text, params) {
-  // Replace {variable}
+  // Remplacer {variable}
   text = text.replace(/\{(\w+)\}/g, (match, key) => {
     return params[key] !== undefined ? params[key] : match;
   });
 
-  // Replace {{expression}}
+  // Remplacer {{expression}}
   text = text.replace(/\{\{([^}]+)\}\}/g, (match, expr) => {
     try {
       const func = new Function(...Object.keys(params), `return ${expr};`);
@@ -2703,7 +2703,7 @@ export default {
 }
 ```
 
-**Organization** : ~400+ keys organisées par feature
+**Organization** : ~400+ clés organisées par fonctionnalité
 
 📍 **Référence** : `src/js/locales/en.js:1-450`, `src/js/locales/fr.js:1-450`
 
@@ -2713,38 +2713,38 @@ export default {
 
 **Function** : `setLanguage(lang)`
 
-**Workflow** (`i18n.js:167-201`) :
+**Flux** (`i18n.js:167-201`) :
 ```javascript
-1. Load dictionary if needed:
+1. Charger le dictionnaire si nécessaire :
    await loadDictionary(lang);
 
-2. Update state:
+2. Mettre à jour l'état :
    currentLang = lang;
 
-3. Persist to localStorage:
+3. Persister dans localStorage :
    localStorage.setItem('deepmemo_lang', lang);
 
-4. Translate static DOM:
+4. Traduire le DOM statique :
    translateDOM();
 
-5. Re-render dynamic UI:
+5. Re-rendu de l'UI dynamique :
    if (window.app?.render) {
      window.app.render();
    }
 
-6. Refresh editor panel:
+6. Rafraîchir le panneau éditeur :
    if (EditorModule.displayNode) {
      const currentNodeId = window.app.currentNodeId;
      EditorModule.displayNode(currentNodeId);
    }
 
-7. Update node counter:
+7. Mettre à jour le compteur de nœuds :
    if (window.app?.updateNodeCounter) {
      window.app.updateNodeCounter();
    }
 ```
 
-**No page reload** : All changes applied dynamically
+**Pas de rechargement** : Tous les changements sont appliqués dynamiquement
 
 📍 **Référence** : `src/js/utils/i18n.js:167-201`
 
@@ -2752,19 +2752,19 @@ export default {
 
 ### Auto-Detection
 
-**On First Load** (`i18n.js:106-124`) :
+**Au premier chargement** (`i18n.js:106-124`) :
 ```javascript
 export async function initI18n() {
-  // Check localStorage
+  // Vérifier localStorage
   let savedLang = localStorage.getItem('deepmemo_lang');
 
-  // Fallback: browser language
+  // Fallback : langue du navigateur
   if (!savedLang) {
     const browserLang = navigator.language.split('-')[0];  // "fr-FR" → "fr"
     savedLang = ['fr', 'en'].includes(browserLang) ? browserLang : 'en';
   }
 
-  // Load & apply
+  // Charger et appliquer
   await setLanguage(savedLang);
 }
 ```
@@ -2782,25 +2782,25 @@ export async function initI18n() {
 DeepMemo est une **Progressive Web App** avec :
 - Service Worker (cache-first strategy)
 - Manifest (installable)
-- Offline capabilities
+- Capacités hors ligne
 - Auto-update cache
 
 **Files** :
-- `sw.js` : Service Worker (143 lignes)
+- `sw.js` : Service Worker (174 lignes)
 - `manifest.json` : App manifest (FR)
 - `manifest-en.json` : App manifest (EN)
 
-📍 **Référence** : `sw.js:1-143`, `manifest.json:1-28`
+📍 **Référence** : `sw.js:1-174`, `manifest.json:1-28`
 
 ---
 
 ### Service Worker (sw.js)
 
-**Version** : `v1.10.5` (matches app version)
+**Version** : `v1.11.1` (améliorations hors ligne)
 
-**Cache Name** : `deepmemo-v1.10.5`
+**Cache Name** : `deepmemo-v1.11.1`
 
-**Precached Files** (`sw.js:6-44`) :
+**Precached Files** (`sw.js:6-48`) :
 ```javascript
 const PRECACHE_URLS = [
   // HTML
@@ -2819,10 +2819,15 @@ const PRECACHE_URLS = [
   // JS (core modules + locales)
   '/src/js/app.js',
   '/src/js/core/data.js',
+  '/src/js/core/validation.js',      // ✨ Import validation
   '/src/js/features/tree.js',
   // ... all modules
   '/src/js/locales/fr.js',
   '/src/js/locales/en.js',
+
+  // Fonts                              ✨ Custom fonts
+  '/assets/sto.ttf',
+  '/assets/sto-fixed.ttf',
 
   // Media
   '/icons/icon-192.png',
@@ -2835,44 +2840,72 @@ const PRECACHE_URLS = [
   '/manifest-fr.json',
   '/manifest-en.json'
 ];
+
+// ✨ CDN externes (fetch explicite au moment de l'install)
+const EXTERNAL_CDNS = [
+  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+  'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+  'https://unpkg.com/dexie@3.2.4/dist/dexie.min.js',
+  'https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js',
+  'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js'  // UMD bundle
+];
 ```
 
-📍 **Référence** : `sw.js:6-44`
+📍 **Référence** : `sw.js:6-57`
 
 ---
 
 ### Install Event
 
-**Handler** (`sw.js:48-58`) :
+**Handler** (`sw.js:60-89`) :
 ```javascript
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Precaching app shell');
-      return cache.addAll(PRECACHE_URLS);
-    }).then(() => {
-      self.skipWaiting();  // Activate immediately
-    })
+    caches.open(CACHE_NAME)
+      .then(async (cache) => {
+        // 1. Précache fichiers locaux
+        await cache.addAll(PRECACHE_URLS);
+
+        // 2. ✨ Précache CDN externes (fetch explicite)
+        const cdnPromises = EXTERNAL_CDNS.map(async (url) => {
+          try {
+            const response = await fetch(url, { mode: 'cors' });
+            if (response.ok) {
+              await cache.put(url, response);
+            }
+          } catch (error) {
+            console.warn(`[SW] CDN failed: ${url}`, error);
+          }
+        });
+        await Promise.all(cdnPromises);
+      })
+      .then(() => self.skipWaiting())  // Activer immédiatement
   );
 });
 ```
 
 **Behavior** :
-- Precache tous les fichiers listés
-- `skipWaiting()` : Active immédiatement (pas de wait pour fermeture tabs)
+- Précache tous les fichiers locaux (PRECACHE_URLS)
+- **✨ Précache les CDN externes** (fetch explicite avec gestion d'erreur individuelle)
+- `skipWaiting()` : Active immédiatement (pas d'attente pour fermeture tabs)
 
-📍 **Référence** : `sw.js:48-58`
+**Pourquoi le fetch explicite des CDN ?**
+- Les scripts CDN dans `<head>` sont chargés **avant** que le SW soit activé (race condition)
+- Le fetch explicite garantit que les CDN sont dans le cache dès la première visite
+- Gestion d'erreur individuelle : un CDN échoué ne bloque pas l'installation
+
+📍 **Référence** : `sw.js:60-89`
 
 ---
 
 ### Activation Event
 
-**Handler** (`sw.js:61-77`) :
+**Handler** (`sw.js:91-108`) :
 ```javascript
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      // Delete old cache versions
+      // Supprimer les anciennes versions du cache
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
@@ -2882,40 +2915,41 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => {
-      self.clients.claim();  // Take control immediately
+      self.clients.claim();  // Prendre le contrôle immédiatement
     })
   );
 });
 ```
 
 **Behavior** :
-- Delete old cache versions (not matching current CACHE_NAME)
-- `clients.claim()` : Take control of all open tabs immediately
+- Supprimer les anciennes versions du cache (ne correspondant pas au CACHE_NAME actuel)
+- `clients.claim()` : Prendre le contrôle de tous les onglets ouverts immédiatement
 
-📍 **Référence** : `sw.js:61-77`
+📍 **Référence** : `sw.js:91-108`
 
 ---
 
 ### Fetch Strategy: Cache First
 
-**Handler** (`sw.js:80-142`) :
+**Handler** (`sw.js:110-147`) :
 ```javascript
 self.addEventListener('fetch', (event) => {
-  // Ignore non-GET requests
+  // Ignorer les requêtes non-GET (POST, PUT, DELETE, etc.)
   if (event.request.method !== 'GET') {
     return;
   }
 
-  // Ignore external CDN
-  if (event.request.url.includes('cdn.jsdelivr.net')) {
+  // ✨ Ignorer les extensions de navigateur (chrome-extension://, moz-extension://, etc.)
+  const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // Cache hit: return immediately + update in background
+      // Cache hit : retourner immédiatement + mise à jour en arrière-plan
       if (cachedResponse) {
-        // Update cache in background (no await)
+        // Mettre à jour le cache en arrière-plan (pas d'await)
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
@@ -2923,19 +2957,19 @@ self.addEventListener('fetch', (event) => {
             });
           }
         }).catch(() => {
-          // Network fail silently (cache already returned)
+          // Échec réseau silencieux (cache déjà retourné)
         });
 
         return cachedResponse;
       }
 
-      // Cache miss: fetch from network + cache + return
+      // Cache miss : récupérer depuis le réseau + cacher + retourner
       return fetch(event.request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
 
-        // Cache successful response
+        // Cacher la réponse réussie
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
@@ -2943,7 +2977,7 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // Network fail + not in cache → 503 offline message
+        // Échec réseau + pas dans le cache → message 503 hors ligne
         return new Response('Offline: Resource not available', {
           status: 503,
           statusText: 'Service Unavailable'
@@ -2955,11 +2989,13 @@ self.addEventListener('fetch', (event) => {
 ```
 
 **Strategy** :
-1. **Cache hit** : Return immediately + update in background
-2. **Cache miss** : Fetch from network + cache + return
-3. **Network fail + cache miss** : Return 503 offline message
+1. **Cache hit** : Retourner immédiatement + mise à jour en arrière-plan
+2. **Cache miss** : Récupérer depuis le réseau + cacher + retourner
+3. **Échec réseau + cache miss** : Retourner un message 503 hors ligne
+4. **CDN externes** : Cachés automatiquement (marked, mermaid, jszip, js-yaml)
+5. **✨ Extensions navigateur** : Ignorées (chrome-extension://, moz-extension://)
 
-📍 **Référence** : `sw.js:80-142`
+📍 **Référence** : `sw.js:110-147`
 
 ---
 
@@ -3002,7 +3038,7 @@ self.addEventListener('fetch', (event) => {
 }
 ```
 
-**Display Mode** : `standalone` (hides browser UI)
+**Display Mode** : `standalone` (masque l'UI du navigateur)
 
 📍 **Référence** : `manifest.json:1-28`
 
@@ -3010,27 +3046,32 @@ self.addEventListener('fetch', (event) => {
 
 ### Offline Capabilities
 
-**What Works Offline** :
-- ✅ All precached files (HTML, CSS, JS, icons)
+**Ce qui fonctionne hors ligne** :
+- ✅ Tous les fichiers précachés (HTML, CSS, JS, icônes, polices)
 - ✅ IndexedDB data (nodes, attachments, settings)
 - ✅ BroadcastChannel (cross-tab sync)
 - ✅ Service Worker cache-first strategy
-- ✅ **Markdown rendering** (Marked.js cached after first load)
+- ✅ **External CDN libraries** (Marked.js, Mermaid.js, JSZip, js-yaml)
+- ✅ **Custom fonts** (Sto, Sto Fixed)
+- ✅ **All exports** (JSON, .dm ZIP, Mermaid SVG, YAML, Markdown)
+- ✅ **Markdown rendering** with full syntax highlighting
+- ✅ **Import validation** (validation.js)
 
-**What Fails Offline** :
-- ❌ PDF export (requires server worker)
-- ❌ File System Sync (browser API restriction)
+**Ce qui échoue hors ligne** :
+- ❌ Export PDF (nécessite un worker serveur)
+- ❌ File System Sync (restriction de l'API navigateur)
 
-**Service Worker Caching** (`sw.js:1-45`) :
-- Marked.js CDN : Cached après premier chargement
-- Stratégie : Cache-first avec fallback network
-- Une fois les ressources chargées, **tout fonctionne offline sauf PDF export**
+**Service Worker Caching** (`sw.js:1-174`) :
+- **Stratégie** : Cache-first avec fallback network
+- **CDN externes** : Cachés dès l'installation via fetch explicite (marked, mermaid, jszip, js-yaml, dexie)
+- **Assets** : Polices personnalisées cachées
+- **Une fois les ressources chargées, tout fonctionne offline sauf PDF export**
 
 ---
 
 ### Install Prompt
 
-**Trigger** : Browser shows "Add to Home Screen" when PWA criteria met
+**Déclencheur** : Le navigateur affiche "Ajouter à l'écran d'accueil" quand les critères PWA sont remplis
 
 **Criteria** :
 - HTTPS (ou localhost)
@@ -3044,7 +3085,7 @@ self.addEventListener('fetch', (event) => {
 - ✅ macOS (Chrome/Edge/Safari)
 - ⚠️ iOS (Safari, limited support)
 
-**Manual Trigger** : Can be deferred and called programmatically via `beforeinstallprompt` event
+**Déclenchement manuel** : Peut être différé et appelé programmatiquement via l'événement `beforeinstallprompt`
 
 ---
 
@@ -3068,10 +3109,10 @@ self.addEventListener('fetch', (event) => {
 
 | Function | Ligne | Description |
 |----------|-------|-------------|
-| `initSync()` | 17-32 | Initialize BroadcastChannel |
-| `notifyDataChanged(payload)` | 40-53 | Send change notification |
-| `setupSyncListener(callback)` | 62-74 | Listen for changes |
-| `closeSync()` | 80-86 | Close channel |
+| `initSync()` | 17-32 | Initialiser le BroadcastChannel |
+| `notifyDataChanged(payload)` | 40-53 | Envoyer une notification de changement |
+| `setupSyncListener(callback)` | 62-74 | Écouter les changements |
+| `closeSync()` | 80-86 | Fermer le canal |
 
 📍 **Référence** : `src/js/utils/sync.js`
 
@@ -3079,31 +3120,31 @@ self.addEventListener('fetch', (event) => {
 
 ### Sync Flow
 
-**Tab A modifies data** :
+**L'onglet A modifie les données** :
 ```javascript
 // Tab A
-await saveData();  // Save to IndexedDB
+await saveData();  // Sauvegarder dans IndexedDB
 
-// Notify other tabs
+// Notifier les autres onglets
 notifyDataChanged({
   nodeId: '123',
   action: 'modified'
 });
 ```
 
-**Tab B receives notification** :
+**L'onglet B reçoit la notification** :
 ```javascript
-// Tab B setup (during app init)
+// Setup de l'onglet B (pendant l'init de l'app)
 setupSyncListener(async (payload) => {
   console.log('Data changed in Tab A, reloading...');
 
-  // Reload data from IndexedDB
+  // Recharger les données depuis IndexedDB
   await loadData();
 
-  // Re-render UI
+  // Re-rendu de l'UI
   app.render();
 
-  // Show toast (optional)
+  // Afficher un toast (optionnel)
   showToast('Data updated from another tab', 'ℹ️');
 });
 ```
@@ -3191,7 +3232,7 @@ export function setupSyncListener(callback) {
 ```javascript
 if (typeof BroadcastChannel === 'undefined') {
   console.warn('[Sync] BroadcastChannel not supported');
-  // App continues without cross-tab sync
+  // L'app continue sans sync cross-tab
 }
 ```
 
@@ -3203,7 +3244,7 @@ if (typeof BroadcastChannel === 'undefined') {
 ```javascript
 import * as SyncModule from './utils/sync.js';
 
-// Initialize during app startup
+// Initialiser pendant le démarrage de l'app
 SyncModule.initSync();
 SyncModule.setupSyncListener(async () => {
   await loadData();
@@ -3214,11 +3255,11 @@ SyncModule.setupSyncListener(async () => {
 **In data.js** (`data.js:50`) :
 ```javascript
 export async function saveData() {
-  // Save to IndexedDB
+  // Sauvegarder dans IndexedDB
   await Storage.saveNodes(data.nodes);
   await Storage.saveSetting('rootNodes', data.rootNodes);
 
-  // Notify other tabs
+  // Notifier les autres onglets
   SyncModule.notifyDataChanged();
 }
 ```
@@ -3233,7 +3274,7 @@ DeepMemo propose des **raccourcis clavier globaux** pour actions courantes.
 
 **Module** : `src/js/utils/keyboard.js` (56 lignes)
 
-**Setup** : Single `document.addEventListener('keydown')` handler
+**Setup** : Un seul handler `document.addEventListener('keydown')`
 
 📍 **Référence** : `src/js/utils/keyboard.js:9-55`
 
@@ -3243,13 +3284,13 @@ DeepMemo propose des **raccourcis clavier globaux** pour actions courantes.
 
 | Shortcut | Mac | Action | Handler | Référence |
 |----------|-----|--------|---------|-----------|
-| **Alt+N** | Opt+N | New node | `createNode()` | Line 12-15 |
-| **Alt+E** | Opt+E | Edit mode | `onEditorFocus()` | Line 18-21 |
-| **Ctrl+K** | Cmd+K | Open search | `openSearch()` | Line 24-27 |
-| **Alt+H** | Opt+H | Markdown help | `openMarkdownHelp()` | Line 30-33 |
-| **Escape** | Esc | Close search / Go to parent | `goToParent()` | Line 36-43 |
+| **Alt+N** | Opt+N | Nouveau nœud | `createNode()` | Line 12-15 |
+| **Alt+E** | Opt+E | Mode édition | `onEditorFocus()` | Line 18-21 |
+| **Ctrl+K** | Cmd+K | Ouvrir la recherche | `openSearch()` | Line 24-27 |
+| **Alt+H** | Opt+H | Aide Markdown | `openMarkdownHelp()` | Line 30-33 |
+| **Escape** | Esc | Fermer la recherche / Aller au parent | `goToParent()` | Line 36-43 |
 | **Arrow keys** | Same | Navigation arborescence | `handleTreeNavigation(e)` | Line 50-52 |
-| **Enter** | Same | Activate node | `handleTreeNavigation(e)` | Line 50-52 |
+| **Enter** | Same | Activer le nœud | `handleTreeNavigation(e)` | Line 50-52 |
 
 📍 **Référence** : `src/js/utils/keyboard.js:9-55`
 
@@ -3261,31 +3302,31 @@ DeepMemo propose des **raccourcis clavier globaux** pour actions courantes.
 ```javascript
 export function setupKeyboardShortcuts(handlers) {
   document.addEventListener('keydown', (e) => {
-    // Alt+N: New node
+    // Alt+N : Nouveau nœud
     if (e.altKey && e.key === 'n') {
       e.preventDefault();
       if (handlers.createNode) handlers.createNode();
     }
 
-    // Alt+E: Edit mode
+    // Alt+E : Mode édition
     else if (e.altKey && e.key === 'e') {
       e.preventDefault();
       if (handlers.onEditorFocus) handlers.onEditorFocus();
     }
 
-    // Ctrl+K (Cmd+K on Mac): Open search
+    // Ctrl+K (Cmd+K sur Mac) : Ouvrir la recherche
     else if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       if (handlers.openSearch) handlers.openSearch();
     }
 
-    // Alt+H: Markdown help
+    // Alt+H : Aide Markdown
     else if (e.altKey && e.key === 'h') {
       e.preventDefault();
       if (handlers.openMarkdownHelp) handlers.openMarkdownHelp();
     }
 
-    // Escape: Close search OR go to parent
+    // Escape : Fermer la recherche OU aller au parent
     else if (e.key === 'Escape') {
       if (handlers.isSearchVisible?.()) {
         handlers.closeSearch?.();
@@ -3294,7 +3335,7 @@ export function setupKeyboardShortcuts(handlers) {
       }
     }
 
-    // Arrow keys: Tree navigation (only if not in input)
+    // Flèches : Navigation arborescence (seulement si pas dans un input)
     else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
       const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
       const isSearchVisible = handlers.isSearchVisible?.();
@@ -3313,9 +3354,9 @@ export function setupKeyboardShortcuts(handlers) {
 
 ### Context-Aware
 
-**Disabled When** :
-- Input/textarea has focus (typing)
-- Search modal visible (search has own navigation)
+**Désactivé quand** :
+- Input/textarea a le focus (en train de taper)
+- Modal de recherche visible (la recherche a sa propre navigation)
 
 **Logic** (`keyboard.js:50-52`) :
 ```javascript
@@ -3346,7 +3387,7 @@ keyboard: {
 }
 ```
 
-**Usage** : Displayed in UI tooltips or keyboard shortcuts modal
+**Usage** : Affiché dans les tooltips UI ou la modale de raccourcis clavier
 
 📍 **Référence** : `src/js/locales/en.js:349-360`
 
@@ -3362,7 +3403,7 @@ keyboard: {
 ---
 
 **Document complet et vérifié** ✅
-**Dernière mise à jour** : 2026-01-29
-**Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13
+**Version** : V0.11.0
 
 Toutes les features sont documentées avec références code exactes (fichier:ligne).

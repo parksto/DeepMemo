@@ -243,7 +243,7 @@ This documentation follows these principles:
 
 ---
 
-**DeepMemo V0.10.5** - Open Source (MIT License)
+**DeepMemo V0.11.0** - Open Source (MIT License)
 
 Built with: Vanilla JavaScript ES6+, IndexedDB (Dexie.js), Service Workers
 

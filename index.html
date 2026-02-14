@@ -94,6 +94,14 @@
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <!-- Mermaid.js UMD bundle (single file, offline-friendly) -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    // Initialize mermaid after load
+    if (typeof mermaid !== 'undefined') {
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    }
+  </script>
 </head>
 <body>
   <!-- Mobile warning banner -->
@@ -445,13 +453,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Mermaid.js for diagram export -->
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
-    window.mermaid = mermaid;
-  </script>
 
   <!-- Enregistrement du Service Worker pour PWA -->
   <script>

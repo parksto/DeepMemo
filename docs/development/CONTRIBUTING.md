@@ -1,7 +1,7 @@
 # Contributing to DeepMemo
 
-> **Version** : V0.10.5
-> **Dernière mise à jour** : 2026-02-03
+> **Version** : V0.11.0
+> **Dernière mise à jour** : 2026-02-13
 > **Sources vérifiées** : Toutes les conventions référencent le code source
 
 ---
@@ -1165,7 +1165,7 @@ python -m http.server 8000
 ## Project Metadata
 
 **Nom** : DeepMemo
-**Version** : V0.10.5
+**Version** : V0.11.0
 **Auteur** : Fabien (parksto)
 **Licence** : MIT
 **Repository** : https://github.com/parksto/DeepMemo

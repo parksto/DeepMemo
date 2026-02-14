@@ -2,8 +2,8 @@
 
 > Guide utilisateur pour exporter et importer vos branches vers/depuis votre système de fichiers local
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-29
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 
 ---
 
@@ -710,4 +710,4 @@ git init
 
 ---
 
-**Dernière mise à jour** : 2026-01-29 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

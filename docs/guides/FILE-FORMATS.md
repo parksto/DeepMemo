@@ -2,8 +2,8 @@
 
 > Guide utilisateur des formats supportés par DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-29
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 
 ---
 

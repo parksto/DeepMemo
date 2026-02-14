@@ -30,15 +30,6 @@ Thumbs.db
 .claude/
 CLAUDE.md
 
-# WIP - PDF export experiments
-src/js/core/pdf-export-new.js
-docs/CONTEXT-CLAUDE-PROJECTS.md
-
-# Stats serveur
-stats.html
-
 # gitignore global
 .gitignore
 
-# 😇
-docs/Prospective/

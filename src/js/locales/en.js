@@ -331,7 +331,10 @@ export default {
     emptyPreview: "Empty",
     brokenSymlink: "⚠️ This symbolic link points to a node that no longer exists.\n\nYou can delete this broken link.",
     externalSymlink: "⚠️ This symbolic link points to a node outside the current branch.\n\nIn branch mode, external links are not accessible. You can delete this link or exit branch mode to access the target node.",
-    newNodeTitle: "New node"
+    newNodeTitle: "New node",
+    pdfRequiresOnline: "PDF export requires an internet connection",
+    pdfRateLimitExceeded: "PDF export limit reached. Try again later.",
+    pdfWorkerUnavailable: "PDF server unavailable. Check your connection or use the offline CLI tool."
   },
 
   // Tooltips

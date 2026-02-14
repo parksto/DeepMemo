@@ -2,8 +2,8 @@
 
 > Spécification complète du format JSON d'interchange DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-31
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 >
 > 📍 **Sources** : `src/js/core/data.js` (lignes 182-292, 838-898, 1164-1280), `schemas/v1.0/deepmemo.json`
 
@@ -1082,8 +1082,8 @@ function obsidianToDeepMemo(files) {
 
 **Documentation vérifiée ligne par ligne** ✅
 
-Toutes les références au code source ont été vérifiées dans DeepMemo V0.10.5 et sont exactes.
+Toutes les références au code source ont été vérifiées dans DeepMemo V0.11.0 et sont exactes.
 
 ---
 
-**Dernière mise à jour** : 2026-01-31 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

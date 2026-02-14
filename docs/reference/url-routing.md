@@ -2,8 +2,8 @@
 
 > Guide complet du système de navigation par URL de DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-31
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 >
 > 📍 **Sources** : `src/js/utils/routing.js` (95 lignes), `src/js/app.js` (lignes 97-99, 111-117, 188-220), `index.html` (lignes 155-166)
 
@@ -936,4 +936,4 @@ User Action → URL Change → Event → Handler → UI Update
 
 ---
 
-**Dernière mise à jour** : 2026-01-31 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

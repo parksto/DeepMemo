@@ -1,5 +1,5 @@
 // Service Worker pour DeepMemo PWA
-const CACHE_VERSION = 'v1.11.0'; // V0.11.0 - Documentation refactoring + bug fixes (Fév 2026)
+const CACHE_VERSION = 'v1.11.1'; // V0.11.1 - Offline improvements: CDN caching + missing assets (Fév 2026)
 const CACHE_NAME = `deepmemo-${CACHE_VERSION}`;
 
 // Fichiers à précacher (essentiels pour le fonctionnement offline)
@@ -19,6 +19,7 @@ const PRECACHE_URLS = [
   '/src/js/core/default-data.js',
   '/src/js/core/storage.js',
   '/src/js/core/migration.js',
+  '/src/js/core/validation.js',
   '/src/js/features/tree.js',
   '/src/js/features/editor.js',
   '/src/js/features/search.js',
@@ -34,6 +35,8 @@ const PRECACHE_URLS = [
   '/src/js/utils/sync.js',
   '/src/js/locales/fr.js',
   '/src/js/locales/en.js',
+  '/assets/sto.ttf',
+  '/assets/sto-fixed.ttf',
   '/favicon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -44,14 +47,42 @@ const PRECACHE_URLS = [
   '/manifest-en.json'
 ];
 
+// CDN externes à précacher (chargés explicitement pour garantir disponibilité offline)
+const EXTERNAL_CDNS = [
+  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+  'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+  'https://unpkg.com/dexie@3.2.4/dist/dexie.min.js',
+  'https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js',
+  'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' // UMD bundle (single file)
+];
+
 // Installation : précache des fichiers essentiels
 self.addEventListener('install', (event) => {
   console.log('[SW] Installation...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Précache des fichiers...');
-        return cache.addAll(PRECACHE_URLS);
+      .then(async (cache) => {
+        console.log('[SW] Précache des fichiers locaux...');
+        await cache.addAll(PRECACHE_URLS);
+
+        // Précacher les CDN externes (avec gestion d'erreur individuelle)
+        console.log('[SW] Précache des CDN externes...');
+        const cdnPromises = EXTERNAL_CDNS.map(async (url) => {
+          try {
+            const response = await fetch(url, { mode: 'cors' });
+            if (response.ok) {
+              await cache.put(url, response);
+              console.log(`[SW] ✓ CDN caché: ${url}`);
+            } else {
+              console.warn(`[SW] ✗ Échec CDN (${response.status}): ${url}`);
+            }
+          } catch (error) {
+            console.warn(`[SW] ✗ Erreur CDN: ${url}`, error);
+          }
+        });
+
+        await Promise.all(cdnPromises);
+        console.log('[SW] Précache terminé');
       })
       .then(() => self.skipWaiting()) // Active immédiatement le nouveau SW
   );
@@ -83,8 +114,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Ignorer les CDN externes (marked.js)
-  if (event.request.url.includes('cdn.jsdelivr.net')) {
+  // Ignorer les extensions du navigateur (chrome-extension://, moz-extension://, etc.)
+  const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
     return;
   }
 

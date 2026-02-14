@@ -2,8 +2,8 @@
 
 > Guide complet des raccourcis clavier DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-30
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 >
 > 📍 **Sources** : `src/js/utils/keyboard.js` (56 lignes), `src/js/features/search.js` (258 lignes), `src/js/features/tags.js` (353 lignes), `src/js/features/tree.js` (ligne 617-720)
 
@@ -943,4 +943,4 @@ Tous les raccourcis utilisent `e.preventDefault()` pour bloquer le comportement 
 
 ---
 
-**Dernière mise à jour** : 2026-01-30 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0

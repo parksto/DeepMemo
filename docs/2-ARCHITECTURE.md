@@ -1,8 +1,8 @@
 # 2. Architecture
 
-> **Version** : V0.10.5
-> **Dernière mise à jour** : 2026-02-03
-> **Sources vérifiées** : Toutes les affirmations référencent le code source (fact-checked 2026-02-03)
+> **Version** : V0.11.0
+> **Dernière mise à jour** : 2026-02-13
+> **Sources vérifiées** : Toutes les affirmations référencent le code source (fact-checked 2026-02-13)
 
 ---
 
@@ -50,7 +50,7 @@ DeepMemo est construit **100% en Vanilla JavaScript** sans aucun framework.
 | **JSZip** | 3.10.1 | Création archives .dm (ZIP) | `index.html:94` |
 | **Dexie.js** | 3.2.4 | Wrapper IndexedDB | `index.html:95` |
 | **js-yaml** | 4.1.0 | Parse frontmatter YAML | `index.html:96` |
-| **Mermaid** | 10 | Export diagrammes (lazy) | `index.html:451` |
+| **Mermaid** | 10 | Export diagrammes (UMD bundle) | `index.html:97-102` |
 
 ---
 
@@ -321,9 +321,16 @@ Tous les labels sont traduits dynamiquement via `data-i18n` :
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<!-- Mermaid UMD bundle (single file, offline-friendly) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+  }
+</script>
 ```
 
-📍 **Référence** : `index.html:93-96`
+📍 **Référence** : `index.html:93-102`
 
 **Module principal** :
 ```html
@@ -392,7 +399,7 @@ if (document.readyState === 'loading') {
 
 ```javascript
 async init() {
-  console.log('🚀 DeepMemo V0.10.5 - Initialisation...');
+  console.log('🚀 DeepMemo V0.11.0 - Initialisation...');
 
   // 1. i18n
   await initI18n();
@@ -1519,57 +1526,92 @@ function parseFrontmatter(content) {
 
 ## Service Worker
 
-**Fichier** : `sw.js` (115 lignes)
+**Fichier** : `sw.js` (174 lignes)
 
 **Responsabilités** :
 - Cache strategy (offline support)
-- Précache des assets essentiels
+- Précache des assets essentiels + CDN externes
 - Update automatique
 
 ### Cache Strategy
 
-**Stratégie** : Network First, fallback to Cache
+**Stratégie** : **Cache First**, fallback to Network
 
 ```javascript
 self.addEventListener('fetch', (event) => {
+  // Ignore non-GET et extensions navigateur
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Success → cache + return
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
-      })
-      .catch(() => {
-        // Failure → fallback cache
-        return caches.match(event.request);
+    caches.match(event.request)
+      .then(cachedResponse => {
+        if (cachedResponse) {
+          // Cache hit → retourner + update en arrière-plan
+          fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, networkResponse.clone());
+              });
+            }
+          }).catch(() => {});
+          return cachedResponse;
+        }
+
+        // Cache miss → fetch réseau + cache
+        return fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        });
       })
   );
 });
 ```
 
-📍 **Référence** : `sw.js:69-102`
+📍 **Référence** : `sw.js:110-147`
+
+**Changement v1.11.1** : Passage de "Network First" à **"Cache First"** pour améliorer les performances offline et réduire la latence.
 
 ### Précache
 
-**Assets précachés** (45 fichiers) :
-- HTML, CSS, JS (tous les modules)
+**Assets locaux** (48 fichiers) :
+- HTML, CSS, JS (tous les modules + validation.js)
 - Icons PWA
 - Manifests
 - Locales
+- **Polices personnalisées** (sto.ttf, sto-fixed.ttf)
 
-📍 **Référence** : `sw.js:6-45` (liste PRECACHE_URLS)
+📍 **Référence** : `sw.js:6-48` (PRECACHE_URLS)
+
+**CDN externes** (5 fichiers, précachés explicitement) :
+```javascript
+const EXTERNAL_CDNS = [
+  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+  'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+  'https://unpkg.com/dexie@3.2.4/dist/dexie.min.js',
+  'https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js',
+  'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js'
+];
+```
+
+📍 **Référence** : `sw.js:50-57`
+
+**Pourquoi le fetch explicite ?** Les scripts CDN dans `<head>` sont chargés avant l'activation du SW (race condition). Le fetch explicite dans l'événement `install` garantit que les CDN sont dans le cache dès la première visite.
 
 ### Lifecycle
 
-1. **Install** : Précache assets
+1. **Install** : Précache assets locaux + **fetch explicite des CDN**
 2. **Activate** : Nettoyage anciens caches
-3. **Fetch** : Intercept requêtes
+3. **Fetch** : Intercept requêtes (Cache First)
 
 📍 **Référence** :
-- `sw.js:48-58` - Install event
-- `sw.js:60-67` - Activate event
-- `sw.js:69-102` - Fetch event
+- `sw.js:60-89` - Install event (avec fetch CDN explicite)
+- `sw.js:91-108` - Activate event
+- `sw.js:110-147` - Fetch event (Cache First + filtre extensions)
 
 ---
 
@@ -1583,11 +1625,13 @@ self.addEventListener('fetch', (event) => {
 | **JSZip** | 3.10.1 | Création/lecture archives ZIP | ~100KB | MIT/GPL |
 | **Dexie.js** | 3.2.4 | Wrapper IndexedDB | ~50KB | Apache 2.0 |
 | **js-yaml** | 4.1.0 | Parse YAML (frontmatter) | ~80KB | MIT |
-| **Mermaid** | 10 | Génération diagrammes SVG | ~500KB | MIT |
+| **Mermaid** | 10 | Génération diagrammes SVG (UMD bundle) | ~500KB | MIT |
 
 **Total** : ~750KB (non minifié)
 
-📍 **Référence** : `index.html:93-96` + `index.html:451`
+📍 **Référence** : `index.html:93-102`
+
+**Note v1.11.1** : Mermaid utilise maintenant la version **UMD bundle** (`mermaid.min.js`) au lieu de l'ESM (`mermaid.esm.min.mjs`), éliminant le code splitting et garantissant un fonctionnement 100% offline.
 
 ### Pourquoi CDN ?
 
@@ -1641,10 +1685,11 @@ try {
 ### Performance
 
 **Optimisations** :
-- ✅ Lazy load Mermaid (import dynamique)
+- ✅ Mermaid préchargé au démarrage (UMD bundle, offline-ready)
 - ✅ Debounce auto-save (300ms)
 - ✅ Blob URLs cleanup (memory leaks)
 - ✅ IndexedDB indexes (queries rapides)
+- ✅ Service Worker Cache First (latence réduite)
 
 **À améliorer** :
 - ⚠️ Rendu arborescence : Reconstruction complète à chaque changement (pas de diffing)

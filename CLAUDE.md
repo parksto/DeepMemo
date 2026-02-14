@@ -67,22 +67,6 @@ Tout ce qui est documenté doit être :
 
 ---
 
-## 🚀 Dev Local
-
-```bash
-# Start local server (ES6 modules require HTTP)
-python -m http.server 8000
-
-# Open
-http://localhost:8000
-```
-
-**Navigateur recommandé** : Chrome/Edge (pour File System Access API)
-
-**Service Worker** : Désactiver cache en dev (DevTools → Application → Service Workers → Bypass)
-
----
-
 ## 📁 Structure du Projet
 
 ```

@@ -2,8 +2,8 @@
 
 > Guide complet de l'API de stockage DeepMemo
 >
-> **Version** : V0.10.5
-> **Mise à jour** : 2026-01-30
+> **Version** : V0.11.0
+> **Mise à jour** : 2026-02-13
 >
 > 📍 **Sources** : `src/js/core/storage.js` (408 lignes), `src/js/core/migration.js` (209 lignes)
 
@@ -1392,4 +1392,4 @@ await exportBackup();
 
 ---
 
-**Dernière mise à jour** : 2026-01-30 | **Version** : V0.10.5
+**Dernière mise à jour** : 2026-02-13 | **Version** : V0.11.0
