@@ -4,6 +4,7 @@
  *
  * Rate limiting: 5 PDFs/hour, 20/day per hashed IP (SHA-256)
  * Privacy: Only IP hash stored, 24h TTL, no document data saved
+ * Stats: one Analytics Engine data point per request, stored in Analytics Engine, viewable at /stats?key=STATS_KEY
  */
 
 import puppeteer from '@cloudflare/puppeteer';
@@ -103,6 +104,154 @@ async function checkRateLimit(env, ipHash) {
     hourRemaining: 5 - hourRequests - 1,
     dayRemaining: 20 - dayRequests - 1
   };
+}
+
+// ===== Usage stats (private, Workers Analytics Engine) =====
+
+const STATS_DATASET = 'deepmemo_pdf';
+const STAT_KINDS = ['pdfs', 'origin', 'rate', 'bad', 'error', 'method'];
+
+/**
+ * Count pages of a PDF buffer (objects "/Type /Page", not "/Type /Pages")
+ */
+function countPdfPages(pdfBuffer) {
+  const bytes = new Uint8Array(pdfBuffer);
+  const head = String.fromCharCode(...bytes.subarray(0, 5));
+  if (!head.startsWith('%PDF-')) return 0;
+  const text = new TextDecoder('latin1').decode(bytes);
+  return (text.match(/\/Type\s*\/Page(?![a-zA-Z])/g) || []).length;
+}
+
+/**
+ * Record one request (non-blocking, never throws).
+ * kind: 'pdfs' (valid PDF, with its page count) or a rejection reason.
+ * No IP is stored: only the kind, country and a truncated user-agent.
+ */
+function recordStat(env, request, kind, pages = 0) {
+  try {
+    env.STATS.writeDataPoint({
+      indexes: [kind],
+      blobs: [kind, request.cf?.country || '', (request.headers.get('User-Agent') || '').slice(0, 100)],
+      doubles: [pages]
+    });
+  } catch (e) {
+    console.error('[Worker] Stats error:', e);
+  }
+}
+
+/**
+ * Constant-time string comparison
+ */
+function safeEqual(a, b) {
+  const enc = new TextEncoder();
+  const x = enc.encode(a);
+  const y = enc.encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    diff |= (x[i] || 0) ^ (y[i] || 0);
+  }
+  return diff === 0;
+}
+
+/**
+ * Run a SQL query against the Analytics Engine API
+ */
+async function queryStats(env, sql) {
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/analytics_engine/sql`,
+    { method: 'POST', headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` }, body: sql }
+  );
+  if (!response.ok) {
+    throw new Error(`Analytics SQL ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  }
+  return (await response.json()).data;
+}
+
+/**
+ * Render the stats page (404 if STATS_KEY is unset or wrong)
+ */
+async function handleStats(request, env) {
+  const key = new URL(request.url).searchParams.get('key') || '';
+  if (!env.STATS_KEY || !safeEqual(key, env.STATS_KEY)) {
+    return new Response('Not found', { status: 404 });
+  }
+
+  let body;
+  try {
+    const [daily, agents] = await Promise.all([
+      queryStats(env, `SELECT toStartOfInterval(timestamp, INTERVAL '1' DAY) AS day, blob1 AS kind,
+        sum(_sample_interval) AS n, sum(double1 * _sample_interval) AS pages
+        FROM ${STATS_DATASET} WHERE timestamp > NOW() - INTERVAL '90' DAY GROUP BY day, kind`),
+      queryStats(env, `SELECT blob3 AS ua, blob1 AS kind, sum(_sample_interval) AS n
+        FROM ${STATS_DATASET} WHERE timestamp > NOW() - INTERVAL '30' DAY GROUP BY ua, kind`)
+    ]);
+    body = renderStats(daily, agents);
+  } catch (error) {
+    console.error('[Worker] Stats query error:', error);
+    body = '<p>Stats indisponibles (voir <code>wrangler tail</code>). Vérifier les secrets CF_ACCOUNT_ID et CF_API_TOKEN.</p>';
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepMemo – Stats PDF</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2em auto; padding: 0 1em; color: #333; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 2em; }
+  td, th { padding: 0.4em 0.5em; font-size: 0.9em; border-bottom: 1px solid #ddd; text-align: right; }
+  th:first-child, td:first-child { text-align: left; word-break: break-all; }
+  tfoot td { font-weight: bold; }
+</style></head><body>${body}</body></html>`;
+
+  return new Response(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Robots-Tag': 'noindex'
+    }
+  });
+}
+
+function renderStats(daily, agents) {
+  const tr = (cells) => `<tr>${cells.map(c => `<td>${c}</td>`).join('')}</tr>`;
+  const num = (v) => Math.round(Number(v) || 0);
+
+  // Daily table: one row per day, one column per kind (+ pages)
+  const days = {};
+  daily.forEach(({ day, kind, n, pages }) => {
+    const d = days[day.slice(0, 10)] ||= { pages: 0 };
+    d[kind] = num(n);
+    d.pages += num(pages);
+  });
+  const rows = Object.entries(days).sort(([a], [b]) => b.localeCompare(a));
+  const total = { pages: 0 };
+  rows.forEach(([, d]) => {
+    total.pages += d.pages;
+    STAT_KINDS.forEach(k => { total[k] = (total[k] || 0) + (d[k] || 0); });
+  });
+  const dayCells = (label, d) => [label, d.pdfs || 0, d.pages, ...STAT_KINDS.slice(1).map(k => d[k] || 0)];
+
+  // Top user-agents: valid PDFs vs rejected requests
+  const byAgent = {};
+  agents.forEach(({ ua, kind, n }) => {
+    const a = byAgent[ua] ||= { ok: 0, ko: 0 };
+    a[kind === 'pdfs' ? 'ok' : 'ko'] += num(n);
+  });
+  const topAgents = Object.entries(byAgent)
+    .sort(([, a], [, b]) => (b.ok + b.ko) - (a.ok + a.ko)).slice(0, 10);
+
+  return `<h1>Usage PDF</h1>
+<div style="overflow-x:auto"><table>
+  <thead><tr><th>Jour (UTC)</th><th>PDF</th><th>Pages</th><th title="403">Origine</th><th title="429">Limite</th><th title="400">Invalide</th><th title="500">Erreur</th><th title="405">Méthode</th></tr></thead>
+  <tbody>${rows.map(([day, d]) => tr(dayCells(day, d))).join('')}</tbody>
+  <tfoot>${tr(dayCells('Total (90 j)', total))}</tfoot>
+</table></div>
+<h2>User-agents (30 j)</h2>
+<div style="overflow-x:auto"><table>
+  <thead><tr><th>User-agent</th><th>PDF valides</th><th>Refusés</th></tr></thead>
+  <tbody>${topAgents.map(([ua, a]) => tr([escapeHtml(ua || '(vide)'), a.ok, a.ko])).join('')}</tbody>
+</table></div>`;
 }
 
 // ===== PDF Generation Logic (from bin/branch2pdf.js) =====
@@ -250,6 +399,10 @@ async function generatePDF(env, nodes, rootId) {
 
 export default {
   async fetch(request, env) {
+    if (request.method === 'GET' && new URL(request.url).pathname === '/stats') {
+      return handleStats(request, env);
+    }
+
     // CORS headers for development
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
@@ -264,6 +417,7 @@ export default {
     }
 
     if (request.method !== 'POST') {
+      recordStat(env, request, 'method');
       return new Response('Method not allowed', { status: 405 });
     }
 
@@ -279,6 +433,7 @@ export default {
     const isAllowed = allowedOrigins.some(origin => referer.startsWith(origin));
     if (!isAllowed && referer) {
       console.warn('[Worker] Blocked request from unauthorized origin:', referer);
+      recordStat(env, request, 'origin');
       return new Response(JSON.stringify({
         error: 'Unauthorized origin. Please use the official DeepMemo instance or deploy your own Worker.'
       }), {
@@ -298,6 +453,7 @@ export default {
       // Check rate limit
       const rateLimit = await checkRateLimit(env, ipHash);
       if (!rateLimit.allowed) {
+        recordStat(env, request, 'rate');
         const message = rateLimit.reason === 'hour'
           ? 'Limite atteinte : 5 PDFs par heure maximum'
           : 'Limite atteinte : 20 PDFs par jour maximum';
@@ -317,6 +473,7 @@ export default {
       const { nodes, rootId } = await request.json();
 
       if (!nodes || !rootId) {
+        recordStat(env, request, 'bad');
         return new Response('Missing required fields: nodes, rootId', {
           status: 400,
           headers: corsHeaders
@@ -327,6 +484,12 @@ export default {
       const pdfBuffer = await generatePDF(env, nodes, rootId);
       const node = nodes[rootId];
       const filename = `${sanitizeFilename(node.title)}.pdf`;
+
+      // Count only valid PDFs
+      const pages = countPdfPages(pdfBuffer);
+      if (pages > 0) {
+        recordStat(env, request, 'pdfs', pages);
+      }
 
       return new Response(pdfBuffer, {
         headers: {
@@ -340,6 +503,8 @@ export default {
 
     } catch (error) {
       console.error('[Worker] PDF generation error:', error);
+      // Malformed JSON body is a client error, anything else a generation failure
+      recordStat(env, request, error instanceof SyntaxError ? 'bad' : 'error');
       return new Response(JSON.stringify({
         error: 'PDF generation failed',
         details: error.message
