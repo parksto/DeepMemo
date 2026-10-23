@@ -10,7 +10,7 @@ browser = { binding = "BROWSER" }
 # Create with: wrangler kv:namespace create "RATE_LIMIT"
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-# id = "c6d68f79351c44849f2d6026dc1b784d"  # Add after creating namespace
+id = "2a8c4c0dea144f0c9ad72ee95a497eb9"  # deepmemo-pdf-rate-limit (namespace lié au worker en prod)
 
 # Usage stats (Workers Analytics Engine, free plan: 100k writes/day)
 [[analytics_engine_datasets]]
